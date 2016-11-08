@@ -24,3 +24,4 @@ target_link_libraries (${PROJECT_NAME} ${ZMQ_LIB} fmt ${CMAKE_THREAD_LIBS_INIT})
 add_executable (lsif lsif.cpp)
 target_include_directories (lsif PUBLIC ./fmt ${Boost_INCLUDE_DIRS})
 target_link_libraries (lsif fmt ${Boost_LIBRARIES})
+

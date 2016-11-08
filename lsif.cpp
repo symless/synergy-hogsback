@@ -82,11 +82,12 @@ get_all_netdevices (std::size_t const num_tries = 100) {
             continue;
         }
         auto& addr = reinterpret_cast<struct sockaddr_in&> (ifc.ifr_addr);
-        /*std::cout << ifc.ifr_name << std::endl;
-        std::cout << boost::asio::ip::address_v4 (
-                         {boost::endian::big_to_native (addr.sin_addr.s_addr)})
-                  << std::endl;*/
-        map.emplace (ifc.ifr_name,
+        std::string ifc_name (ifc.ifr_name);
+        auto ifc_name_prefix = ifc_name.substr(0, 2);
+        if ((ifc_name_prefix != "wl") && (ifc_name_prefix != "en")) {
+            continue;
+        }
+        map.emplace (std::move (ifc_name),
                      boost::asio::ip::address_v4 (
                          boost::endian::big_to_native (addr.sin_addr.s_addr)));
     }
