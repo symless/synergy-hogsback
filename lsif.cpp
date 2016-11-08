@@ -90,7 +90,8 @@ get_all_netdevices (std::size_t const num_tries = 100) {
         }
         auto& addr = reinterpret_cast<struct sockaddr_in&> (ifc.ifr_addr);
         std::string ifc_name (ifc.ifr_name);
-        auto ifc_name_prefix = ifc_name.substr(0, 2);
+        auto ifc_name_prefix = ifc_name.substr (0, 2);
+        /* Only return Ethernet and WLAN interfaces */
         if ((ifc_name_prefix != "wl") && (ifc_name_prefix != "en")) {
             continue;
         }
