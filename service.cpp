@@ -214,6 +214,10 @@ Service::start () {
             if (poll_set[1].revents & ZMQ_POLLIN) {
                 process_multicast_messages ();
             }
+        } else if (n < 0) {
+            if (errno != EINTR) {
+                break;
+            }
         }
 
         auto const t2 = std::chrono::high_resolution_clock::now ();
