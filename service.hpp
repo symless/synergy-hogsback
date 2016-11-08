@@ -9,11 +9,13 @@ struct ServiceImpl;
 class Service {
 public:
     explicit Service (uint16_t base_port = 24800);
-    ~Service();
-    void start();
+    ~Service ();
+    void start ();
+
 private:
     std::shared_ptr<ServiceImpl> impl_;
+    void update_multicast_set();
+    void say_hello();
 };
-
 
 #endif // SERVICE_HPP

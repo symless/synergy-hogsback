@@ -1,3 +1,4 @@
+#include "lsif.hpp"
 #include <boost/asio/ip/address.hpp>
 #include <boost/endian/conversion.hpp>
 #include <boost/numeric/conversion/cast.hpp>
@@ -6,10 +7,6 @@
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
-#include <unordered_map>
-#include <vector>
-//#include <boost/unordered_map.hpp>
-#include <iostream>
 #include <net/if.h>
 #include <netinet/in.h>
 #include <stropts.h> // ioctl
@@ -17,6 +14,8 @@
 #include <sys/socket.h> // socket
 #include <sys/types.h>
 #include <unistd.h> // close
+#include <unordered_map>
+#include <vector>
 
 namespace sys = boost::system;
 
@@ -31,9 +30,9 @@ throw_errno () {
     throw sys::system_error (errno, sys::system_category ());
 }
 
-auto
-get_all_netdevices (std::size_t const num_tries = 100) {
-    std::unordered_map<std::string, boost::asio::ip::address_v4> map;
+std::map<std::string, boost::asio::ip::address>
+get_all_netdevices (std::size_t const num_tries) {
+    std::map<std::string, boost::asio::ip::address> map;
 
     int fd = ::socket (AF_INET, SOCK_DGRAM, 0);
     BOOST_SCOPE_EXIT (&fd) {
@@ -89,13 +88,7 @@ get_all_netdevices (std::size_t const num_tries = 100) {
             continue;
         }
         auto& addr = reinterpret_cast<struct sockaddr_in&> (ifc.ifr_addr);
-        std::string ifc_name (ifc.ifr_name);
-        auto ifc_name_prefix = ifc_name.substr (0, 2);
-        /* Only return Ethernet and WLAN interfaces */
-        if ((ifc_name_prefix != "wl") && (ifc_name_prefix != "en")) {
-            continue;
-        }
-        map.emplace (std::move (ifc_name),
+        map.emplace (ifc.ifr_name,
                      boost::asio::ip::address_v4 (
                          boost::endian::big_to_native (addr.sin_addr.s_addr)));
     }
@@ -104,6 +97,9 @@ get_all_netdevices (std::size_t const num_tries = 100) {
 }
 
 
+#ifdef LSIF_APP
+#include <iostream>
+
 int
 main (int, char**) {
     auto map = get_all_netdevices ();
@@ -111,3 +107,4 @@ main (int, char**) {
         std::cout << e.first << " -> " << e.second << std::endl;
     }
 }
+#endif
