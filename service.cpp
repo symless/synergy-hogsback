@@ -27,7 +27,7 @@ struct ServiceImpl {
     uint16_t base_port;
     bool started = false;
 
-    void proxy_loop ();
+    void core_gui_proxy_loop ();
 };
 
 
@@ -67,7 +67,7 @@ Service::Service (uint16_t const base_port)
     impl_->mcast_sub->setsockopt (ZMQ_SUBSCRIBE, "", 0);
 
     impl_->core_gui_proxy_thread =
-        std::thread ([&]() { impl_->proxy_loop (); });
+        std::thread ([&]() { impl_->core_gui_proxy_loop (); });
     impl_->base_port = base_port;
 }
 
@@ -81,7 +81,7 @@ Service::~Service () {
 }
 
 void
-ServiceImpl::proxy_loop () {
+ServiceImpl::core_gui_proxy_loop () {
     if (!gui || !core) {
         throw;
     }
