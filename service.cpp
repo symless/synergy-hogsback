@@ -187,6 +187,10 @@ Service::process_multicast_messages () {
 }
 
 void
+Service::process_control_messages () {
+}
+
+void
 Service::start () {
     if (impl_->started) {
         return;
@@ -205,6 +209,7 @@ Service::start () {
                                   std::chrono::milliseconds (5000));
         if (n > 0) {
             if (poll_set[0].revents & ZMQ_POLLIN) {
+                process_control_messages ();
             }
             if (poll_set[1].revents & ZMQ_POLLIN) {
                 process_multicast_messages ();
