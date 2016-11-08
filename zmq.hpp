@@ -165,7 +165,7 @@ namespace zmq
         if (rc != 0)
             throw error_t ();
     }
-
+    
 #ifdef ZMQ_HAS_PROXY_STEERABLE
     inline void proxy_steerable (void *frontend, void *backend, void *capture, void *control)
     {
@@ -174,7 +174,7 @@ namespace zmq
             throw error_t ();
     }
 #endif
-
+    
     inline void version (int *major_, int *minor_, int *patch_)
     {
         zmq_version (major_, minor_, patch_);
@@ -591,7 +591,7 @@ namespace zmq
         {
             return(ptr != NULL);
         }
-
+        
         inline size_t send (const void *buf_, size_t len_, int flags_ = 0)
         {
             int nbytes = zmq_send (ptr, buf_, len_, flags_);
@@ -644,7 +644,7 @@ namespace zmq
                 return false;
             throw error_t ();
         }
-
+        
     private:
         inline void init(context_t& context_, int type_)
         {
@@ -684,9 +684,9 @@ namespace zmq
 
             rc = zmq_connect (s, addr_);
             assert (rc == 0);
-
+            
             on_monitor_started();
-
+            
             while (true) {
                 zmq_msg_t eventMsg;
                 zmq_msg_init (&eventMsg);
@@ -703,7 +703,7 @@ namespace zmq
 #else
                 zmq_event_t* event = static_cast<zmq_event_t*>(zmq_msg_data(&eventMsg));
 #endif
-
+                
 #ifdef ZMQ_NEW_MONITOR_EVENT_LAYOUT
                 zmq_msg_t addrMsg;
                 zmq_msg_init (&addrMsg);
