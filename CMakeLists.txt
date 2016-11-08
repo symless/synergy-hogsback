@@ -9,7 +9,7 @@ set (CMAKE_CXX_FLAGS_RELEASE "-O2 -flto -fvisibility=hidden -DNDEBUG")
 
 find_package (Threads REQUIRED)
 find_library (ZMQ_LIB zmq REQUIRED)
-find_package (Boost 1.61 REQUIRED COMPONENTS system)
+find_package (Boost 1.62 REQUIRED COMPONENTS system)
 
 aux_source_directory (./fmt/fmt FMT_SOURCES)
 add_library (fmt STATIC ${FMT_SOURCES})
