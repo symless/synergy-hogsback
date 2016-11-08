@@ -81,7 +81,7 @@ get_all_netdevices (std::size_t const num_tries) {
         /* Loop until we get a buffer that wasn't filled */
     } while (if_ret == if_buf);
 
-    /* Resize the buffer to the number actually grabbed */
+    /* Resize the buffer to the number of interfaces */
     interfaces.resize (if_ret);
 
     for (auto& ifc : interfaces) {

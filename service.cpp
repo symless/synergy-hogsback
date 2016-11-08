@@ -1,6 +1,7 @@
 #include "service.hpp"
 #include "screen_info.hpp"
 #include <boost/optional.hpp>
+#include <chrono>
 #include <fmt/format.h>
 #include <iostream>
 #include <multicast.hpp>
@@ -21,8 +22,8 @@ struct ServiceImpl {
     optional<zmq::socket_t> service_log;
     optional<zmq::socket_t> mcast_pub;
     optional<zmq::socket_t> mcast_sub;
-    std::vector<MulticastInterface> mcast_interfaces;
-    std::thread proxy_thread;
+    std::vector<MulticastInterface> multicast_interfaces;
+    std::thread core_gui_proxy_thread;
     uint16_t base_port;
     bool started = false;
 
@@ -46,7 +47,7 @@ Service::Service (uint16_t const base_port)
     impl_->gui->setsockopt (ZMQ_LINGER, 10000);
     impl_->gui->bind (fmt::format (LOCAL_TCP_ADDR_FMT, base_port + 20));
 
-    auto inproc_addr = fmt::format (INPROC_ADDR_FMT, base_port);
+    auto const inproc_addr = fmt::format (INPROC_ADDR_FMT, base_port);
 
     /* Core interface */
     impl_->core.emplace (impl_->zmq_ctx, ZMQ_XSUB);
@@ -65,8 +66,9 @@ Service::Service (uint16_t const base_port)
     impl_->mcast_sub.emplace (impl_->zmq_ctx, ZMQ_SUB);
     impl_->mcast_sub->setsockopt (ZMQ_SUBSCRIBE, "", 0);
 
-    impl_->proxy_thread = std::thread ([&]() { impl_->proxy_loop (); });
-    impl_->base_port    = base_port;
+    impl_->core_gui_proxy_thread =
+        std::thread ([&]() { impl_->proxy_loop (); });
+    impl_->base_port = base_port;
 }
 
 Service::~Service () {
@@ -74,7 +76,7 @@ Service::~Service () {
         impl_->service_log->close ();
         impl_->control->close ();
         impl_->zmq_ctx.close ();
-        impl_->proxy_thread.join ();
+        impl_->core_gui_proxy_thread.join ();
     }
 }
 
@@ -106,62 +108,82 @@ Service::say_hello () {
 
 void
 Service::update_multicast_set () {
-    auto multicast_devices = get_all_multicast_interfaces ();
+    auto multicast_interfaces = get_all_multicast_interfaces ();
 
-    for (auto& ifc : multicast_devices) {
+    for (auto& ifc : multicast_interfaces) {
         std::cout << "Detected: " << ifc.name << " -> " << ifc.primary_ip
                   << std::endl;
     }
 
     std::vector<MulticastInterface> added;
-    std::vector<MulticastInterface> removed;
-
-    std::set_difference (begin (multicast_devices),
-                         end (multicast_devices),
-                         begin (impl_->mcast_interfaces),
-                         end (impl_->mcast_interfaces),
+    std::set_difference (begin (multicast_interfaces),
+                         end (multicast_interfaces),
+                         begin (impl_->multicast_interfaces),
+                         end (impl_->multicast_interfaces),
                          std::back_inserter (added));
-    std::set_difference (begin (impl_->mcast_interfaces),
-                         end (impl_->mcast_interfaces),
-                         begin (multicast_devices),
-                         end (multicast_devices),
+
+    std::vector<MulticastInterface> removed;
+    std::set_difference (begin (impl_->multicast_interfaces),
+                         end (impl_->multicast_interfaces),
+                         begin (multicast_interfaces),
+                         end (multicast_interfaces),
                          std::back_inserter (removed));
 
     for (auto& rm_ifc : removed) {
         std::cout << "Removed: " << rm_ifc.name << " -> " << rm_ifc.primary_ip;
         auto addr = fmt::format (
             MULTICAST_ADDR_FMT, rm_ifc.primary_ip, impl_->base_port + 40);
-        std::cout << " " << addr << std::endl;
+        std::cout << " -> " << addr << std::endl;
         impl_->mcast_sub->disconnect (addr);
         impl_->mcast_pub->disconnect (addr);
     }
 
     /* Reserve space for the interfaces to be added */
-    impl_->mcast_interfaces.reserve (impl_->mcast_interfaces.size () +
-                                     added.size ());
-    auto mp = impl_->mcast_interfaces.end ();
+    impl_->multicast_interfaces.reserve (impl_->multicast_interfaces.size () +
+                                         added.size ());
+    auto mp = impl_->multicast_interfaces.end ();
     for (auto& new_ifc : added) {
         std::cout << "Added: " << new_ifc.name << " -> " << new_ifc.primary_ip;
         auto addr = fmt::format (
             MULTICAST_ADDR_FMT, new_ifc.primary_ip, impl_->base_port + 40);
-        std::cout << " " << addr << std::endl;
+        std::cout << " -> " << addr << std::endl;
         impl_->mcast_sub->connect (addr);
         impl_->mcast_pub->connect (addr);
-        impl_->mcast_interfaces.push_back (std::move (new_ifc));
+        impl_->multicast_interfaces.push_back (std::move (new_ifc));
     }
 
-    /* Merge in all the newly added interfaces */
-    added.clear ();
-    std::inplace_merge (
-        begin (impl_->mcast_interfaces), mp, end (impl_->mcast_interfaces));
+    /* Merge in all the newly discovered interfaces */
+    std::inplace_merge (begin (impl_->multicast_interfaces),
+                        mp,
+                        end (impl_->multicast_interfaces));
 
-    /* Remove all the interfaces to be removed */
-    std::set_difference (begin (impl_->mcast_interfaces),
-                         end (impl_->mcast_interfaces),
+    /* Remove all the interfaces that no longer seem to be present */
+    added.clear ();
+    std::set_difference (begin (impl_->multicast_interfaces),
+                         end (impl_->multicast_interfaces),
                          begin (removed),
                          end (removed),
                          std::back_inserter (added));
-    impl_->mcast_interfaces = std::move (added);
+    impl_->multicast_interfaces = std::move (added);
+}
+
+void
+Service::process_multicast_messages () {
+    zmq::message_t msg;
+    impl_->mcast_sub->recv (&msg);
+
+    if ((msg.size () == 5) && (0 == std::memcmp (msg.data (), "HELLO", 5))) {
+        auto more_to_recv = impl_->mcast_sub->getsockopt<int> (ZMQ_RCVMORE);
+        assert (more_to_recv);
+        impl_->mcast_sub->recv (&msg);
+        std::cout << std::string (static_cast<char const*> (msg.data ()),
+                                  msg.size ())
+                  << std::endl;
+    } else {
+        while (impl_->mcast_sub->getsockopt<int> (ZMQ_RCVMORE)) {
+            impl_->mcast_sub->recv (&msg);
+        }
+    }
 }
 
 void
@@ -177,31 +199,20 @@ Service::start () {
         {static_cast<void*> (*impl_->mcast_sub), -1, ZMQ_POLLIN, 0}};
 
     do {
-        auto const n = zmq::poll (poll_set.data (),
+        auto const t1 = std::chrono::high_resolution_clock::now ();
+        auto const n  = zmq::poll (poll_set.data (),
                                   poll_set.size (),
                                   std::chrono::milliseconds (5000));
-        if (n) {
+        if (n > 0) {
             if (poll_set[0].revents & ZMQ_POLLIN) {
             }
             if (poll_set[1].revents & ZMQ_POLLIN) {
-                zmq::message_t msg;
-                impl_->mcast_sub->recv (&msg);
-                if ((msg.size () == 5) &&
-                    (0 == std::memcmp (msg.data (), "HELLO", 5))) {
-                    auto more_to_recv = impl_->mcast_sub->getsockopt<int64_t> (ZMQ_RCVMORE);
-                    assert (more_to_recv);
-                    impl_->mcast_sub->recv (&msg);
-                    std::cout
-                        << std::string (static_cast<char const*> (msg.data ()),
-                                        msg.size ())
-                        << std::endl;
-                } else {
-                    while (impl_->mcast_sub->getsockopt<int64_t> (ZMQ_RCVMORE)) {
-                        impl_->mcast_sub->recv (&msg);
-                    }
-                }
+                process_multicast_messages ();
             }
-        } else {
+        }
+
+        auto const t2 = std::chrono::high_resolution_clock::now ();
+        if ((t2 - t1) >= std::chrono::seconds (5)) {
             update_multicast_set ();
             say_hello ();
         }

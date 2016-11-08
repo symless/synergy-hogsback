@@ -16,6 +16,7 @@ private:
     std::shared_ptr<ServiceImpl> impl_;
     void update_multicast_set();
     void say_hello();
+    void process_multicast_messages();
 };
 
 #endif // SERVICE_HPP
