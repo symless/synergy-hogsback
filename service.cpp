@@ -62,7 +62,7 @@ Service::Service (uint16_t const base_port)
 
     /* Multicast interface */
     impl_->mcast_pub.emplace (impl_->zmq_ctx, ZMQ_PUB);
-    impl_->mcast_pub->setsockopt (ZMQ_MULTICAST_HOPS, 16);
+    impl_->mcast_pub->setsockopt (ZMQ_MULTICAST_HOPS, 3);
     impl_->mcast_sub.emplace (impl_->zmq_ctx, ZMQ_SUB);
     impl_->mcast_sub->setsockopt (ZMQ_SUBSCRIBE, "", 0);
 
