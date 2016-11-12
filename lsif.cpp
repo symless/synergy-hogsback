@@ -11,7 +11,6 @@
 #include <net/if.h>
 #include <netinet/in.h>
 #include <string>
-#include <stropts.h> // ioctl
 #include <sys/ioctl.h>
 #include <sys/socket.h> // socket
 #include <sys/types.h>
