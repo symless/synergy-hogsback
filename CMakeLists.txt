@@ -1,9 +1,9 @@
 project(synergyd CXX)
 cmake_minimum_required (VERSION 3.4)
 
-set (CXX_STANDARD 14)
-set (CXX_EXTENIONS OFF)
-set (CXX_STANDARD_REQUIRED ON)
+set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_EXTENSIONS OFF)
+set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
 set (CMAKE_CXX_FLAGS_RELEASE "-O3 -flto -fvisibility=hidden -DNDEBUG")
