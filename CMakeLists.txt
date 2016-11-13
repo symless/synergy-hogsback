@@ -8,11 +8,13 @@ if (CMAKE_COMPILER_IS_GNUCXX)
 set (CMAKE_CXX_FLAGS_RELEASE "-Os -flto -fvisibility=hidden -DNDEBUG")
 endif()
 
+include_directories (BEFORE SYSTEM ext/cppzmq)
+
 set (Boost_USE_MULTITHREADED ON)
 set (Boost_USE_STATIC_LIBS ON)
 set (Boost_USE_STATIC_RUNTIME OFF)
 
-find_package (Boost 1.61 REQUIRED COMPONENTS system date_time)
+find_package (Boost 1.58 REQUIRED COMPONENTS system date_time)
 find_package (Threads REQUIRED)
 
 add_subdirectory (third_party)

@@ -5,9 +5,7 @@ add_executable (${PROJECT_NAME}
     main.cpp
 )
 
-target_include_directories (${PROJECT_NAME} BEFORE PUBLIC .)
-target_include_directories (${PROJECT_NAME} PUBLIC
-    libzmq-static
+target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
     ${fmt_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
 )
