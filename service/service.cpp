@@ -1,9 +1,9 @@
 #include "service.hpp"
+#include "multicast.hpp"
 #include <boost/optional.hpp>
 #include <chrono>
 #include <fmt/format.h>
 #include <iostream>
-#include "multicast.hpp"
 #include <thread>
 #include <tuple>
 #include <zmq.hpp>

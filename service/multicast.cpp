@@ -1,6 +1,6 @@
-#include <iostream>
-#include "lsif.hpp"
 #include "multicast.hpp"
+#include "lsif.hpp"
+#include <iostream>
 
 std::vector<MulticastInterface>
 get_all_multicast_interfaces () {

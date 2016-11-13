@@ -1,12 +1,12 @@
 [submodule "fmt"]
 	path = third_party/fmt
 	url = https://github.com/fmtlib/fmt.git
-[submodule "ext/capnproto"]
+[submodule "capnproto"]
 	path = third_party/capnproto
 	url = https://github.com/sandstorm-io/capnproto.git
-[submodule "third_party/libzmq"]
+[submodule "libzmq"]
 	path = third_party/libzmq
 	url = https://github.com/zeromq/libzmq.git
-[submodule "third_party/cppzmq"]
+[submodule "cppzmq"]
 	path = third_party/cppzmq
 	url = https://github.com/zeromq/cppzmq.git
