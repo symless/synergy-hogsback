@@ -8,7 +8,8 @@ if (CMAKE_COMPILER_IS_GNUCXX)
 set (CMAKE_CXX_FLAGS_RELEASE "-Os -flto -fvisibility=hidden -DNDEBUG")
 endif()
 
-include_directories (BEFORE SYSTEM ext/cppzmq)
+include_directories (BEFORE SYSTEM third_party/libzmq/include)
+include_directories (BEFORE SYSTEM third_party/cppzmq)
 
 set (Boost_USE_MULTITHREADED ON)
 set (Boost_USE_STATIC_LIBS ON)
