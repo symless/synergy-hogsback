@@ -1,0 +1,38 @@
+cmake_minimum_required (VERSION 3.4)
+
+file (GLOB CAPN_FILES *.capn)
+
+function (capnproto_generate_cpp SRCS HDRS)
+    set (${SRCS})
+    set (${HDRS})
+    foreach (CAPN_FILE ${CAPN_FILES})
+        get_filename_component (CAPN_FILE_ABS ${CAPN_FILE} ABSOLUTE)
+        get_filename_component (CAPN_FILE_DIR ${CAPN_FILE} DIRECTORY)
+        get_filename_component (CAPN_FILE_NAME ${CAPN_FILE} NAME)
+        get_filename_component (CAPN_FILE_BASE ${CAPN_FILE_NAME} NAME_WE)
+
+        list (APPEND ${SRCS} "${CMAKE_CURRENT_BINARY_DIR}/${CAPN_FILE_BASE}.capn.c++")
+        list (APPEND ${HDRS} "${CMAKE_CURRENT_BINARY_DIR}/${CAPN_FILE_BASE}.capn.h")
+
+        add_custom_command (
+            OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${CAPN_FILE_BASE}.capn.c++"
+                   "${CMAKE_CURRENT_BINARY_DIR}/${CAPN_FILE_BASE}.capn.h"
+            COMMAND capnp
+            ARGS compile -oc++:${CMAKE_CURRENT_BINARY_DIR}
+                         --src-prefix=${CAPN_FILE_DIR} ${CAPN_FILE_ABS}
+            DEPENDS ${CAPN_FILE_ABS}
+            COMMENT "Running Cap'n Proto compiler on ${CAPN_FILE}"
+            VERBATIM
+        )
+    endforeach()
+    set_source_files_properties (${${SRCS}} ${${HDRS}}
+                                 PROPERTIES GENERATED TRUE)
+    set (${SRCS} ${${SRCS}} PARENT_SCOPE)
+    set (${HDRS} ${${HDRS}} PARENT_SCOPE)
+endfunction()
+
+capnproto_generate_cpp (PROTO_SRCS PROTO_HDRS)
+add_library (protocol STATIC ${PROTO_SRCS})
+
+target_compile_definitions (protocol PUBLIC CAPNP_LITE)
+set_target_properties (protocol PROPERTIES LINKER_LANGUAGE CXX)
