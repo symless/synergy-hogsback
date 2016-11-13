@@ -1,5 +1,4 @@
 #include "service.hpp"
-#include "screen_info.hpp"
 #include <boost/optional.hpp>
 #include <chrono>
 #include <fmt/format.h>
