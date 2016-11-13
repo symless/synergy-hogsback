@@ -1,4 +1,5 @@
 #include "lsif.hpp"
+#include "unix_util.hpp"
 #include <boost/asio/ip/address.hpp>
 #include <boost/endian/conversion.hpp>
 #include <boost/numeric/conversion/cast.hpp>
@@ -17,17 +18,10 @@
 #include <unistd.h>
 #include <vector>
 
-namespace bsys = boost::system;
-
 template <typename T>
 inline auto
 byte_size_of (std::vector<T> const& v) noexcept {
     return v.size () * sizeof (T);
-}
-
-__attribute__ ((noinline, noreturn)) static void
-throw_errno () {
-    throw bsys::system_error (errno, bsys::system_category ());
 }
 
 std::map<std::string, boost::asio::ip::address>
@@ -45,7 +39,7 @@ get_all_netdevices () {
     struct ::ifconf conf;
     std::size_t if_buf, if_ret;
     std::size_t const num_tries = 100;
-    auto tries_left = num_tries;
+    auto tries_left             = num_tries;
 
     do {
         /* Limit the number of attempts we try to grab all network interfaces */

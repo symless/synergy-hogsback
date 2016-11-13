@@ -2,8 +2,8 @@
 #define MULTICAST_HPP
 
 #include <string>
-#include <vector>
 #include <tuple>
+#include <vector>
 
 static auto const MULTICAST_ADDR_FMT = "epgm://{};224.1.1.1:{}";
 
@@ -24,7 +24,6 @@ operator< (MulticastInterface const& ifc1, MulticastInterface const& ifc2) {
            std::tie (ifc2.name, ifc2.primary_ip);
 }
 
-std::vector<MulticastInterface>
-get_all_multicast_interfaces ();
+std::vector<MulticastInterface> get_all_multicast_interfaces ();
 
 #endif // MULTICAST_HPP

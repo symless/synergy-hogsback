@@ -1,16 +1,10 @@
 #include "lsif.hpp"
+#include "unix_util.hpp"
 #include <boost/endian/conversion.hpp>
 #include <boost/scope_exit.hpp>
 #include <ifaddrs.h>
 #include <netinet/in.h>
 #include <sys/types.h>
-
-namespace bsys = boost::system;
-
-__attribute__ ((noinline, noreturn)) static void
-throw_errno () {
-    throw bsys::system_error (errno, bsys::system_category ());
-}
 
 std::map<std::string, boost::asio::ip::address>
 get_all_netdevices () {
@@ -23,7 +17,6 @@ get_all_netdevices () {
 
     BOOST_SCOPE_EXIT (ifa) {
         freeifaddrs (ifa);
-        ifa = nullptr;
     }
     BOOST_SCOPE_EXIT_END
 
