@@ -12,12 +12,12 @@
 #include <netinet/in.h>
 #include <string>
 #include <sys/ioctl.h>
-#include <sys/socket.h> // socket
+#include <sys/socket.h>
 #include <sys/types.h>
-#include <unistd.h> // close
+#include <unistd.h>
 #include <vector>
 
-namespace sys = boost::system;
+namespace bsys = boost::system;
 
 template <typename T>
 inline auto
@@ -27,11 +27,11 @@ byte_size_of (std::vector<T> const& v) noexcept {
 
 __attribute__ ((noinline, noreturn)) static void
 throw_errno () {
-    throw sys::system_error (errno, sys::system_category ());
+    throw bsys::system_error (errno, bsys::system_category ());
 }
 
 std::map<std::string, boost::asio::ip::address>
-get_all_netdevices (std::size_t const num_tries) {
+get_all_netdevices () {
     std::map<std::string, boost::asio::ip::address> map;
 
     int fd = ::socket (AF_INET, SOCK_DGRAM, 0);
@@ -44,6 +44,7 @@ get_all_netdevices (std::size_t const num_tries) {
     std::vector<struct ifreq> interfaces;
     struct ::ifconf conf;
     std::size_t if_buf, if_ret;
+    std::size_t const num_tries = 100;
     auto tries_left = num_tries;
 
     do {

@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.4)
 
 add_executable (${PROJECT_NAME}
     service.cpp
-    lsif.cpp
+    lsif_bsd.cpp
     multicast.cpp
 )
 
@@ -20,7 +20,7 @@ target_link_libraries (${PROJECT_NAME}
 )
 
 add_executable (lsif
-    lsif.cpp
+    lsif_bsd.cpp
 )
 
 target_compile_definitions (lsif PUBLIC LSIF_APP)

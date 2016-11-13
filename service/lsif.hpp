@@ -6,6 +6,6 @@
 #include <string>
 
 std::map<std::string, boost::asio::ip::address>
-get_all_netdevices (std::size_t const num_tries = 100);
+get_all_netdevices ();
 
 #endif // LSIF_HPP
