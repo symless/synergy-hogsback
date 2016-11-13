@@ -5,7 +5,6 @@
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/scope_exit.hpp>
 #include <cassert>
-#include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <map>
