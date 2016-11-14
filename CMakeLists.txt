@@ -20,7 +20,6 @@ find_package (Boost 1.58 REQUIRED COMPONENTS system date_time)
 find_package (Threads REQUIRED)
 
 add_definitions (-DZMQ_STATIC)
-#set (HAVE_WS2)
 
 add_subdirectory (third_party)
 #add_subdirectory (protocol)
