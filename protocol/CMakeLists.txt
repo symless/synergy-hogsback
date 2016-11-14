@@ -5,7 +5,7 @@ file (GLOB CAPN_FILES *.capn)
 if (WIN32)
     set (capnp_BINARY_PATH "${CMAKE_SOURCE_DIR}/third_party/capnproto-bin")
 else()
-    set (capnp_BINARY_PATH "${CMAKE_BINARY_DIR}/third_party/capnproto/c++/src/capnp/")
+    set (capnp_BINARY_PATH "${CMAKE_BINARY_DIR}/third_party/capnproto/c++/src/capnp")
 endif()
 
 set (capnp_PLUGIN_PATH "${capnp_BINARY_PATH}/capnpc-c++${CMAKE_EXECUTABLE_SUFFIX}")
