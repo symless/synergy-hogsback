@@ -28,5 +28,5 @@ if (NOT WIN32)
   add_dependencies (protocol capnp_tool capnpc_cpp)
 endif()
 
-#add_subdirectory (service)
+add_subdirectory (service)
 add_subdirectory (gui)
