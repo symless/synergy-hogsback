@@ -11,4 +11,9 @@ add_subdirectory (libzmq EXCLUDE_FROM_ALL)
 
 set (CAPNP_LITE ON CACHE BOOL "Compile Cap'n Proto in 'lite mode'" FORCE)
 set (BUILD_TESTING OFF CACHE BOOL "Build Cap'n Proto unit tests" FORCE)
+
+if (WIN32)
+    add_definitions (-DEXTERNAL_CAPNP=1)
+endif()
+
 add_subdirectory (capnproto/c++ EXCLUDE_FROM_ALL)

@@ -22,7 +22,11 @@ find_package (Threads REQUIRED)
 add_definitions (-DZMQ_STATIC)
 
 add_subdirectory (third_party)
-#add_subdirectory (protocol)
-#add_dependencies (protocol capnp_tool capnpc_cpp)
+add_subdirectory (protocol)
+
+if (!WIN32)
+add_dependencies (protocol capnp_tool capnpc_cpp)
+endif()
+
 #add_subdirectory (service)
 add_subdirectory (gui)
