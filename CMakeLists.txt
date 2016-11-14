@@ -10,6 +10,7 @@ endif()
 
 include_directories (BEFORE SYSTEM third_party/libzmq/include)
 include_directories (BEFORE SYSTEM third_party/cppzmq)
+include_directories (BEFORE SYSTEM third_party/capnproto/c++/src)
 
 set (Boost_USE_MULTITHREADED ON)
 set (Boost_USE_STATIC_LIBS ON)
@@ -19,5 +20,7 @@ find_package (Boost 1.58 REQUIRED COMPONENTS system date_time)
 find_package (Threads REQUIRED)
 
 add_subdirectory (third_party)
+add_subdirectory (protocol)
+add_dependencies (protocol capnp_tool capnpc_cpp)
 add_subdirectory (service)
 add_subdirectory (gui)

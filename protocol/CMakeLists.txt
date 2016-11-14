@@ -2,6 +2,10 @@ cmake_minimum_required (VERSION 3.4)
 
 file (GLOB CAPN_FILES *.capn)
 
+set (capnp_BINARY_PATH "${CMAKE_BINARY_DIR}/third_party/capnproto/c++/src/capnp/")
+set (capnp_PLUGIN_PATH "${capnp_BINARY_PATH}/capnpc-c++${CMAKE_EXECUTABLE_SUFFIX}")
+set (capnp_PROGRAM_PATH "${capnp_BINARY_PATH}/capnp${CMAKE_EXECUTABLE_SUFFIX}")
+
 function (capnproto_generate_cpp SRCS HDRS)
     set (${SRCS})
     set (${HDRS})
@@ -17,8 +21,8 @@ function (capnproto_generate_cpp SRCS HDRS)
         add_custom_command (
             OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${CAPN_FILE_BASE}.capn.c++"
                    "${CMAKE_CURRENT_BINARY_DIR}/${CAPN_FILE_BASE}.capn.h"
-            COMMAND capnp
-            ARGS compile -oc++:${CMAKE_CURRENT_BINARY_DIR}
+            COMMAND "${capnp_PROGRAM_PATH}"
+            ARGS compile -o ${capnp_PLUGIN_PATH}:${CMAKE_CURRENT_BINARY_DIR}
                          --src-prefix=${CAPN_FILE_DIR} ${CAPN_FILE_ABS}
             DEPENDS ${CAPN_FILE_ABS}
             COMMENT "Running Cap'n Proto compiler on ${CAPN_FILE}"
