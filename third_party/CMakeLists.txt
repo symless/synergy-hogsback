@@ -23,6 +23,6 @@ set (FLATBUFFERS_INSTALL OFF CACHE BOOL
         "Enable the installation of targets." FORCE)
 set (FLATBUFFERS_BUILD_TESTS OFF CACHE BOOL
         "Enable build of flatbuffers tests and samples." FORCE)
-add_subdirectory (flatbuffers)
+add_subdirectory (flatbuffers EXCLUDE_FROM_ALL)
 
-add_subdirectory (norm)
+add_subdirectory (norm EXCLUDE_FROM_ALL)
