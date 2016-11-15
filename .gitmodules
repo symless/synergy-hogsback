@@ -10,3 +10,6 @@
 [submodule "cppzmq"]
 	path = third_party/cppzmq
 	url = https://github.com/zeromq/cppzmq.git
+[submodule "flatbuffers"]
+	path = third_party/flatbuffers
+	url = https://github.com/google/flatbuffers.git
