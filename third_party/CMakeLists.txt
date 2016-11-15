@@ -95,10 +95,10 @@ if (WIN32)
     )
 endif()
 
-add_library (protolib SHARED ${PROTOLIB_SOURCES})
+add_library (protolib ${PROTOLIB_SOURCES})
 target_include_directories (protolib BEFORE PUBLIC norm/protolib/include)
+set_target_properties (protolib PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 #set_target_properties (protolib PROPERTIES COMPILE_FLAGS "-fno-rtti")
-add_zdefs (protolib)
 
 if (UNIX)
     target_compile_definitions (protolib PUBLIC -DUNIX -DHAVE_DIRFD -DHAVE_IPV6
