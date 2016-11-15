@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "protoRouteMgr.h"
 #include "protoDebug.h"
-#include "zebraRouteMgr.h"
+//#include "zebraRouteMgr.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -83,9 +83,9 @@ ProtoRouteMgr* ProtoRouteMgr::Create(Type theType)
     ProtoRouteMgr* returnMgr = NULL;
     switch(theType)
     {
-        case ZEBRA:
+        /*case ZEBRA:
           returnMgr = (ProtoRouteMgr*)(new ZebraRouteMgr);
-          break;
+          break;*/
         case SYSTEM:
           returnMgr = (ProtoRouteMgr*)(new LinuxRouteMgr);
           break;
