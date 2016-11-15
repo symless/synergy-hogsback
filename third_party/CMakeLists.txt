@@ -19,4 +19,10 @@ endif()
 set (BUILD_TESTING OFF CACHE BOOL "Build Cap'n Proto unit tests" FORCE)
 add_subdirectory (capnproto/c++ EXCLUDE_FROM_ALL)
 
+set (FLATBUFFERS_INSTALL OFF CACHE BOOL
+        "Enable the installation of targets." FORCE)
+set (FLATBUFFERS_BUILD_TESTS OFF CACHE BOOL
+        "Enable build of flatbuffers tests and samples." FORCE)
+add_subdirectory (flatbuffers)
+
 add_subdirectory (norm)
