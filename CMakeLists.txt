@@ -4,6 +4,12 @@ set (CMAKE_CXX_STANDARD 14)
 set (CMAKE_CXX_EXTENSIONS OFF)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if (WIN32)
+	add_definitions (-DNTDDI_VERSION=0x06000000)
+	add_definitions (-D_WIN32_WINNT=0x0600)
+	add_definitions (-DWINVER=0x0600)
+endif()
+
 if (CMAKE_COMPILER_IS_GNUCXX)
 set (CMAKE_CXX_FLAGS_RELEASE "-Os -flto -fvisibility=hidden -DNDEBUG")
 endif()

@@ -197,9 +197,15 @@ Service::start () {
 
     impl_->started = true;
 
+#if defined _WIN32
+	SOCKET null_socket = 0;
+#else
+	int null_socket = -1;
+#endif
+
     std::vector<zmq_pollitem_t> poll_set = {
-        {static_cast<void*> (*impl_->control), -1, ZMQ_POLLIN, 0},
-        {static_cast<void*> (*impl_->mcast_sub), -1, ZMQ_POLLIN, 0}};
+        {static_cast<void*> (*impl_->control), null_socket, ZMQ_POLLIN, 0},
+        {static_cast<void*> (*impl_->mcast_sub), null_socket, ZMQ_POLLIN, 0}};
 
     do {
         auto const t1 = std::chrono::high_resolution_clock::now ();

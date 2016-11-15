@@ -28,11 +28,12 @@ target_link_libraries (${PROJECT_NAME}
     ${CMAKE_THREAD_LIBS_INIT}
 )
 
-if (WIN32)
-    target_link_libraries (${PROJECT_NAME} ws2_32 rpcrt4 iphlpapi)
-endif()
-
 add_executable (lsif ${LSIF_SOURCES})
 target_compile_definitions (lsif PUBLIC LSIF_APP)
 target_include_directories (lsif SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries (lsif ${Boost_LIBRARIES})
+
+if (WIN32)
+    target_link_libraries (${PROJECT_NAME} ws2_32 rpcrt4 iphlpapi)
+    target_link_libraries (lsif iphlpapi)
+endif()
