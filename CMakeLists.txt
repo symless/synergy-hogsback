@@ -11,7 +11,7 @@ if (WIN32)
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX)
-set (CMAKE_CXX_FLAGS_RELEASE "-Os -flto -fvisibility=hidden -DNDEBUG")
+#set (CMAKE_CXX_FLAGS_RELEASE "-Os -flto -fvisibility=hidden -DNDEBUG")
 endif()
 
 include_directories (BEFORE SYSTEM third_party/libzmq/include)
