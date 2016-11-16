@@ -32,8 +32,10 @@ add_subdirectory (third_party)
 add_subdirectory (protocol)
 
 if (NOT WIN32)
-  add_dependencies (protocol capnp_tool capnpc_cpp)
+  add_dependencies (capnp_protocol capnp_tool capnpc_cpp)
 endif()
+
+add_dependencies (fbs_protocol flatc)
 
 add_subdirectory (service)
 add_subdirectory (gui)
