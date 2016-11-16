@@ -9,16 +9,6 @@ if (APPLE)
 endif()
 add_subdirectory (libzmq EXCLUDE_FROM_ALL)
 
-if (WIN32)
-    set (CAPNP_LITE ON CACHE BOOL "Compile Cap'n Proto in 'lite mode'" FORCE)
-    add_definitions (-DEXTERNAL_CAPNP=1)
-else()
-    set (CAPNP_LITE OFF CACHE BOOL "Compile Cap'n Proto in 'lite mode'" FORCE)
-endif()
-
-set (BUILD_TESTING OFF CACHE BOOL "Build Cap'n Proto unit tests" FORCE)
-add_subdirectory (capnproto/c++ EXCLUDE_FROM_ALL)
-
 set (FLATBUFFERS_INSTALL OFF CACHE BOOL
         "Enable the installation of targets." FORCE)
 set (FLATBUFFERS_BUILD_TESTS OFF CACHE BOOL
