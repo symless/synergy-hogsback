@@ -12,7 +12,6 @@ target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
 
 target_link_libraries (${PROJECT_NAME}
     fmt
-    capnp kj
     libzmq-static
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}

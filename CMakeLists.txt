@@ -16,7 +16,6 @@ endif()
 
 include_directories (BEFORE SYSTEM third_party/libzmq/include)
 include_directories (BEFORE SYSTEM third_party/cppzmq)
-include_directories (BEFORE SYSTEM third_party/capnproto/c++/src)
 
 set (Boost_USE_MULTITHREADED ON)
 set (Boost_USE_STATIC_LIBS ON)
@@ -30,10 +29,6 @@ add_definitions (-DZMQ_BUILD_DRAFT_API)
 
 add_subdirectory (third_party)
 add_subdirectory (protocol)
-
-if (NOT WIN32)
-  add_dependencies (capnp_protocol capnp_tool capnpc_cpp)
-endif()
 
 add_dependencies (fbs_protocol flatc)
 
