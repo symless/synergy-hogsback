@@ -20,7 +20,7 @@ target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
 )
 
 target_link_libraries (${PROJECT_NAME}
-    gui_lib
+    synlib
     fmt
     libzmq-static
     ${Boost_LIBRARIES}
