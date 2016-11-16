@@ -10,3 +10,7 @@
 [submodule "flatbuffers"]
 	path = third_party/flatbuffers
 	url = https://github.com/google/flatbuffers.git
+[submodule "synergy"]
+	path = synergy
+	url = https://github.com/symless/synergy.git
+	branch = v1.9.0
