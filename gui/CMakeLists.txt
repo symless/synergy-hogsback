@@ -7,17 +7,17 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt5Widgets)
-find_package(Qt5Qml)
-find_package(Qt5Quick)
+find_package(Qt5 COMPONENTS Widgets Quick Core)
 include_directories (${Qt5Widgets_INCLUDE_DIRS} 
 	             ${Qt5Qml_INCLUDE_DIRS}
 		     ${Qt5Quick_INCLUDE_DIRS})
 
 add_subdirectory (lib)
+qt5_add_resources(RESOURCES qml.qrc)
 
 add_executable (${PROJECT_NAME}
     main.cpp
+    ${RESOURCES}
 )
 
 target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
