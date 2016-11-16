@@ -4,6 +4,8 @@ set (CMAKE_CXX_STANDARD 14)
 set (CMAKE_CXX_EXTENSIONS OFF)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
+SET(BUILD_SERVICE OFF CACHE BOOL "Build the legacy service")
+
 if (WIN32)
 	add_definitions (-DNTDDI_VERSION=0x06000000)
 	add_definitions (-D_WIN32_WINNT=0x0600)
@@ -34,3 +36,4 @@ add_dependencies (fbs_protocol flatc)
 
 add_subdirectory (service)
 add_subdirectory (gui)
+add_subdirectory (synergy)
