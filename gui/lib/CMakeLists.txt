@@ -1,3 +1,4 @@
+cmake_minimum_required (VERSION 3.4)
 
 set (GUI_LIB_SOURCES
 	AppConfig.cpp
@@ -27,4 +28,5 @@ set (GUI_LIB_SOURCES
 )
 
 add_library (gui_lib STATIC ${GUI_LIB_SOURCES})
+qt5_use_modules (gui_lib Quick Widgets)
 set_target_properties (gui_lib PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
