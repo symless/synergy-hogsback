@@ -1,7 +1,0 @@
-@0xb4e09ae99b403c38;
-
-struct Version {
-    major @0: UInt8;
-    minor @1: UInt8;
-    release @2: UInt8;
-}

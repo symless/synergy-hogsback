@@ -33,7 +33,6 @@ add_subdirectory (third_party)
 add_subdirectory (protocol)
 
 add_dependencies (fbs_protocol flatc)
-
 add_subdirectory (service)
 add_subdirectory (gui)
 add_subdirectory (synergy)
