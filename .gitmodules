@@ -13,4 +13,4 @@
 [submodule "synergy"]
 	path = synergy
 	url = https://github.com/symless/synergy.git
-	branch = v1.9.0
+	branch = v2.0.0
