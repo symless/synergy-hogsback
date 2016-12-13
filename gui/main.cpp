@@ -24,6 +24,9 @@ int main(int argc, char* argv[])
 		qmlRegisterType<ProcessManager>("com.synergy.gui", 1, 0, "ProcessManager");
 		QQmlApplicationEngine engine(QUrl(QStringLiteral("qrc:/main.qml")));
 
+		QIcon icon(":res/image/synergy.ico");
+		app.setWindowIcon(icon);
+
 		return app.exec();
 	}
 	catch (std::runtime_error& e) {

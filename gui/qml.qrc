@@ -27,5 +27,6 @@
         <file>CustomCheckBox.qml</file>
         <file>GeneralSettingView.qml</file>
         <file>LogSettingView.qml</file>
+        <file>res/image/synergy.ico</file>
     </qresource>
 </RCC>
