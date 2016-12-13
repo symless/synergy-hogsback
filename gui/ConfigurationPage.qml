@@ -213,7 +213,7 @@ Rectangle {
 							anchors.fill: parent
 							fillMode: Image.Stretch
 							smooth: true
-							source: "qrc:/res/image/screen_icon.png"
+							source: "qrc:/res/image/screen-inactive.png"
 
 							Text {
 								width: parent.width - 20

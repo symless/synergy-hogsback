@@ -11,6 +11,14 @@ add_subdirectory (lib)
 add_executable (${PROJECT_NAME}
     main.cpp
     qml.qrc
+    main.qml
+    AdvancedPage.qml
+    ConfigSettingView.qml
+    ConfigurationPage.qml
+    CustomBorder.qml
+    CustomCheckBox.qml
+    GeneralSettingView.qml
+    LogSettingView.qml
 )
 
 target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
