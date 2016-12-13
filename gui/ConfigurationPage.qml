@@ -35,21 +35,31 @@ Rectangle {
 		anchors.fill: parent
 
 		// background
-		Image {
+		Rectangle {
 			id: configurationPageBackground
 			anchors.top: parent.top
 			width: parent.width
-			anchors.bottom: configurationPageBackgroundFooter.top
-			source: "qrc:/res/image/background.png"
+			anchors.bottom: configurationPageBackgroundSeparator.top
+			color:"#3F95B8"
 		}
 
+		// separator
+		Rectangle {
+			id: configurationPageBackgroundSeparator
+			anchors.bottom: configurationPageBackgroundFooter.top
+			width: parent.width
+			height: 7
+			color:"#96C13D"
+		}
+
+
 		// background footer
-		Image {
+		Rectangle {
 			id: configurationPageBackgroundFooter
 			anchors.bottom: parent.bottom
 			width: parent.width
 			height: 70
-			source: "qrc:/res/image/background_footer.png"
+			color:"white"
 		}
 
 		// hostname

@@ -6,9 +6,9 @@ Screen::Screen(QString name) :
 	m_name(name),
 	m_state(kIdle)
 {
-	m_stateImages[kReady] = "qrc:/res/image/screen_icon.png";
+	m_stateImages[kReady] = "qrc:/res/image/screen-active.png";
 	m_stateImages[kRunning] = "qrc:/res/image/screen_icon_running.png";
-	m_stateImages[kIdle] = "qrc:/res/image/screen_icon_idle.png";
+	m_stateImages[kIdle] = "qrc:/res/image/screen-inactive.png";
 
 	m_stateImage = m_stateImages[m_state];
 }

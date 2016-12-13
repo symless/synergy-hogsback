@@ -1,10 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>res/image/screen_icon.png</file>
-        <file alias="main.qml">res/qml/main.qml</file>
-        <file alias="AdvancedPage.qml">res/qml/AdvancedPage.qml</file>
-        <file alias="ConfigurationPage.qml">res/qml/ConfigurationPage.qml</file>
-        <file alias="CustomBorder.qml">res/qml/CustomBorder.qml</file>
         <file>res/image/cog.png</file>
         <file>res/image/configuration.png</file>
         <file>res/image/general.png</file>
@@ -13,18 +8,24 @@
         <file>res/image/apply.png</file>
         <file>res/image/info.png</file>
         <file>res/image/search.png</file>
-        <file alias="GeneralSettingView.qml">res/qml/GeneralSettingView.qml</file>
         <file>res/image/background.png</file>
         <file>res/image/basic_user.png</file>
         <file>res/image/pro_user.png</file>
         <file>res/image/unknown_user.png</file>
         <file>res/image/background_footer.png</file>
-        <file alias="CustomCheckBox.qml">res/qml/CustomCheckBox.qml</file>
         <file>res/image/highlight.png</file>
-        <file alias="LogSettingView.qml">res/qml/LogSettingView.qml</file>
         <file>res/image/background2.png</file>
         <file>res/image/background2_header.png</file>
         <file>res/image/background2_left.png</file>
-        <file alias="ConfigSettingView.qml">res/qml/ConfigSettingView.qml</file>
+        <file>res/image/screen-inactive.png</file>
+        <file>res/image/screen-active.png</file>
+        <file>main.qml</file>
+        <file>AdvancedPage.qml</file>
+        <file>ConfigSettingView.qml</file>
+        <file>ConfigurationPage.qml</file>
+        <file>CustomBorder.qml</file>
+        <file>CustomCheckBox.qml</file>
+        <file>GeneralSettingView.qml</file>
+        <file>LogSettingView.qml</file>
     </qresource>
 </RCC>
