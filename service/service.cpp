@@ -7,7 +7,7 @@
 #include <thread>
 #include <tuple>
 #include <zmq.hpp>
-
+int test;
 using boost::optional;
 
 static auto const INPROC_ADDR_FMT    = "inproc://Synergy_{}";
