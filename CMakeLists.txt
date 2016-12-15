@@ -23,7 +23,7 @@ set (Boost_USE_MULTITHREADED ON)
 set (Boost_USE_STATIC_LIBS ON)
 set (Boost_USE_STATIC_RUNTIME OFF)
 
-find_package (Boost 1.58 REQUIRED COMPONENTS system date_time)
+find_package (Boost 1.53 REQUIRED COMPONENTS system date_time)
 find_package (Threads REQUIRED)
 
 add_definitions (-DZMQ_STATIC)
