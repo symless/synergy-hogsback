@@ -4,6 +4,7 @@ add_subdirectory (fmt EXCLUDE_FROM_ALL)
 
 set (ENABLE_CURVE OFF CACHE BOOL "Enable ZMQ CURVE security" FORCE)
 set (WITH_OPENPGM OFF CACHE BOOL "Build ZMQ with support for OpenPGM" FORCE)
+set (CMAKE_MACOSX_RPATH 1)
 if (APPLE)
   set (ZMQ_BUILD_FRAMEWORK OFF CACHE BOOL "Build ZMQ as OS X framework" FORCE)
 endif()
