@@ -30,4 +30,3 @@ set (GUI_LIB_SOURCES
 add_library (synlib SHARED ${GUI_LIB_SOURCES})
 target_compile_definitions (synlib PRIVATE -DSYNLIB)
 qt5_use_modules (synlib Quick Widgets Network)
-#set_target_properties (synlib PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
