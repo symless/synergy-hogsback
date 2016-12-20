@@ -8,15 +8,15 @@
 #define NULL 0
 #endif
 
-extern const int kScreenIconWidth;
-extern const int kScreenIconHeight;
+LIB_SPEC extern const int kScreenIconWidth;
+LIB_SPEC extern const int kScreenIconHeight;
 
-extern const int kDefaultViewWidth;
-extern const int kDefaultViewHeight;
+LIB_SPEC extern const int kDefaultViewWidth;
+LIB_SPEC extern const int kDefaultViewHeight;
 
-extern const int kSnappingThreshold;
-extern const float kScaleThreshold;
+LIB_SPEC extern const int kSnappingThreshold;
+LIB_SPEC extern const float kScaleThreshold;
 
-extern const QString kDefaultConfigFile;
+LIB_SPEC extern const QString kDefaultConfigFile;
 
 #endif // COMMON_H
