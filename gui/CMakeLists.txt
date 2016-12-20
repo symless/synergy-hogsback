@@ -7,6 +7,7 @@ set (CMAKE_AUTORCC ON)
 
 find_package(Qt5 COMPONENTS Widgets Quick Core)
 add_subdirectory (lib)
+add_subdirectory (tests)
 
 add_executable (${PROJECT_NAME}
     main.cpp
