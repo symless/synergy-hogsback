@@ -34,32 +34,113 @@ Rectangle {
 		id: configurationPage
 		anchors.fill: parent
 
-		// background
+		// background header
 		Rectangle {
-			id: configurationPageBackground
+			id: configurationPageBackgroundHeader
 			anchors.top: parent.top
 			width: parent.width
-			anchors.bottom: configurationPageBackgroundSeparator.top
-			color:"#3F95B8"
+			height: 70
+			color:"white"
+
+			// navigation icon
+			Rectangle {
+				width: 50
+				height: 50
+				z: 1
+				anchors.left: parent.left
+				anchors.leftMargin: 10
+				anchors.bottom: parent.bottom
+				anchors.bottomMargin: 10
+				color: "transparent"
+
+				Image {
+					id: navigationImage
+					width: parent.width
+					height: parent.height
+					fillMode: Image.Stretch
+					smooth: true
+					source: "qrc:/res/image/navigation.png"
+				}
+			}
+
+			// option icon
+			Rectangle {
+				id: option
+				width: 50
+				height: 50
+				z: 1
+				anchors.right: parent.right
+				anchors.rightMargin: 10
+				anchors.bottom: parent.bottom
+				anchors.bottomMargin: 10
+				color: "transparent"
+
+				Image {
+					id: optionImage
+					width: parent.width
+					height: parent.height
+					fillMode: Image.Stretch
+					smooth: true
+					source: "qrc:/res/image/option.png"
+				}
+			}
+
+			// search icon
+			Rectangle {
+				id: search
+				width: 50
+				height: 50
+				z: 1
+				anchors.right: option.left
+				anchors.rightMargin: 10
+				anchors.bottom: parent.bottom
+				anchors.bottomMargin: 10
+				color: "transparent"
+				property bool searching: true
+
+				MouseArea {
+					id: searchMouseArea
+					anchors.fill: parent
+					hoverEnabled: true
+					onPressed: {
+						if (search.searching) {
+							searchImage.source = "qrc:/res/image/signal-tower-off.png"
+						}
+						else {
+							searchImage.source = "qrc:/res/image/signal-tower-on.png"
+						}
+
+						search.searching = !search.searching
+					}
+				}
+
+				Image {
+					id: searchImage
+					width: parent.width
+					height: parent.height
+					fillMode: Image.Stretch
+					smooth: true
+					source: "qrc:/res/image/signal-tower-on.png"
+				}
+			}
 		}
 
 		// separator
 		Rectangle {
 			id: configurationPageBackgroundSeparator
-			anchors.bottom: configurationPageBackgroundFooter.top
+			anchors.top: configurationPageBackgroundHeader.bottom
 			width: parent.width
 			height: 7
 			color:"#96C13D"
 		}
 
-
-		// background footer
+		// background
 		Rectangle {
-			id: configurationPageBackgroundFooter
-			anchors.bottom: parent.bottom
+			id: configurationPageBackground
+			anchors.top: configurationPageBackgroundSeparator.bottom
 			width: parent.width
-			height: 70
-			color:"white"
+			anchors.bottom: parent.bottom
+			color:"#3F95B8"
 		}
 
 		// hostname
