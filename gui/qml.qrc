@@ -28,5 +28,9 @@
         <file>GeneralSettingView.qml</file>
         <file>LogSettingView.qml</file>
         <file>res/image/synergy.ico</file>
+        <file>res/image/signal-tower-on.png</file>
+        <file>res/image/navigation.png</file>
+        <file>res/image/option.png</file>
+        <file>res/image/signal-tower-off.png</file>
     </qresource>
 </RCC>
