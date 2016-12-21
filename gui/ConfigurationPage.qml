@@ -66,13 +66,13 @@ Rectangle {
 			// option icon
 			Rectangle {
 				id: option
-				width: 50
-				height: 50
+				width: 30
+				height: 30
 				z: 1
 				anchors.right: parent.right
-				anchors.rightMargin: 10
+				anchors.rightMargin: 20
 				anchors.bottom: parent.bottom
-				anchors.bottomMargin: 10
+				anchors.bottomMargin: 20
 				color: "transparent"
 
 				Image {
