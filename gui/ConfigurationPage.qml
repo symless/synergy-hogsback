@@ -32,7 +32,10 @@ Rectangle {
 
 	Item {
 		id: configurationPage
-		anchors.fill: parent
+		anchors.top: parent.top
+		anchors.bottom: parent.bottom
+		anchors.left: navigationMenu.right
+		width: parent.width
 
 		// background header
 		Rectangle {
@@ -53,6 +56,21 @@ Rectangle {
 				anchors.bottomMargin: 10
 				color: "transparent"
 
+				MouseArea {
+					id: navigationMouseArea
+					anchors.fill: parent
+					hoverEnabled: true
+					onPressed: {
+						if (navigationMenu.opened) {
+							navigationMenu.x = -navigationMenu.width
+						}
+						else {
+							navigationMenu.x = 0
+						}
+
+						navigationMenu.opened = !navigationMenu.opened
+					}
+				}
 				Image {
 					id: navigationImage
 					width: parent.width
@@ -104,10 +122,12 @@ Rectangle {
 					hoverEnabled: true
 					onPressed: {
 						if (search.searching) {
-							searchImage.source = "qrc:/res/image/signal-tower-off.png"
+							searchImage.source =
+									"qrc:/res/image/signal-tower-off.png"
 						}
 						else {
-							searchImage.source = "qrc:/res/image/signal-tower-on.png"
+							searchImage.source =
+									"qrc:/res/image/signal-tower-on.png"
 						}
 
 						search.searching = !search.searching
@@ -237,6 +257,104 @@ Rectangle {
 						}
 					}
 				}
+			}
+		}
+	}
+
+	// navigation menu
+	Rectangle {
+		id: navigationMenu
+		height: parent.height
+		width: 150
+		x: -width
+		z: 2
+		color:"white"
+		property bool opened: false
+
+		Behavior on x {NumberAnimation
+						{duration: 500; easing.type: Easing.OutQuad}}
+
+		// profile icon
+		Rectangle {
+			id: profile
+			width: parent.width
+			height: width
+			z: 3
+			anchors.horizontalCenter: parent.horizontalCenter
+			anchors.top: parent.top
+			anchors.topMargin: 20
+			color: "transparent"
+
+			Image {
+				id: profileImage
+				width: parent.width
+				height: parent.height
+				fillMode: Image.Stretch
+				smooth: true
+				source: "qrc:/res/image/pro_user.png"
+			}
+		}
+
+		// configure icon
+		Rectangle {
+			id: configure
+			width: 50
+			height: 50
+			z: 3
+			anchors.horizontalCenter: parent.horizontalCenter
+			anchors.top: profile.bottom
+			anchors.topMargin: 30
+			color: "transparent"
+
+			Image {
+				id: configureImage
+				width: parent.width
+				height: parent.height
+				fillMode: Image.Stretch
+				smooth: true
+				source: "qrc:/res/image/configuration.png"
+			}
+		}
+
+		// general icon
+		Rectangle {
+			id: general
+			width: 50
+			height: 50
+			z: 3
+			anchors.horizontalCenter: parent.horizontalCenter
+			anchors.top: configure.bottom
+			anchors.topMargin: 30
+			color: "transparent"
+
+			Image {
+				id: generalImage
+				width: parent.width
+				height: parent.height
+				fillMode: Image.Stretch
+				smooth: true
+				source: "qrc:/res/image/general.png"
+			}
+		}
+
+		// info icon
+		Rectangle {
+			id: info
+			width: 50
+			height: 50
+			z: 3
+			anchors.horizontalCenter: parent.horizontalCenter
+			anchors.top: general.bottom
+			anchors.topMargin: 30
+			color: "transparent"
+
+			Image {
+				id: infoImage
+				width: parent.width
+				height: parent.height
+				fillMode: Image.Stretch
+				smooth: true
+				source: "qrc:/res/image/info.png"
 			}
 		}
 	}
