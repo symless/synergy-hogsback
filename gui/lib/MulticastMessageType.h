@@ -2,9 +2,9 @@
 #define MULTICASTMESSAGETYPE_H
 
 enum MulticastMessageType {
-	kDefaultExistence,
-	kDefaultReply,
-	kUniqueJoin,
+        kDefaultExistence, // new screen multicast this msg looking for server
+        kDefaultReply, // all servers reply with this msg along with if they are active
+        kUniqueJoin, // new screen joined the unique group
 	kUniqueLeave,
 	kUniqueClaim,
 	kUniqueConfig,
