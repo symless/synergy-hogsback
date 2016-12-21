@@ -153,15 +153,17 @@ Rectangle {
 			verticalAlignment: Text.AlignVCenter
 			horizontalAlignment: Text.AlignHCenter
 			anchors.top: parent.top
-			anchors.topMargin: 8
+			anchors.topMargin: 15
 			anchors.horizontalCenter: parent.horizontalCenter
-			font.pixelSize: 15
+			font.pixelSize: 30
 		}
 
 		// server configuration
 		ScrollView {
 			id: screenArrangementScrollView
-			anchors.fill: parent
+			anchors.top: configurationPageBackgroundSeparator.bottom
+			anchors.bottom: parent.bottom
+			width: parent.width
 
 			states: [
 				State { when: !screenArrangementScrollView.visible;
