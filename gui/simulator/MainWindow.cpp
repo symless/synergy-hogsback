@@ -67,7 +67,17 @@ void MainWindow::on_p_pushButtonJoin_clicked()
 
 void MainWindow::on_p_pushButtonLeave_clicked()
 {
+	int index = ui->p_comboBoxGroup->currentIndex();
 
+	// only leave unique groups
+	if (index != 0) {
+		QString hostname = ui->p_lineEditScreenName->text();
+		if (!ui->p_lineEditScreenName->text().isEmpty()) {
+			m_multicastManager->setLocalHostname(hostname);
+			m_multicastManager->multicastUniqueLeave(kClientMode);
+			m_multicastManager->leaveUniqueGroup();
+		}
+	}
 }
 
 void MainWindow::on_p_listViewScreenNames_pressed(const QModelIndex &index)
