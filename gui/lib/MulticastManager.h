@@ -37,6 +37,9 @@ public:
 	int getFirstActiveServerUniqueGroup(QMap<int, bool>& replies) const;
 	int getNextAvailableUniqueGroup(QMap<int, bool>& replies) const;
 
+	QString getLocalHostname() const;
+	void setLocalHostname(const QString &localHostname);
+
 protected:
 	MulticastManager();
 

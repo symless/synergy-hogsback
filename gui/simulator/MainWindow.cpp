@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 #include "MulticastManager.h"
+#include "ProcessMode.h"
 #include <iostream>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -14,8 +15,6 @@ MainWindow::MainWindow(QWidget *parent) :
 			 this, &MainWindow::onReceivedMulticastMessage);
 	connect (m_multicastManager, &MulticastManager::receivedDefaultGroupMessage,
 			 this, &MainWindow::onReceivedMulticastMessage);
-
-	m_multicastManager->joinUniqueGroup(1);
 
 	ui->p_listViewScreenNames->setModel(&m_screenNamesModel);
 }
@@ -48,7 +47,22 @@ void MainWindow::on_p_pushButtonRemove_clicked()
 
 void MainWindow::on_p_pushButtonJoin_clicked()
 {
+	int index = ui->p_comboBoxGroup->currentIndex();
 
+	// want to join default group, as we automatically join default group,
+	// this means we want to know the information of server existance
+	if (index == 0) {
+		m_multicastManager->multicastDefaultExistence();
+	}
+	// join unique group
+	else {
+		QString hostname = ui->p_lineEditScreenName->text();
+		if (!ui->p_lineEditScreenName->text().isEmpty()) {
+			m_multicastManager->setLocalHostname(hostname);
+			m_multicastManager->joinUniqueGroup(index);
+			m_multicastManager->multicastUniqueJoin(kClientMode);
+		}
+	}
 }
 
 void MainWindow::on_p_pushButtonLeave_clicked()

@@ -289,11 +289,21 @@ void MulticastManager::updateLocalIp()
 	}
 }
 
+QString MulticastManager::getLocalHostname() const
+{
+	return m_localHostname;
+}
+
+void MulticastManager::setLocalHostname(const QString &localHostname)
+{
+	m_localHostname = localHostname;
+}
+
 void MulticastManager::printMulticastInterfaceInfo(bool defaultGroup)
 {
 	if (defaultGroup) {
 		QNetworkInterface networkInterface(
-							m_defaultMulticast->interface());
+					m_defaultMulticast->interface());
 
 		LogManager::info(QString("default multicast group: %1 binds to "
 								 "network interface: %2 %3")
