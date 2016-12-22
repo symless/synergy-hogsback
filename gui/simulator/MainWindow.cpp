@@ -54,3 +54,9 @@ void MainWindow::on_p_pushButtonLeave_clicked()
 {
 
 }
+
+void MainWindow::on_p_listViewScreenNames_pressed(const QModelIndex &index)
+{
+	QString selected = m_screenNamesModel.data(index, Qt::DisplayRole).toString();
+	ui->p_lineEditScreenName->setText(selected);
+}
