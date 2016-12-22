@@ -3,7 +3,6 @@
 
 #include <QMainWindow>
 #include <QStringListModel>
-#include <QSet>
 
 namespace Ui {
 class MainWindow;
@@ -32,7 +31,6 @@ private:
 	Ui::MainWindow *ui;
 	MulticastManager* m_multicastManager = nullptr;
 	QStringListModel m_screenNamesModel;
-	QSet<QString> m_screenNames;
 };
 
 #endif // MAINWINDOW_H
