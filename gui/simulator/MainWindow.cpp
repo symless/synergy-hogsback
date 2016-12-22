@@ -40,7 +40,9 @@ void MainWindow::on_p_pushButtonAdd_clicked()
 
 void MainWindow::on_p_pushButtonRemove_clicked()
 {
-
+	int index = m_screenNamesModel.stringList().indexOf(
+					ui->p_lineEditScreenName->text());
+	m_screenNamesModel.removeRow(index);
 }
 
 void MainWindow::on_p_pushButtonJoin_clicked()
