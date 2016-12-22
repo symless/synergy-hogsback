@@ -72,12 +72,6 @@ void ScreenManager::printBoundingBoxInfo()
 	LogManager::debug(QString("latest config serial: %1").arg(m_latestConfigSerial));
 }
 
-void ScreenManager::removeLast()
-{
-	Screen screen(m_lastAddedScreen);
-	m_arrangementStrategy->removeScreen(m_screenModel, screen);
-}
-
 ScreenModel* ScreenManager::screenModel() const
 {
 	return m_screenModel;
@@ -121,7 +115,6 @@ bool ScreenManager::addScreen(QString name)
 		return false;
 	}
 
-	m_lastAddedScreen = name;
 	Screen screen(name);
 	return m_arrangementStrategy->addScreen(m_screenModel, screen);
 }

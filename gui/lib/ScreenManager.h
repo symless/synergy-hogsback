@@ -30,7 +30,6 @@ public:
 
 	// TODO: remove these debug functions
 	Q_INVOKABLE void printBoundingBoxInfo();
-	Q_INVOKABLE void removeLast();
 
 	ScreenModel* screenModel() const;
 	void setScreenModel(ScreenModel* screenModel);
@@ -55,7 +54,6 @@ private:
 	MulticastManager* m_multicastManager;
 	IScreenArrangement* m_arrangementStrategy;
 	QTimer* m_waitTimer;
-	QString m_lastAddedScreen;
 	QMap<int, bool> m_defaultServerReplies;
 	QList<Screen> m_configScreensRecord;
 	int m_latestConfigSerial;
