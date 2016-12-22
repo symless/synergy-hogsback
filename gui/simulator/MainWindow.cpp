@@ -15,7 +15,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect (m_multicastManager, &MulticastManager::receivedDefaultGroupMessage,
 			 this, &MainWindow::onReceivedMulticastMessage);
 
-	m_multicastManager->joinDefaultGroup();
 	m_multicastManager->joinUniqueGroup(1);
 
 	ui->p_listViewScreenNames->setModel(&m_screenNamesModel);
@@ -49,6 +48,7 @@ void MainWindow::on_p_pushButtonRemove_clicked()
 
 void MainWindow::on_p_pushButtonJoin_clicked()
 {
+
 }
 
 void MainWindow::on_p_pushButtonLeave_clicked()
