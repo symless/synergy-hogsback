@@ -51,7 +51,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBox">
+           <widget class="QComboBox" name="p_comboBoxGroup">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -104,7 +104,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QListView" name="listView">
+         <widget class="QListView" name="p_listViewScreenNames">
           <property name="horizontalScrollBarPolicy">
            <enum>Qt::ScrollBarAlwaysOff</enum>
           </property>
@@ -131,7 +131,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit"/>
+           <widget class="QLineEdit" name="p_lineEditScreenName"/>
           </item>
          </layout>
         </item>
@@ -149,14 +149,28 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="p_pushButtonAdd">
+          <property name="text">
+           <string>Add</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="p_pushButtonRemove">
+          <property name="text">
+           <string>Remove</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="p_pushButtonJoin">
           <property name="text">
            <string>Join Group</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_2">
+         <widget class="QPushButton" name="p_pushButtonLeave">
           <property name="text">
            <string>Leave Group</string>
           </property>

@@ -1,5 +1,5 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "MainWindow.h"
+#include "ui_MainWindow.h"
 #include "MulticastManager.h"
 #include <iostream>
 
@@ -11,10 +11,14 @@ MainWindow::MainWindow(QWidget *parent) :
 								(MulticastManager::instance());
 	ui->setupUi(this);
 	connect (m_multicastManager, &MulticastManager::receivedUniqueGroupMessage,
-			 this, &MainWindow::onUniqueGroupMessage);
+			 this, &MainWindow::onReceivedMulticastMessage);
 	connect (m_multicastManager, &MulticastManager::receivedDefaultGroupMessage,
-			 this, &MainWindow::onUniqueGroupMessage);
+			 this, &MainWindow::onReceivedMulticastMessage);
+
+	m_multicastManager->joinDefaultGroup();
 	m_multicastManager->joinUniqueGroup(1);
+
+	ui->p_listViewScreenNames->setModel(&m_screenNamesModel);
 }
 
 MainWindow::~MainWindow()
@@ -23,6 +27,28 @@ MainWindow::~MainWindow()
 }
 
 void
-MainWindow::onUniqueGroupMessage(MulticastMessage msg) {
-	ui->comboBox->addItem ("test: " + msg.m_hostname);
+MainWindow::onReceivedMulticastMessage(MulticastMessage msg) {
+	//ui->p_comboBoxGroup->addItem ("test: " + msg.m_hostname);
+}
+
+void MainWindow::on_p_pushButtonAdd_clicked()
+{
+	m_screenNamesModel.insertRow(m_screenNamesModel.rowCount());
+	QModelIndex index = m_screenNamesModel.index(m_screenNamesModel.rowCount() - 1);
+	m_screenNamesModel.setData(index, ui->p_lineEditScreenName->text());
+}
+
+void MainWindow::on_p_pushButtonRemove_clicked()
+{
+
+}
+
+void MainWindow::on_p_pushButtonJoin_clicked()
+{
+
+}
+
+void MainWindow::on_p_pushButtonLeave_clicked()
+{
+
 }

@@ -10,9 +10,9 @@ find_package (Qt5 COMPONENTS Widgets Core Network)
 
 add_executable (${PROJECT_NAME}
     main.cpp
-    mainwindow.cpp
-    mainwindow.h
-    mainwindow.ui
+    MainWindow.cpp
+    MainWindow.h
+    MainWindow.ui
 )
 
 include_directories (../lib)
