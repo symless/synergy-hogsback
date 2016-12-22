@@ -33,6 +33,7 @@ MainWindow::onReceivedMulticastMessage(MulticastMessage msg) {
 
 void MainWindow::on_p_pushButtonAdd_clicked()
 {
+	// insert the screen name into the list view, no duplicate checking atm
 	m_screenNamesModel.insertRow(m_screenNamesModel.rowCount());
 	QModelIndex index = m_screenNamesModel.index(m_screenNamesModel.rowCount() - 1);
 	m_screenNamesModel.setData(index, ui->p_lineEditScreenName->text());
@@ -40,6 +41,7 @@ void MainWindow::on_p_pushButtonAdd_clicked()
 
 void MainWindow::on_p_pushButtonRemove_clicked()
 {
+	// get the index number of the screen name shown in screen name field
 	int index = m_screenNamesModel.stringList().indexOf(
 					ui->p_lineEditScreenName->text());
 	m_screenNamesModel.removeRow(index);
@@ -47,7 +49,6 @@ void MainWindow::on_p_pushButtonRemove_clicked()
 
 void MainWindow::on_p_pushButtonJoin_clicked()
 {
-
 }
 
 void MainWindow::on_p_pushButtonLeave_clicked()
