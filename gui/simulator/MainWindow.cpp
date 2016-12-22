@@ -26,7 +26,8 @@ MainWindow::~MainWindow()
 
 void
 MainWindow::onReceivedMulticastMessage(MulticastMessage msg) {
-	//ui->p_comboBoxGroup->addItem ("test: " + msg.m_hostname);
+	ui->p_textBrowserLogging->append("===== Received Message =====");
+	ui->p_textBrowserLogging->append(msg.toReadableString());
 }
 
 void MainWindow::on_p_pushButtonAdd_clicked()

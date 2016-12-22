@@ -164,7 +164,7 @@ void ScreenManager::handleDefaultGroupMessage(MulticastMessage msg)
 {
 	// servers need to send replies on receiving default existence
 	if (processMode() == kServerMode) {
-		if (msg.m_type == kDefaultExistence) {
+		if (msg.m_type == MulticastMessage::kDefaultExistence) {
 			if (m_multicastManager->joinedUniqueGroup()) {
 				// multicast server reply
 				bool active = false;
@@ -178,7 +178,7 @@ void ScreenManager::handleDefaultGroupMessage(MulticastMessage msg)
 	// clients either join active servers or switch to server if no server
 	// exists
 	else if (processMode() == kClientMode) {
-		if (msg.m_type == kDefaultReply) {
+		if (msg.m_type == MulticastMessage::kDefaultReply) {
 			if (m_multicastManager->joinedUniqueGroup() == false) {
 				setupWaitTimer();
 				m_defaultServerReplies.insert(msg.m_uniqueGroup.toInt(),
@@ -196,7 +196,7 @@ void ScreenManager::handleDefaultGroupMessage(MulticastMessage msg)
 void ScreenManager::handleUniqueGroupMessage(MulticastMessage msg)
 {
 	if (processMode() == kServerMode) {
-		if (msg.m_type == kUniqueJoin) {
+		if (msg.m_type == MulticastMessage::kUniqueJoin) {
 			if (addScreen(msg.m_hostname)) {
 				LogManager::info(QString("client %1 joined server unique "
 										 "group").arg(msg.m_hostname));
@@ -211,7 +211,7 @@ void ScreenManager::handleUniqueGroupMessage(MulticastMessage msg)
 										++m_latestConfigSerial);
 			}
 		}
-		else if (msg.m_type == kUniqueLeave) {
+		else if (msg.m_type == MulticastMessage::kUniqueLeave) {
 			if (removeScreen(msg.m_hostname)) {
 				LogManager::info(QString("client %1 left server unique "
 										 "group").arg(msg.m_hostname));
@@ -225,7 +225,7 @@ void ScreenManager::handleUniqueGroupMessage(MulticastMessage msg)
 		}
 	}
 	else if (processMode() == kClientMode) {
-		if (msg.m_type == kUniqueLeave &&
+		if (msg.m_type == MulticastMessage::kUniqueLeave &&
 			msg.m_ip == m_processManager->serverIp()) {
 			m_processManager->setServerIp("");
 			m_multicastManager->leaveUniqueGroup();
@@ -235,19 +235,19 @@ void ScreenManager::handleUniqueGroupMessage(MulticastMessage msg)
 		}
 	}
 
-	if (msg.m_type == kUniqueClaim) {
+	if (msg.m_type == MulticastMessage::kUniqueClaim) {
 		m_processManager->setProcessMode(kClientMode);
 		m_processManager->setServerIp(msg.m_ip);
 
 		//m_processManager->start();
 	}
-	else if (msg.m_type == kUniqueConfig ||
-			 msg.m_type == kUniqueConfigDelta) {
+	else if (msg.m_type == MulticastMessage::kUniqueConfig ||
+			 msg.m_type == MulticastMessage::kUniqueConfigDelta) {
 		ConfigMessageConvertor convertor;
 		if(convertor.fromStringToList(m_configScreensRecord,
 						msg.m_configInfo,
 						m_latestConfigSerial,
-						msg.m_type == kUniqueConfig)) {
+						msg.m_type == MulticastMessage::kUniqueConfig)) {
 
 			// if there is only 1 screen in the list and its position is -1,-1,
 			// it means remove this screen in configuration

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>415</width>
-    <height>273</height>
+    <height>473</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -192,6 +192,9 @@
        </layout>
       </item>
      </layout>
+    </item>
+    <item>
+     <widget class="QTextBrowser" name="p_textBrowserLogging"/>
     </item>
    </layout>
   </widget>
