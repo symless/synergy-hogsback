@@ -25,6 +25,7 @@ private slots:
 	void on_p_pushButtonRemove_clicked();
 	void on_p_pushButtonJoin_clicked();
 	void on_p_pushButtonLeave_clicked();
+	void on_p_listViewScreenNames_pressed(const QModelIndex &index);
 
 private:
 	void onReceivedMulticastMessage (MulticastMessage);
