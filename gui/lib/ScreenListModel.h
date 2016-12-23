@@ -42,7 +42,7 @@ public:
 	int getScreenModeSize();
 	const Screen& getScreen(int index) const;
 	void update(const QList<Screen>& screens);
-
+    QSet<Screen> getScreenNames();
 	float scale() const;
 	void setScale(float s);
 
@@ -55,7 +55,7 @@ protected:
 private:
 	friend class ConfigMessageConvertor;
 
-	QList<Screen> m_screens;
+    QList<Screen> m_screens;
 	float m_scale;
 };
 

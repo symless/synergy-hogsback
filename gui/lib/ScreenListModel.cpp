@@ -3,6 +3,8 @@
 #include "Screen.h"
 #include "Common.h"
 
+#include <QSet>
+
 ScreenListModel::ScreenListModel() :
 	m_scale(1.0f)
 {
@@ -73,7 +75,12 @@ void ScreenListModel::update(const QList<Screen>& screens)
 		else {
 			addScreen(screens[i]);
 		}
-	}
+    }
+}
+
+QSet<Screen> ScreenListModel::getScreenNames()
+{
+    return QSet<Screen>::fromList(m_screens);
 }
 
 int ScreenListModel::rowCount(const QModelIndex& parent) const {
