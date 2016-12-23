@@ -1,7 +1,7 @@
 #include "ProcessManager.h"
 
 #include "ProcessCommand.h"
-#include "ScreenModel.h"
+#include "ScreenListModel.h"
 #include "IpcClient.h"
 #include "LogManager.h"
 #include "ProcessMode.h"

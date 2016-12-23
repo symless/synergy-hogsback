@@ -9,8 +9,8 @@ Rectangle {
 		id: localHostname
 	}
 
-	ScreenModel {
-		id: screenModel
+	ScreenListModel {
+		id: screenListModel
 	}
 
 //	IpcClient {
@@ -24,7 +24,7 @@ Rectangle {
 
 	ScreenManager {
 		id: screenManager
-		screenModel: screenModel
+		screenListModel: screenListModel
 		processManager: processManager
 		viewWidth: screenArrangementScrollView.width
 		viewHeight: screenArrangementScrollView.height
@@ -274,15 +274,15 @@ Rectangle {
 			Item {
 				id: screenArrangement
 				anchors.fill: parent
-				scale: screenModel.scale
+				scale: screenListModel.scale
 
 				Repeater {
-					model: screenModel
+					model: screenListModel
 					Item {
 						id: screenIcon
 						x: posX; y: posY
-						width: screenModel.screenIconWidth()
-						height: screenModel.screenIconHeight()
+						width: screenListModel.screenIconWidth()
+						height: screenListModel.screenIconHeight()
 						property point beginDrag
 						property int modelIndex
 

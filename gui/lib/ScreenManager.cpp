@@ -11,7 +11,7 @@
 #include <QtNetwork>
 
 ScreenManager::ScreenManager() :
-	m_screenModel(NULL),
+	m_screenListModel(NULL),
 	m_multicastManager(NULL),
 	m_waitTimer(NULL),
 	m_latestConfigSerial(0)
@@ -41,18 +41,18 @@ ScreenManager::~ScreenManager()
 
 int ScreenManager::getModelIndex(int x, int y)
 {
-	return m_screenModel->getModelIndex(x, y);
+	return m_screenListModel->getModelIndex(x, y);
 }
 
 void ScreenManager::moveModel(int index, int offsetX, int offsetY)
 {
-	m_screenModel->moveModel(index, offsetX, offsetY);
-	m_arrangementStrategy->adjustModel(m_screenModel, index);
+	m_screenListModel->moveModel(index, offsetX, offsetY);
+	m_arrangementStrategy->adjustModel(m_screenListModel, index);
 
 	if (m_multicastManager->joinedUniqueGroup()) {
 		ConfigMessageConvertor convertor;
 		Screen screen;
-		screen = m_screenModel->getScreen(index);
+		screen = m_screenListModel->getScreen(index);
 		QString data = convertor.fromScreenToString(screen);
 		m_multicastManager->multicastUniqueConfigDelta(data);
 	}
@@ -60,7 +60,7 @@ void ScreenManager::moveModel(int index, int offsetX, int offsetY)
 
 void ScreenManager::updateConfigFile()
 {
-	ConfigFileManager configFileManager(m_screenModel,
+	ConfigFileManager configFileManager(m_screenListModel,
 							m_arrangementStrategy);
 	configFileManager.writeConfigurationFile();
 }
@@ -72,15 +72,15 @@ void ScreenManager::printBoundingBoxInfo()
 	LogManager::debug(QString("latest config serial: %1").arg(m_latestConfigSerial));
 }
 
-ScreenModel* ScreenManager::screenModel() const
+ScreenListModel* ScreenManager::screenListModel() const
 {
-	return m_screenModel;
+	return m_screenListModel;
 }
 
-void ScreenManager::setScreenModel(ScreenModel* screenModel)
+void ScreenManager::setScreenModel(ScreenListModel* screenListModel)
 {
-	if (m_screenModel != screenModel) {
-		m_screenModel = screenModel;
+	if (m_screenListModel != screenListModel) {
+		m_screenListModel = screenListModel;
 
 		addScreen(QHostInfo::localHostName());
 	}
@@ -96,7 +96,7 @@ void ScreenManager::setViewWidth(int w)
 	if (w <= 0) return;
 
 	m_arrangementStrategy->setViewW(w);
-	m_arrangementStrategy->checkAdjustment(m_screenModel, true);
+	m_arrangementStrategy->checkAdjustment(m_screenListModel, true);
 }
 
 void ScreenManager::setViewHeight(int h)
@@ -104,31 +104,31 @@ void ScreenManager::setViewHeight(int h)
 	if (h <= 0) return;
 
 	m_arrangementStrategy->setViewH(h);
-	m_arrangementStrategy->checkAdjustment(m_screenModel, true);
+	m_arrangementStrategy->checkAdjustment(m_screenListModel, true);
 }
 
 bool ScreenManager::addScreen(QString name)
 {
-	if (m_screenModel->findScreen(name)	!= -1) {
+	if (m_screenListModel->findScreen(name)	!= -1) {
 		LogManager::debug(QString("screen already exist: %1")
 					.arg(name));
 		return false;
 	}
 
 	Screen screen(name);
-	return m_arrangementStrategy->addScreen(m_screenModel, screen);
+	return m_arrangementStrategy->addScreen(m_screenListModel, screen);
 }
 
 bool ScreenManager::removeScreen(QString name)
 {
-	if (m_screenModel->findScreen(name)	== -1) {
+	if (m_screenListModel->findScreen(name)	== -1) {
 		LogManager::debug(QString("screen doesn't exist: %1")
 					.arg(name));
 		return false;
 	}
 
 	Screen screen(name);
-	return m_arrangementStrategy->removeScreen(m_screenModel, screen);
+	return m_arrangementStrategy->removeScreen(m_screenListModel, screen);
 }
 
 int ScreenManager::processMode()
@@ -199,7 +199,7 @@ void ScreenManager::handleUniqueGroupMessage(MulticastMessage msg)
 
 				// sync configuration information
 				ConfigMessageConvertor convertor;
-				QString data = convertor.fromModelToString(m_screenModel);
+				QString data = convertor.fromModelToString(m_screenListModel);
 				m_multicastManager->multicastUniqueConfig(data,
 										++m_latestConfigSerial);
 			}
@@ -252,8 +252,8 @@ void ScreenManager::handleUniqueGroupMessage(MulticastMessage msg)
 				}
 			}
 
-			m_screenModel->update(m_configScreensRecord);
-			m_arrangementStrategy->update(m_screenModel);
+			m_screenListModel->update(m_configScreensRecord);
+			m_arrangementStrategy->update(m_screenListModel);
 		}
 	}
 }

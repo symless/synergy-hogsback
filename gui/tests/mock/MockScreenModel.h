@@ -1,9 +1,9 @@
 #ifndef MOCKSCREENMODEL_H
 #define MOCKSCREENMODEL_H
 
-#include "ScreenModel.h"
+#include "ScreenListModel.h"
 
-class MockScreenModel : public ScreenModel
+class MockScreenModel : public ScreenListModel
 {
 public:
 	MockScreenModel();

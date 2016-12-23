@@ -1,5 +1,5 @@
 #include "Hostname.h"
-#include "ScreenModel.h"
+#include "ScreenListModel.h"
 #include "ScreenManager.h"
 #include "IpcClient.h"
 #include "LogManager.h"
@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
 
 	try {
 		qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");
-		qmlRegisterType<ScreenModel>("com.synergy.gui", 1, 0, "ScreenModel");
+		qmlRegisterType<ScreenListModel>("com.synergy.gui", 1, 0, "ScreenListModel");
 		qmlRegisterType<ScreenManager>("com.synergy.gui", 1, 0, "ScreenManager");
 		qmlRegisterType<IpcClient>("com.synergy.gui", 1, 0, "IpcClient");
 		qmlRegisterType<ProcessManager>("com.synergy.gui", 1, 0, "ProcessManager");

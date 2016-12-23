@@ -8,4 +8,3 @@ enum ScreenState {
 };
 
 #endif // SCREENSTATE
-

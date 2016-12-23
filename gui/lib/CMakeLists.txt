@@ -23,7 +23,7 @@ set (GUI_LIB_SOURCES
 	ScreenBBArrangement.cpp
 	Screen.cpp
 	ScreenManager.cpp
-	ScreenModel.cpp
+        ScreenListModel.cpp
 	ServerInfo.cpp
 )
 

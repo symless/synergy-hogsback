@@ -6,7 +6,7 @@
 #include <QQuickItem>
 #include <QProcess>
 
-class ScreenModel;
+class ScreenListModel;
 class IpcClient;
 
 class LIB_SPEC ProcessManager : public QQuickItem

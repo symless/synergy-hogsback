@@ -7,7 +7,7 @@
 #include <QString>
 
 class QTextStream;
-class ScreenModel;
+class ScreenListModel;
 class IScreenArrangement;
 class Screen;
 class QVector2D;
@@ -16,7 +16,7 @@ class LIB_SPEC ConfigFileManager
 {
 	friend class ConfigFileManagerTest;
 public:
-	ConfigFileManager(ScreenModel* screens,
+	ConfigFileManager(ScreenListModel* screens,
 		IScreenArrangement* arrangementStrategy);
 
 	void writeConfigurationFile(QString path = "");
@@ -30,7 +30,7 @@ private:
 	void calculatRelativePercentage(const Screen& src, const Screen& des,
 			Direction dir, QVector2D& srcInterval, QVector2D& desInterval);
 private:
-	ScreenModel* m_screens;
+	ScreenListModel* m_screens;
 	IScreenArrangement* m_arrangementStrategy;
 };
 

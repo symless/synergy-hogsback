@@ -3,14 +3,14 @@
 #include "DirectoryManager.h"
 #include "IScreenArrangement.h"
 #include "LogManager.h"
-#include "ScreenModel.h"
+#include "ScreenListModel.h"
 #include "Common.h"
 
 #include <QTextStream>
 #include <QFile>
 #include <QVector2D>
 
-ConfigFileManager::ConfigFileManager(ScreenModel* screens,
+ConfigFileManager::ConfigFileManager(ScreenListModel* screens,
 		IScreenArrangement* arrangementStrategy) :
 	m_screens(screens),
 	m_arrangementStrategy(arrangementStrategy)

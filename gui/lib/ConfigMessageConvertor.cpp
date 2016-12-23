@@ -1,6 +1,6 @@
 #include "ConfigMessageConvertor.h"
 
-#include "ScreenModel.h"
+#include "ScreenListModel.h"
 #include "Screen.h"
 
 const QString kSeperator = ",";
@@ -10,7 +10,7 @@ ConfigMessageConvertor::ConfigMessageConvertor()
 
 }
 
-QString ConfigMessageConvertor::fromModelToString(ScreenModel* model)
+QString ConfigMessageConvertor::fromModelToString(ScreenListModel* model)
 {
 	// TODO: add multiple messages support
 	QString result;

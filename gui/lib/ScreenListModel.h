@@ -7,7 +7,7 @@
 #include "ConfigMessageConvertor.h"
 #include <QAbstractListModel>
 
-class LIB_SPEC ScreenModel : public QAbstractListModel
+class LIB_SPEC ScreenListModel : public QAbstractListModel
 {
 	Q_OBJECT
 
@@ -19,8 +19,8 @@ public:
 		kStateImageRole
 	};
 
-	ScreenModel();
-	virtual ~ScreenModel();
+	ScreenListModel();
+	virtual ~ScreenListModel();
 
 	Q_PROPERTY(float scale READ scale NOTIFY scaleChanged)
 

@@ -7,7 +7,7 @@
 #include <QString>
 #include <QList>
 
-class ScreenModel;
+class ScreenListModel;
 class Screen;
 
 class LIB_SPEC ConfigMessageConvertor
@@ -15,7 +15,7 @@ class LIB_SPEC ConfigMessageConvertor
 public:
 	ConfigMessageConvertor();
 
-	QString fromModelToString(ScreenModel* model);
+	QString fromModelToString(ScreenListModel* model);
 	QString fromScreenToString(Screen& screen);
 	bool fromStringToList(QList<Screen>& screens, QString& str,
 			int& latestSerial, bool fullConfig);

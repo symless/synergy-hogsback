@@ -1,7 +1,7 @@
 #include "ScreenBBArrangement.h"
 
 #include "Screen.h"
-#include "ScreenModel.h"
+#include "ScreenListModel.h"
 #include "LogManager.h"
 #include "Common.h"
 
@@ -21,12 +21,12 @@ ScreenBBArrangement::ScreenBBArrangement() :
 
 }
 
-bool ScreenBBArrangement::addScreen(ScreenModel* screenModel,
+bool ScreenBBArrangement::addScreen(ScreenListModel* screenListModel,
 								Screen& screen)
 {
-	calculateNewPos(screenModel, screen);
-	screenModel->addScreen(screen);
-	update(screenModel);
+	calculateNewPos(screenListModel, screen);
+	screenListModel->addScreen(screen);
+	update(screenListModel);
 
 	LogManager::debug(QString("new added screen pos: %1 %2")
 					.arg(screen.posX())
@@ -35,11 +35,11 @@ bool ScreenBBArrangement::addScreen(ScreenModel* screenModel,
 	return true;
 }
 
-bool ScreenBBArrangement::removeScreen(ScreenModel* screenModel,
+bool ScreenBBArrangement::removeScreen(ScreenListModel* screenListModel,
 								Screen& screen)
 {
-	screenModel->removeScreen(screen.name());
-	update(screenModel);
+	screenListModel->removeScreen(screen.name());
+	update(screenListModel);
 
 	return true;
 }
@@ -54,20 +54,20 @@ void ScreenBBArrangement::setViewH(int h)
 	m_originalViewH = h;
 }
 
-void ScreenBBArrangement::adjustModel(ScreenModel* screenModel, int index)
+void ScreenBBArrangement::adjustModel(ScreenListModel* screenListModel, int index)
 {
 
 
 	// check if we can just use snapping
 	bool canSnap = true;
-	if (screenModel->getScreenModeSize() == 1) {
+	if (screenListModel->getScreenModeSize() == 1) {
 		canSnap = false;
 	}
 
-	for (int i = 0; i < screenModel->getScreenModeSize(); i++) {
+	for (int i = 0; i < screenListModel->getScreenModeSize(); i++) {
 		if (i == index) continue;
 
-		bool ok = testSnapTo(screenModel, index, i,
+		bool ok = testSnapTo(screenListModel, index, i,
 						kSnappingThreshold, INT_MAX);
 		if (!ok) {
 			canSnap = false;
@@ -76,42 +76,42 @@ void ScreenBBArrangement::adjustModel(ScreenModel* screenModel, int index)
 	}
 
 	if (canSnap) {
-		int backupX = screenModel->getScreen(index).posX();
-		int backupY = screenModel->getScreen(index).posY();
+		int backupX = screenListModel->getScreen(index).posX();
+		int backupY = screenListModel->getScreen(index).posY();
 
-		snapToOthers(screenModel, index);
+		snapToOthers(screenListModel, index);
 		// check if overlap exists after snapping
-		QList<int> intersectedModels = collideWithOthers(screenModel, index);
+		QList<int> intersectedModels = collideWithOthers(screenListModel, index);
 
 		// no overlap exists, just return
 		if (intersectedModels.isEmpty()) {
-			update(screenModel);
+			update(screenListModel);
 			return;
 		}
 		// revert snapping operation and fall into next adjustment section
 		else {
-			int offsetX = screenModel->getScreen(index).posX() - backupX;
-			int offsetY = screenModel->getScreen(index).posY() - backupY;
-			screenModel->moveModel(index, offsetX, offsetY);
+			int offsetX = screenListModel->getScreen(index).posX() - backupX;
+			int offsetY = screenListModel->getScreen(index).posY() - backupY;
+			screenListModel->moveModel(index, offsetX, offsetY);
 		}
 	}
 
 	// adjust it according to the whole bounding box
-	recalculateBoundingBox(screenModel, index);
-	const Screen& original = screenModel->getScreen(index);
+	recalculateBoundingBox(screenListModel, index);
+	const Screen& original = screenListModel->getScreen(index);
 	Screen screen("temp");
 	screen.setPosX(original.posX());
 	screen.setPosY(original.posY());
-	calculateNewPos(screenModel, screen);
-	screenModel->moveModel(index, screen.posX() - original.posX(),
+	calculateNewPos(screenListModel, screen);
+	screenListModel->moveModel(index, screen.posX() - original.posX(),
 					screen.posY() - original.posY());
-	update(screenModel);
+	update(screenListModel);
 }
 
-void ScreenBBArrangement::update(ScreenModel* screenModel)
+void ScreenBBArrangement::update(ScreenListModel* screenListModel)
 {
-	recalculateBoundingBox(screenModel);
-	checkAdjustment(screenModel);
+	recalculateBoundingBox(screenListModel);
+	checkAdjustment(screenListModel);
 }
 
 void ScreenBBArrangement::printDebugInfo()
@@ -121,14 +121,14 @@ void ScreenBBArrangement::printDebugInfo()
 					.arg(m_bottomRightX).arg(m_bottomRightY));
 }
 
-void ScreenBBArrangement::calculateNewPos(ScreenModel* screenModel,
+void ScreenBBArrangement::calculateNewPos(ScreenListModel* screenListModel,
 								Screen& screen)
 {
 	int newPosX = m_scaledViewW / 2 - kScreenIconWidth / 2;
 	int newPosY = m_scaledViewH / 2 - kScreenIconHeight / 2;
 
 	if (screen.posX() == -1 && screen.posY() == -1) {
-		screenModel->getScreenPos(QHostInfo::localHostName(), newPosX, newPosY);
+		screenListModel->getScreenPos(QHostInfo::localHostName(), newPosX, newPosY);
 	}
 	else {
 		newPosX = screen.posX();
@@ -185,7 +185,7 @@ void ScreenBBArrangement::calculateNewPos(ScreenModel* screenModel,
 	}
 }
 
-void ScreenBBArrangement::checkAdjustment(ScreenModel* screenModel,
+void ScreenBBArrangement::checkAdjustment(ScreenListModel* screenListModel,
 								bool forceCenter)
 {
 	int adjustAll = false;
@@ -221,7 +221,7 @@ void ScreenBBArrangement::checkAdjustment(ScreenModel* screenModel,
 			maxTimes = 1;
 		}
 
-		screenModel->setScale(m_scale);
+		screenListModel->setScale(m_scale);
 		setScaledViewW(m_originalViewW * maxTimes);
 		setScaledViewH(m_originalViewH * maxTimes);
 
@@ -230,16 +230,16 @@ void ScreenBBArrangement::checkAdjustment(ScreenModel* screenModel,
 			wasOutside ||
 			forceCenter) {
 
-			adjustToCenter(screenModel);
+			adjustToCenter(screenListModel);
 		}
 	}
 }
 
-QList<int> ScreenBBArrangement::getScreensNextTo(ScreenModel* screenModel,
+QList<int> ScreenBBArrangement::getScreensNextTo(ScreenListModel* screenListModel,
 									int index, Direction dir)
 {
 	QList<int> result;
-	Screen screen = screenModel->getScreen(index);
+	Screen screen = screenListModel->getScreen(index);
 	int srcX = screen.posX();
 	int srcY = screen.posY();
 	int srcW = kScreenIconWidth;
@@ -273,9 +273,9 @@ QList<int> ScreenBBArrangement::getScreensNextTo(ScreenModel* screenModel,
 	}
 	}
 
-	for (int i = 0; i < screenModel->getScreenModeSize(); i++) {
+	for (int i = 0; i < screenListModel->getScreenModeSize(); i++) {
 		if (i == index) continue;
-		Screen des = screenModel->getScreen(i);
+		Screen des = screenListModel->getScreen(i);
 		if (collide(srcX, srcY, srcW, srcH, des.posX(), des.posY(),
 				kScreenIconWidth, kScreenIconHeight)) {
 			result.append(i);
@@ -295,7 +295,7 @@ void ScreenBBArrangement::setScaledViewH(int h)
 	m_scaledViewH = h;
 }
 
-void ScreenBBArrangement::recalculateBoundingBox(ScreenModel* screenModel,
+void ScreenBBArrangement::recalculateBoundingBox(ScreenListModel* screenListModel,
 								int ignoreIndex)
 {
 	m_topLeftX = INT_MAX;
@@ -303,10 +303,10 @@ void ScreenBBArrangement::recalculateBoundingBox(ScreenModel* screenModel,
 	m_bottomRightX = INT_MIN;
 	m_bottomRightY = INT_MIN;
 
-	for (int i = 0; i < screenModel->getScreenModeSize(); i++) {
+	for (int i = 0; i < screenListModel->getScreenModeSize(); i++) {
 		if (i == ignoreIndex) continue;
 
-		const Screen& screen = screenModel->getScreen(i);
+		const Screen& screen = screenListModel->getScreen(i);
 		int posX = screen.posX();
 		int posY = screen.posY();
 		m_topLeftX = m_topLeftX < posX ? m_topLeftX : posX;
@@ -323,7 +323,7 @@ void ScreenBBArrangement::recalculateBoundingBox(ScreenModel* screenModel,
 	if (m_bottomRightY == INT_MIN) m_bottomRightY = 0;
 }
 
-void ScreenBBArrangement::adjustToCenter(ScreenModel* screenModel)
+void ScreenBBArrangement::adjustToCenter(ScreenListModel* screenListModel)
 {
 	int viewCenterX = m_scaledViewW / 2;
 	int viewCenterY = m_scaledViewH / 2;
@@ -356,19 +356,19 @@ void ScreenBBArrangement::adjustToCenter(ScreenModel* screenModel)
 		m_bottomRightY = m_scaledViewH;
 	}
 
-	screenModel->adjustAll(disX, disY);
+	screenListModel->adjustAll(disX, disY);
 }
 
-void ScreenBBArrangement::snapToOthers(ScreenModel* screenModel, int index)
+void ScreenBBArrangement::snapToOthers(ScreenListModel* screenListModel, int index)
 {
 	QList<QVector2D> adjustments;
-	for (int i = 0; i < screenModel->getScreenModeSize(); i++) {
+	for (int i = 0; i < screenListModel->getScreenModeSize(); i++) {
 		if (i == index) continue;
-		adjustments.append(calculateSnapping(screenModel, index, i));
+		adjustments.append(calculateSnapping(screenListModel, index, i));
 	}
 
 	QVector2D finalAdjustment = combineAdjustments(adjustments);
-	screenModel->moveModel(index,
+	screenListModel->moveModel(index,
 					finalAdjustment.x(), finalAdjustment.y());
 }
 
@@ -400,15 +400,15 @@ bool ScreenBBArrangement::collide(const int srcX, const int srcY,
 	return result;
 }
 
-QList<int> ScreenBBArrangement::collideWithOthers(ScreenModel* screenModel,
+QList<int> ScreenBBArrangement::collideWithOthers(ScreenListModel* screenListModel,
 									int index) const
 {
 	QList<int> result;
-	const Screen screenSrc = screenModel->getScreen(index);
-	for (int i = 0; i < screenModel->getScreenModeSize(); i++) {
+	const Screen screenSrc = screenListModel->getScreen(index);
+	for (int i = 0; i < screenListModel->getScreenModeSize(); i++) {
 		if (i == index) continue;
 
-		const Screen& screenDes = screenModel->getScreen(i);
+		const Screen& screenDes = screenListModel->getScreen(i);
 		if (collide(screenSrc, screenDes)) {
 			result.append(i);
 		}
@@ -417,16 +417,16 @@ QList<int> ScreenBBArrangement::collideWithOthers(ScreenModel* screenModel,
 	return result;
 }
 
-bool ScreenBBArrangement::testSnapTo(ScreenModel* screenModel,
+bool ScreenBBArrangement::testSnapTo(ScreenListModel* screenListModel,
 							int fromIndex, int toIndex,
 							int innerThreshold, int outsideThreshold) const
 {
 	if (innerThreshold <= 0 || outsideThreshold <=0) return false;
 
-	int fromX = screenModel->getScreen(fromIndex).posX();
-	int fromY = screenModel->getScreen(fromIndex).posY();
-	int toX = screenModel->getScreen(toIndex).posX();
-	int toY = screenModel->getScreen(toIndex).posY();
+	int fromX = screenListModel->getScreen(fromIndex).posX();
+	int fromY = screenListModel->getScreen(fromIndex).posY();
+	int toX = screenListModel->getScreen(toIndex).posX();
+	int toY = screenListModel->getScreen(toIndex).posY();
 
 	bool canSnapOnX = testSnapToOnAxis(fromX, toX,
 						innerThreshold, outsideThreshold, true);
@@ -479,13 +479,13 @@ bool ScreenBBArrangement::testSnapToOnAxis(int from, int to,
 
 }
 
-QVector2D ScreenBBArrangement::calculateSnapping(ScreenModel* screenModel,
+QVector2D ScreenBBArrangement::calculateSnapping(ScreenListModel* screenListModel,
 									int fromIndex, int toIndex) const
 {
-	int fromX = screenModel->getScreen(fromIndex).posX();
-	int fromY = screenModel->getScreen(fromIndex).posY();
-	int toX = screenModel->getScreen(toIndex).posX();
-	int toY = screenModel->getScreen(toIndex).posY();
+	int fromX = screenListModel->getScreen(fromIndex).posX();
+	int fromY = screenListModel->getScreen(fromIndex).posY();
+	int toX = screenListModel->getScreen(toIndex).posX();
+	int toY = screenListModel->getScreen(toIndex).posY();
 	int adjustmentX = 0;
 	int adjustmentY = 0;
 

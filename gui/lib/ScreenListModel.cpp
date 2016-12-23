@@ -1,29 +1,29 @@
-#include "ScreenModel.h"
+#include "ScreenListModel.h"
 
 #include "Screen.h"
 #include "Common.h"
 
-ScreenModel::ScreenModel() :
+ScreenListModel::ScreenListModel() :
 	m_scale(1.0f)
 {
 }
 
-ScreenModel::~ScreenModel()
+ScreenListModel::~ScreenListModel()
 {
 
 }
 
-int ScreenModel::screenIconWidth()
+int ScreenListModel::screenIconWidth()
 {
 	return kScreenIconWidth;
 }
 
-int ScreenModel::screenIconHeight()
+int ScreenListModel::screenIconHeight()
 {
 	return kScreenIconHeight;
 }
 
-int ScreenModel::getModelIndex(int x, int y)
+int ScreenListModel::getModelIndex(int x, int y)
 {
 	for (int index = 0; index < m_screens.count(); index++) {
 		int posX = m_screens[index].posX();
@@ -38,7 +38,7 @@ int ScreenModel::getModelIndex(int x, int y)
 	return -1;
 }
 
-void ScreenModel::moveModel(int index, int offsetX, int offsetY)
+void ScreenListModel::moveModel(int index, int offsetX, int offsetY)
 {
 	if (index < 0 && index >= m_screens.count()) {
 		return;
@@ -52,17 +52,17 @@ void ScreenModel::moveModel(int index, int offsetX, int offsetY)
 	dataChanged(getIndex(index), getIndex(index));
 }
 
-int ScreenModel::getScreenModeSize()
+int ScreenListModel::getScreenModeSize()
 {
 	return m_screens.count();
 }
 
-const Screen& ScreenModel::getScreen(int index) const
+const Screen& ScreenListModel::getScreen(int index) const
 {
 	return m_screens[index];
 }
 
-void ScreenModel::update(const QList<Screen>& screens)
+void ScreenListModel::update(const QList<Screen>& screens)
 {
 	for (int i = 0; i < screens.count(); i++) {
 		int r = findScreen(screens[i].name());
@@ -76,12 +76,12 @@ void ScreenModel::update(const QList<Screen>& screens)
 	}
 }
 
-int ScreenModel::rowCount(const QModelIndex& parent) const {
+int ScreenListModel::rowCount(const QModelIndex& parent) const {
 	Q_UNUSED(parent);
 	return m_screens.count();
 }
 
-QVariant ScreenModel::data(const QModelIndex& index, int role) const
+QVariant ScreenListModel::data(const QModelIndex& index, int role) const
 {
 	if (index.row() < 0 || index.row() >= m_screens.count())
 		return QVariant();
@@ -99,7 +99,7 @@ QVariant ScreenModel::data(const QModelIndex& index, int role) const
 	return QVariant();
 }
 
-QModelIndex ScreenModel::getIndex(int row, int column,
+QModelIndex ScreenListModel::getIndex(int row, int column,
 								 const QModelIndex& parent) const
 {
 	return hasIndex(row, column, parent) ?
@@ -107,7 +107,7 @@ QModelIndex ScreenModel::getIndex(int row, int column,
 				: QModelIndex();
 }
 
-QHash<int, QByteArray> ScreenModel::roleNames() const
+QHash<int, QByteArray> ScreenListModel::roleNames() const
 {
 	QHash<int, QByteArray> roles;
 	roles[kPosXRole] = "posX";
@@ -118,7 +118,7 @@ QHash<int, QByteArray> ScreenModel::roleNames() const
 	return roles;
 }
 
-int ScreenModel::findScreen(QString name)
+int ScreenListModel::findScreen(QString name)
 {
 	for (int index = 0; index < m_screens.count(); index++) {
 		if (m_screens[index].name() == name) return index;
@@ -127,14 +127,14 @@ int ScreenModel::findScreen(QString name)
 	return -1;
 }
 
-void ScreenModel::addScreen(const Screen& screen)
+void ScreenListModel::addScreen(const Screen& screen)
 {
 	beginInsertRows(QModelIndex(), rowCount(), rowCount());
 	m_screens.append(screen);
 	endInsertRows();
 }
 
-void ScreenModel::removeScreen(QString name)
+void ScreenListModel::removeScreen(QString name)
 {
 	int index = findScreen(name);
 	beginRemoveRows(QModelIndex(), index, index);
@@ -142,7 +142,7 @@ void ScreenModel::removeScreen(QString name)
 	endRemoveRows();
 }
 
-void ScreenModel::getScreenPos(QString name, int& newPosX, int& newPosY)
+void ScreenListModel::getScreenPos(QString name, int& newPosX, int& newPosY)
 {
 	for (int index = 0; index < m_screens.count(); index++) {
 		if (m_screens[index].name() == name) {
@@ -153,7 +153,7 @@ void ScreenModel::getScreenPos(QString name, int& newPosX, int& newPosY)
 	}
 }
 
-void ScreenModel::adjustAll(int disX, int disY)
+void ScreenListModel::adjustAll(int disX, int disY)
 {
 	for (int index = 0; index < m_screens.count(); index++) {
 		m_screens[index].setPosX(m_screens[index].posX() + disX);
@@ -163,12 +163,12 @@ void ScreenModel::adjustAll(int disX, int disY)
 	dataChanged(getIndex(0), getIndex(rowCount() - 1));
 }
 
-float ScreenModel::scale() const
+float ScreenListModel::scale() const
 {
 	return m_scale;
 }
 
-void ScreenModel::setScale(float s)
+void ScreenListModel::setScale(float s)
 {
 	m_scale = s;
 	emit scaleChanged();

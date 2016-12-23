@@ -2,7 +2,7 @@
 #define SCREENMANAGER_H
 
 #include "LibMacro.h"
-#include "ScreenModel.h"
+#include "ScreenListModel.h"
 
 #include <QQuickItem>
 #include <QMap>
@@ -19,7 +19,7 @@ public:
 	ScreenManager();
 	~ScreenManager();
 
-	Q_PROPERTY(ScreenModel* screenModel READ screenModel WRITE setScreenModel)
+	Q_PROPERTY(ScreenListModel* screenListModel READ screenListModel WRITE setScreenModel)
 	Q_PROPERTY(ProcessManager* processManager WRITE setProcessManager)
 	Q_PROPERTY(int viewWidth WRITE setViewWidth)
 	Q_PROPERTY(int viewHeight WRITE setViewHeight)
@@ -31,8 +31,8 @@ public:
 	// TODO: remove these debug functions
 	Q_INVOKABLE void printBoundingBoxInfo();
 
-	ScreenModel* screenModel() const;
-	void setScreenModel(ScreenModel* screenModel);
+	ScreenListModel* screenListModel() const;
+	void setScreenModel(ScreenListModel* screenListModel);
 	void setProcessManager(ProcessManager* processManager);
 	void setViewWidth(int w);
 	void setViewHeight(int h);
@@ -49,7 +49,7 @@ private slots:
 	void waitServerReplyTimeout();
 
 private:
-	ScreenModel* m_screenModel;
+	ScreenListModel* m_screenListModel;
 	ProcessManager* m_processManager;
 	MulticastManager* m_multicastManager;
 	IScreenArrangement* m_arrangementStrategy;

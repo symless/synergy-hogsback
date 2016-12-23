@@ -1,6 +1,6 @@
 #include "ConfigMessageConvertorTest.h"
 
-#include "ScreenModel.h"
+#include "ScreenListModel.h"
 #include "ConfigMessageConvertor.h"
 
 ConfigMessageConvertorTest::ConfigMessageConvertorTest(QObject *parent) : QObject(parent)
@@ -10,7 +10,7 @@ ConfigMessageConvertorTest::ConfigMessageConvertorTest(QObject *parent) : QObjec
 
 void ConfigMessageConvertorTest::fromModelToString_emptyModel_returnZero()
 {
-	ScreenModel model;
+	ScreenListModel model;
 	ConfigMessageConvertor convertor;
 	QString r = convertor.fromModelToString(&model);
 
@@ -19,7 +19,7 @@ void ConfigMessageConvertorTest::fromModelToString_emptyModel_returnZero()
 
 void ConfigMessageConvertorTest::fromModelToString_validModel_returnAllScreensInfo()
 {
-	ScreenModel model;
+	ScreenListModel model;
 	Screen screen1("mock1");
 	Screen screen2("mock2");
 	model.addScreen(screen1);
