@@ -119,7 +119,7 @@ void MulticastManager::leaveUniqueGroup()
 void MulticastManager::multicastDefaultExistence()
 {
 	MulticastMessage msg;
-	msg.m_type = kDefaultExistence;
+	msg.m_type = MulticastMessage::kDefaultExistence;
 
 	m_defaultMulticast->multicast(msg);
 }
@@ -127,7 +127,7 @@ void MulticastManager::multicastDefaultExistence()
 void MulticastManager::multicastDefaultServerReply(bool active)
 {
 	MulticastMessage msg;
-	msg.m_type = kDefaultReply;
+	msg.m_type = MulticastMessage::kDefaultReply;
 	msg.m_active = active;
 	int group = getGroup(m_uniqueMulticast->address());
 	if (group == -1) {
@@ -148,7 +148,7 @@ void MulticastManager::multicastUniqueJoin(int processMode)
 	}
 
 	MulticastMessage msg;
-	msg.m_type = kUniqueJoin;
+	msg.m_type = MulticastMessage::kUniqueJoin;
 	msg.m_processMode = processMode;
 	msg.m_hostname = m_localHostname;
 
@@ -164,7 +164,7 @@ void MulticastManager::multicastUniqueLeave(int processMode)
 	}
 
 	MulticastMessage msg;
-	msg.m_type = kUniqueLeave;
+	msg.m_type = MulticastMessage::kUniqueLeave;
 	msg.m_processMode = processMode;
 	msg.m_hostname = m_localHostname;
 	msg.m_ip = m_localIp;
@@ -181,7 +181,7 @@ void MulticastManager::multicastUniqueClaim()
 	}
 
 	MulticastMessage msg;
-	msg.m_type = kUniqueClaim;
+	msg.m_type = MulticastMessage::kUniqueClaim;
 	msg.m_ip = m_localIp;
 
 	m_uniqueMulticast->multicast(msg);
@@ -197,7 +197,7 @@ void MulticastManager::multicastUniqueConfig(QString& data,
 	}
 
 	MulticastMessage msg;
-	msg.m_type = kUniqueConfig;
+	msg.m_type = MulticastMessage::kUniqueConfig;
 	msg.m_configInfo = QString::number(latestSerial) + "," + data;
 
 	m_uniqueMulticast->multicast(msg);
@@ -212,7 +212,7 @@ void MulticastManager::multicastUniqueConfigDelta(QString& data)
 	}
 
 	MulticastMessage msg;
-	msg.m_type = kUniqueConfigDelta;
+	msg.m_type = MulticastMessage::kUniqueConfigDelta;
 	msg.m_configInfo = data;
 
 	m_uniqueMulticast->multicast(msg);
@@ -289,11 +289,21 @@ void MulticastManager::updateLocalIp()
 	}
 }
 
+QString MulticastManager::getLocalHostname() const
+{
+	return m_localHostname;
+}
+
+void MulticastManager::setLocalHostname(const QString &localHostname)
+{
+	m_localHostname = localHostname;
+}
+
 void MulticastManager::printMulticastInterfaceInfo(bool defaultGroup)
 {
 	if (defaultGroup) {
 		QNetworkInterface networkInterface(
-							m_defaultMulticast->interface());
+					m_defaultMulticast->interface());
 
 		LogManager::info(QString("default multicast group: %1 binds to "
 								 "network interface: %2 %3")

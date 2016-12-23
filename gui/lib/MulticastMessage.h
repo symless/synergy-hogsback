@@ -2,17 +2,33 @@
 #define MULTICASTMESSAGE_H
 
 #include "LibMacro.h"
-#include "MulticastMessageType.h"
 
 #include <QString>
+#include <QObject>
 
-class LIB_SPEC MulticastMessage
+class LIB_SPEC MulticastMessage : public QObject
 {
+	Q_OBJECT
+	Q_ENUMS(Type)
+
 public:
 	MulticastMessage();
+	MulticastMessage(const MulticastMessage& message);
 	MulticastMessage(const QString& message);
 
+	enum Type {
+		kDefaultExistence,
+		kDefaultReply,
+		kUniqueJoin,
+		kUniqueLeave,
+		kUniqueClaim,
+		kUniqueConfig,
+		kUniqueConfigDelta,
+		kUnknown
+	};
+
 	QByteArray toByteArray();
+	QString toReadableString();
 
 	bool m_valid;
 	int m_type;

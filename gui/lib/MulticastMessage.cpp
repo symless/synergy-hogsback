@@ -3,6 +3,7 @@
 #include "ProcessMode.h"
 
 #include <QStringList>
+#include <QMetaEnum>
 
 const QString kSeperator = ",";
 
@@ -17,6 +18,20 @@ MulticastMessage::MulticastMessage() :
 	m_uniqueGroup(QString()),
 	m_configInfo(QString())
 {
+}
+
+MulticastMessage::MulticastMessage(const MulticastMessage& message) :
+	m_valid(message.m_valid),
+	m_type(message.m_type),
+	m_processMode(message.m_processMode),
+	m_active(message.m_active),
+	m_joinGroup(message.m_joinGroup),
+	m_hostname(message.m_hostname),
+	m_ip(message.m_ip),
+	m_uniqueGroup(message.m_uniqueGroup),
+	m_configInfo(message.m_configInfo)
+{
+
 }
 
 MulticastMessage::MulticastMessage(const QString& message) :
@@ -60,6 +75,39 @@ QByteArray MulticastMessage::toByteArray()
 	}
 
 	return data.toUtf8();
+}
+
+QString MulticastMessage::toReadableString()
+{
+	QString result;
+
+	int index = metaObject()->indexOfEnumerator("Type");
+	QMetaEnum metaEnum = metaObject()->enumerator(index);
+	QString type =  metaEnum.valueToKey(m_type);
+
+	result += "type: " + type + "\n";
+
+	if (m_type == kDefaultReply) {
+		result += "active: " + QString::number(m_active) + "\n";
+		result += "unique group: " + m_uniqueGroup + "\n";
+	}
+	else if (m_type == kUniqueJoin) {
+		result += "process mode: " + QString::number(m_processMode) + "\n";
+		result += "hostname: " + m_hostname + "\n";
+	}
+	else if (m_type == kUniqueLeave) {
+		result += "process mode: " + QString::number(m_processMode) + "\n";
+		result += "hostname: " + m_hostname + "\n";
+		result += "IP: " + m_ip + "\n";
+	}
+	else if (m_type == kUniqueClaim) {
+		result += "IP: " + m_ip + "\n";
+	}
+	else if (m_type == kUniqueConfig || m_type == kUniqueConfigDelta) {
+		result += "config info: " + m_configInfo + "\n";
+	}
+
+	return result;
 }
 
 void MulticastMessage::parse(const QString& message)

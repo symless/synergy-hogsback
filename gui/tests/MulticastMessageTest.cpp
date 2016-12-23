@@ -16,7 +16,7 @@ MulticastMessageTest::~MulticastMessageTest()
 void MulticastMessageTest::parse_empty_setNothing()
 {
 	MulticastMessage msg("");
-	int type = kUnknown;
+	int type = MulticastMessage::kUnknown;
 	int mode = kUnknownMode;
 
 	QCOMPARE(msg.m_valid, false);
@@ -33,7 +33,7 @@ void MulticastMessageTest::parse_empty_setNothing()
 void MulticastMessageTest::parse_defaultExistence_setValidType()
 {
 	MulticastMessage msg("0");
-	int type = kDefaultExistence;
+	int type = MulticastMessage::kDefaultExistence;
 
 	QCOMPARE(msg.m_valid, true);
 	QCOMPARE(msg.m_type, type);
@@ -42,7 +42,7 @@ void MulticastMessageTest::parse_defaultExistence_setValidType()
 void MulticastMessageTest::parse_defaultExistence_setInvalidMessage()
 {
 	MulticastMessage msg("0,0");
-	int type = kDefaultExistence;
+	int type = MulticastMessage::kDefaultExistence;
 
 	QCOMPARE(msg.m_valid, false);
 	QCOMPARE(msg.m_type, type);
@@ -51,7 +51,7 @@ void MulticastMessageTest::parse_defaultExistence_setInvalidMessage()
 void MulticastMessageTest::parse_defaultReply_setValidTypeActiveUniqueGroup()
 {
 	MulticastMessage msg("1,1,1");
-	int type = kDefaultReply;
+	int type = MulticastMessage::kDefaultReply;
 
 	QCOMPARE(msg.m_valid, true);
 	QCOMPARE(msg.m_type, type);
@@ -62,7 +62,7 @@ void MulticastMessageTest::parse_defaultReply_setValidTypeActiveUniqueGroup()
 void MulticastMessageTest::parse_defaultReply_setInvalidMessage()
 {
 	MulticastMessage msg("1,1,1,1");
-	int type = kDefaultReply;
+	int type = MulticastMessage::kDefaultReply;
 
 	QCOMPARE(msg.m_valid, false);
 	QCOMPARE(msg.m_type, type);
@@ -71,7 +71,7 @@ void MulticastMessageTest::parse_defaultReply_setInvalidMessage()
 void MulticastMessageTest::parse_uniqueJoin_setValidTypeModeName()
 {
 	MulticastMessage msg("2,1,mock");
-	int type = kUniqueJoin;
+	int type = MulticastMessage::kUniqueJoin;
 	int mode = kClientMode;
 
 	QCOMPARE(msg.m_valid, true);
@@ -83,7 +83,7 @@ void MulticastMessageTest::parse_uniqueJoin_setValidTypeModeName()
 void MulticastMessageTest::parse_uniqueJoin_setInvalidMessage()
 {
 	MulticastMessage msg("2,1,mock,1");
-	int type = kUniqueJoin;
+	int type = MulticastMessage::kUniqueJoin;
 
 	QCOMPARE(msg.m_valid, false);
 	QCOMPARE(msg.m_type, type);
@@ -92,7 +92,7 @@ void MulticastMessageTest::parse_uniqueJoin_setInvalidMessage()
 void MulticastMessageTest::parse_uniqueLeave_setValidTypeModeNameIp()
 {
 	MulticastMessage msg("3,0,mockName,mockIp");
-	int type = kUniqueLeave;
+	int type = MulticastMessage::kUniqueLeave;
 	int mode = kServerMode;
 
 	QCOMPARE(msg.m_valid, true);
@@ -105,7 +105,7 @@ void MulticastMessageTest::parse_uniqueLeave_setValidTypeModeNameIp()
 void MulticastMessageTest::parse_uniqueLeave_setInvalidMessage()
 {
 	MulticastMessage msg("3,0,mockName,mockIp,1");
-	int type = kUniqueLeave;
+	int type = MulticastMessage::kUniqueLeave;
 
 	QCOMPARE(msg.m_valid, false);
 	QCOMPARE(msg.m_type, type);
@@ -114,7 +114,7 @@ void MulticastMessageTest::parse_uniqueLeave_setInvalidMessage()
 void MulticastMessageTest::parse_uniqueClaim_setValidTypeIp()
 {
 	MulticastMessage msg("4,mock");
-	int type = kUniqueClaim;
+	int type = MulticastMessage::kUniqueClaim;
 
 	QCOMPARE(msg.m_valid, true);
 	QCOMPARE(msg.m_type, type);
@@ -124,7 +124,7 @@ void MulticastMessageTest::parse_uniqueClaim_setValidTypeIp()
 void MulticastMessageTest::parse_uniqueClaim_setInvalidMessage()
 {
 	MulticastMessage msg("4,0,mock,1");
-	int type = kUniqueClaim;
+	int type = MulticastMessage::kUniqueClaim;
 
 	QCOMPARE(msg.m_valid, false);
 	QCOMPARE(msg.m_type, type);
@@ -133,7 +133,7 @@ void MulticastMessageTest::parse_uniqueClaim_setInvalidMessage()
 void MulticastMessageTest::parse_uniqueConfig_setValidTypeConfigInfo()
 {
 	MulticastMessage msg("5,mock");
-	int type = kUniqueConfig;
+	int type = MulticastMessage::kUniqueConfig;
 
 	QCOMPARE(msg.m_valid, true);
 	QCOMPARE(msg.m_type, type);
@@ -143,7 +143,7 @@ void MulticastMessageTest::parse_uniqueConfig_setValidTypeConfigInfo()
 void MulticastMessageTest::parse_uniqueConfig_setInvalidMessage()
 {
 	MulticastMessage msg("5");
-	int type = kUniqueConfig;
+	int type = MulticastMessage::kUniqueConfig;
 
 	QCOMPARE(msg.m_valid, false);
 	QCOMPARE(msg.m_type, type);
