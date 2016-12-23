@@ -6,6 +6,7 @@
 #include "LogManager.h"
 #include "ScreenBBArrangement.h"
 #include "ConfigFileManager.h"
+#include "ScreenListSnapshotManager.h"
 #include "ProcessMode.h"
 
 #include <QtNetwork>
@@ -14,12 +15,16 @@ ScreenManager::ScreenManager() :
 	m_screenListModel(NULL),
 	m_multicastManager(NULL),
 	m_waitTimer(NULL),
+    m_screenListSnapshotManager(NULL),
 	m_latestConfigSerial(0)
 {
 	m_arrangementStrategy = new ScreenBBArrangement();
 
 	m_multicastManager = qobject_cast<MulticastManager*>(
 								MulticastManager::instance());
+
+    m_screenListSnapshotManager= new ScreenListSnapshotManager();
+
 	connect(m_multicastManager,
 		SIGNAL(receivedDefaultGroupMessage(MulticastMessage)),
 		this, SLOT(handleDefaultGroupMessage(MulticastMessage)));
@@ -115,7 +120,7 @@ bool ScreenManager::addScreen(QString name)
 		return false;
 	}
 
-	Screen screen(name);
+    Screen screen(name);
 	return m_arrangementStrategy->addScreen(m_screenListModel, screen);
 }
 
@@ -190,19 +195,37 @@ void ScreenManager::handleUniqueGroupMessage(MulticastMessage msg)
 {
 	if (processMode() == kServerMode) {
 		if (msg.m_type == MulticastMessage::kUniqueJoin) {
-			if (addScreen(msg.m_hostname)) {
-				LogManager::info(QString("client %1 joined server unique "
-										 "group").arg(msg.m_hostname));
 
-				// claim this is the server
-				m_multicastManager->multicastUniqueClaim();
+            bool matchedOrAdded = false;
+            auto names = m_screenListModel->getScreenNames();
+            names.insert(msg.m_hostname);
+            auto matched = m_screenListSnapshotManager->exactMatch(names);
 
-				// sync configuration information
-				ConfigMessageConvertor convertor;
-				QString data = convertor.fromModelToString(m_screenListModel);
-				m_multicastManager->multicastUniqueConfig(data,
-										++m_latestConfigSerial);
-			}
+            if (matched != ScreenListSnapshotManager::SnapshotIndex()) {
+                LogManager::info(QString("found snapshot"));
+                m_screenListModel->update(m_screenListSnapshotManager->getSnapshot(matched));
+                m_arrangementStrategy->update(m_screenListModel);
+                matchedOrAdded = true;
+            }
+            else {
+                if (addScreen(msg.m_hostname)) {
+                    LogManager::info(QString("client %1 joined server unique "
+                                             "group").arg(msg.m_hostname));
+
+                   matchedOrAdded = true;
+                }
+            }
+
+            if (matchedOrAdded) {
+                // claim this is the server
+                m_multicastManager->multicastUniqueClaim();
+
+                // sync configuration information
+                ConfigMessageConvertor convertor;
+                QString data = convertor.fromModelToString(m_screenListModel);
+                m_multicastManager->multicastUniqueConfig(data,
+                                        ++m_latestConfigSerial);
+            }
 		}
 		else if (msg.m_type == MulticastMessage::kUniqueLeave) {
 			if (removeScreen(msg.m_hostname)) {
@@ -237,22 +260,23 @@ void ScreenManager::handleUniqueGroupMessage(MulticastMessage msg)
 	else if (msg.m_type == MulticastMessage::kUniqueConfig ||
 			 msg.m_type == MulticastMessage::kUniqueConfigDelta) {
 		ConfigMessageConvertor convertor;
-		if(convertor.fromStringToList(m_configScreensRecord,
+        QList<Screen> screenList;
+        if(convertor.fromStringToList(screenList,
 						msg.m_configInfo,
 						m_latestConfigSerial,
 						msg.m_type == MulticastMessage::kUniqueConfig)) {
 
 			// if there is only 1 screen in the list and its position is -1,-1,
 			// it means remove this screen in configuration
-			if (m_configScreensRecord.size() == 1) {
-				if (m_configScreensRecord[0].posX() == -1 &&
-					m_configScreensRecord[0].posY() == -1) {
-					removeScreen(m_configScreensRecord[0].name());
+            if (screenList.size() == 1) {
+                if (screenList[0].posX() == -1 &&
+                    screenList[0].posY() == -1) {
+                    removeScreen(screenList[0].name());
 					return;
 				}
 			}
 
-			m_screenListModel->update(m_configScreensRecord);
+            m_screenListModel->update(screenList);
 			m_arrangementStrategy->update(m_screenListModel);
 		}
 	}

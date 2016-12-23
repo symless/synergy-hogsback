@@ -24,6 +24,7 @@ set (GUI_LIB_SOURCES
 	Screen.cpp
 	ScreenManager.cpp
         ScreenListModel.cpp
+        ScreenListSnapshotManager.cpp
 	ServerInfo.cpp
 )
 
