@@ -1,5 +1,7 @@
 #include "Screen.h"
 
+QHash<ScreenState, QString> Screen::m_stateImages;
+
 Screen::Screen(QString name) :
 	m_posX(-1),
 	m_posY(-1),

@@ -10,6 +10,16 @@
 class LIB_SPEC Screen
 {
 public:
+    friend inline
+    uint qHash (Screen const& screen, uint seed = 0) noexcept {
+        return qHash (screen.m_name, seed);
+    }
+
+    friend bool
+    operator== (Screen const& s1, Screen const& s2) noexcept {
+        return (s1.m_name == s2.m_name);
+    }
+
 	Screen(QString name = "");
 
 	int posX() const;
@@ -27,9 +37,11 @@ private:
 	int m_posX;
 	int m_posY;
 	QString m_name;
+
+private:
 	ScreenState m_state;
 	QString m_stateImage;
-	QHash<ScreenState, QString> m_stateImages;
+    static QHash<ScreenState, QString> m_stateImages;
 };
 
 #endif // SCREEN_H
