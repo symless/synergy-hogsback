@@ -202,9 +202,12 @@ void ScreenManager::handleUniqueGroupMessage(MulticastMessage msg)
             auto matched = m_screenListSnapshotManager->exactMatch(names);
 
             if (matched != ScreenListSnapshotManager::SnapshotIndex()) {
-                LogManager::info(QString("found snapshot"));
-                m_screenListModel->update(m_screenListSnapshotManager->getSnapshot(matched));
+                m_screenListModel->update(
+                            m_screenListSnapshotManager->getSnapshot(
+                                                                matched));
                 m_arrangementStrategy->update(m_screenListModel);
+                LogManager::info(QString("found snapshot"));
+
                 matchedOrAdded = true;
             }
             else {
