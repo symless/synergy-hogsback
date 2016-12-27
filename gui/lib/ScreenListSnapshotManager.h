@@ -36,11 +36,12 @@ public:
     using SnapshotIndex = QSet<QSet<Screen>>::const_iterator;
     explicit ScreenListSnapshotManager(QObject* parent = 0);
 
-    SnapshotIndex exactMatch(const QSet<Screen> &screenNames) const;
+    bool exactMatch(const QSet<Screen>& screenNames, SnapshotIndex& index) const;
     QList<Screen> getSnapshot(SnapshotIndex) const;
     void saveToFile();
     void loadFromFile();
-    void update(ScreenListModel* screenListModel);
+    void saveSnapshot(ScreenListModel* screenListModel);
+
 private:
     QSet<QSet<Screen>> m_snapshots;
 };

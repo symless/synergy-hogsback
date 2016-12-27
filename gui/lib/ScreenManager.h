@@ -28,6 +28,7 @@ public:
 	Q_INVOKABLE int getModelIndex(int x, int y);
 	Q_INVOKABLE void moveModel(int index, int offsetX, int offsetY);
 	Q_INVOKABLE void updateConfigFile();
+    Q_INVOKABLE void saveSnapshot();
 
 	// TODO: remove these debug functions
 	Q_INVOKABLE void printBoundingBoxInfo();
@@ -36,7 +37,7 @@ public:
 	void setScreenModel(ScreenListModel* screenListModel);
 	void setProcessManager(ProcessManager* processManager);
 	void setViewWidth(int w);
-	void setViewHeight(int h);
+    void setViewHeight(int h);
 
 private:
 	bool addScreen(QString name);

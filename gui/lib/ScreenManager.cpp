@@ -109,7 +109,12 @@ void ScreenManager::setViewHeight(int h)
 	if (h <= 0) return;
 
 	m_arrangementStrategy->setViewH(h);
-	m_arrangementStrategy->checkAdjustment(m_screenListModel, true);
+    m_arrangementStrategy->checkAdjustment(m_screenListModel, true);
+}
+
+void ScreenManager::saveSnapshot()
+{
+    m_screenListSnapshotManager->saveSnapshot(m_screenListModel);
 }
 
 bool ScreenManager::addScreen(QString name)
@@ -199,12 +204,14 @@ void ScreenManager::handleUniqueGroupMessage(MulticastMessage msg)
             bool matchedOrAdded = false;
             auto names = m_screenListModel->getScreenNames();
             names.insert(msg.m_hostname);
-            auto matched = m_screenListSnapshotManager->exactMatch(names);
-
-            if (matched != ScreenListSnapshotManager::SnapshotIndex()) {
+            ScreenListSnapshotManager::SnapshotIndex index;
+            bool matched = m_screenListSnapshotManager->exactMatch(
+                                                            names, index);
+;
+            if (matched) {
                 m_screenListModel->update(
                             m_screenListSnapshotManager->getSnapshot(
-                                                                matched));
+                                                                index));
                 m_arrangementStrategy->update(m_screenListModel);
                 LogManager::info(QString("found snapshot"));
 

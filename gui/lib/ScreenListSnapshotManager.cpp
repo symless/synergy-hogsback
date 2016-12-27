@@ -7,10 +7,19 @@ ScreenListSnapshotManager::ScreenListSnapshotManager(QObject* parent) :
 {
 }
 
-ScreenListSnapshotManager::SnapshotIndex
-ScreenListSnapshotManager::exactMatch(QSet<Screen> const& screens) const
+bool
+ScreenListSnapshotManager::exactMatch(
+            QSet<Screen> const& screens,
+            SnapshotIndex& index) const
 {
-    return m_snapshots.find(screens);
+    index = m_snapshots.find(screens);
+    bool found = true;
+
+    if (index == m_snapshots.end()) {
+        found = false;
+    }
+
+    return found;
 }
 
 QList<Screen> ScreenListSnapshotManager::getSnapshot(SnapshotIndex index) const
@@ -28,7 +37,7 @@ void ScreenListSnapshotManager::loadFromFile()
 
 }
 
-void ScreenListSnapshotManager::update(ScreenListModel *screenListModel)
+void ScreenListSnapshotManager::saveSnapshot(ScreenListModel* screenListModel)
 {
-
+    m_snapshots.insert(screenListModel->getScreenNames());
 }
