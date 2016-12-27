@@ -7,9 +7,9 @@ set (CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(BUILD_SERVICE OFF CACHE BOOL "Build the legacy service")
 
 if (WIN32)
-	add_definitions (-DNTDDI_VERSION=0x06000000)
-	add_definitions (-D_WIN32_WINNT=0x0600)
-	add_definitions (-DWINVER=0x0600)
+    add_definitions (-DNTDDI_VERSION=0x06000000)
+    add_definitions (-D_WIN32_WINNT=0x0600)
+    add_definitions (-DWINVER=0x0600)
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX)

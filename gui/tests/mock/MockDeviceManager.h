@@ -6,12 +6,12 @@
 class MockDeviceManager : public DeviceManager
 {
 public:
-	MockDeviceManager();
+    MockDeviceManager();
 
-	int resolutionWidth();
-	int resolutionHeight();
-	int primaryMonitorWidth();
-	int primaryMonitorHeight();
+    int resolutionWidth();
+    int resolutionHeight();
+    int primaryMonitorWidth();
+    int primaryMonitorHeight();
 };
 
 #endif // MOCKDEVICEMANAGER_H

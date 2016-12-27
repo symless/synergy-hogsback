@@ -6,11 +6,11 @@
 class MockDirectoryManager : public DirectoryManager
 {
 public:
-	MockDirectoryManager();
+    MockDirectoryManager();
 
-	QString profileDir();
-	QString configFileDir();
-	QString installedDir();
+    QString profileDir();
+    QString configFileDir();
+    QString installedDir();
 };
 
 #endif // MOCKDIRECTORYMANAGER_H

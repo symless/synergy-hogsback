@@ -198,9 +198,9 @@ Service::start () {
     impl_->started = true;
 
 #if defined _WIN32
-	SOCKET null_socket = 0;
+    SOCKET null_socket = 0;
 #else
-	int null_socket = -1;
+    int null_socket = -1;
 #endif
 
     std::vector<zmq_pollitem_t> poll_set = {

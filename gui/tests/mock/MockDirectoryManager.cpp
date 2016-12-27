@@ -7,16 +7,16 @@ MockDirectoryManager::MockDirectoryManager()
 
 QString MockDirectoryManager::profileDir()
 {
-	return "mockDir";
+    return "mockDir";
 }
 
 QString MockDirectoryManager::configFileDir()
 {
-	return "mockDir";
+    return "mockDir";
 }
 
 QString MockDirectoryManager::installedDir()
 {
-	return "mockDir";
+    return "mockDir";
 }
 

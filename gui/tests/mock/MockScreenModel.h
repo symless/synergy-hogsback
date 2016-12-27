@@ -6,13 +6,13 @@
 class MockScreenModel : public ScreenListModel
 {
 public:
-	MockScreenModel();
+    MockScreenModel();
 
-	virtual void adjustAll(int disX, int disY);
+    virtual void adjustAll(int disX, int disY);
 
 public:
-	int m_disX;
-	int m_disY;
+    int m_disX;
+    int m_disY;
 };
 
 #endif // MOCKSCREENMODEL_H
