@@ -4,6 +4,7 @@ cmake_minimum_required (VERSION 3.4)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)
+set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DQT_QML_DEBUG ")
 
 find_package(Qt5 COMPONENTS Widgets Quick Core)
 add_subdirectory (lib)
