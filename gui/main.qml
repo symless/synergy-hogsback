@@ -9,12 +9,16 @@ ApplicationWindow {
 	minimumWidth: 800
 	minimumHeight: 600
 	title: qsTr("Synergy")
-
+	signal keyReceived(int key)
 
 	StackView {
 		id: stackView
 		anchors.fill: parent
 		focus: true
+
+		Keys.onPressed: {
+			keyReceived(event.key)
+		}
 
 		initialItem: {
 			[{item : Qt.resolvedUrl("ConfigurationPage.qml")}]

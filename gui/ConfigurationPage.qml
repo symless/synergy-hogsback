@@ -30,6 +30,14 @@ Rectangle {
 		viewHeight: screenArrangementScrollView.height
 	}
 
+	// TODO: This is for testing, remove before release
+	Connections {
+		target: applicationWindow
+		onKeyReceived: {
+			screenManager.saveSnapshot()
+		}
+	}
+
 	Item {
 		id: configurationPage
 		anchors.top: parent.top
