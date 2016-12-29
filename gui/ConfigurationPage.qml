@@ -414,7 +414,7 @@ Rectangle {
                 height: parent.height
                 fillMode: Image.Stretch
                 smooth: true
-                source: "qrc:/res/image/general.png"
+                source: stateImage
             }
         }
 
