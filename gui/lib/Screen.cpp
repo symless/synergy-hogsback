@@ -6,11 +6,11 @@ Screen::Screen(QString name) :
     m_posX(-1),
     m_posY(-1),
     m_name(name),
-    m_state(kIdle)
+    m_state(kDisconnected)
 {
-    m_stateImages[kReady] = "qrc:/res/image/screen-active.png";
-    m_stateImages[kRunning] = "qrc:/res/image/screen_icon_running.png";
-    m_stateImages[kIdle] = "qrc:/res/image/screen-inactive.png";
+    m_stateImages[kConnected] = "qrc:/res/image/screen-active.png";
+    m_stateImages[kConnecting] = "qrc:/res/image/screen_icon_running.png";
+    m_stateImages[kDisconnected] = "qrc:/res/image/screen-inactive.png";
 
     m_stateImage = m_stateImages[m_state];
 }

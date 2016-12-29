@@ -12,9 +12,9 @@ MainWindow::MainWindow(QWidget *parent) :
                                 (MulticastManager::instance());
     ui->setupUi(this);
     connect (m_multicastManager, &MulticastManager::receivedUniqueGroupMessage,
-             this, &MainWindow::onReceivedMulticastMessage);
+             this, &MainWindow::onReceivedUniqueMulticastMessage);
     connect (m_multicastManager, &MulticastManager::receivedDefaultGroupMessage,
-             this, &MainWindow::onReceivedMulticastMessage);
+             this, &MainWindow::onReceivedDefaultMulticastMessage);
 
     ui->p_listViewScreenNames->setModel(&m_screenNamesModel);
 }
@@ -25,9 +25,40 @@ MainWindow::~MainWindow()
 }
 
 void
-MainWindow::onReceivedMulticastMessage(MulticastMessage msg) {
-    ui->p_textBrowserLogging->append("===== Received Message =====");
+MainWindow::onReceivedDefaultMulticastMessage(MulticastMessage msg) {
+    ui->p_textBrowserLogging->append("===== Received Default Message =====");
     ui->p_textBrowserLogging->append(msg.toReadableString());
+}
+
+void
+MainWindow::onReceivedUniqueMulticastMessage(MulticastMessage msg) {
+    ui->p_textBrowserLogging->append("===== Received Unique Message =====");
+    ui->p_textBrowserLogging->append(msg.toReadableString());
+
+    if (msg.m_type == MulticastMessage::kUniqueConfig ||
+        msg.m_type == MulticastMessage::kUniqueConfigDelta) {
+        ConfigMessageConvertor convertor;
+        QList<Screen> screenList;
+        // set serial to -1 to bypass serial checking
+        int lastSerial = -1;
+        if(convertor.fromStringToList(screenList,
+                        msg.m_configInfo,
+                        lastSerial,
+                        msg.m_type == MulticastMessage::kUniqueConfig)) {
+
+            // if there is only 1 screen in the list and its position is -1,-1,
+            // it means remove this screen in configuration
+            if (screenList.size() == 1) {
+                if (screenList[0].posX() == -1 &&
+                    screenList[0].posY() == -1) {
+                    m_screenListModel.removeScreen(screenList[0].name());
+                    return;
+                }
+            }
+
+            m_screenListModel.update(screenList);
+        }
+    }
 }
 
 void MainWindow::on_p_pushButtonAdd_clicked()
@@ -73,7 +104,7 @@ void MainWindow::on_p_pushButtonLeave_clicked()
     // only leave unique groups
     if (index != 0) {
         QString hostname = ui->p_lineEditScreenName->text();
-        if (!ui->p_lineEditScreenName->text().isEmpty()) {
+        if (!hostname.isEmpty()) {
             m_multicastManager->setLocalHostname(hostname);
             m_multicastManager->multicastUniqueLeave(kClientMode);
             m_multicastManager->leaveUniqueGroup();
@@ -85,4 +116,32 @@ void MainWindow::on_p_listViewScreenNames_pressed(const QModelIndex &index)
 {
     QString selected = m_screenNamesModel.data(index, Qt::DisplayRole).toString();
     ui->p_lineEditScreenName->setText(selected);
+}
+
+void MainWindow::on_p_pushButtonConnected_pressed()
+{
+    QString hostname = ui->p_lineEditScreenName->text();
+    if (!hostname.isEmpty()) {
+        int index = m_screenListModel.findScreen(hostname);
+        const Screen& screen = m_screenListModel.getScreen(index);
+        Screen screenCopy = screen;
+        screenCopy.setState(kConnected);
+        ConfigMessageConvertor convertor;
+        QString data = convertor.fromScreenToString(screenCopy);
+        m_multicastManager->multicastUniqueConfigDelta(data);
+    }
+}
+
+void MainWindow::on_p_pushButtonDisconnected_pressed()
+{
+    QString hostname = ui->p_lineEditScreenName->text();
+    if (!hostname.isEmpty()) {
+        int index = m_screenListModel.findScreen(hostname);
+        const Screen& screen = m_screenListModel.getScreen(index);
+        Screen screenCopy = screen;
+        screenCopy.setState(kDisconnected);
+        ConfigMessageConvertor convertor;
+        QString data = convertor.fromScreenToString(screenCopy);
+        m_multicastManager->multicastUniqueConfigDelta(data);
+    }
 }

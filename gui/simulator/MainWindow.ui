@@ -177,6 +177,20 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="p_pushButtonConnected">
+          <property name="text">
+           <string>Connected</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="p_pushButtonDisconnected">
+          <property name="text">
+           <string>Disconnected</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>

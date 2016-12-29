@@ -53,11 +53,11 @@ void ConfigMessageConvertorTest::fromStringToList_validFullConfigLatestSerial_up
     QCOMPARE(record[0].name(), QString("mock1"));
     QCOMPARE(record[0].posX(), -1);
     QCOMPARE(record[0].posY(), -1);
-    QCOMPARE(record[0].state(), kIdle);
+    QCOMPARE(record[0].state(), kDisconnected);
     QCOMPARE(record[1].name(), QString("mock2"));\
     QCOMPARE(record[1].posX(), -1);
     QCOMPARE(record[1].posY(), -1);
-    QCOMPARE(record[1].state(), kIdle);
+    QCOMPARE(record[1].state(), kDisconnected);
 }
 
 void ConfigMessageConvertorTest::fromStringToList_validFullConfigOutdatedSerial_returnFalse()
@@ -100,7 +100,7 @@ void ConfigMessageConvertorTest::fromStringToList_validIncompleteConfigLatestSer
     QCOMPARE(record[0].name(), QString("mock1"));
     QCOMPARE(record[0].posX(), -1);
     QCOMPARE(record[0].posY(), -1);
-    QCOMPARE(record[0].state(), kIdle);
+    QCOMPARE(record[0].state(), kDisconnected);
 }
 
 void ConfigMessageConvertorTest::fromStringToList_validDeltaConfig_updateScreenList()
@@ -117,7 +117,7 @@ void ConfigMessageConvertorTest::fromStringToList_validDeltaConfig_updateScreenL
     QCOMPARE(record[0].name(), QString("mock1"));
     QCOMPARE(record[0].posX(), -1);
     QCOMPARE(record[0].posY(), -1);
-    QCOMPARE(record[0].state(), kIdle);
+    QCOMPARE(record[0].state(), kDisconnected);
 }
 
 void ConfigMessageConvertorTest::fromStringToList_invalidDeltaConfig_returnFalse()

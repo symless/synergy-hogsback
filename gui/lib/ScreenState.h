@@ -2,9 +2,9 @@
 #define SCREENSTATE
 
 enum ScreenState {
-	kReady,
-	kRunning,
-	kIdle
+    kConnected,
+    kConnecting,
+    kDisconnected
 };
 
 #endif // SCREENSTATE

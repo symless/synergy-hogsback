@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "ScreenListModel.h"
 #include <QMainWindow>
 #include <QStringListModel>
 
@@ -25,12 +26,16 @@ private slots:
     void on_p_pushButtonJoin_clicked();
     void on_p_pushButtonLeave_clicked();
     void on_p_listViewScreenNames_pressed(const QModelIndex &index);
+    void on_p_pushButtonConnected_pressed();
+    void on_p_pushButtonDisconnected_pressed();
 
 private:
-    void onReceivedMulticastMessage (MulticastMessage);
+    void onReceivedDefaultMulticastMessage (MulticastMessage);
+    void onReceivedUniqueMulticastMessage (MulticastMessage);
     Ui::MainWindow *ui;
     MulticastManager* m_multicastManager = nullptr;
     QStringListModel m_screenNamesModel;
+    ScreenListModel m_screenListModel;
 };
 
 #endif // MAINWINDOW_H
