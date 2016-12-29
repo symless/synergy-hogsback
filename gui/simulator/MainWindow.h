@@ -13,24 +13,24 @@ class MulticastManager;
 
 class MainWindow : public QMainWindow
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit MainWindow(QWidget *parent = 0);
-	~MainWindow();
+    explicit MainWindow(QWidget *parent = 0);
+    ~MainWindow();
 
 private slots:
-	void on_p_pushButtonAdd_clicked();
-	void on_p_pushButtonRemove_clicked();
-	void on_p_pushButtonJoin_clicked();
-	void on_p_pushButtonLeave_clicked();
-	void on_p_listViewScreenNames_pressed(const QModelIndex &index);
+    void on_p_pushButtonAdd_clicked();
+    void on_p_pushButtonRemove_clicked();
+    void on_p_pushButtonJoin_clicked();
+    void on_p_pushButtonLeave_clicked();
+    void on_p_listViewScreenNames_pressed(const QModelIndex &index);
 
 private:
-	void onReceivedMulticastMessage (MulticastMessage);
-	Ui::MainWindow *ui;
-	MulticastManager* m_multicastManager = nullptr;
-	QStringListModel m_screenNamesModel;
+    void onReceivedMulticastMessage (MulticastMessage);
+    Ui::MainWindow *ui;
+    MulticastManager* m_multicastManager = nullptr;
+    QStringListModel m_screenNamesModel;
 };
 
 #endif // MAINWINDOW_H
