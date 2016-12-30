@@ -319,7 +319,7 @@ Rectangle {
                             anchors.fill: parent
                             fillMode: Image.Stretch
                             smooth: true
-                            source: "qrc:/res/image/screen-inactive.png"
+                            source: stateImage
 
                             Text {
                                 width: parent.width - 20
