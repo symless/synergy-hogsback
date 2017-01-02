@@ -55,13 +55,13 @@ Rectangle {
 
             // navigation icon
             Rectangle {
-                width: 50
-                height: 50
+                width: 30
+                height: 30
                 z: 1
                 anchors.left: parent.left
-                anchors.leftMargin: 10
+                anchors.leftMargin: 20
                 anchors.bottom: parent.bottom
-                anchors.bottomMargin: 10
+                anchors.bottomMargin: 20
                 color: "transparent"
 
                 MouseArea {
@@ -140,10 +140,12 @@ Rectangle {
                     hoverEnabled: true
                     onPressed: {
                         if (search.searching) {
+                            search.height = 38
                             searchImage.source =
                                     "qrc:/res/image/signal-tower-off.png"
                         }
                         else {
+                             search.height = 50
                             searchImage.source =
                                     "qrc:/res/image/signal-tower-on.png"
                         }
@@ -156,7 +158,7 @@ Rectangle {
                     id: searchImage
                     width: parent.width
                     height: parent.height
-                    fillMode: Image.Stretch
+                    fillMode: Image.PreserveAspectFit
                     smooth: true
                     source: "qrc:/res/image/signal-tower-on.png"
                 }
@@ -414,7 +416,7 @@ Rectangle {
                 height: parent.height
                 fillMode: Image.Stretch
                 smooth: true
-                source: stateImage
+                source: "qrc:/res/image/general.png"
             }
         }
 
