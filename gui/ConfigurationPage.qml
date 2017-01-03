@@ -34,7 +34,7 @@ Rectangle {
     Connections {
         target: applicationWindow
         onKeyReceived: {
-            screenManager.saveSnapshot()
+            screenManager.onKeyPressed(key)
         }
     }
 
