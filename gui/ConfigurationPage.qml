@@ -301,6 +301,7 @@ Rectangle {
                             anchors.fill: parent
                             drag.target: screenIcon
                             drag.axis: Drag.XandYAxis
+                            hoverEnabled: true
                             onPressed: {
                                 beginDrag = Qt.point(screenIcon.x,
                                                 screenIcon.y);
@@ -313,6 +314,9 @@ Rectangle {
                                                 screenIcon.x - beginDrag.x,
                                                 screenIcon.y - beginDrag.y)
                             }
+                            onHoveredChanged: {
+                                shutdownImage.visible = !shutdownImage.visible
+                            }
                         }
 
                         Image {
@@ -323,10 +327,36 @@ Rectangle {
                             smooth: true
                             source: stateImage
 
+                            Image {
+                                id: shutdownImage
+                                width: 20
+                                height: 20
+                                anchors.top: parent.top
+                                anchors.topMargin: 9
+                                anchors.right: parent.right
+                                anchors.rightMargin: 9
+                                fillMode: Image.PreserveAspectFit
+                                smooth: true
+                                visible: false
+                                source: "qrc:/res/image/shutdown.png"
+                            }
+
+                            Image {
+                                id: signalImage
+                                width: 20
+                                height: 20
+                                anchors.top: parent.top
+                                anchors.topMargin: 9
+                                anchors.left: parent.left
+                                anchors.leftMargin: 9
+                                fillMode: Image.PreserveAspectFit
+                                smooth: true
+                                source: "qrc:/res/image/signal.png"
+                            }
+
                             Text {
                                 width: parent.width - 20
-                                anchors.top: parent.top
-                                anchors.topMargin: 7
+                                anchors.verticalCenter: parent.verticalCenter
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: name
                                 font.pixelSize: 15

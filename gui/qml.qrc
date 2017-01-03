@@ -32,5 +32,7 @@
         <file>res/image/navigation.png</file>
         <file>res/image/option.png</file>
         <file>res/image/signal-tower-off.png</file>
+        <file>res/image/shutdown.png</file>
+        <file>res/image/signal.png</file>
     </qresource>
 </RCC>
