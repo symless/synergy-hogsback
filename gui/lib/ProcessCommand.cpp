@@ -47,7 +47,11 @@ QStringList ProcessCommand::arguments(bool serverMode) const
             qobject_cast<AppConfig*>(AppConfig::instance());
 
     QStringList arguments;
-    arguments << "-f" << "--no-tray" << "--ipc" << "--stop-on-desk-switch";
+    arguments << "-f" << "--no-tray" << "--ipc";
+
+#ifdef Q_OS_WIN
+    arguments << "--stop-on-desk-switch";
+#endif
 
     // debug level
     arguments << "--debug";
@@ -60,10 +64,12 @@ QStringList ProcessCommand::arguments(bool serverMode) const
     arguments << "--name";
     arguments << QHostInfo::localHostName();
 
+#ifdef Q_OS_WIN
     // drag and drop
     if (appConfig->dragAndDrop()) {
         arguments << "--enable-drag-drop";
     }
+#endif
 
     // profile directory
     arguments << "--profile-dir";
@@ -113,6 +119,8 @@ QStringList ProcessCommand::arguments(bool serverMode) const
         }
     }
 
+    arguments << "--log";
+    arguments << "synergy.log";
 
     if (m_directoryManager == NULL) {
         delete m_directoryManager;
