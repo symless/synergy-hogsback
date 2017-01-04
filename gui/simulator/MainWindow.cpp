@@ -81,6 +81,9 @@ MainWindow::onReceivedUniqueMulticastMessage(MulticastMessage msg) {
                 if (screenList[0].posX() == -1 &&
                     screenList[0].posY() == -1) {
                     getScreenModel()->removeScreen(screenList[0].name());
+                    int index = getNameModel()->stringList().indexOf(
+                                                    screenList[0].name());
+                    getNameModel()->removeRow(index);
                     return;
                 }
             }
