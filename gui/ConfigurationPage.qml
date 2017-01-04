@@ -351,6 +351,7 @@ Rectangle {
                                 anchors.leftMargin: 9
                                 fillMode: Image.PreserveAspectFit
                                 smooth: true
+                                visible: stateImage === "qrc:/res/image/screen-active.png"
                                 source: "qrc:/res/image/signal.png"
                             }
 
