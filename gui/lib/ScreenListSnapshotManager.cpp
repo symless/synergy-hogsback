@@ -39,5 +39,5 @@ void ScreenListSnapshotManager::loadFromFile()
 
 void ScreenListSnapshotManager::saveSnapshot(ScreenListModel* screenListModel)
 {
-    m_snapshots.insert(screenListModel->getScreenNames());
+    m_snapshots.insert(screenListModel->getScreenSet());
 }
