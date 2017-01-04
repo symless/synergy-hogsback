@@ -10,9 +10,6 @@ set (GUI_LIB_SOURCES
 	DeviceManager.cpp
 	DirectoryManager.cpp
 	Hostname.cpp
-	IpcClient.cpp
-	Ipc.cpp
-	IpcReader.cpp
 	IpManager.cpp
 	LogManager.cpp
 	Multicast.cpp

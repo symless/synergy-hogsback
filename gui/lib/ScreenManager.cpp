@@ -10,6 +10,7 @@
 #include "ProcessMode.h"
 
 #include <QtNetwork>
+#include <iostream>
 
 ScreenManager::ScreenManager() :
     m_screenListModel(NULL),
@@ -117,6 +118,19 @@ void ScreenManager::saveSnapshot()
     m_screenListSnapshotManager->saveSnapshot(m_screenListModel);
 }
 
+void ScreenManager::onKeyPressed (int const key)
+{
+    switch (key) {
+        case Qt::Key_S:
+            saveSnapshot();
+            break;
+        case Qt::Key_A:
+            updateConfigFile();
+            m_processManager->start();
+            break;
+    }
+}
+
 bool ScreenManager::addScreen(QString name)
 {
     if (m_screenListModel->findScreen(name) != -1) {
@@ -222,7 +236,7 @@ void ScreenManager::handleUniqueGroupMessage(MulticastMessage msg)
                     LogManager::info(QString("client %1 joined server unique "
                                              "group").arg(msg.m_hostname));
 
-                   matchedOrAdded = true;
+                    matchedOrAdded = true;
                 }
             }
 

@@ -13,13 +13,8 @@ Rectangle {
         id: screenListModel
     }
 
-//  IpcClient {
-//      id: ipcClient
-//  }
-
     ProcessManager {
         id: processManager
-        //ipcClient: ipcClient;
     }
 
     ScreenManager {
@@ -34,7 +29,7 @@ Rectangle {
     Connections {
         target: applicationWindow
         onKeyReceived: {
-            screenManager.saveSnapshot()
+            screenManager.onKeyPressed(key)
         }
     }
 
