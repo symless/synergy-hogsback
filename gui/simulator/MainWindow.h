@@ -38,7 +38,7 @@ private:
     void syncNameAndScreenModel();
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow* ui;
     MulticastManager* m_multicastManager = nullptr;
     QVector<QStringListModel*> m_namesModelList;
     QVector<ScreenListModel*> m_screemModelList;
