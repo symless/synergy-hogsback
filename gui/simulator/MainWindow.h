@@ -35,6 +35,7 @@ private:
     void onReceivedUniqueMulticastMessage (MulticastMessage);
     QStringListModel* getNameModel();
     ScreenListModel* getScreenModel();
+    void syncNameAndScreenModel();
 
 private:
     Ui::MainWindow *ui;

@@ -43,6 +43,22 @@ MainWindow::onReceivedDefaultMulticastMessage(MulticastMessage msg) {
     ui->p_textBrowserLogging->append(msg.toReadableString());
 }
 
+void MainWindow::syncNameAndScreenModel()
+{
+    int index = ui->p_comboBoxGroup->currentIndex();
+    QStringListModel* nameModel = m_namesModelList[index];
+    ScreenListModel* screenModel = m_screemModelList[index];
+
+    foreach (const Screen& screen, screenModel->getScreenSet()) {
+        if (!nameModel->stringList().contains(screen.name())) {
+            nameModel->insertRow(nameModel->rowCount());
+            QModelIndex i = nameModel->index(nameModel->rowCount() - 1);
+            nameModel->setData(i, screen.name());
+        }
+    }
+
+}
+
 void
 MainWindow::onReceivedUniqueMulticastMessage(MulticastMessage msg) {
     ui->p_textBrowserLogging->append("===== Received Unique Message =====");
@@ -70,6 +86,7 @@ MainWindow::onReceivedUniqueMulticastMessage(MulticastMessage msg) {
             }
 
             getScreenModel()->update(screenList);
+            syncNameAndScreenModel();
         }
     }
 }
