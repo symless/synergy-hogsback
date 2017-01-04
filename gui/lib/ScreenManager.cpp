@@ -129,7 +129,7 @@ bool ScreenManager::addScreen(QString name)
     return m_arrangementStrategy->addScreen(m_screenListModel, screen);
 }
 
-bool ScreenManager::removeScreen(QString name)
+bool ScreenManager::removeScreen(QString name, bool notify)
 {
     if (m_screenListModel->findScreen(name) == -1) {
         LogManager::debug(QString("screen doesn't exist: %1")
@@ -138,7 +138,18 @@ bool ScreenManager::removeScreen(QString name)
     }
 
     Screen screen(name);
-    return m_arrangementStrategy->removeScreen(m_screenListModel, screen);
+    bool result = m_arrangementStrategy->removeScreen(m_screenListModel,
+                                            screen);
+
+    if (result && notify) {
+        // only sync the changed part in configuration
+        ConfigMessageConvertor convertor;
+        Screen screen(name);
+        QString data = convertor.fromScreenToString(screen);
+        m_multicastManager->multicastUniqueConfigDelta(data);
+    }
+
+    return result;
 }
 
 int ScreenManager::processMode()
@@ -238,15 +249,9 @@ void ScreenManager::handleUniqueGroupMessage(MulticastMessage msg)
             }
         }
         else if (msg.m_type == MulticastMessage::kUniqueLeave) {
-            if (removeScreen(msg.m_hostname)) {
+            if (removeScreen(msg.m_hostname, true)) {
                 LogManager::info(QString("client %1 left server unique "
                                          "group").arg(msg.m_hostname));
-
-                // only sync the changed part in configuration
-                ConfigMessageConvertor convertor;
-                Screen screen(msg.m_hostname);
-                QString data = convertor.fromScreenToString(screen);
-                m_multicastManager->multicastUniqueConfigDelta(data);
             }
         }
     }

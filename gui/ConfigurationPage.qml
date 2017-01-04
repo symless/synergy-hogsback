@@ -339,6 +339,14 @@ Rectangle {
                                 smooth: true
                                 visible: false
                                 source: "qrc:/res/image/shutdown.png"
+
+                                MouseArea {
+                                    id: shutdownMouseArea
+                                    anchors.fill: parent
+                                    onReleased: {
+                                        screenManager.removeScreen(name, true)
+                                    }
+                                }
                             }
 
                             Image {
