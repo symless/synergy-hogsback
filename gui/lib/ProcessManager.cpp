@@ -2,31 +2,17 @@
 
 #include "ProcessCommand.h"
 #include "ScreenListModel.h"
-#include "IpcClient.h"
 #include "LogManager.h"
 #include "ProcessMode.h"
 #include <iostream>
 
 ProcessManager::ProcessManager() :
-    m_ipcClient(NULL),
     m_process(NULL),
     m_processMode(kClientMode),
     m_active(true),
     m_serverIp()
 {
 
-}
-
-IpcClient* ProcessManager::ipcClient() const
-{
-    return m_ipcClient;
-}
-
-void ProcessManager::setIpcClient(IpcClient *ipcClient)
-{
-    if (m_ipcClient != ipcClient) {
-        m_ipcClient = ipcClient;
-    }
 }
 
 int ProcessManager::processMode()
@@ -58,27 +44,6 @@ void ProcessManager::start()
     startProcess();
 }
 
-/*
-void ProcessManager::startProcessOnWin()
-{
-    // service mode on Windows
-    ProcessCommand processCommand;
-    QString command = processCommand.command(m_processMode == kServerMode);
-    if (m_processMode == kClientMode) {
-        processCommand.setServerIp(m_serverIp);
-    }
-    QStringList args = processCommand.arguments(m_processMode == kServerMode);
-    QString fullCommand(command + " " + args.join(" "));
-
-    if (!args.empty()) {
-        m_ipcClient->sendCommand(fullCommand, false);
-    }
-    else {
-        LogManager::error(QString("invalid command: %1")
-                          .arg(fullCommand));
-    }
-}
-*/
 
 void ProcessManager::startProcess()
 {

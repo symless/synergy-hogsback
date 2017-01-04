@@ -13,13 +13,8 @@ Rectangle {
         id: screenListModel
     }
 
-//  IpcClient {
-//      id: ipcClient
-//  }
-
     ProcessManager {
         id: processManager
-        //ipcClient: ipcClient;
     }
 
     ScreenManager {
