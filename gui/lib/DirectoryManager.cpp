@@ -18,28 +18,15 @@ DirectoryManager::~DirectoryManager()
 
 QString DirectoryManager::profileDir()
 {
-	CoreInterface coreInterface;
-
-	try {
-		return coreInterface.profileDir();
-	}
-	catch (std::runtime_error& e) {
-		LogManager::error(QString("failed to get profile directory, %1")
-							.arg(e.what()));
-		// TODO: remove this test code
-		return "\"C:\\Users\\Jerry\\AppData\\Local\"";
-		//throw e;
-	}
+    return "";
 }
 
 QString DirectoryManager::configFileDir()
 {
-	return installedDir();
+    return installedDir();
 }
 
 QString DirectoryManager::installedDir()
 {
-	// TODO: remove this test code
-	return "C:\\Users\\Jerry\\Desktop\\";
-	//return QCoreApplication::applicationDirPath();
+    return "";
 }
