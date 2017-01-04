@@ -11,17 +11,30 @@ MainWindow::MainWindow(QWidget *parent) :
     m_multicastManager = qobject_cast<MulticastManager*>
                                 (MulticastManager::instance());
     ui->setupUi(this);
-    connect (m_multicastManager, &MulticastManager::receivedUniqueGroupMessage,
+    connect(m_multicastManager, &MulticastManager::receivedUniqueGroupMessage,
              this, &MainWindow::onReceivedUniqueMulticastMessage);
-    connect (m_multicastManager, &MulticastManager::receivedDefaultGroupMessage,
+    connect(m_multicastManager, &MulticastManager::receivedDefaultGroupMessage,
              this, &MainWindow::onReceivedDefaultMulticastMessage);
 
-    ui->p_listViewScreenNames->setModel(&m_screenNamesModel);
+    for (int i = 0; i < ui->p_comboBoxGroup->count(); i++) {
+        QStringListModel* name = new QStringListModel();
+        m_namesModelList.append(name);
+
+        ScreenListModel* model = new ScreenListModel();
+        m_screemModelList.append(model);
+    }
+
+    ui->p_listViewScreenNames->setModel(m_namesModelList[0]);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+
+    for (int i = 0; i < ui->p_comboBoxGroup->count(); i++) {
+        delete m_namesModelList[i];
+        delete m_screemModelList[i];
+    }
 }
 
 void
@@ -51,30 +64,40 @@ MainWindow::onReceivedUniqueMulticastMessage(MulticastMessage msg) {
             if (screenList.size() == 1) {
                 if (screenList[0].posX() == -1 &&
                     screenList[0].posY() == -1) {
-                    m_screenListModel.removeScreen(screenList[0].name());
+                    getScreenModel()->removeScreen(screenList[0].name());
                     return;
                 }
             }
 
-            m_screenListModel.update(screenList);
+            getScreenModel()->update(screenList);
         }
     }
+}
+
+QStringListModel* MainWindow::getNameModel()
+{
+    return m_namesModelList[ui->p_comboBoxGroup->currentIndex()];
+}
+
+ScreenListModel* MainWindow::getScreenModel()
+{
+    return m_screemModelList[ui->p_comboBoxGroup->currentIndex()];
 }
 
 void MainWindow::on_p_pushButtonAdd_clicked()
 {
     // insert the screen name into the list view, no duplicate checking atm
-    m_screenNamesModel.insertRow(m_screenNamesModel.rowCount());
-    QModelIndex index = m_screenNamesModel.index(m_screenNamesModel.rowCount() - 1);
-    m_screenNamesModel.setData(index, ui->p_lineEditScreenName->text());
+    getNameModel()->insertRow(getNameModel()->rowCount());
+    QModelIndex index = getNameModel()->index(getNameModel()->rowCount() - 1);
+    getNameModel()->setData(index, ui->p_lineEditScreenName->text());
 }
 
 void MainWindow::on_p_pushButtonRemove_clicked()
 {
     // get the index number of the screen name shown in screen name field
-    int index = m_screenNamesModel.stringList().indexOf(
+    int index = getNameModel()->stringList().indexOf(
                     ui->p_lineEditScreenName->text());
-    m_screenNamesModel.removeRow(index);
+    getNameModel()->removeRow(index);
 }
 
 void MainWindow::on_p_pushButtonJoin_clicked()
@@ -114,7 +137,7 @@ void MainWindow::on_p_pushButtonLeave_clicked()
 
 void MainWindow::on_p_listViewScreenNames_pressed(const QModelIndex &index)
 {
-    QString selected = m_screenNamesModel.data(index, Qt::DisplayRole).toString();
+    QString selected = getNameModel()->data(index, Qt::DisplayRole).toString();
     ui->p_lineEditScreenName->setText(selected);
 }
 
@@ -122,8 +145,8 @@ void MainWindow::on_p_pushButtonConnected_pressed()
 {
     QString hostname = ui->p_lineEditScreenName->text();
     if (!hostname.isEmpty()) {
-        int index = m_screenListModel.findScreen(hostname);
-        const Screen& screen = m_screenListModel.getScreen(index);
+        int index = getScreenModel()->findScreen(hostname);
+        const Screen& screen = getScreenModel()->getScreen(index);
         Screen screenCopy = screen;
         screenCopy.setState(kConnected);
         ConfigMessageConvertor convertor;
@@ -136,12 +159,17 @@ void MainWindow::on_p_pushButtonDisconnected_pressed()
 {
     QString hostname = ui->p_lineEditScreenName->text();
     if (!hostname.isEmpty()) {
-        int index = m_screenListModel.findScreen(hostname);
-        const Screen& screen = m_screenListModel.getScreen(index);
+        int index = getScreenModel()->findScreen(hostname);
+        const Screen& screen = getScreenModel()->getScreen(index);
         Screen screenCopy = screen;
         screenCopy.setState(kDisconnected);
         ConfigMessageConvertor convertor;
         QString data = convertor.fromScreenToString(screenCopy);
         m_multicastManager->multicastUniqueConfigDelta(data);
     }
+}
+
+void MainWindow::on_p_comboBoxGroup_currentIndexChanged(int index)
+{
+    ui->p_listViewScreenNames->setModel(m_namesModelList[index]);
 }

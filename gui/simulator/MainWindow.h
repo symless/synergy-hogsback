@@ -28,14 +28,19 @@ private slots:
     void on_p_listViewScreenNames_pressed(const QModelIndex &index);
     void on_p_pushButtonConnected_pressed();
     void on_p_pushButtonDisconnected_pressed();
+    void on_p_comboBoxGroup_currentIndexChanged(int index);
 
 private:
     void onReceivedDefaultMulticastMessage (MulticastMessage);
     void onReceivedUniqueMulticastMessage (MulticastMessage);
+    QStringListModel* getNameModel();
+    ScreenListModel* getScreenModel();
+
+private:
     Ui::MainWindow *ui;
     MulticastManager* m_multicastManager = nullptr;
-    QStringListModel m_screenNamesModel;
-    ScreenListModel m_screenListModel;
+    QVector<QStringListModel*> m_namesModelList;
+    QVector<ScreenListModel*> m_screemModelList;
 };
 
 #endif // MAINWINDOW_H
