@@ -163,12 +163,18 @@ void MainWindow::on_p_pushButtonConnected_pressed()
     QString hostname = ui->p_lineEditScreenName->text();
     if (!hostname.isEmpty()) {
         int index = getScreenModel()->findScreen(hostname);
-        const Screen& screen = getScreenModel()->getScreen(index);
-        Screen screenCopy = screen;
-        screenCopy.setState(kConnected);
-        ConfigMessageConvertor convertor;
-        QString data = convertor.fromScreenToString(screenCopy);
-        m_multicastManager->multicastUniqueConfigDelta(data);
+        if (index != -1) {
+            const Screen& screen = getScreenModel()->getScreen(index);
+            Screen screenCopy = screen;
+            screenCopy.setState(kConnected);
+            ConfigMessageConvertor convertor;
+            QString data = convertor.fromScreenToString(screenCopy);
+            m_multicastManager->multicastUniqueConfigDelta(data);
+        }
+        else {
+            QString errorMsg = QString("Can't find ").append(hostname);
+            ui->p_textBrowserLogging->append(errorMsg);
+        }
     }
 }
 
@@ -177,12 +183,18 @@ void MainWindow::on_p_pushButtonDisconnected_pressed()
     QString hostname = ui->p_lineEditScreenName->text();
     if (!hostname.isEmpty()) {
         int index = getScreenModel()->findScreen(hostname);
-        const Screen& screen = getScreenModel()->getScreen(index);
-        Screen screenCopy = screen;
-        screenCopy.setState(kDisconnected);
-        ConfigMessageConvertor convertor;
-        QString data = convertor.fromScreenToString(screenCopy);
-        m_multicastManager->multicastUniqueConfigDelta(data);
+        if (index != -1) {
+            const Screen& screen = getScreenModel()->getScreen(index);
+            Screen screenCopy = screen;
+            screenCopy.setState(kDisconnected);
+            ConfigMessageConvertor convertor;
+            QString data = convertor.fromScreenToString(screenCopy);
+            m_multicastManager->multicastUniqueConfigDelta(data);
+        }
+        else {
+            QString errorMsg = QString("Can't find ").append(hostname);
+            ui->p_textBrowserLogging->append(errorMsg);
+        }
     }
 }
 
