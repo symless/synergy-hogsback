@@ -34,5 +34,6 @@
         <file>res/image/signal-tower-off.png</file>
         <file>res/image/shutdown.png</file>
         <file>res/image/signal.png</file>
+        <file>res/image/doge.png</file>
     </qresource>
 </RCC>

@@ -30,6 +30,7 @@ public:
     Q_INVOKABLE void updateConfigFile();
     Q_INVOKABLE bool removeScreen(QString name, bool notify = false);
     Q_INVOKABLE void onKeyPressed(const int key);
+    Q_INVOKABLE bool addScreen(QString name);
 
     // TODO: remove these debug functions
     Q_INVOKABLE void printBoundingBoxInfo();
@@ -42,7 +43,6 @@ public:
     void saveSnapshot();
 
 private:
-    bool addScreen(QString name);
     int processMode();
     void setupWaitTimer();
 
