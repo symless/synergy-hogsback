@@ -80,6 +80,9 @@ QStringList ProcessCommand::arguments(bool serverMode) const
     arguments << "--profile-dir";
     arguments << wrapCommand(directoryManager->profileDir());
 
+    arguments << "--log";
+    arguments << "synergy.log";
+
     if (serverMode) {
         // configuration file
         arguments << "-c";
@@ -123,9 +126,6 @@ QStringList ProcessCommand::arguments(bool serverMode) const
             arguments.clear();
         }
     }
-
-    arguments << "--log";
-    arguments << "synergy.log";
 
     if (m_directoryManager == NULL) {
         delete m_directoryManager;
