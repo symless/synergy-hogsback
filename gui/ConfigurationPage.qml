@@ -176,7 +176,7 @@ Rectangle {
             z: 1
             anchors.right: parent.right
             anchors.top: configurationPageBackgroundSeparator.bottom
-            property variant items: ["Undo", "Redo", "Add a new screen"]
+            property variant items: ["Add a new screen"]
             smooth:true;
 
             Rectangle {
@@ -433,9 +433,9 @@ Rectangle {
             }
         }
 
-        // general icon
+        // log icon
         Rectangle {
-            id: general
+            id: log
             width: 50
             height: 50
             z: 3
@@ -450,7 +450,7 @@ Rectangle {
                 height: parent.height
                 fillMode: Image.Stretch
                 smooth: true
-                source: "qrc:/res/image/general.png"
+                source: "qrc:/res/image/log.png"
             }
         }
 
@@ -461,7 +461,7 @@ Rectangle {
             height: 50
             z: 3
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: general.bottom
+            anchors.top: log.bottom
             anchors.topMargin: 30
             color: "transparent"
 
