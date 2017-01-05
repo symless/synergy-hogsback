@@ -5,6 +5,9 @@
 #include "LogManager.h"
 #include "ProcessMode.h"
 #include <iostream>
+#ifndef Q_OS_WIN
+#include <unistd.h>
+#endif
 
 ProcessManager::ProcessManager() :
     m_process(NULL),
@@ -74,8 +77,12 @@ void ProcessManager::startProcess()
     }
     QStringList args = processCommand.arguments(
                             m_processMode == kServerMode);
-
+#ifndef Q_OS_WIN
     auto argstr = args.join(" ").toStdString();
+    std::cout << getcwd(NULL, 0) << std::endl;
+    std::cout << command.toStdString() << std::endl;
+    std::cout << argstr << std::endl;
+#endif
     m_process->start(command, args);
 
     if (!m_process->waitForStarted()) {

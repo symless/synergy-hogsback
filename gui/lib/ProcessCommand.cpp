@@ -8,8 +8,13 @@
 #include <QHostInfo>
 #include <QMetaEnum>
 
+#ifdef Q_OS_WIN
 const QString kServerCmd = "synergys.exe";
 const QString kClientCmd = "synergyc.exe";
+#else
+const QString kServerCmd = "synergys";
+const QString kClientCmd = "synergyc";
+#endif
 
 ProcessCommand::ProcessCommand(QObject* parent) :
     QObject(parent),
@@ -30,7 +35,7 @@ QString ProcessCommand::command(bool serverMode) const
         command += kClientCmd;
     }
 
-    return wrapCommand(command);
+    return command;
 }
 
 QStringList ProcessCommand::arguments(bool serverMode) const
