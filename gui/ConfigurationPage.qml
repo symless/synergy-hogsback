@@ -215,6 +215,9 @@ Rectangle {
                             hoverEnabled: true
                             onClicked: {
                                 dropMenu.state = ""
+                                if (index == 0) {
+                                    screenManager.addScreen("Unknown")
+                                }
                             }
                         }
                     }
