@@ -14,3 +14,7 @@
     path = synergy
     url = https://github.com/symless/synergy.git
     branch = v2.0.0
+[submodule "third_party/libsodium"]
+	path = third_party/libsodium
+	url = https://github.com/jedisct1/libsodium.git
+	branch = stable
