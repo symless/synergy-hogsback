@@ -19,12 +19,12 @@ set (GUI_LIB_SOURCES
     ProcessManager.cpp
     ScreenBBArrangement.cpp
     Screen.cpp
+    ScreenListModel.cpp
+    ScreenListSnapshotManager.cpp
     ScreenManager.cpp
-        ScreenListModel.cpp
-        ScreenListSnapshotManager.cpp
     ServerInfo.cpp
 )
 
 add_library (synlib ${GUI_LIB_SOURCES})
 target_compile_definitions (synlib PRIVATE -DSYNLIB)
-qt5_use_modules (synlib Quick Widgets Network)
+qt5_use_modules (synlib Core Widgets Quick Network)

@@ -6,7 +6,7 @@ set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)
 set (CMAKE_AUTOUIC ON)
 
-find_package (Qt5 COMPONENTS Widgets Core Network)
+find_package (Qt5 COMPONENTS Core Widgets Network)
 
 add_executable (${PROJECT_NAME}
     main.cpp
@@ -17,4 +17,4 @@ add_executable (${PROJECT_NAME}
 
 include_directories (../lib)
 target_link_libraries (${PROJECT_NAME} synlib)
-qt5_use_modules (${PROJECT_NAME} Widgets Core Network)
+qt5_use_modules (${PROJECT_NAME} Core Widgets Network)

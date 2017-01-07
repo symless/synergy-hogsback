@@ -1,23 +1,25 @@
 cmake_minimum_required (VERSION 3.4)
 
-find_package(Qt5Test REQUIRED)
+find_package (Qt5Test REQUIRED)
 
 set (GUI_TEST_SOURCES
-	ConfigFileManagerTest.cpp
-	ConfigMessageConvertorTest.cpp
-	ScreenBBArrangementTest.cpp
-	ProcessCommandTest.cpp
-	MulticastMessageTest.cpp
-	main.cpp
-	AutoTest.h
-        mock/MockDeviceManager.cpp
-        mock/MockDirectoryManager.cpp
-        mock/MockScreenModel.cpp
+    ConfigFileManagerTest.cpp
+    ConfigMessageConvertorTest.cpp
+    main.cpp
+    MulticastMessageTest.cpp
+    ProcessCommandTest.cpp
+    ScreenBBArrangementTest.cpp
+    AutoTest.h
+    mock/MockDeviceManager.cpp
+    mock/MockDirectoryManager.cpp
+    mock/MockScreenModel.cpp
 )
 
 add_executable (gui-tests ${GUI_TEST_SOURCES})
+
 include_directories(
-        ../lib/
-        mock/
+    ../lib
+    mock
 )
+
 target_link_libraries (gui-tests Qt5::Test synlib)

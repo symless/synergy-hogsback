@@ -6,7 +6,7 @@ set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DQT_QML_DEBUG ")
 
-find_package(Qt5 COMPONENTS Widgets Quick Core)
+find_package (Qt5 COMPONENTS Core Widgets Quick Network)
 add_subdirectory (lib)
 add_subdirectory (tests)
 add_subdirectory (simulator)
@@ -42,9 +42,6 @@ if (WIN32)
     target_link_libraries (${PROJECT_NAME} ws2_32 rpcrt4 iphlpapi)
 endif()
 
-# Check if we are on Mac
 if (APPLE)
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-            MACOSX_BUNDLE YES
-    )
+    set_target_properties (${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE YES)
 endif()

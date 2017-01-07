@@ -15,32 +15,23 @@ if (WIN32)
     add_definitions (-DWINVER=0x0600)
 endif()
 
-if (MSVC)
-    # Enable parallel builds
-   # set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MP /EHsc")
-   # set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MP /EHsc")
-endif()
-
 if (CMAKE_COMPILER_IS_GNUCXX)
-#set (CMAKE_CXX_FLAGS_RELEASE "-Os -flto -fvisibility=hidden -DNDEBUG")
+    #set (CMAKE_CXX_FLAGS_RELEASE "-Os -flto -fvisibility=hidden -DNDEBUG")
 endif()
-
-include_directories (BEFORE SYSTEM third_party/libzmq/include)
-include_directories (BEFORE SYSTEM third_party/cppzmq)
 
 set (Boost_USE_MULTITHREADED ON)
 set (Boost_USE_STATIC_LIBS ON)
 set (Boost_USE_STATIC_RUNTIME OFF)
-
 find_package (Boost 1.53 REQUIRED COMPONENTS system date_time)
 find_package (Threads REQUIRED)
 
+include_directories (BEFORE SYSTEM third_party/libzmq/include)
+include_directories (BEFORE SYSTEM third_party/cppzmq)
 add_definitions (-DZMQ_STATIC)
 add_definitions (-DZMQ_BUILD_DRAFT_API)
 
 add_subdirectory (third_party)
 add_subdirectory (protocol)
-
 add_dependencies (fbs_protocol flatc)
 #add_subdirectory (service)
 add_subdirectory (gui)
