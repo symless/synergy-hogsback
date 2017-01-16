@@ -115,49 +115,6 @@ Rectangle {
                     source: "qrc:/res/image/option.png"
                 }
             }
-
-            // search icon
-            Rectangle {
-                id: search
-                width: 50
-                height: 50
-                z: 1
-                anchors.right: option.left
-                anchors.rightMargin: 10
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 10
-                color: "transparent"
-                property bool searching: true
-
-                MouseArea {
-                    id: searchMouseArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onPressed: {
-                        if (search.searching) {
-                            search.height = 38
-                            searchImage.source =
-                                    "qrc:/res/image/signal-tower-off.png"
-                        }
-                        else {
-                             search.height = 50
-                            searchImage.source =
-                                    "qrc:/res/image/signal-tower-on.png"
-                        }
-
-                        search.searching = !search.searching
-                    }
-                }
-
-                Image {
-                    id: searchImage
-                    width: parent.width
-                    height: parent.height
-                    fillMode: Image.PreserveAspectFit
-                    smooth: true
-                    source: "qrc:/res/image/signal-tower-on.png"
-                }
-            }
         }
 
         // separator
