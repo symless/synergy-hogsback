@@ -5,7 +5,7 @@
 
 static const QStringList preferredIPAddress(
                 QStringList() <<
-                "10." <<
+                "10.1.2" <<
                 "192.168." <<
                 "172.");
 
