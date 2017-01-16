@@ -57,8 +57,9 @@ void Multicast::join()
 		this, SLOT(processDatagrams()));
 	m_socket->bind(QHostAddress::AnyIPv4, m_port,
 				QUdpSocket::ShareAddress | QUdpSocket::ReuseAddressHint);
-	m_socket->joinMulticastGroup(m_address,
+    bool r = m_socket->joinMulticastGroup(m_address,
 				getNetworkInterfaceByAddress(m_localIp));
+    QString t = m_address.toString();
 
 	m_socket->setMulticastInterface(
 				getNetworkInterfaceByAddress(m_localIp));
