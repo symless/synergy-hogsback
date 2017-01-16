@@ -77,7 +77,7 @@ void ConfigFileManager::writeDefaultScreenSettings(QTextStream& stream)
 void ConfigFileManager::writeDefaultOptionSettings(QTextStream& stream)
 {
     stream << "section: options" << endl;
-    stream << "\t\t" << "relativeMouseMoves = false" << endl;
+    stream << "\t\t" << "relativeMouseMoves = true" << endl;
     stream << "\t\t" << "screenSaverSync = true" << endl;
     stream << "\t\t" << "win32KeepForeground = false" << endl;
     stream << "\t\t" << "switchCorners = none" << endl;
