@@ -7,8 +7,6 @@ set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/install/bin")
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/install/lib")
 
-set (BUILD_SERVICE OFF CACHE BOOL "Build the legacy service")
-
 if (WIN32)
     # Configure for Windows Vista and above. Vista has extended support from
     # Microsoft until April 11, 2017
@@ -38,4 +36,6 @@ add_subdirectory (protocol)
 add_dependencies (fbs_protocol flatc)
 #add_subdirectory (service)
 add_subdirectory (gui)
+
+set (BUILD_SERVICE OFF CACHE BOOL "Build the legacy service")
 add_subdirectory (synergy)
