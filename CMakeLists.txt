@@ -17,6 +17,10 @@ if (WIN32)
     add_definitions (-DWINVER=0x0600)
 endif()
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    add_definitions (-Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic)
+endif()
+
 if (CMAKE_COMPILER_IS_GNUCXX)
     #set (CMAKE_CXX_FLAGS_RELEASE "-Os -flto -fvisibility=hidden -DNDEBUG")
 endif()

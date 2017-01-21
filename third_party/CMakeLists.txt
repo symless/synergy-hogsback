@@ -5,6 +5,10 @@ if (APPLE)
     set (ZMQ_BUILD_FRAMEWORK OFF CACHE BOOL "Build ZMQ as an OS X framework" FORCE)
 endif()
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    remove_definitions (-Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic)
+endif()
+
 add_subdirectory (fmt EXCLUDE_FROM_ALL)
 add_subdirectory (norm EXCLUDE_FROM_ALL)
 
