@@ -22,6 +22,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX)
+    add_definitions (-Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Wformat=2)
     #set (CMAKE_CXX_FLAGS_RELEASE "-Os -flto -fvisibility=hidden -DNDEBUG")
 endif()
 

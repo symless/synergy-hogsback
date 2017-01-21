@@ -9,6 +9,10 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     remove_definitions (-Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic)
 endif()
 
+if (CMAKE_COMPILER_IS_GNUCXX)
+    remove_definitions (-Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Wformat=2)
+endif()
+
 add_subdirectory (fmt EXCLUDE_FROM_ALL)
 add_subdirectory (norm EXCLUDE_FROM_ALL)
 
