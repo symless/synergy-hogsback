@@ -21,7 +21,7 @@ if (MSVC)
     add_definitions (/W4)
 endif()
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if ((${CMAKE_SYSTEM_NAME} MATCHES "Darwin") AND (NOT DEFINED SCAN_BUILD))
     add_definitions (-Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic)
 endif()
 
