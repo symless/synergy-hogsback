@@ -17,6 +17,10 @@ if (WIN32)
     add_definitions (-DWINVER=0x0600)
 endif()
 
+if (MSVC)
+    add_definitions (/W4)
+endif()
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     add_definitions (-Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic)
 endif()
