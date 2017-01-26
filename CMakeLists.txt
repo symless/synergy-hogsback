@@ -24,22 +24,21 @@ if (WIN32)
 
 elseif (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
 
-    if (NOT DEFINED SCAN_BUILD)
-        set (SYNERGY_WARNING_FLAGS
-            -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic)
-    endif()
+    set (SYNERGY_WARNING_FLAGS
+        -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic)
 
 elseif (CMAKE_COMPILER_IS_GNUCXX)
 
-    if (NOT DEFINED SCAN_BUILD)
-        set (SYNERGY_WARNING_FLAGS
-            -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Wformat=2)
-    endif()
+    set (SYNERGY_WARNING_FLAGS
+        -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Wformat=2)
 
     set (SYNERGY_CXX_FLAGS_RELEASE "-Os -flto -fvisibility=hidden -DNDEBUG")
 
 endif()
 
+if (NOT DEFINED SCAN_BUILD)
+    add_definitions (${SYNERGY_WARNING_FLAGS})
+endif()
 
 if ((DEFINED SYNERGY_CXX_FLAGS_RELEASE) AND (CMAKE_BUILD_TYPE EQUAL "Release"))
     set (CMAKE_CXX_FLAGS_RELEASE ${SYNERGY_CXX_FLAGS_RELEASE})
@@ -54,6 +53,7 @@ set (Boost_USE_MULTITHREADED ON)
 set (Boost_USE_STATIC_LIBS ON)
 set (Boost_USE_STATIC_RUNTIME OFF)
 find_package (Boost 1.53 REQUIRED COMPONENTS system date_time)
+
 
 include_directories (BEFORE SYSTEM third_party/libzmq/include)
 include_directories (BEFORE SYSTEM third_party/cppzmq)
