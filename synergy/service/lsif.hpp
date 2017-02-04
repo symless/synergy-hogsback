@@ -2,12 +2,14 @@
 #define LSIF_HPP
 
 #include <boost/asio/ip/address.hpp>
-#include <map>
+#include <boost/bimap.hpp>
+#include <boost/bimap/unordered_set_of.hpp>
 #include <string>
 
-// TODO: return a set of network interface structs that look more like the
-// struct in multicast.hpp
+using NetworkInterfaceMap =
+    boost::bimap<boost::bimaps::set_of<std::string>,
+                 boost::bimaps::set_of<boost::asio::ip::address>>;
 
-std::map<std::string, boost::asio::ip::address> get_all_netdevices ();
+NetworkInterfaceMap get_netdevice_map ();
 
 #endif // LSIF_HPP

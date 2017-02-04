@@ -1,14 +1,14 @@
-#include <synergy/service/lsif.hpp>
-#include <synergy/service/unix_util.hpp>
 #include <boost/endian/conversion.hpp>
 #include <boost/scope_exit.hpp>
 #include <ifaddrs.h>
 #include <netinet/in.h>
+#include <synergy/service/lsif.hpp>
+#include <synergy/service/unix_util.hpp>
 #include <sys/types.h>
 
-std::map<std::string, boost::asio::ip::address>
-get_all_netdevices () {
-    std::map<std::string, boost::asio::ip::address> map;
+NetworkInterfaceMap
+get_netdevice_map () {
+    NetworkInterfaceMap map;
 
     struct ::ifaddrs* ifa = nullptr;
     if (getifaddrs (&ifa)) {
@@ -20,15 +20,16 @@ get_all_netdevices () {
     }
     BOOST_SCOPE_EXIT_END
 
-    do {
-        if (!ifa->ifa_addr || (ifa->ifa_addr->sa_family != AF_INET)) {
+    for (auto if_p = ifa; if_p != NULL; if_p = if_p->ifa_next) {
+        if (!if_p->ifa_addr || (if_p->ifa_addr->sa_family != AF_INET)) {
             continue;
         }
-        auto& addr = reinterpret_cast<struct sockaddr_in&> (*ifa->ifa_addr);
-        map.emplace (ifa->ifa_name,
-                     boost::asio::ip::address_v4 (
-                         boost::endian::big_to_native (addr.sin_addr.s_addr)));
-    } while ((ifa = ifa->ifa_next));
+        auto& addr = reinterpret_cast<struct sockaddr_in&> (*if_p->ifa_addr);
+        map.insert (NetworkInterfaceMap::value_type (
+            if_p->ifa_name,
+            boost::asio::ip::address_v4 (
+                boost::endian::big_to_native (addr.sin_addr.s_addr))));
+    }
 
     return map;
 }
@@ -39,8 +40,8 @@ get_all_netdevices () {
 
 int
 main (int, char**) {
-    auto map = get_all_netdevices ();
-    for (auto& e : map) {
+    auto map = get_netdevice_map ();
+    for (auto& e : map.left) {
         std::cout << e.first << " -> " << e.second << std::endl;
     }
 }
