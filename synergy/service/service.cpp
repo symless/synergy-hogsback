@@ -1,5 +1,5 @@
-#include "service.hpp"
-#include "multicast.hpp"
+#include <synergy/service/service.hpp>
+#include <synergy/service/multicast.hpp>
 #include <boost/optional.hpp>
 #include <chrono>
 #include <fmt/format.h>

@@ -1,5 +1,5 @@
-#include "multicast.hpp"
-#include "lsif.hpp"
+#include <synergy/service/multicast.hpp>
+#include <synergy/service/lsif.hpp>
 
 std::vector<MulticastInterface>
 get_all_multicast_interfaces () {

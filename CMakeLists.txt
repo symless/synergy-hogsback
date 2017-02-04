@@ -24,11 +24,11 @@ if (WIN32)
     endif()
 
 elseif (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
-    set (SYNERGY_WARNING_FLAGS  -Weverything 
+    set (SYNERGY_WARNING_FLAGS  -Weverything
                                 -Wno-c++98-compat -Wno-c++98-compat-pedantic)
 
 elseif (CMAKE_COMPILER_IS_GNUCXX)
-    set (SYNERGY_WARNING_FLAGS -Wall -Wextra -Wpedantic 
+    set (SYNERGY_WARNING_FLAGS -Wall -Wextra -Wpedantic
                                -Wconversion -Wsign-conversion -Wformat=2)
     set (SYNERGY_CXX_FLAGS_RELEASE "-Os -flto -fvisibility=hidden -DNDEBUG")
 
@@ -60,6 +60,7 @@ add_definitions (-DZMQ_USE_LIBSODIUM)
 include_directories (BEFORE SYSTEM third_party/libzmq/include)
 include_directories (BEFORE SYSTEM third_party/cppzmq)
 
-
 add_subdirectory (third_party)
+
+include_directories (.)
 add_subdirectory (synergy)

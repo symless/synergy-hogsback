@@ -1,5 +1,5 @@
-#include "lsif.hpp"
-#include "unix_util.hpp"
+#include <synergy/service/lsif.hpp>
+#include <synergy/service/unix_util.hpp>
 #include <boost/asio/ip/address.hpp>
 #include <boost/endian/conversion.hpp>
 #include <boost/numeric/conversion/cast.hpp>

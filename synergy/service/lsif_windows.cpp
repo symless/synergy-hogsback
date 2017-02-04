@@ -1,4 +1,4 @@
-#include "lsif.hpp"
+#include <synergy/service/lsif.hpp>
 #include <vector>
 #include <cstring>
 #include <cassert>
