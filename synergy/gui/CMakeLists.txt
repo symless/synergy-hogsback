@@ -34,6 +34,7 @@ target_link_libraries (${PROJECT_NAME}
     synlib
     fmt
     libzmq-static
+    ${SODIUM_LIBRARIES}
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
 )
