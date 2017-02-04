@@ -42,6 +42,3 @@ if (WIN32)
     target_link_libraries (${PROJECT_NAME} ws2_32 rpcrt4 iphlpapi)
 endif()
 
-if (APPLE)
-    set_target_properties (${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE YES)
-endif()
