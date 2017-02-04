@@ -27,5 +27,7 @@ endfunction()
 
 file (GLOB FBS_FILES *.fbs)
 flatc_generate_cpp (FBS_FILES FBS_HEADERS)
+
 add_library (fbs_protocol STATIC ${FBS_HEADERS} empty.cpp)
+add_dependencies (fbs_protocol flatc)
 set_target_properties (fbs_protocol PROPERTIES LINKER_LANGUAGE CXX)

@@ -11,7 +11,7 @@
     path = third_party/flatbuffers
     url = https://github.com/google/flatbuffers.git
 [submodule "synergy"]
-    path = synergy
+	path = synergy/core
     url = https://github.com/symless/synergy.git
     branch = v2.0.0
 [submodule "third_party/libsodium"]
