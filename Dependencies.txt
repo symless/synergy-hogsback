@@ -1,0 +1,57 @@
+Synergy v2.0 Dependencies
+=========================
+
+Current Versions
+(on Windows and macOS, Linux versions vary)
+===========================================
+    
+    Oldest first:
+    - libsodium     1.0.11  released  1 August 2016
+    - Boost         1.63.0  released 26 December 2016
+    - Qt            5.8     released 23 January 2017
+    - OpenSSL       1.0.2k  released 27 January 2017
+    - ZeroZMQ       master  until 4.2.2 is released
+
+Windows
+=======
+Precompiled:
+
+    - Qt        (installed using the installer in to C:\Qt)
+
+    - Boost     (from https://sourceforge.net/projects/boost/files/boost-binaries/
+                 unzipped to C:\Boost\ and added to PATH)
+
+    - libsodium (from https://download.libsodium.org/libsodium/releases/
+                 unzipped to C:\libsodium)
+
+    - OpenSSL   (from https://www.openssl.org/source/
+                 built on the build slave from source using NASM and Strawberry Perl
+                 in tree under synergy/core/ext/openssl)
+
+CentOS 7
+========
+Tools:
+    
+    - CMake 3   (installed from the EPEL repository)
+
+Precompiled:
+
+    - Boost     (distro version (1.53.0) is too old, installed in to
+                 /home/synergy/boost)
+
+Linux (General)
+===============
+Strategy:
+    
+    - Using distro versions of everything, unless unavoidable.
+    
+    - Statically link C++ libraries like Boost unless they provide a stable
+      ABI (Qt does, as does ZMQ (written in C++, but provides a C API which the 
+      official C++ API uses under the covers))
+
+macOS
+=====
+Precompiled:
+
+    - Qt        (installed using the installer in to /Users/Synergy/Qt)
+    - libsodium (installed with brew in /usr/local/)
