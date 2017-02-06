@@ -60,6 +60,7 @@ add_definitions (-DZMQ_USE_LIBSODIUM)
 include_directories (BEFORE SYSTEM third_party/libzmq/include)
 include_directories (BEFORE SYSTEM third_party/cppzmq)
 
+include_directories (third_party/catch/include)
 add_subdirectory (third_party)
 
 include_directories (.)
