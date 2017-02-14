@@ -69,6 +69,7 @@ Rectangle {
                             hint.text = ""
 
                             // Contact Cloud
+                            stackView.push({item : Qt.resolvedUrl("ConfigurationPage.qml")})
                         }
                         else {
                             hint.text = "Empty email or password"
