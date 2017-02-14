@@ -4,6 +4,11 @@ import QtQuick.Controls 1.2
 import com.synergy.gui 1.0
 
 Rectangle {
+
+    CloudClient {
+        id: cloudClient
+    }
+
     Item {
         id: advancedPage
         anchors.fill: parent
@@ -65,10 +70,12 @@ Rectangle {
                     anchors.topMargin: 10
                     text: "Sign in"
                     onClicked: {
-                        if (password.text && email.text) {
+                        if (email.text && password.text) {
                             hint.text = ""
 
-                            // Contact Cloud
+                            // contact Cloud
+                            cloudClient.login(email.text, password.text)
+
                             stackView.push({item : Qt.resolvedUrl("ConfigurationPage.qml")})
                         }
                         else {

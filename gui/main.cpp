@@ -1,4 +1,5 @@
 #include "Hostname.h"
+#include "CloudClient.h"
 #include "ScreenListModel.h"
 #include "ScreenManager.h"
 #include "LogManager.h"
@@ -20,6 +21,7 @@ int main(int argc, char* argv[])
         qmlRegisterType<ScreenListModel>("com.synergy.gui", 1, 0, "ScreenListModel");
         qmlRegisterType<ScreenManager>("com.synergy.gui", 1, 0, "ScreenManager");
         qmlRegisterType<ProcessManager>("com.synergy.gui", 1, 0, "ProcessManager");
+        qmlRegisterType<CloudClient>("com.synergy.gui", 1, 0, "CloudClient");
         QQmlApplicationEngine engine(QUrl(QStringLiteral("qrc:/main.qml")));
 
         QIcon icon(":res/image/synergy.ico");
