@@ -21,7 +21,7 @@ ApplicationWindow {
         }
 
         initialItem: {
-            [{item : Qt.resolvedUrl("Configuration.qml")}]
+            [{item : Qt.resolvedUrl("ActivationPage.qml")}]
         }
     }
 }
