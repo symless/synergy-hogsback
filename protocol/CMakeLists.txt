@@ -13,11 +13,11 @@ function (flatc_generate_cpp _FBS_FILES _FBS_HEADERS)
             OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${FBS_FILE_WE}_generated.h"
             COMMAND flatc
             ARGS --cpp --scoped-enums --gen-object-api
-		 		 -o ${CMAKE_CURRENT_BINARY_DIR} -I ${CMAKE_CURRENT_SOURCE_DIR}
-            	 ${FBS_FILE_ABS}
+                  -o ${CMAKE_CURRENT_BINARY_DIR} -I ${CMAKE_CURRENT_SOURCE_DIR}
+                 ${FBS_FILE_ABS}
             DEPENDS ${FBS_FILE_ABS}
             COMMENT "Running Flatbuffers compiler on ${FBS_FILE_NAME}"
-	    	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             VERBATIM
         )
     endforeach()

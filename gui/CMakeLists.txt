@@ -16,7 +16,7 @@ add_executable (${PROJECT_NAME}
     qml.qrc
     main.qml
     AdvancedPage.qml
-	ActivationPage.qml
+    ActivationPage.qml
     ConfigSettingView.qml
     ConfigurationPage.qml
     CustomBorder.qml

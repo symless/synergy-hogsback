@@ -3,6 +3,7 @@ cmake_minimum_required (VERSION 3.4)
 set (GUI_LIB_SOURCES
     AppConfig.cpp
     Common.cpp
+    CloudClient.cpp
     ConfigFileManager.cpp
     ConfigMessageConvertor.cpp
     CoreInterface.cpp
