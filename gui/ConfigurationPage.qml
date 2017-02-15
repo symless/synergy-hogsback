@@ -270,7 +270,9 @@ Rectangle {
                                                 screenIcon.y - beginDrag.y)
                             }
                             onHoveredChanged: {
-                                shutdownImage.visible = !shutdownImage.visible
+                                if (name !== localHostname.hostname()) {
+                                    shutdownImage.visible = !shutdownImage.visible
+                                }
                             }
                         }
 
