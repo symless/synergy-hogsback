@@ -349,6 +349,7 @@ Rectangle {
         z: 2
         color:"white"
         property bool opened: false
+        visible: x != -width ? true : false
 
         Behavior on x {NumberAnimation
                         {duration: 500; easing.type: Easing.OutQuad}}
