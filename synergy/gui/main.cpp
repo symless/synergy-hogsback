@@ -1,3 +1,4 @@
+#include "AppConfig.h"
 #include "Hostname.h"
 #include "CloudClient.h"
 #include "ScreenListModel.h"
@@ -13,6 +14,10 @@
 
 int main(int argc, char* argv[])
 {
+    QCoreApplication::setOrganizationName("Symless");
+    QCoreApplication::setOrganizationDomain("http://symless.com/");
+    QCoreApplication::setApplicationName("Synergy v2");
+
     QApplication app(argc, argv);
     LogManager::instance();
 
@@ -22,6 +27,7 @@ int main(int argc, char* argv[])
         qmlRegisterType<ScreenManager>("com.synergy.gui", 1, 0, "ScreenManager");
         qmlRegisterType<ProcessManager>("com.synergy.gui", 1, 0, "ProcessManager");
         qmlRegisterType<CloudClient>("com.synergy.gui", 1, 0, "CloudClient");
+        qmlRegisterSingletonType<AppConfig>("com.synergy.gui", 1, 0, "AppConfig", AppConfig::instance);
         QQmlApplicationEngine engine(QUrl(QStringLiteral("qrc:/main.qml")));
 
         QIcon icon(":res/image/synergy.ico");
