@@ -12,7 +12,7 @@
 // TODO: use cloud url
 static const char kCloudUrl[] = "http://192.168.3.59:8080/login";
 
-CloudClient::CloudClient(QObject *parent) : QObject(parent)
+CloudClient::CloudClient(QObject* parent) : QObject(parent)
 {
     m_networkManager = new QNetworkAccessManager(this);
 
@@ -45,5 +45,6 @@ void CloudClient::onfinish(QNetworkReply* reply)
     QJsonObject obj = doc.object();
     int id = obj["uid"].toInt();
     m_appConfig->setUserId(id);
-    qDebug() << token << endl;
+
+    emit connected();
 }

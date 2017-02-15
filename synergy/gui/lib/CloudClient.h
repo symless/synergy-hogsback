@@ -17,6 +17,7 @@ public:
     Q_INVOKABLE void login(QString email, QString password);
 
 signals:
+    void connected();
 
 public slots:
     void onfinish(QNetworkReply* reply);

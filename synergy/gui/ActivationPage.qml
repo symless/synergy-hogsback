@@ -9,6 +9,13 @@ Rectangle {
         id: cloudClient
     }
 
+    Connections {
+        target: cloudClient
+        onConnected: {
+            stackView.push({item : Qt.resolvedUrl("ConfigurationPage.qml")})
+        }
+    }
+
     Item {
         id: advancedPage
         anchors.fill: parent
@@ -76,8 +83,6 @@ Rectangle {
 
                             // contact Cloud
                             cloudClient.login(email.text, password.text)
-
-                            stackView.push({item : Qt.resolvedUrl("ConfigurationPage.qml")})
                         }
                         else {
                             hint.text = "Empty email or password"
