@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.4)
 
-find_package (Qt5Test REQUIRED)
+find_package (Qt5 COMPONENTS Test REQUIRED)
 
 set (GUI_TEST_SOURCES
     ConfigFileManagerTest.cpp
@@ -22,4 +22,5 @@ include_directories(
     mock
 )
 
-target_link_libraries (gui-tests Qt5::Test synlib)
+qt5_use_modules (gui-tests Test)
+target_link_libraries (gui-tests synlib)
