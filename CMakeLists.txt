@@ -20,7 +20,7 @@ if (WIN32)
     add_definitions (/DWINVER=0x0600)
 
     if (MSVC)
-        set (SYNERGY_WARNING_FLAGS /W4)
+        #set (SYNERGY_WARNING_FLAGS /W4)
     endif()
 
 elseif (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
