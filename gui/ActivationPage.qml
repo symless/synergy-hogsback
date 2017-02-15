@@ -59,6 +59,7 @@ Rectangle {
                     anchors.topMargin: 10
                     placeholderText: qsTr("Password")
                     horizontalAlignment: Text.AlignHCenter
+                    echoMode: TextInput.Password
                 }
 
                 Button {
