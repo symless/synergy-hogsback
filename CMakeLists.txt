@@ -56,7 +56,7 @@ find_package (Boost 1.53 REQUIRED COMPONENTS system date_time)
 
 add_definitions (-DZMQ_STATIC)
 add_definitions (-DZMQ_BUILD_DRAFT_API)
-#add_definitions (-DZMQ_USE_LIBSODIUM)
+add_definitions (-DZMQ_USE_LIBSODIUM)
 include_directories (BEFORE SYSTEM third_party/libzmq/include)
 include_directories (BEFORE SYSTEM third_party/cppzmq)
 
