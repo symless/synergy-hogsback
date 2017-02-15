@@ -6,6 +6,7 @@
 
 #include <QObject>
 #include <QQmlEngine>
+#include <QSettings>
 
 class LIB_SPEC AppConfig : public QObject
 {
@@ -20,14 +21,21 @@ public:
 	DebugLevel debugLevel();
 	QString localIp() const;
 	void setLocalIp(const QString& localIp);
+    QString userToken();
+    void setUserToken(const QString& token);
+    int userId();
+    void setUserId(int id);
 
 protected:
 	AppConfig();
 
 private:
-	bool m_dragAndDrop;
+    QSettings m_settings;
 	DebugLevel m_debugLevel;
-	QString m_localIp;
+    QString m_localIp;
+    QString m_userToken;
+    int m_userId;
+    bool m_dragAndDrop;
 
 	static QObject* s_instance;
 };

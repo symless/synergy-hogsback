@@ -5,6 +5,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
+class AppConfig;
 
 class CloudClient : public QObject
 {
@@ -21,8 +22,10 @@ public slots:
     void onfinish(QNetworkReply* reply);
 
 private:
-    QNetworkAccessManager* m_networkManager;
     QByteArray m_Data;
+    QNetworkAccessManager* m_networkManager;
+    AppConfig* m_appConfig;
+
 };
 
 #endif // CLOUDCLIENT_H

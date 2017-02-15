@@ -1,5 +1,7 @@
 #include "CloudClient.h"
 
+#include "AppConfig.h"
+
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
@@ -16,6 +18,8 @@ CloudClient::CloudClient(QObject *parent) : QObject(parent)
 
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this,
             SLOT(onfinish(QNetworkReply*)));
+
+    m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
 }
 
 void CloudClient::login(QString email, QString password)
@@ -34,6 +38,12 @@ void CloudClient::onfinish(QNetworkReply* reply)
 {
     m_Data = reply->readAll();
     reply->deleteLater();
+    QByteArray token = reply->rawHeader("X-Auth-Token");
+    m_appConfig->setUserToken(token);
 
-    qDebug() << m_Data << endl;
+    QJsonDocument doc = QJsonDocument::fromJson(m_Data);
+    QJsonObject obj = doc.object();
+    int id = obj["uid"].toInt();
+    m_appConfig->setUserId(id);
+    qDebug() << token << endl;
 }
