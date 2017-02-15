@@ -20,6 +20,6 @@ if (APPLE)
 endif()
 
 set (ENABLE_CURVE ON CACHE BOOL "Enable ZMQ CURVE security" FORCE)
-set (WITH_LIBSODIUM ON CACHE BOOL "ZMQ: Use libsodium instead of tweetnacl" FORCE)
+#set (WITH_LIBSODIUM ON CACHE BOOL "ZMQ: Use libsodium instead of tweetnacl" FORCE)
 set (WITH_OPENPGM OFF CACHE BOOL "Build ZMQ with support for OpenPGM" FORCE)
 add_subdirectory (libzmq EXCLUDE_FROM_ALL)
