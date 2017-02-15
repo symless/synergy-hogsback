@@ -8,19 +8,19 @@ QObject* AppConfig::instance(QQmlEngine* engine,
 	Q_UNUSED(engine)
 	Q_UNUSED(scriptEngine)
 
-	if (s_instance == NULL) {
-		s_instance = new AppConfig();
-	}
+    if (s_instance == NULL) {
+        s_instance = new AppConfig();
+    }
 
-	return s_instance;
+    return s_instance;
 }
 
 AppConfig::AppConfig() :
     m_debugLevel(kDebug),
-    m_userId(-1),
     m_dragAndDrop(true)
 {
-
+    m_userToken = m_settings.value("userToken", "").toString();
+    m_userId = m_settings.value("userId", -1).toInt();
 }
 
 AppConfig::~AppConfig()

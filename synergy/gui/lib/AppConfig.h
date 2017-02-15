@@ -21,9 +21,9 @@ public:
 	DebugLevel debugLevel();
 	QString localIp() const;
 	void setLocalIp(const QString& localIp);
-    QString userToken();
+    Q_INVOKABLE QString userToken();
     void setUserToken(const QString& token);
-    int userId();
+    Q_INVOKABLE int userId();
     void setUserId(int id);
 
 protected:
@@ -37,7 +37,7 @@ private:
     int m_userId;
     bool m_dragAndDrop;
 
-	static QObject* s_instance;
+    static QObject* s_instance;
 };
 
 #endif // APPCONFIGURATION_H
