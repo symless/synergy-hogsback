@@ -1,6 +1,7 @@
 #include "MulticastMessage.h"
 
 #include "ProcessMode.h"
+#include "AppConfig.h"
 
 #include <QStringList>
 #include <QMetaEnum>
@@ -10,7 +11,7 @@ const QString kSeperator = ",";
 MulticastMessage::MulticastMessage() :
 	m_valid(true),
 	m_type(kUnknown),
-	m_processMode(kUnknownMode),
+    m_processMode(kUnknownMode),
 	m_active(true),
 	m_joinGroup(false),
 	m_hostname(QString()),
@@ -18,12 +19,14 @@ MulticastMessage::MulticastMessage() :
 	m_uniqueGroup(QString()),
 	m_configInfo(QString())
 {
+    m_userId = qobject_cast<AppConfig*>(AppConfig::instance())->userId();
 }
 
 MulticastMessage::MulticastMessage(const MulticastMessage& message) :
 	m_valid(message.m_valid),
 	m_type(message.m_type),
 	m_processMode(message.m_processMode),
+    m_userId(message.m_userId),
 	m_active(message.m_active),
 	m_joinGroup(message.m_joinGroup),
 	m_hostname(message.m_hostname),
@@ -37,7 +40,7 @@ MulticastMessage::MulticastMessage(const MulticastMessage& message) :
 MulticastMessage::MulticastMessage(const QString& message) :
 	m_valid(true),
 	m_type(kUnknown),
-	m_processMode(kUnknownMode),
+    m_processMode(kUnknownMode),
 	m_active(true),
 	m_joinGroup(false),
 	m_hostname(QString()),
@@ -45,6 +48,8 @@ MulticastMessage::MulticastMessage(const QString& message) :
 	m_uniqueGroup(QString()),
 	m_configInfo(QString())
 {
+    m_userId = qobject_cast<AppConfig*>(AppConfig::instance())->userId();
+
 	parse(message);
 }
 

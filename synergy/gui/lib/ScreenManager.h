@@ -11,6 +11,7 @@ class MulticastManager;
 class IScreenArrangement;
 class ProcessManager;
 class ScreenListSnapshotManager;
+class AppConfig;
 
 class LIB_SPEC ScreenManager : public QObject
 {
@@ -58,6 +59,7 @@ private:
     IScreenArrangement* m_arrangementStrategy;
     QTimer* m_waitTimer;
     ScreenListSnapshotManager* m_screenListSnapshotManager;
+    AppConfig* m_appConfig;
     QMap<int, bool> m_defaultServerReplies;
     int m_latestConfigSerial;
 };

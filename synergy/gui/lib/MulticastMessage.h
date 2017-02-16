@@ -33,6 +33,7 @@ public:
 	bool m_valid;
 	int m_type;
 	int m_processMode;
+    int m_userId;
 	bool m_active;
 	bool m_joinGroup;
 	QString m_hostname;

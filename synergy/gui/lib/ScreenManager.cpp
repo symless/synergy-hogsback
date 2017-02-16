@@ -7,6 +7,7 @@
 #include "ScreenBBArrangement.h"
 #include "ConfigFileManager.h"
 #include "ScreenListSnapshotManager.h"
+#include "AppConfig.h"
 #include "ProcessMode.h"
 
 #include <QtNetwork>
@@ -19,6 +20,8 @@ ScreenManager::ScreenManager() :
     m_screenListSnapshotManager(NULL),
     m_latestConfigSerial(0)
 {
+    m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
+
     m_arrangementStrategy = new ScreenBBArrangement();
 
     m_multicastManager = qobject_cast<MulticastManager*>(
@@ -193,6 +196,10 @@ void ScreenManager::handleDefaultGroupMessage(MulticastMessage msg)
     // servers need to send replies on receiving default existence
     if (processMode() == kServerMode) {
         if (msg.m_type == MulticastMessage::kDefaultExistence) {
+            if (msg.m_userId != m_appConfig->userId()) {
+                return;
+            }
+
             if (m_multicastManager->joinedUniqueGroup()) {
                 // multicast server reply
                 bool active = false;
@@ -207,6 +214,10 @@ void ScreenManager::handleDefaultGroupMessage(MulticastMessage msg)
     // exists
     else if (processMode() == kClientMode) {
         if (msg.m_type == MulticastMessage::kDefaultReply) {
+            if (msg.m_userId != m_appConfig->userId()) {
+                return;
+            }
+
             if (m_multicastManager->joinedUniqueGroup() == false) {
                 setupWaitTimer();
                 m_defaultServerReplies.insert(msg.m_uniqueGroup.toInt(),
