@@ -25,9 +25,9 @@ AppConfig::AppConfig() :
 
 AppConfig::~AppConfig()
 {
-   m_settings.setValue("userToken", m_userToken);
-   m_settings.setValue("userId", m_userId);
-   m_settings.sync();
+    m_settings.setValue("userToken", m_userToken);
+    m_settings.setValue("userId", m_userId);
+    m_settings.sync();
 }
 
 bool AppConfig::dragAndDrop() const
