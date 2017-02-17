@@ -101,14 +101,7 @@ Rectangle {
                     hoverEnabled: true
 
                     onPressed: {
-                        var component = Qt.createComponent("FacebookAuthWeb.qml")
-                        if (component.status === Component.Ready) {
-                            var window = component.createObject(this)
-                            window.show()
-                        }
-                        else {
-                            console.log("Error loading component:", component.errorString());
-                        }
+                        Qt.openUrlExternally("https://accounts.google.com/o/oauth2/v2/auth?client_id=735056519324-0rtc3fo39qol3i6c8irloqbgjrdnt4mi.apps.googleusercontent.com&redirect_uri=https://alpha1.cloud.symless.com/login/with-google&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email")
                     }
                 }
             }
