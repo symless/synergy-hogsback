@@ -17,10 +17,11 @@ public:
     Q_INVOKABLE void login(QString email, QString password);
 
 signals:
-    void connected();
+    void loginOk();
+    void loginFail();
 
 public slots:
-    void onfinish(QNetworkReply* reply);
+    void onLoginFinished(QNetworkReply* reply);
 
 private:
     QByteArray m_Data;

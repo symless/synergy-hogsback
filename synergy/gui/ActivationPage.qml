@@ -11,7 +11,7 @@ Rectangle {
 
     Connections {
         target: cloudClient
-        onConnected: {
+        onLoginOk: {
             stackView.push({item : Qt.resolvedUrl("ConfigurationPage.qml")})
         }
     }

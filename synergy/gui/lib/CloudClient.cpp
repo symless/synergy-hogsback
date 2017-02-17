@@ -15,10 +15,6 @@ static const char kCloudUrl[] = "http://192.168.3.59:8080/login";
 CloudClient::CloudClient(QObject* parent) : QObject(parent)
 {
     m_networkManager = new QNetworkAccessManager(this);
-
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this,
-            SLOT(onfinish(QNetworkReply*)));
-
     m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
 }
 
@@ -31,10 +27,14 @@ void CloudClient::login(QString email, QString password)
     jsonObject.insert("email", email);
     jsonObject.insert("password", password);
     QJsonDocument doc(jsonObject);
+
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this,
+            SLOT(onLoginFinished(QNetworkReply*)));
+
     m_networkManager->post(req, doc.toJson());
 }
 
-void CloudClient::onfinish(QNetworkReply* reply)
+void CloudClient::onLoginFinished(QNetworkReply* reply)
 {
     m_Data = reply->readAll();
     reply->deleteLater();
@@ -42,9 +42,13 @@ void CloudClient::onfinish(QNetworkReply* reply)
     m_appConfig->setUserToken(token);
 
     QJsonDocument doc = QJsonDocument::fromJson(m_Data);
-    QJsonObject obj = doc.object();
-    int id = obj["uid"].toInt();
-    m_appConfig->setUserId(id);
+    if (!doc.isNull()) {
+        if (doc.isObject()) {
+            QJsonObject obj = doc.object();
+            int id = obj["uid"].toInt();
+            m_appConfig->setUserId(id);
+        }
+    }
 
-    emit connected();
+    emit loginOk();
 }
