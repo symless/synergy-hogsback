@@ -10,6 +10,7 @@
 #include <QApplication>
 #include <QtQuick>
 #include <QQmlApplicationEngine>
+#include <QtWebEngine/qtwebengineglobal.h>
 #include <stdexcept>
 
 int main(int argc, char* argv[])
@@ -20,6 +21,7 @@ int main(int argc, char* argv[])
 
     QApplication app(argc, argv);
     LogManager::instance();
+    QtWebEngine::initialize();
 
     try {
         qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");

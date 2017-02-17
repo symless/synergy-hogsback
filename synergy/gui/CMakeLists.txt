@@ -6,7 +6,7 @@ set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DQT_QML_DEBUG ")
 
-find_package (Qt5 COMPONENTS Core Widgets Quick Network)
+find_package (Qt5 COMPONENTS Core Widgets Quick Network WebEngine)
 add_subdirectory (lib)
 add_subdirectory (tests)
 add_subdirectory (simulator)
@@ -21,6 +21,7 @@ add_executable (${PROJECT_NAME}
     ConfigurationPage.qml
     CustomBorder.qml
     CustomCheckBox.qml
+    FacebookAuthWeb.qml
     GeneralSettingView.qml
     LogSettingView.qml
 )
@@ -38,6 +39,7 @@ target_link_libraries (${PROJECT_NAME}
     ${SODIUM_LIBRARIES}
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
+    Qt5::WebEngine
 )
 
 if (WIN32)

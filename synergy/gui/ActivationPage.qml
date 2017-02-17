@@ -80,6 +80,39 @@ Rectangle {
                 }
             }
 
+            Rectangle {
+                id: socialLogin
+                anchors.left: signIn.left
+                anchors.top: signIn.bottom
+                anchors.topMargin: 10
+                width: 35
+                height: 35
+
+                Image {
+                    id: facebookImage
+                    anchors.fill: parent
+                    fillMode: Image.Stretch
+                    smooth: true
+                    source: "qrc:/res/image/facebook.png"
+                }
+                MouseArea {
+                    id: facebookMouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+
+                    onPressed: {
+                        var component = Qt.createComponent("FacebookAuthWeb.qml")
+                        if (component.status === Component.Ready) {
+                            var window = component.createObject(this)
+                            window.show()
+                        }
+                        else {
+                            console.log("Error loading component:", component.errorString());
+                        }
+                    }
+                }
+            }
+
             Text {
                 id: hint
                 z: 1
