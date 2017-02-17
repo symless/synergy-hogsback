@@ -5,17 +5,6 @@ import com.synergy.gui 1.0
 
 Rectangle {
 
-    CloudClient {
-        id: cloudClient
-    }
-
-    Connections {
-        target: cloudClient
-        onLoginOk: {
-            stackView.push({item : Qt.resolvedUrl("ConfigurationPage.qml")})
-        }
-    }
-
     Item {
         id: advancedPage
         anchors.fill: parent

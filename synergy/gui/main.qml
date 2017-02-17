@@ -31,5 +31,16 @@ ApplicationWindow {
             }
         }
     }
+
+    CloudClient {
+        id: cloudClient
+    }
+
+    Connections {
+        target: cloudClient
+        onLoginOk: {
+            stackView.push({item : Qt.resolvedUrl("ConfigurationPage.qml")})
+        }
+    }
 }
 
