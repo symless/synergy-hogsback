@@ -36,5 +36,8 @@
         <file>res/image/signal.png</file>
         <file>res/image/doge.png</file>
         <file>ActivationPage.qml</file>
+        <file>res/image/facebook.png</file>
+        <file>FacebookAuthWeb.qml</file>
+        <file>res/image/google.png</file>
     </qresource>
 </RCC>

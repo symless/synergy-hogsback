@@ -93,7 +93,7 @@ Rectangle {
                     anchors.fill: parent
                     fillMode: Image.Stretch
                     smooth: true
-                    source: "qrc:/res/image/facebook.png"
+                    source: "qrc:/res/image/google.png"
                 }
                 MouseArea {
                     id: facebookMouseArea
