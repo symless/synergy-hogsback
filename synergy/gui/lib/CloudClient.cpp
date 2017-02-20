@@ -9,7 +9,6 @@
 #include <QTimer>
 #include <QDebug>
 
-// TODO: use cloud url
 static const char kLoginUrl[] = "https://alpha1.cloud.symless.com/login";
 static const char kIdentifyUrl[] = "https://alpha1.cloud.symless.com/user/identify";
 static const int kPollingTimeout = 60000; // 1 minite
