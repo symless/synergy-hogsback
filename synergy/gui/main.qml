@@ -23,11 +23,19 @@ ApplicationWindow {
         }
 
         initialItem: {
-            if (AppConfig.userToken() && AppConfig.userId() !== -1) {
-                [{item : Qt.resolvedUrl("ConfigurationPage.qml")}]
+            if (cloudClient.verifyUser()) {
+                [{item : Qt.resolvedUrl("ConfigurationPage.qml"), properties: { objectName: "ConfigurationPage"}}]
             }
             else {
-                [{item : Qt.resolvedUrl("ActivationPage.qml")}]
+                [{item : Qt.resolvedUrl("ActivationPage.qml"), properties: { objectName: "ActivationPage"}}]
+            }
+        }
+
+        onCurrentItemChanged: {
+            if (stackView.currentItem) {
+                if (stackView.currentItem.objectName == "ActivationPage") {
+                    cloudClient.getUserToken()
+                }
             }
         }
     }
