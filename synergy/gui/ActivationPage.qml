@@ -17,7 +17,7 @@ Rectangle {
             Rectangle {
                 id: signIn
                 width: 350
-                height: 185
+                height: 275
                 color: "transparent"
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.verticalCenter: parent.verticalCenter
@@ -80,51 +80,88 @@ Rectangle {
                         }
                     }
                 }
-            }
 
-            Rectangle {
-                id: socialLogin
-                anchors.left: signIn.left
-                anchors.top: signIn.bottom
-                anchors.topMargin: 10
-                width: 35
-                height: 35
+                Rectangle {
+                    id: orSaparator
+                    width: parent.width
+                    height: 30
+                    anchors.top: signInButton.bottom
+                    anchors.topMargin: 10
+                    color: "transparent"
 
-                Image {
-                    id: facebookImage
-                    anchors.fill: parent
-                    fillMode: Image.Stretch
-                    smooth: true
-                    source: "qrc:/res/image/google.png"
+                    Rectangle {
+                        border.width: 1
+                        height: 2
+                        width: parent.width / 2 - 10
+                        border.color: "#2d2b19"
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        anchors.topMargin: 14
+                    }
+
+                    Text {
+                        id: orText
+                        width: parent.width
+                        horizontalAlignment: Text.AlignHCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "Or"
+                    }
+
+                    Rectangle {
+                        border.width: 1
+                        height: 2
+                        width: parent.width / 2 - 10
+                        border.color: "#2d2b19"
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.topMargin: 14
+                    }
                 }
-                MouseArea {
-                    id: facebookMouseArea
-                    anchors.fill: parent
-                    hoverEnabled: true
 
-                    onPressed: {
-                        if (AppConfig.userToken()) {
-                            var url = "https://accounts.google.com/o/oauth2/v2/auth?"
-                            url += "client_id="
-                            url += "735056519324-0rtc3fo39qol3i6c8irloqbgjrdnt4mi.apps.googleusercontent.com"
-                            url += '&'
-                            url += "redirect_uri="
-                            url += "https://alpha1.cloud.symless.com/login/with-google"
-                            url += '&'
-                            url += "response_type"
-                            url += "=code"
-                            url += '&'
-                            url += "scope="
-                            url += "https://www.googleapis.com/auth/userinfo.email"
-                            url += '&'
-                            url += "state="
-                            url += AppConfig.userToken()
-                            Qt.openUrlExternally(url)
+                Rectangle {
+                    id: socialLogin
+                    anchors.horizontalCenter: orSaparator.horizontalCenter
+                    anchors.top: orSaparator.bottom
+                    anchors.topMargin: 10
+                    width: 158
+                    height: 35
+                    color: "transparent"
+                    Image {
+                        id: googleImage
+                        anchors.fill: parent
+                        fillMode: Image.Stretch
+                        smooth: true
+                        source: "qrc:/res/image/google.png"
+                    }
+                    MouseArea {
+                        id: googleMouseArea
+                        anchors.fill: parent
+                        hoverEnabled: true
 
-                            cloudClient.getUserId()
-                        }
-                        else {
-                            hint.text = "Can't connect with Synergy Cloud. Please check your internet."
+                        onPressed: {
+                            if (AppConfig.userToken()) {
+                                var url = "https://accounts.google.com/o/oauth2/v2/auth?"
+                                url += "client_id="
+                                url += "735056519324-0rtc3fo39qol3i6c8irloqbgjrdnt4mi.apps.googleusercontent.com"
+                                url += '&'
+                                url += "redirect_uri="
+                                url += "https://alpha1.cloud.symless.com/login/with-google"
+                                url += '&'
+                                url += "response_type"
+                                url += "=code"
+                                url += '&'
+                                url += "scope="
+                                url += "https://www.googleapis.com/auth/userinfo.email"
+                                url += '&'
+                                url += "state="
+                                url += AppConfig.userToken()
+                                Qt.openUrlExternally(url)
+
+                                cloudClient.getUserId()
+                            }
+                            else {
+                                hint.text = "Can't connect with Synergy Cloud. Please check your internet."
+                            }
                         }
                     }
                 }
