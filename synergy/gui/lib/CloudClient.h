@@ -15,6 +15,8 @@ public:
     explicit CloudClient(QObject* parent = 0);
 
     Q_INVOKABLE void login(QString email, QString password);
+    Q_INVOKABLE void getUserToken();
+    Q_INVOKABLE void verifyUser();
 
 signals:
     void loginOk();
@@ -22,6 +24,7 @@ signals:
 
 public slots:
     void onLoginFinished(QNetworkReply* reply);
+    void onGetIdentifyFinished(QNetworkReply* reply);
 
 private:
     QByteArray m_Data;

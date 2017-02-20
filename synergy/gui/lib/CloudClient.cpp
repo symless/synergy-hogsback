@@ -10,7 +10,8 @@
 #include <QDebug>
 
 // TODO: use cloud url
-static const char kCloudUrl[] = "http://192.168.3.59:8080/login";
+static const char kLoginUrl[] = "https://alpha1.cloud.symless.com/login";
+static const char kIdentifyUrl[] = "https://alpha1.cloud.symless.com/user/identify";
 
 CloudClient::CloudClient(QObject* parent) : QObject(parent)
 {
@@ -20,7 +21,7 @@ CloudClient::CloudClient(QObject* parent) : QObject(parent)
 
 void CloudClient::login(QString email, QString password)
 {
-    QUrl cloudUrl = QUrl(kCloudUrl);
+    QUrl cloudUrl = QUrl(kLoginUrl);
     QNetworkRequest req(cloudUrl);
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
     QJsonObject jsonObject;
@@ -32,6 +33,31 @@ void CloudClient::login(QString email, QString password)
             SLOT(onLoginFinished(QNetworkReply*)));
 
     m_networkManager->post(req, doc.toJson());
+}
+
+void CloudClient::getUserToken()
+{
+    // contact cloud if there is not a user token
+    if (m_appConfig->userToken().isEmpty()) {
+        QUrl identifyUrl = QUrl(kIdentifyUrl);
+        QNetworkRequest req(identifyUrl);
+
+        connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this,
+                SLOT(onGetIdentifyFinished(QNetworkReply*)));
+
+        m_networkManager->get(req);
+    }
+}
+
+void CloudClient::verifyUser()
+{
+    if (!m_appConfig->userToken().isEmpty() &&
+        m_appConfig->userId() != -1) {
+        emit loginOk();
+    }
+    else {
+        emit loginRequired();
+    }
 }
 
 void CloudClient::onLoginFinished(QNetworkReply* reply)
@@ -51,4 +77,12 @@ void CloudClient::onLoginFinished(QNetworkReply* reply)
     }
 
     emit loginOk();
+}
+
+void CloudClient::onGetIdentifyFinished(QNetworkReply *reply)
+{
+    m_Data = reply->readAll();
+    reply->deleteLater();
+    QByteArray token = reply->rawHeader("X-Auth-Token");
+    m_appConfig->setUserToken(token);
 }
