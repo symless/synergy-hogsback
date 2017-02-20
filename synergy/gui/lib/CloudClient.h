@@ -1,6 +1,8 @@
 #ifndef CLOUDCLIENT_H
 #define CLOUDCLIENT_H
 
+#include <QNetworkReply>
+#include <QTime>
 #include <QObject>
 
 class QNetworkAccessManager;
@@ -16,20 +18,25 @@ public:
 
     Q_INVOKABLE void login(QString email, QString password);
     Q_INVOKABLE void getUserToken();
-    Q_INVOKABLE void verifyUser();
+    Q_INVOKABLE bool verifyUser();
+    Q_INVOKABLE void getUserId(bool initialCall = true);
 
 signals:
     void loginOk();
-    void loginFail();
+    void loginFail(QString error);
 
-public slots:
+private slots:
     void onLoginFinished(QNetworkReply* reply);
     void onGetIdentifyFinished(QNetworkReply* reply);
+    void onGetUserIdFinished(QNetworkReply* reply);
+    void onReplyError(QNetworkReply::NetworkError code);
+    void onRetryGetUserId();
 
 private:
     QByteArray m_Data;
     QNetworkAccessManager* m_networkManager;
     AppConfig* m_appConfig;
+    QTime m_elapsedTime;
 
 };
 

@@ -119,9 +119,9 @@ Rectangle {
                             url += '&'
                             url += "state="
                             url += AppConfig.userToken()
-                            console.log(url)
                             Qt.openUrlExternally(url)
-                            //Qt.openUrlExternally("https://accounts.google.com/o/oauth2/v2/auth?client_id=735056519324-0rtc3fo39qol3i6c8irloqbgjrdnt4mi.apps.googleusercontent.com&redirect_uri=https://alpha1.cloud.symless.com/login/with-google&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email")
+
+                            cloudClient.getUserId()
                         }
                         else {
                             hint.text = "Can't connect with Synergy Cloud. Please check your internet."
@@ -141,6 +141,13 @@ Rectangle {
                 anchors.topMargin: 10
                 anchors.horizontalCenter: signIn.horizontalCenter
                 font.pixelSize: 10
+            }
+
+            Connections {
+                target: cloudClient
+                onLoginFail: {
+                    hint.text = error
+                }
             }
         }
     }
