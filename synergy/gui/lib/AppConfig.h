@@ -37,7 +37,7 @@ private:
     int m_userId;
     bool m_dragAndDrop;
 
-    static QObject* s_instance;
+    static AppConfig s_instance;
 };
 
 #endif // APPCONFIGURATION_H

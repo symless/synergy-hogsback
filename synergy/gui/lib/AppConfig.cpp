@@ -1,18 +1,14 @@
 #include "AppConfig.h"
 
-QObject* AppConfig::s_instance = NULL;
+AppConfig AppConfig::s_instance;
 
 QObject* AppConfig::instance(QQmlEngine* engine,
 										QJSEngine* scriptEngine)
 {
 	Q_UNUSED(engine)
 	Q_UNUSED(scriptEngine)
-
-    if (s_instance == NULL) {
-        s_instance = new AppConfig();
-    }
-
-    return s_instance;
+    QQmlEngine::setObjectOwnership(&s_instance, QQmlEngine::CppOwnership);
+    return &AppConfig::s_instance;
 }
 
 AppConfig::AppConfig() :
