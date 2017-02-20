@@ -6,12 +6,13 @@ import com.synergy.gui 1.0
 Rectangle {
 
     Item {
-        id: advancedPage
+        id: activationPage
         anchors.fill: parent
 
         Rectangle {
             anchors.fill: parent
             color:"#3f95b8"
+
 
             Rectangle {
                 id: signIn
@@ -66,6 +67,7 @@ Rectangle {
                     anchors.top : password.bottom
                     anchors.topMargin: 10
                     text: "Sign in"
+
                     onClicked: {
                         if (email.text && password.text) {
                             hint.text = ""
@@ -101,7 +103,29 @@ Rectangle {
                     hoverEnabled: true
 
                     onPressed: {
-                        Qt.openUrlExternally("https://accounts.google.com/o/oauth2/v2/auth?client_id=735056519324-0rtc3fo39qol3i6c8irloqbgjrdnt4mi.apps.googleusercontent.com&redirect_uri=https://alpha1.cloud.symless.com/login/with-google&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email")
+                        if (AppConfig.userToken()) {
+                            var url = "https://accounts.google.com/o/oauth2/v2/auth?"
+                            url += "client_id="
+                            url += "735056519324-0rtc3fo39qol3i6c8irloqbgjrdnt4mi.apps.googleusercontent.com"
+                            url += '&'
+                            url += "redirect_uri="
+                            url += "https://alpha1.cloud.symless.com/login/with-google"
+                            url += '&'
+                            url += "response_type"
+                            url += "=code"
+                            url += '&'
+                            url += "scope="
+                            url += "https://www.googleapis.com/auth/userinfo.email"
+                            url += '&'
+                            url += "state="
+                            url += AppConfig.userToken()
+                            console.log(url)
+                            Qt.openUrlExternally(url)
+                            //Qt.openUrlExternally("https://accounts.google.com/o/oauth2/v2/auth?client_id=735056519324-0rtc3fo39qol3i6c8irloqbgjrdnt4mi.apps.googleusercontent.com&redirect_uri=https://alpha1.cloud.symless.com/login/with-google&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email")
+                        }
+                        else {
+                            hint.text = "Can't connect with Synergy Cloud. Please check your internet."
+                        }
                     }
                 }
             }
