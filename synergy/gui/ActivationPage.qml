@@ -157,6 +157,7 @@ Rectangle {
                                 url += AppConfig.userToken()
                                 Qt.openUrlExternally(url)
 
+                                hint.text = ""
                                 cloudClient.getUserId()
                             }
                             else {
