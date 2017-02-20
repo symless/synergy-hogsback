@@ -67,7 +67,8 @@ void CloudClient::getUserId(bool initialCall)
         // user Id, we only need to restart the time and skip creating
         // a new poll as the last one probably is not finished yet
         bool skip = false;
-        if (m_elapsedTime.elapsed() < kPollingTimeout) {
+        if (0 < m_elapsedTime.elapsed() &&
+            m_elapsedTime.elapsed() < kPollingTimeout) {
             skip = true;
         }
 
