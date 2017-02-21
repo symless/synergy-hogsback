@@ -13,116 +13,18 @@ Rectangle {
             anchors.fill: parent
             color:"#3f95b8"
 
-
             Rectangle {
-                id: signIn
+                id: signInArea
                 width: 350
-                height: 275
+                height: 235
                 color: "transparent"
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.verticalCenter: parent.verticalCenter
 
-                Text {
-                    id: signInText
-                    z: 1
-                    color: "White"
-                    text: "Sign in"
-                    font.family: "Tahoma"
-                    font.bold: false
-                    horizontalAlignment: Text.AlignHCenter
-                    anchors.top: parent.top
-                    anchors.topMargin: 10
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    font.pixelSize: 30
-                }
-
-                TextField {
-                    id: email
-                    z: 1
-                    height: 35
-                    width: parent.width
-                    anchors.top : signInText.bottom
-                    anchors.topMargin: 10
-                    placeholderText: qsTr("Email")
-                    horizontalAlignment: Text.AlignHCenter
-                }
-
-                TextField {
-                    id: password
-                    z: 1
-                    height: 35
-                    width: parent.width
-                    anchors.top : email.bottom
-                    anchors.topMargin: 10
-                    placeholderText: qsTr("Password")
-                    horizontalAlignment: Text.AlignHCenter
-                    echoMode: TextInput.Password
-                }
-
-                Button {
-                    id: signInButton
-                    z: 1
-                    height: 35
-                    width: parent.width
-                    anchors.top : password.bottom
-                    anchors.topMargin: 10
-                    text: "Sign in"
-
-                    onClicked: {
-                        if (email.text && password.text) {
-                            hint.text = ""
-
-                            // contact Cloud
-                            cloudClient.login(email.text, password.text)
-                        }
-                        else {
-                            hint.text = "Empty email or password"
-                        }
-                    }
-                }
-
-                Rectangle {
-                    id: orSaparator
-                    width: parent.width
-                    height: 30
-                    anchors.top: signInButton.bottom
-                    anchors.topMargin: 10
-                    color: "transparent"
-
-                    Rectangle {
-                        border.width: 1
-                        height: 2
-                        width: parent.width / 2 - 10
-                        border.color: "#2d2b19"
-                        anchors.left: parent.left
-                        anchors.top: parent.top
-                        anchors.topMargin: 14
-                    }
-
-                    Text {
-                        id: orText
-                        width: parent.width
-                        horizontalAlignment: Text.AlignHCenter
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: "Or"
-                    }
-
-                    Rectangle {
-                        border.width: 1
-                        height: 2
-                        width: parent.width / 2 - 10
-                        border.color: "#2d2b19"
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        anchors.topMargin: 14
-                    }
-                }
-
                 Rectangle {
                     id: socialLogin
-                    anchors.horizontalCenter: orSaparator.horizontalCenter
-                    anchors.top: orSaparator.bottom
-                    anchors.topMargin: 10
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: parent.top
                     width: 158
                     height: 35
                     color: "transparent"
@@ -166,6 +68,88 @@ Rectangle {
                         }
                     }
                 }
+
+                Rectangle {
+                    id: orSaparator
+                    width: parent.width
+                    height: 30
+                    anchors.top: socialLogin.bottom
+                    anchors.topMargin: 10
+                    color: "transparent"
+
+                    Rectangle {
+                        border.width: 1
+                        height: 2
+                        width: parent.width / 2 - 10
+                        border.color: "#2d2b19"
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        anchors.topMargin: 14
+                    }
+
+                    Text {
+                        id: orText
+                        width: parent.width
+                        horizontalAlignment: Text.AlignHCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "Or"
+                    }
+
+                    Rectangle {
+                        border.width: 1
+                        height: 2
+                        width: parent.width / 2 - 10
+                        border.color: "#2d2b19"
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.topMargin: 14
+                    }
+                }
+
+                TextField {
+                    id: email
+                    z: 2
+                    height: 35
+                    width: parent.width
+                    anchors.top : orSaparator.bottom
+                    anchors.topMargin: 10
+                    placeholderText: qsTr("Email")
+                    horizontalAlignment: Text.AlignHCenter
+                }
+
+                TextField {
+                    id: password
+                    z: 2
+                    height: 35
+                    width: parent.width
+                    anchors.top : email.bottom
+                    anchors.topMargin: 10
+                    placeholderText: qsTr("Password")
+                    horizontalAlignment: Text.AlignHCenter
+                    echoMode: TextInput.Password
+                }
+
+                Button {
+                    id: signInButton
+                    z: 2
+                    height: 35
+                    width: parent.width
+                    anchors.top : password.bottom
+                    anchors.topMargin: 10
+                    text: "Sign in"
+
+                    onClicked: {
+                        if (email.text && password.text) {
+                            hint.text = ""
+
+                            // contact Cloud
+                            cloudClient.login(email.text, password.text)
+                        }
+                        else {
+                            hint.text = "Empty email or password"
+                        }
+                    }
+                }
             }
 
             Text {
@@ -175,9 +159,9 @@ Rectangle {
                 font.family: "Tahoma"
                 font.bold: false
                 horizontalAlignment: Text.AlignHCenter
-                anchors.top: signIn.bottom
+                anchors.top: signInArea.bottom
                 anchors.topMargin: 10
-                anchors.horizontalCenter: signIn.horizontalCenter
+                anchors.horizontalCenter: signInArea.horizontalCenter
                 font.pixelSize: 10
             }
 
