@@ -38,7 +38,6 @@ target_link_libraries (${PROJECT_NAME}
     ${SODIUM_LIBRARIES}
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
-    Qt5::WebEngine
 )
 
 if (WIN32)
