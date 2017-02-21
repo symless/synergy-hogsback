@@ -6,7 +6,7 @@ set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DQT_QML_DEBUG ")
 
-find_package (Qt5 COMPONENTS Core Widgets Quick Network WebEngine)
+find_package (Qt5 COMPONENTS Core Widgets Quick Network)
 add_subdirectory (lib)
 add_subdirectory (tests)
 add_subdirectory (simulator)
