@@ -21,14 +21,18 @@ public:
     Q_INVOKABLE bool verifyUser();
     Q_INVOKABLE void getUserId(bool initialCall = true);
 
+    Q_INVOKABLE void getScreens();
+
 signals:
     void loginOk();
     void loginFail(QString error);
+    void receivedScreens(QByteArray reply);
 
 private slots:
     void onLoginFinished(QNetworkReply* reply);
     void onGetIdentifyFinished(QNetworkReply* reply);
     void onGetUserIdFinished(QNetworkReply* reply);
+    void onGetScreensFinished(QNetworkReply* reply);
     void onReplyError(QNetworkReply::NetworkError code);
     void onRetryGetUserId();
 

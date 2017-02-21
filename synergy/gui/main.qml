@@ -12,6 +12,18 @@ ApplicationWindow {
     minimumHeight: 600
     title: qsTr("Synergy")
     signal keyReceived(int key)
+    property alias cloudClient: cloudClient
+
+    CloudClient {
+        id: cloudClient
+    }
+
+    Connections {
+        target: cloudClient
+        onLoginOk: {
+            stackView.push({item : Qt.resolvedUrl("ConfigurationPage.qml")})
+        }
+    }
 
     StackView {
         id: stackView
@@ -37,17 +49,6 @@ ApplicationWindow {
                     cloudClient.getUserToken()
                 }
             }
-        }
-    }
-
-    CloudClient {
-        id: cloudClient
-    }
-
-    Connections {
-        target: cloudClient
-        onLoginOk: {
-            stackView.push({item : Qt.resolvedUrl("ConfigurationPage.qml")})
         }
     }
 }

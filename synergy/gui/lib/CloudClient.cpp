@@ -11,6 +11,7 @@
 
 static const char kLoginUrl[] = "https://alpha1.cloud.symless.com/login";
 static const char kIdentifyUrl[] = "https://alpha1.cloud.symless.com/user/identify";
+static const char kscreensUrl[] = "https://alpha1.cloud.symless.com/user/screens";
 static const int kPollingTimeout = 60000; // 1 minite
 
 CloudClient::CloudClient(QObject* parent) : QObject(parent)
@@ -98,7 +99,19 @@ void CloudClient::getUserId(bool initialCall)
     connect(
         reply,
         static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
-        this, &CloudClient::onReplyError);
+                this, &CloudClient::onReplyError);
+}
+
+void CloudClient::getScreens()
+{
+    QUrl screensUrl = QUrl(kscreensUrl);
+    QNetworkRequest req(screensUrl);
+    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this,
+            SLOT(onGetScreensFinished(QNetworkReply*)));
+
+    m_networkManager->get(req);
 }
 
 void CloudClient::onLoginFinished(QNetworkReply* reply)
@@ -157,6 +170,13 @@ void CloudClient::onGetUserIdFinished(QNetworkReply *reply)
     else {
         emit loginOk();
     }
+}
+
+void CloudClient::onGetScreensFinished(QNetworkReply* reply)
+{
+    emit receivedScreens(reply->readAll());
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this,
+            SLOT(onGetScreensFinished(QNetworkReply*)));
 }
 
 void CloudClient::onReplyError(QNetworkReply::NetworkError code)

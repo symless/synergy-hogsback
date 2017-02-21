@@ -6,6 +6,7 @@ set (GUI_LIB_SOURCES
     CloudClient.cpp
     ConfigFileManager.cpp
     ConfigMessageConvertor.cpp
+    ConnectivityTester.cpp
     CoreInterface.cpp
     DebugLevel.cpp
     DeviceManager.cpp

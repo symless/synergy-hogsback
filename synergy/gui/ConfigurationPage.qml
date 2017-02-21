@@ -17,6 +17,11 @@ Rectangle {
         id: processManager
     }
 
+    ConnectivityTester {
+        id: connectivityTester
+        cloudClient: applicationWindow.cloudClient
+    }
+
     ScreenManager {
         id: screenManager
         screenListModel: screenListModel

@@ -1,10 +1,11 @@
-#include "AppConfig.h"
-#include "Hostname.h"
+#include "ConnectivityTester.h"
 #include "CloudClient.h"
 #include "ScreenListModel.h"
 #include "ScreenManager.h"
 #include "LogManager.h"
 #include "ProcessManager.h"
+#include "AppConfig.h"
+#include "Hostname.h"
 #include "Common.h"
 
 #include <QApplication>
@@ -27,6 +28,7 @@ int main(int argc, char* argv[])
         qmlRegisterType<ScreenManager>("com.synergy.gui", 1, 0, "ScreenManager");
         qmlRegisterType<ProcessManager>("com.synergy.gui", 1, 0, "ProcessManager");
         qmlRegisterType<CloudClient>("com.synergy.gui", 1, 0, "CloudClient");
+        qmlRegisterType<ConnectivityTester>("com.synergy.gui", 1, 0, "ConnectivityTester");
         qmlRegisterSingletonType<AppConfig>("com.synergy.gui", 1, 0, "AppConfig", AppConfig::instance);
         QQmlApplicationEngine engine(QUrl(QStringLiteral("qrc:/main.qml")));
 
