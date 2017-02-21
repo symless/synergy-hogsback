@@ -21,7 +21,6 @@ add_executable (${PROJECT_NAME}
     ConfigurationPage.qml
     CustomBorder.qml
     CustomCheckBox.qml
-    FacebookAuthWeb.qml
     GeneralSettingView.qml
     LogSettingView.qml
 )
