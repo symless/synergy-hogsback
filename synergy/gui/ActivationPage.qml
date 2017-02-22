@@ -63,7 +63,7 @@ Rectangle {
                                 cloudClient.getUserId()
                             }
                             else {
-                                hint.text = "Can't connect with Synergy Cloud. Please check your internet."
+                                hint.text = "Can't connect with Synergy Cloud. Please check your Internet connection."
                             }
                         }
                     }
