@@ -128,9 +128,11 @@ void CloudClient::onLoginFinished(QNetworkReply* reply)
             int id = obj["uid"].toInt();
             m_appConfig->setUserId(id);
         }
+        emit loginOk();
+        return;
     }
 
-    emit loginOk();
+    emit loginFail(reply->errorString());
 }
 
 void CloudClient::onGetIdentifyFinished(QNetworkReply *reply)
