@@ -35,7 +35,7 @@ void ConnectivityTester::testNewScreens(QByteArray reply)
 
             QJsonArray screens = obj["screens"].toArray();
             QSet<int> latestScreenIdSet;
-            foreach (QJsonValue& v, screens) {
+            foreach (QJsonValue const& v, screens) {
                 QJsonObject obj = v.toObject();
                 QString screenName = obj["name"].toString();
 
