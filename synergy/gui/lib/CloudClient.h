@@ -21,6 +21,7 @@ public:
     Q_INVOKABLE bool verifyUser();
     Q_INVOKABLE void getUserId(bool initialCall = true);
     Q_INVOKABLE void addScreen(QString name);
+    Q_INVOKABLE void removeScreen();
     Q_INVOKABLE void getScreens();
 
 signals:
@@ -34,6 +35,7 @@ private slots:
     void onGetUserIdFinished(QNetworkReply* reply);
     void onGetScreensFinished(QNetworkReply* reply);
     void onAddScreenFinished(QNetworkReply* reply);
+    void onRemoveScreenFinished(QNetworkReply* reply);
     void onReplyError(QNetworkReply::NetworkError code);
     void onRetryGetUserId();
 
@@ -42,6 +44,8 @@ private:
     QNetworkAccessManager* m_networkManager;
     AppConfig* m_appConfig;
     QTime m_elapsedTime;
+    int64_t m_groupId = -1;
+    int64_t m_screenId = -1;
 
 };
 

@@ -8,11 +8,13 @@
 #include <QJsonDocument>
 #include <QTimer>
 #include <QDebug>
+#include <QEventLoop>
 
 // https://alpha1.cloud.symless.com/
 // http://127.0.0.1:8080/
 
 static const char kAddScreenUrl[] = "https://alpha1.cloud.symless.com/user/screens/join";
+static const char kRemoveScreenUrl[] = "https://alpha1.cloud.symless.com/user/screens/leave";
 static const char kLoginUrl[] = "https://alpha1.cloud.symless.com/login";
 static const char kIdentifyUrl[] = "https://alpha1.cloud.symless.com/user/identify";
 static const char kscreensUrl[] = "https://alpha1.cloud.symless.com/user/screens";
@@ -35,10 +37,10 @@ void CloudClient::login(QString email, QString password)
     jsonObject.insert("password", password);
     QJsonDocument doc(jsonObject);
 
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this,
-            SLOT(onLoginFinished(QNetworkReply*)));
-
-    m_networkManager->post(req, doc.toJson());
+    auto reply = m_networkManager->post(req, doc.toJson());
+    connect (reply, &QNetworkReply::finished, [this, reply]() {
+        onLoginFinished (reply);
+    });
 }
 
 void CloudClient::getUserToken()
@@ -48,10 +50,10 @@ void CloudClient::getUserToken()
         QUrl identifyUrl = QUrl(kIdentifyUrl);
         QNetworkRequest req(identifyUrl);
 
-        connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this,
-                SLOT(onGetIdentifyFinished(QNetworkReply*)));
-
-        m_networkManager->get(req);
+        auto reply = m_networkManager->get(req);
+        connect (reply, &QNetworkReply::finished, [this, reply]() {
+            onGetIdentifyFinished (reply);
+        });
     }
 }
 
@@ -97,10 +99,10 @@ void CloudClient::getUserId(bool initialCall)
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this,
-            SLOT(onGetUserIdFinished(QNetworkReply*)));
-
-    QNetworkReply* reply = m_networkManager->get(req);
+    auto reply = m_networkManager->get(req);
+    connect (reply, &QNetworkReply::finished, [this, reply](){
+        onGetUserIdFinished (reply);
+    });
 
     connect(
         reply,
@@ -108,33 +110,82 @@ void CloudClient::getUserId(bool initialCall)
                 this, &CloudClient::onReplyError);
 }
 
-void CloudClient::addScreen(QString name)
-{
-    QUrl addScreenUrl = QUrl(kAddScreenUrl);
-    QNetworkRequest req (addScreenUrl);
+void CloudClient::removeScreen() {
+    static const QUrl removeScreenUrl = QUrl(kRemoveScreenUrl);
+    QNetworkRequest req (removeScreenUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
     QJsonObject jsonObject;
+    jsonObject.insert("screen", qint64(m_screenId));
+    jsonObject.insert("group", qint64(m_groupId));
+    QJsonDocument doc (jsonObject);
+
+    QEventLoop loop;
+    auto reply = m_networkManager->post(req, doc.toJson());
+    connect (reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+    /*connect (reply, &QNetworkReply::finished, [this, reply]() {
+       this->onRemoveScreenFinished (reply);
+    });*/
+}
+
+
+void CloudClient::onRemoveScreenFinished(QNetworkReply* reply)
+{
+    reply->deleteLater();
+    if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200) {
+        return;
+    }
+
+    m_screenId = -1;
+    m_groupId = -1;
+}
+
+void CloudClient::addScreen(QString name)
+{
+    static const QUrl addScreenUrl = QUrl(kAddScreenUrl);
+    QNetworkRequest req (addScreenUrl);
+    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
+
     QJsonObject screenObject;
     QJsonObject groupObject;
     screenObject.insert("name", name);
     groupObject.insert ("name", "default");
+
+    QJsonObject jsonObject;
     jsonObject.insert("screen", screenObject);
     jsonObject.insert("group", groupObject);
     QJsonDocument doc(jsonObject);
 
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this,
-            SLOT(onAddScreenFinished(QNetworkReply*)));
-    m_networkManager->post(req, doc.toJson());
+    auto reply = m_networkManager->post(req, doc.toJson());
+    connect (reply, &QNetworkReply::finished, [this, reply]() {
+       this->onAddScreenFinished (reply);
+    });
 }
 
 void CloudClient::onAddScreenFinished(QNetworkReply* reply)
 {
     reply->deleteLater();
-    qDebug() << reply->readAll() << "\n";
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this,
-            SLOT(onAddScreenFinished(QNetworkReply*)));
+    if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200) {
+        return;
+    }
+
+    auto doc = QJsonDocument::fromJson(reply->readAll());
+    if (!doc.isObject()) {
+        return;
+    }
+
+    auto object = doc.object();
+    auto screen = object["screen"];
+    auto group = object["group"];
+    if (!screen.isDouble() || !group.isDouble()) {
+        return;
+    }
+
+    m_screenId = screen.toInt();
+    m_groupId = group.toInt();
 }
 
 void CloudClient::getScreens()
@@ -144,17 +195,14 @@ void CloudClient::getScreens()
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this,
-            SLOT(onGetScreensFinished(QNetworkReply*)));
-
-    m_networkManager->get(req);
+    auto reply = m_networkManager->get(req);
+    connect (reply, &QNetworkReply::finished, [this, reply]{
+        onGetScreensFinished (reply);
+    });
 }
 
 void CloudClient::onLoginFinished(QNetworkReply* reply)
 {
-    disconnect (m_networkManager, SIGNAL(finished(QNetworkReply*)), this,
-            SLOT(onLoginFinished(QNetworkReply*)));
-
     m_Data = reply->readAll();
     reply->deleteLater();
     QByteArray token = reply->rawHeader("X-Auth-Token");
@@ -180,9 +228,6 @@ void CloudClient::onGetIdentifyFinished(QNetworkReply *reply)
     reply->deleteLater();
     QByteArray token = reply->rawHeader("X-Auth-Token");
     m_appConfig->setUserToken(token);
-
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this,
-            SLOT(onGetIdentifyFinished(QNetworkReply*)));
 }
 
 void CloudClient::onGetUserIdFinished(QNetworkReply *reply)
@@ -201,9 +246,6 @@ void CloudClient::onGetUserIdFinished(QNetworkReply *reply)
         }
     }
 
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this,
-            SLOT(onGetUserIdFinished(QNetworkReply*)));
-
     if (m_appConfig->userId() == -1) {
         // setup a timer to do the request again
         QTimer::singleShot(500, this, SLOT(onRetryGetUserId()));
@@ -215,9 +257,8 @@ void CloudClient::onGetUserIdFinished(QNetworkReply *reply)
 
 void CloudClient::onGetScreensFinished(QNetworkReply* reply)
 {
-    emit receivedScreens(reply->readAll());
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this,
-               SLOT(onGetScreensFinished(QNetworkReply*)));
+    reply->deleteLater();
+    emit receivedScreens (reply->readAll());
 }
 
 void CloudClient::onReplyError(QNetworkReply::NetworkError code)

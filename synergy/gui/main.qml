@@ -25,6 +25,10 @@ ApplicationWindow {
         }
     }
 
+    onClosing: {
+        cloudClient.removeScreen()
+    }
+
     StackView {
         id: stackView
         anchors.fill: parent
