@@ -45,6 +45,10 @@ Rectangle {
         anchors.left: navigationMenu.right
         width: parent.width
 
+        Component.onCompleted: {
+            applicationWindow.cloudClient.addScreen(localHostname.hostname())
+        }
+
         // background header
         Rectangle {
             id: configurationPageBackgroundHeader
