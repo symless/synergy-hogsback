@@ -116,6 +116,9 @@ void CloudClient::getScreens()
 
 void CloudClient::onLoginFinished(QNetworkReply* reply)
 {
+    disconnect (m_networkManager, SIGNAL(finished(QNetworkReply*)), this,
+            SLOT(onLoginFinished(QNetworkReply*)));
+
     m_Data = reply->readAll();
     reply->deleteLater();
     QByteArray token = reply->rawHeader("X-Auth-Token");
@@ -127,9 +130,9 @@ void CloudClient::onLoginFinished(QNetworkReply* reply)
             QJsonObject obj = doc.object();
             int id = obj["uid"].toInt();
             m_appConfig->setUserId(id);
+            emit loginOk();
+            return;
         }
-        emit loginOk();
-        return;
     }
 
     emit loginFail(reply->errorString());
