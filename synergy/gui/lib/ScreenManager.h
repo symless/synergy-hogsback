@@ -46,6 +46,7 @@ public:
 private:
     int processMode();
     void setupWaitTimer();
+    void startCoreProcess();
 
 private slots:
     void handleDefaultGroupMessage(MulticastMessage msg);

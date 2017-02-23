@@ -64,6 +64,10 @@ void ScreenManager::moveModel(int index, int offsetX, int offsetY)
         screen = m_screenListModel->getScreen(index);
         QString data = convertor.fromScreenToString(screen);
         m_multicastManager->multicastUniqueConfigDelta(data);
+
+        if (processMode() == kServerMode) {
+            startCoreProcess();
+        }
     }
 }
 
@@ -128,8 +132,7 @@ void ScreenManager::onKeyPressed (int const key)
             saveSnapshot();
             break;
         case Qt::Key_A:
-            updateConfigFile();
-            m_processManager->start();
+            startCoreProcess();
             break;
     }
 }
@@ -189,6 +192,12 @@ void ScreenManager::setupWaitTimer()
 
         m_defaultServerReplies.clear();
     }
+}
+
+void ScreenManager::startCoreProcess()
+{
+    updateConfigFile();
+    m_processManager->start();
 }
 
 void ScreenManager::handleDefaultGroupMessage(MulticastMessage msg)
@@ -271,6 +280,8 @@ void ScreenManager::handleUniqueGroupMessage(MulticastMessage msg)
                 QString data = convertor.fromModelToString(m_screenListModel);
                 m_multicastManager->multicastUniqueConfig(data,
                                         ++m_latestConfigSerial);
+
+                startCoreProcess();
             }
         }
         else if (msg.m_type == MulticastMessage::kUniqueLeave) {
@@ -295,7 +306,7 @@ void ScreenManager::handleUniqueGroupMessage(MulticastMessage msg)
         m_processManager->setProcessMode(kClientMode);
         m_processManager->setServerIp(msg.m_ip);
 
-        //m_processManager->start();
+        startCoreProcess();
     }
     else if (msg.m_type == MulticastMessage::kUniqueConfig ||
              msg.m_type == MulticastMessage::kUniqueConfigDelta) {
@@ -318,6 +329,10 @@ void ScreenManager::handleUniqueGroupMessage(MulticastMessage msg)
 
             m_screenListModel->update(screenList);
             m_arrangementStrategy->update(m_screenListModel);
+
+            if (processMode() == kServerMode) {
+                startCoreProcess();
+            }
         }
     }
 }
