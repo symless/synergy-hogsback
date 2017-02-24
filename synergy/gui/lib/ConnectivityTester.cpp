@@ -63,6 +63,9 @@ void ConnectivityTester::testNewScreens(QByteArray reply)
                     if (i == m_screenIdSet.end()) {
                         // new screen detected, get ip list
                         QString ipList = obj["ipList"].toString();
+                        if (ipList.isEmpty()) {
+                            continue;
+                        }
                         // combine screen id and ip list separated by comma
                         QString testCase = QString::number(screenId);
                         testCase += ',';
