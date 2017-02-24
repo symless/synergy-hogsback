@@ -9,7 +9,7 @@ const unsigned int kServerPort = 24810;
 TestDelegatee::TestDelegatee(QString& testCase, QObject *parent) :
     QObject(parent),
     m_testCase(testCase),
-    m_tcpclient(new QTcpSocket()),
+    m_tcpclient(NULL),
     m_testIndex(0)
 
 {
@@ -23,18 +23,21 @@ TestDelegatee::TestDelegatee(QString& testCase, QObject *parent) :
             m_results.append(false);
         }
     }
-
-    connect(m_tcpclient, &QAbstractSocket::connected, this, &TestDelegatee::onConnected);
-    connect(m_tcpclient, &QIODevice::readyRead, this, &TestDelegatee::onReadyRead);
-    typedef void (QAbstractSocket::*QAbstractSocketErrorSignal)(QAbstractSocket::SocketError);
-    connect(m_tcpclient, static_cast<QAbstractSocketErrorSignal>(&QAbstractSocket::error),
-        this, &TestDelegatee::onSocketError);
 }
 
 void TestDelegatee::start()
 {
+    if (!m_tcpclient) {
+        m_tcpclient = new QTcpSocket();
+        connect(m_tcpclient, &QAbstractSocket::connected, this, &TestDelegatee::onConnected);
+        connect(m_tcpclient, &QIODevice::readyRead, this, &TestDelegatee::onReadyRead);
+        typedef void (QAbstractSocket::*QAbstractSocketErrorSignal)(QAbstractSocket::SocketError);
+        connect(m_tcpclient, static_cast<QAbstractSocketErrorSignal>(&QAbstractSocket::error),
+            this, &TestDelegatee::onSocketError);
+    }
     if (m_testIndex >= m_ipList.size()) {
         emit done(m_results);
+        return;
     }
 
     QHostAddress address(m_ipList[m_testIndex]);
