@@ -50,7 +50,7 @@ void TestDelegatee::onConnected()
 {
     QByteArray block;
     QDataStream out(&block, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_5_7);
+    out.setVersion(QDataStream::Qt_4_0);
     out << "ClientHello";
     m_tcpclient->write(block);
 }
@@ -62,9 +62,10 @@ void TestDelegatee::onReadyRead()
     in.setVersion(QDataStream::Qt_5_7);
     in.startTransaction();
 
-    QString message;
-    in >> message;
+    QByteArray raw;
+    in >> raw;
 
+    QString message(raw);
     if (!in.commitTransaction()) {
         return;
     }

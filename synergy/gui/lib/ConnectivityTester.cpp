@@ -112,9 +112,10 @@ void ConnectivityTester::onConnectionReadyRead()
     in.setVersion(QDataStream::Qt_5_7);
     in.startTransaction();
 
-    QString message;
-    in >> message;
+    QByteArray raw;
+    in >> raw;
 
+    QString message(raw);
     if (!in.commitTransaction()) {
         return;
     }
