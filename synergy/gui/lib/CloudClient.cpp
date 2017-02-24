@@ -9,6 +9,7 @@
 #include <QTimer>
 #include <QDebug>
 #include <QEventLoop>
+#include <QNetworkInterface>
 
 // https://alpha1.cloud.symless.com/
 // http://127.0.0.1:8080/
@@ -149,9 +150,20 @@ void CloudClient::addScreen(QString name)
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
+    QStringList ipList;
+
+    foreach (QHostAddress const& address, QNetworkInterface::allAddresses()) {
+        if (address.protocol() == QAbstractSocket::IPv4Protocol &&
+                address != QHostAddress(QHostAddress::LocalHost)) {
+            ipList.push_back(address.toString());
+        }
+    }
+
     QJsonObject screenObject;
-    QJsonObject groupObject;
     screenObject.insert("name", name);
+    screenObject.insert("ipList", ipList.join(","));
+
+    QJsonObject groupObject;
     groupObject.insert ("name", "default");
 
     QJsonObject jsonObject;
