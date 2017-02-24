@@ -12,7 +12,7 @@ Multicast::Multicast() :
 Multicast::~Multicast()
 {
     leave();
-    delete m_socket;
+    m_socket->deleteLater();
     m_socket = NULL;
 }
 
