@@ -201,6 +201,11 @@ void CloudClient::getScreens()
     });
 }
 
+void CloudClient::report(int destId, QString successfulIp, QString failedIp)
+{
+    qDebug() << "report to cloud: destId " << destId << "successfulIp " << successfulIp << "failedIp " << failedIp;
+}
+
 void CloudClient::onLoginFinished(QNetworkReply* reply)
 {
     m_Data = reply->readAll();

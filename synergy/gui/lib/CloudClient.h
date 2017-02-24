@@ -1,6 +1,8 @@
 #ifndef CLOUDCLIENT_H
 #define CLOUDCLIENT_H
 
+#include "LibMacro.h"
+
 #include <QNetworkReply>
 #include <QTime>
 #include <QObject>
@@ -9,7 +11,7 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class AppConfig;
 
-class CloudClient : public QObject
+class LIB_SPEC CloudClient : public QObject
 {
     Q_OBJECT
 
@@ -23,6 +25,8 @@ public:
     Q_INVOKABLE void addScreen(QString name);
     Q_INVOKABLE void removeScreen();
     Q_INVOKABLE void getScreens();
+
+    void report(int destId, QString successfulIp, QString failedIp);
 
 signals:
     void loginOk();

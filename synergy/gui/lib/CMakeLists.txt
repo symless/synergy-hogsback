@@ -25,6 +25,7 @@ set (GUI_LIB_SOURCES
     ScreenListSnapshotManager.cpp
     ScreenManager.cpp
     ServerInfo.cpp
+    TestDelegatee.cpp
 )
 
 add_library (synlib ${GUI_LIB_SOURCES})
