@@ -50,6 +50,9 @@ void ProcessManager::start()
 
 void ProcessManager::startProcess()
 {
+    // TODO: remove this before release
+    return;
+
     // desktop mode on Unix
     if (m_process != NULL) {
         // stop the previous process if exists
