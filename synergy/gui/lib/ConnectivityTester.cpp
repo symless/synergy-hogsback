@@ -184,10 +184,6 @@ void ConnectivityTester::onTestDelegateeDone(QList<bool> results)
     QString successfulIp = successfulIpList.join(',');
     QString failedIp = failedIpList.join(',');
 
-    disconnect(m_cloudClient, SIGNAL(receivedScreens(QByteArray)), this,
-            SLOT(testNewScreens(QByteArray)));
-    disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(pollScreens()));
-
     m_cloudClient->report(screenId, successfulIp, failedIp);
 
     m_pendingTestCases.pop_front();

@@ -19,6 +19,7 @@ static const char kRemoveScreenUrl[] = "https://alpha1.cloud.symless.com/user/sc
 static const char kLoginUrl[] = "https://alpha1.cloud.symless.com/login";
 static const char kIdentifyUrl[] = "https://alpha1.cloud.symless.com/user/identify";
 static const char kscreensUrl[] = "https://alpha1.cloud.symless.com/user/screens";
+static const char kreportUrl[] = "https://alpha1.cloud.symless.com/report";
 static const int kPollingTimeout = 60000; // 1 minite
 
 CloudClient::CloudClient(QObject* parent) : QObject(parent)
@@ -215,6 +216,20 @@ void CloudClient::getScreens()
 
 void CloudClient::report(int destId, QString successfulIp, QString failedIp)
 {
+    QUrl reportUrl = QUrl(kreportUrl);
+    QNetworkRequest req(reportUrl);
+    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
+
+    QJsonObject reportObject;
+    reportObject.insert("srcId", m_screenId);
+    reportObject.insert("destId", destId);
+    reportObject.insert("successfulIp", successfulIp);
+    reportObject.insert("failedIp", failedIp);
+    QJsonDocument doc(jsonObject);
+
+    m_networkManager->post(req, doc.toJson());
+
     qDebug() << "report to cloud: destId " << destId << "successfulIp " << successfulIp << "failedIp " << failedIp;
 }
 
