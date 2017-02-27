@@ -109,7 +109,7 @@ void ConnectivityTester::onConnectionReadyRead()
 
     QDataStream in;
     in.setDevice(socket);
-    in.setVersion(QDataStream::Qt_5_7);
+    in.setVersion(QDataStream::Qt_5_5);
     in.startTransaction();
 
     QByteArray raw;
@@ -123,7 +123,7 @@ void ConnectivityTester::onConnectionReadyRead()
     if (message == "ClientHello") {
         QByteArray block;
         QDataStream out(&block, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_5_7);
+        out.setVersion(QDataStream::Qt_5_5);
         out << "ServerHello";
         socket->write(block);
     }
