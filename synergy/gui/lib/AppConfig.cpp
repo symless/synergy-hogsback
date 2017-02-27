@@ -22,9 +22,7 @@ AppConfig::AppConfig() :
 
 AppConfig::~AppConfig()
 {
-    m_settings.setValue("userToken", m_userToken);
-    m_settings.setValue("userId", m_userId);
-    m_settings.sync();
+    save();
 }
 
 bool AppConfig::dragAndDrop() const
@@ -50,6 +48,13 @@ void AppConfig::setLocalIp(const QString& localIp)
 QString AppConfig::userToken()
 {
     return m_userToken;
+}
+
+void AppConfig::save()
+{
+    m_settings.setValue("userToken", m_userToken);
+    m_settings.setValue("userId", m_userId);
+    m_settings.sync();
 }
 
 void AppConfig::setUserToken(const QString& token)

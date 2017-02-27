@@ -17,13 +17,16 @@ public:
 	static QObject* instance(QQmlEngine* engine = NULL, QJSEngine* scriptEngine = NULL);
 	~AppConfig();
 
+    Q_INVOKABLE int userId();
+    Q_INVOKABLE QString userToken();
+    Q_INVOKABLE void save();
+
 	bool dragAndDrop() const;
 	DebugLevel debugLevel();
 	QString localIp() const;
-	void setLocalIp(const QString& localIp);
-    Q_INVOKABLE QString userToken();
+    void setLocalIp(const QString& localIp);
     void setUserToken(const QString& token);
-    Q_INVOKABLE int userId();
+
     void setUserId(int id);
 
 protected:
