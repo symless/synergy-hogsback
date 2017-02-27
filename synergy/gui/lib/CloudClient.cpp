@@ -222,7 +222,7 @@ void CloudClient::report(int destId, QString successfulIpList, QString failedIpL
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
     QJsonObject reportObject;
-    reportObject.insert("src", m_screenId);
+    reportObject.insert("src", (qint64)m_screenId);
     reportObject.insert("dest", destId);
     reportObject.insert("successfulIpList", successfulIpList);
     reportObject.insert("failedIpList", failedIpList);
