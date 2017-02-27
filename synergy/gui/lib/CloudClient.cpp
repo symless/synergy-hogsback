@@ -214,7 +214,7 @@ void CloudClient::getScreens()
     });
 }
 
-void CloudClient::report(int destId, QString successfulIp, QString failedIp)
+void CloudClient::report(int destId, QString successfulIpList, QString failedIpList)
 {
     QUrl reportUrl = QUrl(kreportUrl);
     QNetworkRequest req(reportUrl);
@@ -222,15 +222,15 @@ void CloudClient::report(int destId, QString successfulIp, QString failedIp)
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
     QJsonObject reportObject;
-    reportObject.insert("srcId", m_screenId);
-    reportObject.insert("destId", destId);
-    reportObject.insert("successfulIp", successfulIp);
-    reportObject.insert("failedIp", failedIp);
+    reportObject.insert("src", m_screenId);
+    reportObject.insert("dest", destId);
+    reportObject.insert("successfulIpList", successfulIpList);
+    reportObject.insert("failedIpList", failedIpList);
     QJsonDocument doc(reportObject);
 
     m_networkManager->post(req, doc.toJson());
 
-    qDebug() << "report to cloud: destId " << destId << "successfulIp " << successfulIp << "failedIp " << failedIp;
+    qDebug() << "report to cloud: destId " << destId << "successfulIp " << successfulIpList << "failedIp " << failedIpList;
 }
 
 void CloudClient::onLoginFinished(QNetworkReply* reply)
