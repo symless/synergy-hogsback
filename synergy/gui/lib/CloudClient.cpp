@@ -226,7 +226,7 @@ void CloudClient::report(int destId, QString successfulIp, QString failedIp)
     reportObject.insert("destId", destId);
     reportObject.insert("successfulIp", successfulIp);
     reportObject.insert("failedIp", failedIp);
-    QJsonDocument doc(jsonObject);
+    QJsonDocument doc(reportObject);
 
     m_networkManager->post(req, doc.toJson());
 
