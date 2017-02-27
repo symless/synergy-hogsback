@@ -182,7 +182,7 @@ Rectangle {
                             onClicked: {
                                 dropMenu.state = ""
                                 if (index == 0) {
-                                    screenManager.addScreen("Unknown")
+                                    // screenManager.addScreen("Unknown")
                                 }
                             }
                         }
@@ -310,7 +310,7 @@ Rectangle {
                                     id: shutdownMouseArea
                                     anchors.fill: parent
                                     onReleased: {
-                                        screenManager.removeScreen(name, true)
+                                        // screenManager.removeScreen(name, true)
                                     }
                                 }
                             }
