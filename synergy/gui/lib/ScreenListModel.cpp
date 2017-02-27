@@ -42,7 +42,7 @@ int ScreenListModel::getModelIndex(int x, int y)
 
 void ScreenListModel::moveModel(int index, int offsetX, int offsetY)
 {
-    if (index < 0 && index >= m_screens.count()) {
+    if (index < 0 || index >= m_screens.count()) {
         return;
     }
 
