@@ -202,13 +202,13 @@ void ScreenManager::startCoreProcess()
 
 void ScreenManager::handleDefaultGroupMessage(MulticastMessage msg)
 {
+    if (msg.m_userId != m_appConfig->userId()) {
+        return;
+    }
+
     // servers need to send replies on receiving default existence
     if (processMode() == kServerMode) {
         if (msg.m_type == MulticastMessage::kDefaultExistence) {
-            if (msg.m_userId != m_appConfig->userId()) {
-                return;
-            }
-
             if (m_multicastManager->joinedUniqueGroup()) {
                 // multicast server reply
                 bool active = false;
@@ -223,10 +223,6 @@ void ScreenManager::handleDefaultGroupMessage(MulticastMessage msg)
     // exists
     else if (processMode() == kClientMode) {
         if (msg.m_type == MulticastMessage::kDefaultReply) {
-            if (msg.m_userId != m_appConfig->userId()) {
-                return;
-            }
-
             if (m_multicastManager->joinedUniqueGroup() == false) {
                 setupWaitTimer();
                 m_defaultServerReplies.insert(msg.m_uniqueGroup.toInt(),
@@ -243,9 +239,12 @@ void ScreenManager::handleDefaultGroupMessage(MulticastMessage msg)
 
 void ScreenManager::handleUniqueGroupMessage(MulticastMessage msg)
 {
+    if (msg.m_userId != m_appConfig->userId()) {
+        return;
+    }
+
     if (processMode() == kServerMode) {
         if (msg.m_type == MulticastMessage::kUniqueJoin) {
-
             bool matchedOrAdded = false;
             auto names = m_screenListModel->getScreenSet();
             names.insert(msg.m_hostname);
