@@ -44,7 +44,6 @@ void ConnectivityTester::setCloudClient(CloudClient* cloudClient)
 
 void ConnectivityTester::testNewScreens(QByteArray reply)
 {
-    qDebug() << "check new screens";
     QJsonDocument doc = QJsonDocument::fromJson(reply);
     if (!doc.isNull()) {
         if (doc.isObject()) {
@@ -89,8 +88,6 @@ void ConnectivityTester::testNewScreens(QByteArray reply)
 
 void ConnectivityTester::pollScreens()
 {
-     qDebug() << "polling screens";
-
      m_cloudClient->getScreens();
 }
 
