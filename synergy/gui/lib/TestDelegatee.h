@@ -30,7 +30,7 @@ private:
     QString m_screenId;
     QList<QString> m_ipList;
     QList<bool> m_results;
-    QTcpSocket* m_tcpclient;
+    QTcpSocket* m_tcpClient;
     int m_testIndex;
 };
 

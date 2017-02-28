@@ -9,7 +9,7 @@ const unsigned int kServerPort = 24810;
 TestDelegatee::TestDelegatee(QString& testCase, QObject *parent) :
     QObject(parent),
     m_testCase(testCase),
-    m_tcpclient(NULL),
+    m_tcpClient(NULL),
     m_testIndex(0)
 
 {
@@ -32,19 +32,19 @@ void TestDelegatee::start()
         return;
     }
 
-    if (!m_tcpclient) {
-        m_tcpclient = new QTcpSocket();
-        connect(m_tcpclient, &QAbstractSocket::connected, this, &TestDelegatee::onConnected);
-        connect(m_tcpclient, &QIODevice::readyRead, this, &TestDelegatee::onReadyRead);
+    if (!m_tcpClient) {
+        m_tcpClient = new QTcpSocket();
+        connect(m_tcpClient, &QAbstractSocket::connected, this, &TestDelegatee::onConnected);
+        connect(m_tcpClient, &QIODevice::readyRead, this, &TestDelegatee::onReadyRead);
         typedef void (QAbstractSocket::*QAbstractSocketErrorSignal)(QAbstractSocket::SocketError);
-        connect(m_tcpclient, static_cast<QAbstractSocketErrorSignal>(&QAbstractSocket::error),
+        connect(m_tcpClient, static_cast<QAbstractSocketErrorSignal>(&QAbstractSocket::error),
             this, &TestDelegatee::onSocketError);
     }
 
     QHostAddress address(m_ipList[m_testIndex]);
-    m_tcpclient->connectToHost(address, kServerPort);
+    m_tcpClient->connectToHost(address, kServerPort);
 
-    if (!m_tcpclient->waitForConnected(3000)) {
+    if (!m_tcpClient->waitForConnected(3000)) {
         onSocketError();
     }
 
@@ -57,13 +57,13 @@ void TestDelegatee::onConnected()
     QDataStream out(&block, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_5);
     out << "ClientHello";
-    m_tcpclient->write(block);
+    m_tcpClient->write(block);
 }
 
 void TestDelegatee::onReadyRead()
 {
     QDataStream in;
-    in.setDevice(m_tcpclient);
+    in.setDevice(m_tcpClient);
     in.setVersion(QDataStream::Qt_5_5);
     in.startTransaction();
 
@@ -80,15 +80,15 @@ void TestDelegatee::onReadyRead()
         qDebug() << m_ipList[m_testIndex] << "pass";
     }
 
-    disconnect(m_tcpclient, &QAbstractSocket::connected, this, &TestDelegatee::onConnected);
-    disconnect(m_tcpclient, &QIODevice::readyRead, this, &TestDelegatee::onReadyRead);
+    disconnect(m_tcpClient, &QAbstractSocket::connected, this, &TestDelegatee::onConnected);
+    disconnect(m_tcpClient, &QIODevice::readyRead, this, &TestDelegatee::onReadyRead);
     typedef void (QAbstractSocket::*QAbstractSocketErrorSignal)(QAbstractSocket::SocketError);
-    disconnect(m_tcpclient, static_cast<QAbstractSocketErrorSignal>(&QAbstractSocket::error),
+    disconnect(m_tcpClient, static_cast<QAbstractSocketErrorSignal>(&QAbstractSocket::error),
         this, &TestDelegatee::onSocketError);
-    m_tcpclient->abort();
+    m_tcpClient->abort();
     in.setDevice(0);
-    m_tcpclient->deleteLater();
-    m_tcpclient = NULL;
+    m_tcpClient->deleteLater();
+    m_tcpClient = NULL;
 
     m_testIndex++;
     start();
@@ -97,14 +97,14 @@ void TestDelegatee::onReadyRead()
 void TestDelegatee::onSocketError()
 {
     m_results[m_testIndex] = false;
-    disconnect(m_tcpclient, &QAbstractSocket::connected, this, &TestDelegatee::onConnected);
-    disconnect(m_tcpclient, &QIODevice::readyRead, this, &TestDelegatee::onReadyRead);
+    disconnect(m_tcpClient, &QAbstractSocket::connected, this, &TestDelegatee::onConnected);
+    disconnect(m_tcpClient, &QIODevice::readyRead, this, &TestDelegatee::onReadyRead);
     typedef void (QAbstractSocket::*QAbstractSocketErrorSignal)(QAbstractSocket::SocketError);
-    disconnect(m_tcpclient, static_cast<QAbstractSocketErrorSignal>(&QAbstractSocket::error),
+    disconnect(m_tcpClient, static_cast<QAbstractSocketErrorSignal>(&QAbstractSocket::error),
         this, &TestDelegatee::onSocketError);
-    m_tcpclient->abort();
-    m_tcpclient->deleteLater();
-    m_tcpclient = NULL;
+    m_tcpClient->abort();
+    m_tcpClient->deleteLater();
+    m_tcpClient = NULL;
     m_testIndex++;
     start();
 }
