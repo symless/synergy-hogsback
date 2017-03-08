@@ -36,9 +36,6 @@ void TestDelegatee::start()
         m_tcpClient = new QTcpSocket();
         connect(m_tcpClient, &QAbstractSocket::connected, this, &TestDelegatee::onConnected);
         connect(m_tcpClient, &QIODevice::readyRead, this, &TestDelegatee::onReadyRead);
-        typedef void (QAbstractSocket::*QAbstractSocketErrorSignal)(QAbstractSocket::SocketError);
-        connect(m_tcpClient, static_cast<QAbstractSocketErrorSignal>(&QAbstractSocket::error),
-            this, &TestDelegatee::onSocketError);
     }
 
     QHostAddress address(m_ipList[m_testIndex]);
@@ -46,6 +43,11 @@ void TestDelegatee::start()
 
     if (!m_tcpClient->waitForConnected(3000)) {
         onSocketError();
+    }
+    else {
+        typedef void (QAbstractSocket::*QAbstractSocketErrorSignal)(QAbstractSocket::SocketError);
+        connect(m_tcpClient, static_cast<QAbstractSocketErrorSignal>(&QAbstractSocket::error),
+            this, &TestDelegatee::onSocketError);
     }
 
     return;
