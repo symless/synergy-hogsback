@@ -63,6 +63,17 @@ Rectangle {
             height: 70
             color:"white"
 
+            Image {
+                id: logoImage
+                anchors.left: parent.left
+                anchors.leftMargin: 15
+                anchors.verticalCenter: parent.verticalCenter
+                height: parent.height - 20
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                source: "qrc:/res/image/synergy-icon.png"
+            }
+
             // option icon
             Rectangle {
                 id: option
