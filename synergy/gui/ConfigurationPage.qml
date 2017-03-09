@@ -42,7 +42,6 @@ Rectangle {
         id: configurationPage
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        anchors.left: navigationMenu.right
         width: parent.width
 
         Component.onCompleted: {
