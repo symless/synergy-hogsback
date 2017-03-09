@@ -38,5 +38,6 @@
         <file>ActivationPage.qml</file>
         <file>res/image/facebook.png</file>
         <file>res/image/google.png</file>
+        <file>res/image/synergy-logo.png</file>
     </qresource>
 </RCC>

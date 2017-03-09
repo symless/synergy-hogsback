@@ -10,8 +10,38 @@ Rectangle {
         anchors.fill: parent
 
         Rectangle {
+            id: rectangle1
             anchors.fill: parent
             color:"#3f95b8"
+
+            // background header
+            Rectangle {
+                id: activationPageBackgroundHeader
+                anchors.top: parent.top
+                width: parent.width
+                height: 94
+                color:"white"
+
+                Image {
+                    id: logo
+                    fillMode :Image.PreserveAspectFit
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 15
+                    anchors.top: parent.top
+                    anchors.topMargin: 15
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    source: "res/image/synergy-logo.png"
+                }
+            }
+
+            // separator
+            Rectangle {
+                id: activationPageBackgroundSeparator
+                anchors.top: activationPageBackgroundHeader.bottom
+                width: parent.width
+                height: 7
+                color:"#96C13D"
+            }
 
             Rectangle {
                 id: signInArea
