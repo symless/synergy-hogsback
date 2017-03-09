@@ -7,11 +7,11 @@ TEMPLATE = app
 
 debug {
     DESTDIR = ../../bin/debug
-    LIBS += -L../../bin/debug -lsynlib
+    LIBS += -L../../bin/debug -lguilib
 }
 release {
     DESTDIR = ../../bin/release
-    LIBS += -L../../bin/release -lsynlib
+    LIBS += -L../../bin/release -lguilib
 }
 
 # include the classes from the gui project

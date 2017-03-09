@@ -16,5 +16,5 @@ add_executable (${PROJECT_NAME}
 )
 
 include_directories (../lib)
-target_link_libraries (${PROJECT_NAME} synlib)
+target_link_libraries (${PROJECT_NAME} guilib)
 qt5_use_modules (${PROJECT_NAME} Core Widgets Network)

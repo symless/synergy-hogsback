@@ -23,4 +23,4 @@ include_directories(
 )
 
 qt5_use_modules (gui-tests Test)
-target_link_libraries (gui-tests synlib)
+target_link_libraries (gui-tests guilib)

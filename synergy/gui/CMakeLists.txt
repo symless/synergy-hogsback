@@ -32,7 +32,7 @@ target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
 )
 
 target_link_libraries (${PROJECT_NAME}
-    synlib
+    guilib
     fmt
     libzmq-static
     ${SODIUM_LIBRARIES}
