@@ -55,13 +55,13 @@ Rectangle {
                     id: socialLogin
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
-                    width: 158
-                    height: 35
+                    width: 200
+                    height: 50
                     color: "transparent"
                     Image {
                         id: googleImage
                         anchors.fill: parent
-                        fillMode: Image.Stretch
+                        fillMode: Image.PreserveAspectFit
                         smooth: true
                         source: "qrc:/res/image/google.png"
                     }
