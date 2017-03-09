@@ -48,6 +48,13 @@ Rectangle {
             applicationWindow.cloudClient.addScreen(localHostname.hostname())
         }
 
+        Version {
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 5
+        }
+
         // background header
         Rectangle {
             id: configurationPageBackgroundHeader

@@ -23,6 +23,7 @@ add_executable (${PROJECT_NAME}
     CustomCheckBox.qml
     GeneralSettingView.qml
     LogSettingView.qml
+    Version.qml
 )
 
 target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
