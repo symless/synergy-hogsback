@@ -91,3 +91,40 @@ add_subdirectory (third_party)
 
 include_directories (.)
 add_subdirectory (synergy)
+
+#
+# Configure_file... but for directories, recursively.
+#
+macro (configure_files srcDir destDir)
+    message (STATUS "Configuring directory ${destDir}")
+    make_directory (${destDir})
+
+    file (GLOB_RECURSE sourceFiles RELATIVE ${srcDir} ${srcDir}/*)
+    file (GLOB_RECURSE templateFiles LIST_DIRECTORIES false RELATIVE ${srcDir} ${srcDir}/*.in)
+    list (REMOVE_ITEM sourceFiles ${templateFiles})
+
+    foreach (sourceFile ${sourceFiles})
+        set (sourceFilePath ${srcDir}/${sourceFile})
+        if (IS_DIRECTORY ${sourceFilePath})
+            message (STATUS "Copying directory ${sourceFile}")
+            make_directory (${destDir/${sourceFile})
+        else()
+            message (STATUS "Copying file ${sourceFile}")
+            configure_file (${sourceFilePath} ${destDir}/${sourceFile} COPYONLY)
+        endif()
+    endforeach (sourceFile)
+
+    foreach (templateFile ${templateFiles})
+        set (sourceTemplateFilePath ${srcDir}/${templateFile})
+                string (REGEX REPLACE "\.in$" "" templateFile ${templateFile})
+        message (STATUS "Configuring file ${templateFile}")
+        configure_file (${sourceTemplateFilePath} ${destDir}/${templateFile} @ONLY)
+    endforeach (templateFile)
+endmacro (configure_files)
+
+#
+# Windows installer
+#
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    configure_files (${CMAKE_CURRENT_SOURCE_DIR}/dist/wix ${CMAKE_BINARY_DIR}/installer)
+endif()
