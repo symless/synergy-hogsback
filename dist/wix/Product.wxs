@@ -81,9 +81,12 @@
 				<File Source="$(var.OpenSSLBinPath)/ssleay32.dll"/>
 			</Component>
 			<Component Guid="BAC8149B-6287-45BF-9C27-43D71ED40214" Id="Gui">
-				<File Id="GuiProgram" KeyPath="yes" Source="$(var.BinPath)/synergy.exe">
-					<Shortcut Advertise="yes" Directory="ProgramMenuFolder" Icon="synergy.ico" Id="GuiShortcut" Name="$(var.Name)"/>
-					<fire:FirewallException Id="GuiFirewallException" IgnoreFailure="yes" Name="$(var.Name)" Scope="any"/>
+				<File Id="LegacyGuiProgram" Source="$(var.BinPath)/synergy.exe">
+					<fire:FirewallException Id="GuiFirewallException" IgnoreFailure="yes" Name="Synergy" Scope="any"/>
+				</File>
+				<File Id="GuiProgram" KeyPath="yes" Source="$(var.BinPath)/synergy2.exe">
+					<Shortcut Advertise="yes" Directory="ProgramMenuFolder" Icon="synergy.ico" Id="GuiShortcut" Name="$(var.Name) 2.0"/>
+					<fire:FirewallException Id="GuiFirewallException" IgnoreFailure="yes" Name="Synergy 2.0" Scope="any"/>
 				</File>
 				<?if $(var.Configuration) = "Debug" ?>
 				<File Source="$(var.QtBinPath)\Qt5Cored.dll"/>
