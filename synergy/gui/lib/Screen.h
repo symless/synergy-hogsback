@@ -17,11 +17,13 @@ public:
 
     friend bool
     operator== (Screen const& s1, Screen const& s2) noexcept {
-        return (s1.m_name == s2.m_name);
+        return (s1.m_name == s2.m_name && s1.m_id == s2.m_id);
     }
 
 	Screen(QString name = "");
 
+    int id() const;
+    void setId(int id);
 	int posX() const;
 	int posY() const;
 	QString name() const;
@@ -34,8 +36,9 @@ public:
 	void setState(ScreenState s);
 
 private:
-	int m_posX;
-	int m_posY;
+    int m_id;
+    int m_posX;
+    int m_posY;
 	QString m_name;
 
 private:

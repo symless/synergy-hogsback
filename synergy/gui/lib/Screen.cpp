@@ -3,6 +3,7 @@
 QHash<ScreenState, QString> Screen::m_stateImages;
 
 Screen::Screen(QString name) :
+    m_id(-1),
     m_posX(-1),
     m_posY(-1),
     m_name(name),
@@ -10,7 +11,8 @@ Screen::Screen(QString name) :
 {
     m_stateImages[kConnected] = "qrc:/res/image/screen-active.png";
     m_stateImages[kConnecting] = "qrc:/res/image/screen_icon_running.png";
-    m_stateImages[kDisconnected] = "qrc:/res/image/screen-inactive.png";
+    m_stateImages[kDisconnected] = "qrc:/res/image/screen-active.png";
+    m_stateImages[kInactive] = "qrc:/res/image/screen-inactive.png";
 
     m_stateImage = m_stateImages[m_state];
 }
@@ -59,4 +61,14 @@ void Screen::setState(ScreenState s)
 {
     m_state = s;
     m_stateImage = m_stateImages[m_state];
+}
+
+int Screen::id() const
+{
+    return m_id;
+}
+
+void Screen::setId(int id)
+{
+    m_id = id;
 }
