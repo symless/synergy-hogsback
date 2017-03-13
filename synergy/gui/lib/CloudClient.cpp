@@ -214,7 +214,8 @@ void CloudClient::onAddScreenFinished(QNetworkReply* reply)
 void CloudClient::getScreens()
 {
     if (m_groupId == -1) {
-        qDebug() << "failed to get screen list, as there is no group ID";
+        qDebug() << "retry get screens in 3 secs";
+        return;
     }
 
     QUrl screensUrl = QUrl(kscreensUrl);
