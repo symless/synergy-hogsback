@@ -32,8 +32,7 @@ CloudClient::CloudClient(QObject* parent) : QObject(parent)
 
 CloudClient::~CloudClient()
 {
-    m_appConfig->setGroupId(m_groupId);
-    m_appConfig->setScreenId(m_screenId);
+    syncConfig();
 }
 
 void CloudClient::login(QString email, QString password)
@@ -207,6 +206,8 @@ void CloudClient::onAddScreenFinished(QNetworkReply* reply)
 
     m_screenId = screen.toInt();
     m_groupId = group.toInt();
+
+    syncConfig();
 }
 
 void CloudClient::getScreens()
@@ -320,4 +321,10 @@ void CloudClient::onReplyError(QNetworkReply::NetworkError code)
 void CloudClient::onRetryGetUserId()
 {
     getUserId(false);
+}
+
+CloudClient::syncConfig()
+{
+    m_appConfig->setGroupId(m_groupId);
+    m_appConfig->setScreenId(m_screenId);
 }

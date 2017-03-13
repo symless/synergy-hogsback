@@ -45,6 +45,9 @@ private slots:
     void onRetryGetUserId();
 
 private:
+    syncConfig();
+
+private:
     QByteArray m_Data;
     QNetworkAccessManager* m_networkManager;
     AppConfig* m_appConfig;
