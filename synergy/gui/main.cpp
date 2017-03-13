@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
         qmlRegisterSingletonType<AppConfig>("com.synergy.gui", 1, 0, "AppConfig", AppConfig::instance);
         QQmlApplicationEngine engine(QUrl(QStringLiteral("qrc:/main.qml")));
 
-        QIcon icon(":res/image/synergy.ico");
+        QIcon icon(":res/image/synergy-icon.png");
         app.setWindowIcon(icon);
 
         return app.exec();

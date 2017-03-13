@@ -10,8 +10,45 @@ Rectangle {
         anchors.fill: parent
 
         Rectangle {
+            id: rectangle1
             anchors.fill: parent
             color:"#3f95b8"
+
+            Version {
+                anchors.left: parent.left
+                anchors.leftMargin: 5
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 5
+            }
+
+            // background header
+            Rectangle {
+                id: activationPageBackgroundHeader
+                anchors.top: parent.top
+                width: parent.width
+                height: 94
+                color:"white"
+
+                Image {
+                    id: logo
+                    fillMode :Image.PreserveAspectFit
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 15
+                    anchors.top: parent.top
+                    anchors.topMargin: 15
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    source: "res/image/synergy-logo.png"
+                }
+            }
+
+            // separator
+            Rectangle {
+                id: activationPageBackgroundSeparator
+                anchors.top: activationPageBackgroundHeader.bottom
+                width: parent.width
+                height: 7
+                color:"#96C13D"
+            }
 
             Rectangle {
                 id: signInArea
@@ -25,13 +62,13 @@ Rectangle {
                     id: socialLogin
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
-                    width: 158
-                    height: 35
+                    width: 200
+                    height: 50
                     color: "transparent"
                     Image {
                         id: googleImage
                         anchors.fill: parent
-                        fillMode: Image.Stretch
+                        fillMode: Image.PreserveAspectFit
                         smooth: true
                         source: "qrc:/res/image/google.png"
                     }

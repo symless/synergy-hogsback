@@ -1,22 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>res/image/cog.png</file>
-        <file>res/image/configuration.png</file>
-        <file>res/image/general.png</file>
-        <file>res/image/log.png</file>
-        <file>res/image/ssl.png</file>
-        <file>res/image/apply.png</file>
-        <file>res/image/info.png</file>
-        <file>res/image/search.png</file>
-        <file>res/image/background.png</file>
-        <file>res/image/basic_user.png</file>
-        <file>res/image/pro_user.png</file>
-        <file>res/image/unknown_user.png</file>
-        <file>res/image/background_footer.png</file>
-        <file>res/image/highlight.png</file>
-        <file>res/image/background2.png</file>
-        <file>res/image/background2_header.png</file>
-        <file>res/image/background2_left.png</file>
         <file>res/image/screen-inactive.png</file>
         <file>res/image/screen-active.png</file>
         <file>main.qml</file>
@@ -27,16 +10,13 @@
         <file>CustomCheckBox.qml</file>
         <file>GeneralSettingView.qml</file>
         <file>LogSettingView.qml</file>
-        <file>res/image/synergy.ico</file>
-        <file>res/image/signal-tower-on.png</file>
-        <file>res/image/navigation.png</file>
         <file>res/image/option.png</file>
-        <file>res/image/signal-tower-off.png</file>
         <file>res/image/shutdown.png</file>
         <file>res/image/signal.png</file>
-        <file>res/image/doge.png</file>
         <file>ActivationPage.qml</file>
-        <file>res/image/facebook.png</file>
         <file>res/image/google.png</file>
+        <file>res/image/synergy-logo.png</file>
+        <file>Version.qml</file>
+        <file>res/image/synergy-icon.png</file>
     </qresource>
 </RCC>

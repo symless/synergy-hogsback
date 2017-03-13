@@ -42,11 +42,17 @@ Rectangle {
         id: configurationPage
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        anchors.left: navigationMenu.right
         width: parent.width
 
         Component.onCompleted: {
             applicationWindow.cloudClient.addScreen(localHostname.hostname())
+        }
+
+        Version {
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 5
         }
 
         // background header
@@ -56,6 +62,17 @@ Rectangle {
             width: parent.width
             height: 70
             color:"white"
+
+            Image {
+                id: logoImage
+                anchors.left: parent.left
+                anchors.leftMargin: 15
+                anchors.verticalCenter: parent.verticalCenter
+                height: parent.height - 20
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                source: "qrc:/res/image/synergy-icon.png"
+            }
 
             // option icon
             Rectangle {
