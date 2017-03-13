@@ -195,7 +195,10 @@ void ScreenManager::updateScreens(QByteArray reply)
             }
 
             if (!latestScreenNameSet.contains(m_localHostname)) {
-                latestScreenList.push_back(m_localHostname);
+                Screen screen(m_localHostname);
+                screen.setId(m_appConfig->screenId());
+                m_arrangementStrategy->addScreen(m_screenListModel, screen);
+                latestScreenList.push_back(screen);
                 latestScreenNameSet.insert(m_localHostname);
                 notify = true;
             }
