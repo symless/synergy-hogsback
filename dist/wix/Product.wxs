@@ -94,6 +94,8 @@
 				<File Source="$(var.QtBinPath)\Qt5Networkd.dll"/>
 				<File Source="$(var.QtBinPath)\Qt5Svgd.dll"/>
 				<File Source="$(var.QtBinPath)\Qt5Widgetsd.dll"/>
+				<File Source="$(var.QtBinPath)\Qt5Quickd.dll"/>
+				<File Source="$(var.QtBinPath)\Qt5Qmld.dll"/>
 				<File Source="$(var.QtBinPath)\libGLESv2d.dll"/>
 				<File Source="$(var.QtBinPath)\libEGLd.dll"/>
 				<!-- Hacky -->
@@ -104,6 +106,8 @@
 				<File Source="$(var.QtBinPath)\Qt5Network.dll"/>
 				<File Source="$(var.QtBinPath)\Qt5Svg.dll"/>
 				<File Source="$(var.QtBinPath)\Qt5Widgets.dll"/>
+				<File Source="$(var.QtBinPath)\Qt5Quick.dll"/>
+				<File Source="$(var.QtBinPath)\Qt5Qml.dll"/>
 				<File Source="$(var.QtBinPath)\libGLESv2.dll"/>
 				<File Source="$(var.QtBinPath)\libEGL.dll"/>
 				<?endif ?>
