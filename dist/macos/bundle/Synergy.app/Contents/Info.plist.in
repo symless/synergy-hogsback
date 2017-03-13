@@ -6,12 +6,11 @@
     <key>CFBundleDisplayName</key>
     <string>Synergy</string>
     <key>CFBundleExecutable</key>
-    <string>synergy</string>
+    <string>synergy2</string>
     <key>CFBundleIconFile</key>
     <string>Synergy.icns</string>
     <key>CFBundleIdentifier</key>
-    <string>synergy</string>
-    <!-- TODO: Fix this in v2.0 //-->
+    <string>com.symless.synergy</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>

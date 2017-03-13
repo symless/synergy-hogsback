@@ -6,6 +6,7 @@ set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
                        "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
 
@@ -89,9 +90,6 @@ include_directories (BEFORE SYSTEM third_party/cppzmq)
 include_directories (third_party/catch/include)
 add_subdirectory (third_party)
 
-include_directories (.)
-add_subdirectory (synergy)
-
 #
 # Configure_file... but for directories, recursively.
 #
@@ -123,8 +121,25 @@ macro (configure_files srcDir destDir)
 endmacro (configure_files)
 
 #
+# macOS app Bundle
+#
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set (CMAKE_INSTALL_RPATH "@loader_path/../Libraries;@loader_path/../Frameworks")
+
+    set (SYNERGY_BUNDLE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dist/macos/bundle)
+    set (SYNERGY_BUNDLE_DIR ${CMAKE_BINARY_DIR}/bundle)
+    set (SYNERGY_BUNDLE_APP_DIR ${SYNERGY_BUNDLE_DIR}/Synergy.app)
+    set (SYNERGY_BUNDLE_BINARY_DIR ${SYNERGY_BUNDLE_APP_DIR}/Contents/MacOS)
+
+    configure_files (${SYNERGY_BUNDLE_SOURCE_DIR} ${SYNERGY_BUNDLE_DIR})
+endif()
+
+#
 # Windows installer
 #
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     configure_files (${CMAKE_CURRENT_SOURCE_DIR}/dist/wix ${CMAKE_BINARY_DIR}/installer)
 endif()
+
+include_directories (.)
+add_subdirectory (synergy)
