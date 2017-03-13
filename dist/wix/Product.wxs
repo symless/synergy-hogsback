@@ -66,11 +66,11 @@
 	<Fragment>
 		<ComponentGroup Directory="INSTALLFOLDER" Id="ProductComponents">
 			<Component Guid="EC9AD3B0-277C-4157-B5C8-5FD5B6A5F4AD" Id="Core">
-				<File KeyPath="yes" Source="$(var.BinPath)/synergyd.exe"/>
+				<!--<File KeyPath="yes" Source="$(var.BinPath)/synergyd.exe"/>
 				<ServiceInstall Description="Controls the $(var.Name) foreground processes." DisplayName="$(var.Name)" ErrorControl="normal" Id="ServiceInstall" Name="Synergy" Start="auto" Type="ownProcess">
 					<util:ServiceConfig FirstFailureActionType="restart" ResetPeriodInDays="1" RestartServiceDelayInSeconds="1" SecondFailureActionType="restart" ThirdFailureActionType="restart"/>
 				</ServiceInstall>
-				<ServiceControl Id="ServiceControl" Name="Synergy" Remove="uninstall" Start="install" Stop="both"/>
+				<ServiceControl Id="ServiceControl" Name="Synergy" Remove="uninstall" Start="install" Stop="both"/>//-->
 				<File Source="$(var.BinPath)/synergys.exe">
 					<fire:FirewallException Id="ServerFirewallException" IgnoreFailure="yes" Name="$(var.Name)" Scope="any"/>
 				</File>
