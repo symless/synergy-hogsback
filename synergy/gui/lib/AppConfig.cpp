@@ -18,6 +18,28 @@ AppConfig::AppConfig() :
 {
     m_userToken = m_settings.value("userToken", "").toString();
     m_userId = m_settings.value("userId", -1).toInt();
+    m_groupId = m_settings.value("groupId", -1).toInt();
+    m_screenId = m_settings.value("screenId", -1).toInt();
+}
+
+int AppConfig::screenId() const
+{
+    return m_screenId;
+}
+
+void AppConfig::setScreenId(int screenId)
+{
+    m_screenId = screenId;
+}
+
+int AppConfig::groupId() const
+{
+    return m_groupId;
+}
+
+void AppConfig::setGroupId(int groupId)
+{
+    m_groupId = groupId;
 }
 
 AppConfig::~AppConfig()
@@ -27,7 +49,7 @@ AppConfig::~AppConfig()
 
 bool AppConfig::dragAndDrop() const
 {
-	return m_dragAndDrop;
+    return m_dragAndDrop;
 }
 
 DebugLevel AppConfig::debugLevel()
@@ -54,6 +76,8 @@ void AppConfig::save()
 {
     m_settings.setValue("userToken", m_userToken);
     m_settings.setValue("userId", m_userId);
+    m_settings.setValue("groupId", m_groupId);
+    m_settings.setValue("screenId", m_screenId);
     m_settings.sync();
 }
 

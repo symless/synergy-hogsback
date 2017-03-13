@@ -26,11 +26,14 @@ public:
 	QString localIp() const;
     void setLocalIp(const QString& localIp);
     void setUserToken(const QString& token);
-
     void setUserId(int id);
+    int groupId() const;
+    void setGroupId(int groupId);
+    int screenId() const;
+    void setScreenId(int screenId);
 
 protected:
-	AppConfig();
+    AppConfig();
 
 private:
     QSettings m_settings;
@@ -38,6 +41,8 @@ private:
     QString m_localIp;
     QString m_userToken;
     int m_userId;
+    int m_groupId;
+    int m_screenId;
     bool m_dragAndDrop;
 };
 

@@ -17,6 +17,7 @@ class LIB_SPEC CloudClient : public QObject
 
 public:
     explicit CloudClient(QObject* parent = 0);
+    ~CloudClient();
 
     Q_INVOKABLE void login(QString email, QString password);
     Q_INVOKABLE void getUserToken();

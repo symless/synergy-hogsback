@@ -14,18 +14,26 @@
 // https://alpha1.cloud.symless.com/
 // http://127.0.0.1:8080/
 
-static const char kAddScreenUrl[] = "https://alpha1.cloud.symless.com/user/screens/join";
-static const char kRemoveScreenUrl[] = "https://alpha1.cloud.symless.com/user/screens/leave";
-static const char kLoginUrl[] = "https://alpha1.cloud.symless.com/login";
-static const char kIdentifyUrl[] = "https://alpha1.cloud.symless.com/user/identify";
-static const char kscreensUrl[] = "https://alpha1.cloud.symless.com/user/screens";
-static const char kreportUrl[] = "https://alpha1.cloud.symless.com/report";
+static const char kAddScreenUrl[] = "http://192.168.3.113:8080/group/join";
+static const char kRemoveScreenUrl[] = "http://192.168.3.113:8080/group/leave";
+static const char kLoginUrl[] = "http://192.168.3.113:8080/login";
+static const char kIdentifyUrl[] = "http://192.168.3.113:8080/user/identify";
+static const char kscreensUrl[] = "http://192.168.3.113:8080/group/screens";
+static const char kreportUrl[] = "http://192.168.3.113:8080/report";
 static const int kPollingTimeout = 60000; // 1 minite
 
 CloudClient::CloudClient(QObject* parent) : QObject(parent)
 {
     m_networkManager = new QNetworkAccessManager(this);
     m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
+    m_groupId = m_appConfig->groupId();
+    m_screenId = m_appConfig->screenId();
+}
+
+CloudClient::~CloudClient()
+{
+    m_appConfig->setGroupId(m_groupId);
+    m_appConfig->setScreenId(m_screenId);
 }
 
 void CloudClient::login(QString email, QString password)
@@ -203,12 +211,21 @@ void CloudClient::onAddScreenFinished(QNetworkReply* reply)
 
 void CloudClient::getScreens()
 {
+    if (m_groupId == -1) {
+        qDebug() << "failed to get screen list, as there is no group ID";
+    }
+
     QUrl screensUrl = QUrl(kscreensUrl);
     QNetworkRequest req(screensUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
-    auto reply = m_networkManager->get(req);
+    QJsonObject reportObject;
+    reportObject.insert("groupId", (qint64)m_groupId);
+
+    QJsonDocument doc(reportObject);
+
+    auto reply = m_networkManager->post(req, doc.toJson());
     connect (reply, &QNetworkReply::finished, [this, reply]{
         onGetScreensFinished (reply);
     });
