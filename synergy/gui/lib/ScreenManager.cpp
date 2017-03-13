@@ -411,11 +411,11 @@ void ScreenManager::updateScreens(QByteArray reply)
                 }
                 screen.setState(kDisconnected);
 
-                latestScreenList.insert(screen);
+                latestScreenList.push_back(screen);
             }
 
             if (!latestScreenNameSet.contains(m_localHostname)) {
-                latestScreenList.insert(m_localHostname);
+                latestScreenList.push_back(m_localHostname);
                 latestScreenNameSet.insert(m_localHostname);
                 notify = true;
             }
