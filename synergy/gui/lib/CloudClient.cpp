@@ -19,7 +19,8 @@ static const char kRemoveScreenUrl[] = "http://192.168.3.113:8080/group/leave";
 static const char kLoginUrl[] = "http://192.168.3.113:8080/login";
 static const char kIdentifyUrl[] = "http://192.168.3.113:8080/user/identify";
 static const char kscreensUrl[] = "http://192.168.3.113:8080/group/screens";
-static const char kreportUrl[] = "http://192.168.3.113:8080/report";
+static const char kUpdateGroupConfigUrl[] = "http://192.168.3.113:8080/group/update";
+static const char kReportUrl[] = "http://192.168.3.113:8080/report";
 static const int kPollingTimeout = 60000; // 1 minite
 
 CloudClient::CloudClient(QObject* parent) : QObject(parent)
@@ -234,7 +235,7 @@ void CloudClient::getScreens()
 
 void CloudClient::report(int destId, QString successfulIpList, QString failedIpList)
 {
-    QUrl reportUrl = QUrl(kreportUrl);
+    QUrl reportUrl = QUrl(kReportUrl);
     QNetworkRequest req(reportUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
@@ -249,6 +250,16 @@ void CloudClient::report(int destId, QString successfulIpList, QString failedIpL
     m_networkManager->post(req, doc.toJson());
 
     qDebug() << "report to cloud: destId " << destId << "successfulIp " << successfulIpList << "failedIp " << failedIpList;
+}
+
+void CloudClient::updateGroupConfig(QJsonDocument &doc)
+{
+    QUrl reportUrl = QUrl(kUpdateGroupConfigUrl);
+    QNetworkRequest req(reportUrl);
+    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
+
+    m_networkManager->post(req, doc.toJson());
 }
 
 void CloudClient::onLoginFinished(QNetworkReply* reply)

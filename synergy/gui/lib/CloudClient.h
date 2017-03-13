@@ -28,6 +28,7 @@ public:
     Q_INVOKABLE void getScreens();
 
     void report(int destId, QString successfulIp, QString failedIp);
+    void updateGroupConfig(QJsonDocument& doc);
 
 signals:
     void loginOk();
