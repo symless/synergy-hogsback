@@ -297,20 +297,6 @@ Rectangle {
                                 }
                             }
 
-                            Image {
-                                id: signalImage
-                                width: 20
-                                height: 20
-                                anchors.top: parent.top
-                                anchors.topMargin: 9
-                                anchors.left: parent.left
-                                anchors.leftMargin: 9
-                                fillMode: Image.PreserveAspectFit
-                                smooth: true
-                                visible: stateImage === "qrc:/res/image/screen-active.png"
-                                source: "qrc:/res/image/signal.png"
-                            }
-
                             Text {
                                 width: parent.width - 20
                                 anchors.verticalCenter: parent.verticalCenter
