@@ -186,7 +186,7 @@ void ScreenManager::updateScreens(QByteArray reply)
                 screen.setPosX(obj["posX"].toInt());
                 screen.setPosY(obj["posY"].toInt());
                 if (!obj.contains("activeGroup") ||
-                    obj[expired].toBool()) {
+                    obj["expired"].toBool()) {
                     screen.setState(kInactive);
                 }
                 screen.setState(kDisconnected);
@@ -201,7 +201,7 @@ void ScreenManager::updateScreens(QByteArray reply)
             }
             // remove unsub screen
             m_screenNameSet.subtract(latestScreenNameSet);
-            for (QString& name : m_screenNameSet) {
+            for (const QString& name : m_screenNameSet) {
                 removeScreen(name);
             }
 
