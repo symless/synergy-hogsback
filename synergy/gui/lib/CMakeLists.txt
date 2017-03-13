@@ -5,7 +5,6 @@ set (GUI_LIB_SOURCES
     Common.cpp
     CloudClient.cpp
     ConfigFileManager.cpp
-    ConfigMessageConvertor.cpp
     ConnectivityTester.cpp
     CoreInterface.cpp
     DebugLevel.cpp
@@ -14,9 +13,6 @@ set (GUI_LIB_SOURCES
     Hostname.cpp
     IpManager.cpp
     LogManager.cpp
-    Multicast.cpp
-    MulticastManager.cpp
-    MulticastMessage.cpp
     ProcessCommand.cpp
     ProcessManager.cpp
     ScreenBBArrangement.cpp

@@ -334,7 +334,7 @@ void CloudClient::onRetryGetUserId()
     getUserId(false);
 }
 
-CloudClient::syncConfig()
+void CloudClient::syncConfig()
 {
     m_appConfig->setGroupId(m_groupId);
     m_appConfig->setScreenId(m_screenId);

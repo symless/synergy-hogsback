@@ -7,7 +7,6 @@
 #include <QQuickItem>
 #include <QMap>
 
-class MulticastManager;
 class IScreenArrangement;
 class ProcessManager;
 class ScreenListSnapshotManager;
@@ -51,22 +50,16 @@ signals:
 
 private:
     int processMode();
-    void setupWaitTimer();
     void startCoreProcess();
 
 private slots:
-    void handleDefaultGroupMessage(MulticastMessage msg);
-    void handleUniqueGroupMessage(MulticastMessage msg);
-    void waitServerReplyTimeout();
     void updateScreens(QByteArray reply);
     void onUpdateGroupConfig();
 
 private:
     ScreenListModel* m_screenListModel;
     ProcessManager* m_processManager;
-    MulticastManager* m_multicastManager;
     IScreenArrangement* m_arrangementStrategy;
-    QTimer* m_waitTimer;
     ScreenListSnapshotManager* m_screenListSnapshotManager;
     AppConfig* m_appConfig;
     CloudClient* m_cloudClient;

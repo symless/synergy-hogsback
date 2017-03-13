@@ -1,6 +1,5 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include "MulticastManager.h"
 #include "ProcessMode.h"
 #include <iostream>
 
@@ -8,13 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    m_multicastManager = qobject_cast<MulticastManager*>
-                                (MulticastManager::instance());
     ui->setupUi(this);
-    connect(m_multicastManager, &MulticastManager::receivedUniqueGroupMessage,
-             this, &MainWindow::onReceivedUniqueMulticastMessage);
-    connect(m_multicastManager, &MulticastManager::receivedDefaultGroupMessage,
-             this, &MainWindow::onReceivedDefaultMulticastMessage);
 
     for (int i = 0; i < ui->p_comboBoxGroup->count(); i++) {
         QStringListModel* name = new QStringListModel();
@@ -37,12 +30,6 @@ MainWindow::~MainWindow()
     }
 }
 
-void
-MainWindow::onReceivedDefaultMulticastMessage(MulticastMessage msg) {
-    ui->p_textBrowserLogging->append("===== Received Default Message =====");
-    ui->p_textBrowserLogging->append(msg.toReadableString());
-}
-
 void MainWindow::syncNameAndScreenModel()
 {
     int index = ui->p_comboBoxGroup->currentIndex();
@@ -57,41 +44,6 @@ void MainWindow::syncNameAndScreenModel()
         }
     }
 
-}
-
-void
-MainWindow::onReceivedUniqueMulticastMessage(MulticastMessage msg) {
-    ui->p_textBrowserLogging->append("===== Received Unique Message =====");
-    ui->p_textBrowserLogging->append(msg.toReadableString());
-
-    if (msg.m_type == MulticastMessage::kUniqueConfig ||
-        msg.m_type == MulticastMessage::kUniqueConfigDelta) {
-        ConfigMessageConvertor convertor;
-        QList<Screen> screenList;
-        // set serial to -1 to bypass serial checking
-        int lastSerial = -1;
-        if(convertor.fromStringToList(screenList,
-                        msg.m_configInfo,
-                        lastSerial,
-                        msg.m_type == MulticastMessage::kUniqueConfig)) {
-
-            // if there is only 1 screen in the list and its position is -1,-1,
-            // it means remove this screen in configuration
-            if (screenList.size() == 1) {
-                if (screenList[0].posX() == -1 &&
-                    screenList[0].posY() == -1) {
-                    getScreenModel()->removeScreen(screenList[0].name());
-                    int index = getNameModel()->stringList().indexOf(
-                                                    screenList[0].name());
-                    getNameModel()->removeRow(index);
-                    return;
-                }
-            }
-
-            getScreenModel()->update(screenList);
-            syncNameAndScreenModel();
-        }
-    }
 }
 
 QStringListModel* MainWindow::getNameModel()
@@ -126,33 +78,11 @@ void MainWindow::on_p_pushButtonJoin_clicked()
 
     // want to join default group, as we automatically join default group,
     // this means we want to know the information of server existance
-    if (index == 0) {
-        m_multicastManager->multicastDefaultExistence();
-    }
-    // join unique group
-    else {
-        QString hostname = ui->p_lineEditScreenName->text();
-        if (!ui->p_lineEditScreenName->text().isEmpty()) {
-            m_multicastManager->setLocalHostname(hostname);
-            m_multicastManager->joinUniqueGroup(index);
-            m_multicastManager->multicastUniqueJoin(kClientMode);
-        }
-    }
 }
 
 void MainWindow::on_p_pushButtonLeave_clicked()
 {
     int index = ui->p_comboBoxGroup->currentIndex();
-
-    // only leave unique groups
-    if (index != 0) {
-        QString hostname = ui->p_lineEditScreenName->text();
-        if (!hostname.isEmpty()) {
-            m_multicastManager->setLocalHostname(hostname);
-            m_multicastManager->multicastUniqueLeave(kClientMode);
-            m_multicastManager->leaveUniqueGroup();
-        }
-    }
 }
 
 void MainWindow::on_p_listViewScreenNames_pressed(const QModelIndex &index)
@@ -164,41 +94,11 @@ void MainWindow::on_p_listViewScreenNames_pressed(const QModelIndex &index)
 void MainWindow::on_p_pushButtonConnected_pressed()
 {
     QString hostname = ui->p_lineEditScreenName->text();
-    if (!hostname.isEmpty()) {
-        int index = getScreenModel()->findScreen(hostname);
-        if (index != -1) {
-            const Screen& screen = getScreenModel()->getScreen(index);
-            Screen screenCopy = screen;
-            screenCopy.setState(kConnected);
-            ConfigMessageConvertor convertor;
-            QString data = convertor.fromScreenToString(screenCopy);
-            m_multicastManager->multicastUniqueConfigDelta(data);
-        }
-        else {
-            QString errorMsg = QString("Can't find ").append(hostname);
-            ui->p_textBrowserLogging->append(errorMsg);
-        }
-    }
 }
 
 void MainWindow::on_p_pushButtonDisconnected_pressed()
 {
     QString hostname = ui->p_lineEditScreenName->text();
-    if (!hostname.isEmpty()) {
-        int index = getScreenModel()->findScreen(hostname);
-        if (index != -1) {
-            const Screen& screen = getScreenModel()->getScreen(index);
-            Screen screenCopy = screen;
-            screenCopy.setState(kDisconnected);
-            ConfigMessageConvertor convertor;
-            QString data = convertor.fromScreenToString(screenCopy);
-            m_multicastManager->multicastUniqueConfigDelta(data);
-        }
-        else {
-            QString errorMsg = QString("Can't find ").append(hostname);
-            ui->p_textBrowserLogging->append(errorMsg);
-        }
-    }
 }
 
 void MainWindow::on_p_comboBoxGroup_currentIndexChanged(int index)

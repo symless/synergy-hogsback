@@ -9,9 +9,6 @@ namespace Ui {
 class MainWindow;
 }
 
-class MulticastMessage;
-class MulticastManager;
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -31,15 +28,12 @@ private slots:
     void on_p_comboBoxGroup_currentIndexChanged(int index);
 
 private:
-    void onReceivedDefaultMulticastMessage (MulticastMessage);
-    void onReceivedUniqueMulticastMessage (MulticastMessage);
     QStringListModel* getNameModel();
     ScreenListModel* getScreenModel();
     void syncNameAndScreenModel();
 
 private:
     Ui::MainWindow* ui;
-    MulticastManager* m_multicastManager = nullptr;
     QVector<QStringListModel*> m_namesModelList;
     QVector<ScreenListModel*> m_screemModelList;
 };

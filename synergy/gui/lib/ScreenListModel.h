@@ -3,8 +3,6 @@
 
 #include "LibMacro.h"
 #include "Screen.h"
-#include "MulticastMessage.h"
-#include "ConfigMessageConvertor.h"
 #include <QAbstractListModel>
 
 class LIB_SPEC ScreenListModel : public QAbstractListModel

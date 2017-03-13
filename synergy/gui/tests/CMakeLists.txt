@@ -4,9 +4,7 @@ find_package (Qt5 COMPONENTS Test REQUIRED)
 
 set (GUI_TEST_SOURCES
     ConfigFileManagerTest.cpp
-    ConfigMessageConvertorTest.cpp
     main.cpp
-    MulticastMessageTest.cpp
     ProcessCommandTest.cpp
     ScreenBBArrangementTest.cpp
     AutoTest.h

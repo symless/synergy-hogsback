@@ -46,7 +46,7 @@ private slots:
     void onRetryGetUserId();
 
 private:
-    syncConfig();
+    void syncConfig();
 
 private:
     QByteArray m_Data;
