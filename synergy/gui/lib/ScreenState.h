@@ -4,7 +4,8 @@
 enum ScreenState {
     kConnected,
     kConnecting,
-    kDisconnected
+    kDisconnected,
+    kInactive
 };
 
 #endif // SCREENSTATE

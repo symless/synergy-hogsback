@@ -1,5 +1,6 @@
 #include "ScreenManager.h"
 
+#include "CloudClient.h"
 #include "MulticastManager.h"
 #include "ProcessManager.h"
 #include "ConfigMessageConvertor.h"
@@ -21,7 +22,7 @@ ScreenManager::ScreenManager() :
     m_latestConfigSerial(0)
 {
     m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
-
+    m_localHostname = QHostInfo::localHostName();
     m_arrangementStrategy = new ScreenBBArrangement();
 
     m_multicastManager = qobject_cast<MulticastManager*>(
@@ -35,6 +36,9 @@ ScreenManager::ScreenManager() :
     connect(m_multicastManager,
         SIGNAL(receivedUniqueGroupMessage(MulticastMessage)),
             this, SLOT(handleUniqueGroupMessage(MulticastMessage)));
+
+    connect(this, &ScreenManager::updateGroupConfig, this,
+        &ScreenManager::onUpdateGroupConfig);
 
     setupWaitTimer();
     m_multicastManager->multicastDefaultExistence();
@@ -118,6 +122,15 @@ void ScreenManager::setViewHeight(int h)
 
     m_arrangementStrategy->setViewH(h);
     m_arrangementStrategy->checkAdjustment(m_screenListModel, true);
+}
+
+void ScreenManager::setCloudClient(CloudClient *cloudClient)
+{
+    if (cloudClient == NULL) return;
+
+    m_cloudClient = cloudClient;
+    connect(m_cloudClient, SIGNAL(receivedScreens(QByteArray)), this,
+            SLOT(updateScreens(QByteArray)));
 }
 
 void ScreenManager::saveSnapshot()
@@ -370,4 +383,80 @@ void ScreenManager::waitServerReplyTimeout()
         SLOT(waitServerReplyTimeout()));
     delete m_waitTimer;
     m_waitTimer = NULL;
+}
+
+void ScreenManager::updateScreens(QByteArray reply)
+{
+    bool notify = false;
+
+    QJsonDocument doc = QJsonDocument::fromJson(reply);
+    if (!doc.isNull()) {
+        if (doc.isObject()) {
+            QJsonObject obj = doc.object();
+
+            QJsonArray screens = obj["screens"].toArray();
+            QList<Screen> latestScreenList;
+            QSet<QString> latestScreenNameSet;
+            foreach (QJsonValue const& v, screens) {
+                QJsonObject obj = v.toObject();
+                QString screenName = obj["name"].toString();
+                latestScreenNameSet.insert(screenName);
+                Screen screen(screenName);
+                screen.setId(obj["id"].toInt());
+                screen.setPosX(obj["posX"].toInt());
+                screen.setPosY(obj["posY"].toInt());
+                if (!obj.contains("activeGroup") ||
+                    obj[expired].toBool()) {
+                    screen.setState(kInactive);
+                }
+                screen.setState(kDisconnected);
+
+                latestScreenList.insert(screen);
+            }
+
+            if (!latestScreenNameSet.contains(m_localHostname)) {
+                latestScreenList.insert(m_localHostname);
+                latestScreenNameSet.insert(m_localHostname);
+                notify = true;
+            }
+            // remove unsub screen
+            m_screenNameSet.subtract(latestScreenNameSet);
+            for (QString& name : m_screenNameSet) {
+                removeScreen(name);
+            }
+
+            m_screenNameSet = latestScreenNameSet;
+
+            m_screenListModel->update(latestScreenList);
+        }
+    }
+
+    if (notify) {
+        emit updateGroupConfig();
+    }
+}
+
+void ScreenManager::onUpdateGroupConfig()
+{
+    QJsonObject groupObject;
+    groupObject.insert ("id", m_appConfig->groupId());
+    groupObject.insert ("name", "default");
+
+    QJsonArray screenArray;
+    ;
+    for (Screen& s : m_screenListModel->getScreenList()) {
+        QJsonObject screenObject;
+        screenObject.insert("id", s.id());
+        screenObject.insert("posX", s.posX());
+        screenObject.insert("posY", s.posY());
+
+        screenArray.push_back(screenObject);
+    }
+
+    QJsonObject jsonObject;
+    jsonObject.insert("group", groupObject);
+    jsonObject.insert("screenRenderInfo", screenArray);
+    QJsonDocument doc(jsonObject);
+
+    m_cloudClient->updateGroupConfig(doc);
 }

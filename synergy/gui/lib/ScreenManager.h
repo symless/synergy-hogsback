@@ -12,6 +12,7 @@ class IScreenArrangement;
 class ProcessManager;
 class ScreenListSnapshotManager;
 class AppConfig;
+class CloudClient;
 
 class LIB_SPEC ScreenManager : public QObject
 {
@@ -25,6 +26,7 @@ public:
     Q_PROPERTY(ProcessManager* processManager WRITE setProcessManager)
     Q_PROPERTY(int viewWidth WRITE setViewWidth)
     Q_PROPERTY(int viewHeight WRITE setViewHeight)
+    Q_PROPERTY(CloudClient* cloudClient WRITE setCloudClient)
 
     Q_INVOKABLE int getModelIndex(int x, int y);
     Q_INVOKABLE void moveModel(int index, int offsetX, int offsetY);
@@ -41,7 +43,11 @@ public:
     void setProcessManager(ProcessManager* processManager);
     void setViewWidth(int w);
     void setViewHeight(int h);
+    void setCloudClient(CloudClient* cloudClient);
     void saveSnapshot();
+
+signals:
+    void updateGroupConfig();
 
 private:
     int processMode();
@@ -52,6 +58,8 @@ private slots:
     void handleDefaultGroupMessage(MulticastMessage msg);
     void handleUniqueGroupMessage(MulticastMessage msg);
     void waitServerReplyTimeout();
+    void updateScreens(QByteArray reply);
+    void onUpdateGroupConfig();
 
 private:
     ScreenListModel* m_screenListModel;
@@ -61,7 +69,10 @@ private:
     QTimer* m_waitTimer;
     ScreenListSnapshotManager* m_screenListSnapshotManager;
     AppConfig* m_appConfig;
+    CloudClient* m_cloudClient;
     QMap<int, bool> m_defaultServerReplies;
+    QSet<QString> m_screenNameSet;
+    QString m_localHostname;
     int m_latestConfigSerial;
 };
 

@@ -28,6 +28,7 @@ Rectangle {
         processManager: processManager
         viewWidth: screenArrangementScrollView.width
         viewHeight: screenArrangementScrollView.height
+        cloudClient: applicationWindow.cloudClient
     }
 
     // TODO: This is for testing, remove before release
