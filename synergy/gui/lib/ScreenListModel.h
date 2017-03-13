@@ -45,6 +45,7 @@ public:
     QSet<Screen> getScreenSet();
     float scale() const;
     void setScale(float s);
+    QList<Screen> getScreenList() const;
 
 signals:
     void scaleChanged();

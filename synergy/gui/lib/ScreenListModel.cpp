@@ -125,6 +125,11 @@ QHash<int, QByteArray> ScreenListModel::roleNames() const
     return roles;
 }
 
+QList<Screen> ScreenListModel::getScreenList() const
+{
+    return m_screens;
+}
+
 int ScreenListModel::findScreen(QString name)
 {
     for (int index = 0; index < m_screens.count(); index++) {
