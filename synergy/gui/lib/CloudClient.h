@@ -42,11 +42,13 @@ private slots:
     void onGetScreensFinished(QNetworkReply* reply);
     void onAddScreenFinished(QNetworkReply* reply);
     void onRemoveScreenFinished(QNetworkReply* reply);
+    void onUpdateGroupConfigFinished(QNetworkReply* reply);
     void onReplyError(QNetworkReply::NetworkError code);
     void onRetryGetUserId();
 
 private:
     void syncConfig();
+    bool replyHasError(QNetworkReply* reply);
 
 private:
     QByteArray m_Data;

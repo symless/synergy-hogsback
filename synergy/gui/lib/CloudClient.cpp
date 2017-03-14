@@ -152,6 +152,13 @@ void CloudClient::onRemoveScreenFinished(QNetworkReply* reply)
     m_groupId = -1;
 }
 
+void CloudClient::onUpdateGroupConfigFinished(QNetworkReply *reply)
+{
+    if (replyHasError(reply)) {
+        return;
+    }
+}
+
 void CloudClient::addScreen(QString name)
 {
     static const QUrl addScreenUrl = QUrl(kJoinGroupUrl);
@@ -260,11 +267,19 @@ void CloudClient::updateGroupConfig(QJsonDocument& doc)
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
-    m_networkManager->post(req, doc.toJson());
+    auto reply = m_networkManager->post(req, doc.toJson());
+    connect (reply, &QNetworkReply::finished, [this, reply]{
+        onUpdateGroupConfigFinished (reply);
+    });
 }
 
 void CloudClient::onLoginFinished(QNetworkReply* reply)
 {
+    if (replyHasError(reply)) {
+        emit loginFail(reply->errorString());
+        return;
+    }
+
     m_Data = reply->readAll();
     reply->deleteLater();
     QByteArray token = reply->rawHeader("X-Auth-Token");
@@ -286,6 +301,10 @@ void CloudClient::onLoginFinished(QNetworkReply* reply)
 
 void CloudClient::onGetIdentifyFinished(QNetworkReply *reply)
 {
+    if (replyHasError(reply)) {
+        return;
+    }
+
     m_Data = reply->readAll();
     reply->deleteLater();
     QByteArray token = reply->rawHeader("X-Auth-Token");
@@ -294,6 +313,10 @@ void CloudClient::onGetIdentifyFinished(QNetworkReply *reply)
 
 void CloudClient::onGetUserIdFinished(QNetworkReply *reply)
 {
+    if (replyHasError(reply)) {
+        return;
+    }
+
     m_Data = reply->readAll();
     reply->deleteLater();
     QByteArray token = reply->rawHeader("X-Auth-Token");
@@ -319,6 +342,10 @@ void CloudClient::onGetUserIdFinished(QNetworkReply *reply)
 
 void CloudClient::onGetScreensFinished(QNetworkReply* reply)
 {
+    if (replyHasError(reply)) {
+        return;
+    }
+
     reply->deleteLater();
     emit receivedScreens (reply->readAll());
 }
@@ -339,4 +366,29 @@ void CloudClient::syncConfig()
 {
     m_appConfig->setGroupId(m_groupId);
     m_appConfig->setScreenId(m_screenId);
+}
+
+bool CloudClient::replyHasError(QNetworkReply* reply)
+{
+    bool result = false;
+    QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
+    if (statusCode != 200) {
+        qDebug() << "Reply status code: " << statusCode;
+        m_Data = reply->readAll();
+        reply->deleteLater();
+
+        QJsonDocument doc = QJsonDocument::fromJson(m_Data);
+        if (!doc.isNull()) {
+            if (doc.isObject()) {
+                QJsonObject obj = doc.object();
+                QString errorMsg = obj["error"].toString();
+                qDebug() << "Reply status message: " << errorMsg;
+            }
+        }
+
+        result = true;
+    }
+
+    return result;
 }
