@@ -41,6 +41,7 @@ void ScreenManager::moveModel(int index, int offsetX, int offsetY)
 {
     m_screenListModel->moveModel(index, offsetX, offsetY);
     m_arrangementStrategy->adjustModel(m_screenListModel, index);
+    emit updateGroupConfig();
 
     if (processMode() == kServerMode) {
         startCoreProcess();
