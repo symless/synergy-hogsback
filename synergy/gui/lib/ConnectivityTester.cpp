@@ -39,7 +39,7 @@ void ConnectivityTester::setCloudClient(CloudClient* cloudClient)
     connect(m_cloudClient, SIGNAL(receivedScreens(QByteArray)), this,
             SLOT(testNewScreens(QByteArray)));
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(pollScreens()));
-    m_timer.start(3000);
+    m_timer.start(1000);
 }
 
 void ConnectivityTester::testNewScreens(QByteArray reply)
