@@ -39,6 +39,10 @@ int ScreenManager::getModelIndex(int x, int y)
 
 void ScreenManager::moveModel(int index, int offsetX, int offsetY)
 {
+    if (!offsetX && !offsetY) {
+        return;
+    }
+
     m_screenListModel->moveModel(index, offsetX, offsetY);
     m_arrangementStrategy->adjustModel(m_screenListModel, index);
     emit updateGroupConfig();
