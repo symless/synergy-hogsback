@@ -383,7 +383,7 @@ bool CloudClient::replyHasError(QNetworkReply* reply)
             if (doc.isObject()) {
                 QJsonObject obj = doc.object();
                 QString errorMsg = obj["error"].toString();
-                qDebug() << "Reply status message: " << errorMsg;
+                qDebug() << "Reply error message: " << errorMsg;
             }
         }
 
