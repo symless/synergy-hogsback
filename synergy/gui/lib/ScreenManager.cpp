@@ -179,7 +179,8 @@ void ScreenManager::updateScreens(QByteArray reply)
     if (!doc.isNull()) {
         if (doc.isObject()) {
             QJsonObject obj = doc.object();
-            m_configVersion = obj["configVersion"].toInt();
+            auto& groupObject = obj["group"].toObject();
+            m_configVersion = groupObject["configVersion"].toInt();
             QJsonArray screens = obj["screens"].toArray();
             QList<Screen> latestScreenList;
             QSet<QString> latestScreenNameSet;
