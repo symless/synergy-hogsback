@@ -374,7 +374,7 @@ bool CloudClient::replyHasError(QNetworkReply* reply)
     QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
 
     if (statusCode != 200) {
-        qDebug() << "Reply status code: " << statusCode;
+        qDebug() << "Reply status code: " << statusCode.toInt();
         m_Data = reply->readAll();
         reply->deleteLater();
 
