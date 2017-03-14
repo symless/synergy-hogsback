@@ -186,11 +186,11 @@ void ScreenManager::updateScreens(QByteArray reply)
                 screen.setId(obj["id"].toInt());
                 screen.setPosX(obj["posX"].toInt());
                 screen.setPosY(obj["posY"].toInt());
+                screen.setState(kDisconnected);
                 if (!obj.contains("activeGroup") ||
                     obj["expired"].toBool()) {
                     screen.setState(kInactive);
                 }
-                screen.setState(kDisconnected);
 
                 latestScreenList.push_back(screen);
             }
