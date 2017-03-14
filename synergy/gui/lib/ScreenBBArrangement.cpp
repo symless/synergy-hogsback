@@ -56,7 +56,8 @@ void ScreenBBArrangement::setViewH(int h)
 
 void ScreenBBArrangement::adjustModel(ScreenListModel* screenListModel, int index)
 {
-
+    // Fixme: this function doesn't handle a case when there is no change
+    // in the adjust screen
 
 	// check if we can just use snapping
 	bool canSnap = true;
