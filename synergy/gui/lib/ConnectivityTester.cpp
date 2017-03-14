@@ -45,44 +45,52 @@ void ConnectivityTester::setCloudClient(CloudClient* cloudClient)
 void ConnectivityTester::testNewScreens(QByteArray reply)
 {
     QJsonDocument doc = QJsonDocument::fromJson(reply);
-    if (!doc.isNull()) {
-        if (doc.isObject()) {
-            QJsonObject obj = doc.object();
 
-            QJsonArray screens = obj["screens"].toArray();
-            QSet<int> latestScreenIdSet;
-            foreach (QJsonValue const& v, screens) {
-                QJsonObject obj = v.toObject();
-                QString screenName = obj["name"].toString();
+    if (doc.isNull()) {
+        return;
+    }
 
-                if (screenName != m_localHostname) {
-                    int screenId = obj["id"].toInt();
-                    latestScreenIdSet.insert(screenId);
-                    QSet<int>::const_iterator i = m_screenIdSet.find(screenId);
-                    if (i == m_screenIdSet.end()) {
-                        // new screen detected, get ip list
-                        QString ipList = obj["ipList"].toString();
-                        if (ipList.isEmpty()) {
-                            continue;
-                        }
-                        // combine screen id and ip list separated by comma
-                        QString testCase = QString::number(screenId);
-                        testCase += ',';
-                        testCase += ipList;
+    if (doc.isObject()) {
+        QJsonObject obj = doc.object();
 
-                        // start connectivity test
-                        m_pendingTestCases.push_back(testCase);
-                        emit startTesting();
-
-                        // add into set
-                        m_screenIdSet.insert(screenId);
-                    }
-                }
+        QJsonArray screens = obj["screens"].toArray();
+        QSet<int> latestScreenIdSet;
+        foreach (QJsonValue const& v, screens) {
+            if (!obj.contains("activeGroup") ||
+                obj["expired"].toBool()) {
+                continue;
             }
 
-            // remove inactive screen id
-            m_screenIdSet.intersect(latestScreenIdSet);
+            QJsonObject obj = v.toObject();
+            QString screenName = obj["name"].toString();
+
+            if (screenName != m_localHostname) {
+                int screenId = obj["id"].toInt();
+                latestScreenIdSet.insert(screenId);
+                QSet<int>::const_iterator i = m_screenIdSet.find(screenId);
+                if (i == m_screenIdSet.end()) {
+                    // new screen detected, get ip list
+                    QString ipList = obj["ipList"].toString();
+                    if (ipList.isEmpty()) {
+                        continue;
+                    }
+                    // combine screen id and ip list separated by comma
+                    QString testCase = QString::number(screenId);
+                    testCase += ',';
+                    testCase += ipList;
+
+                    // start connectivity test
+                    m_pendingTestCases.push_back(testCase);
+                    emit startTesting();
+
+                    // add into set
+                    m_screenIdSet.insert(screenId);
+                }
+            }
         }
+
+        // remove inactive screen id
+        m_screenIdSet.intersect(latestScreenIdSet);
     }
 }
 
