@@ -253,7 +253,7 @@ void CloudClient::report(int destId, QString successfulIpList, QString failedIpL
     qDebug() << "report to cloud: destId " << destId << "successfulIp " << successfulIpList << "failedIp " << failedIpList;
 }
 
-void CloudClient::updateGroupConfig(QJsonDocument &doc)
+void CloudClient::updateGroupConfig(QJsonDocument& doc)
 {
     QUrl reportUrl = QUrl(kUpdateGroupConfigUrl);
     QNetworkRequest req(reportUrl);
