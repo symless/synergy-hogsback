@@ -14,8 +14,8 @@
 // https://alpha1.cloud.symless.com/
 // http://127.0.0.1:8080/
 
-static const char kAddScreenUrl[] = "http://192.168.3.113:8080/group/join";
-static const char kRemoveScreenUrl[] = "http://192.168.3.113:8080/group/leave";
+static const char kJoinGroupUrl[] = "http://192.168.3.113:8080/group/join";
+static const char kLeaveGroupUrl[] = "http://192.168.3.113:8080/group/leave";
 static const char kLoginUrl[] = "http://192.168.3.113:8080/login";
 static const char kIdentifyUrl[] = "http://192.168.3.113:8080/user/identify";
 static const char kscreensUrl[] = "http://192.168.3.113:8080/group/screens";
@@ -121,7 +121,7 @@ void CloudClient::getUserId(bool initialCall)
 }
 
 void CloudClient::removeScreen() {
-    static const QUrl removeScreenUrl = QUrl(kRemoveScreenUrl);
+    static const QUrl removeScreenUrl = QUrl(kLeaveGroupUrl);
     QNetworkRequest req (removeScreenUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
@@ -154,7 +154,7 @@ void CloudClient::onRemoveScreenFinished(QNetworkReply* reply)
 
 void CloudClient::addScreen(QString name)
 {
-    static const QUrl addScreenUrl = QUrl(kAddScreenUrl);
+    static const QUrl addScreenUrl = QUrl(kJoinGroupUrl);
     QNetworkRequest req (addScreenUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
