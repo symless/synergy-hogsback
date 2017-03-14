@@ -167,7 +167,7 @@ void ScreenManager::startCoreProcess()
 
 void ScreenManager::updateScreens(QByteArray reply)
 {
-    bool notify = false;
+    bool updateLocalHost = false;
 
     QJsonDocument doc = QJsonDocument::fromJson(reply);
     if (!doc.isNull()) {
@@ -195,12 +195,8 @@ void ScreenManager::updateScreens(QByteArray reply)
             }
 
             if (!latestScreenNameSet.contains(m_localHostname)) {
-                Screen screen(m_localHostname);
-                screen.setId(m_appConfig->screenId());
-                m_arrangementStrategy->addScreen(m_screenListModel, screen);
-                latestScreenList.push_back(screen);
                 latestScreenNameSet.insert(m_localHostname);
-                notify = true;
+                updateLocalHost = true;
             }
             // remove unsub screen
             m_screenNameSet.subtract(latestScreenNameSet);
@@ -214,7 +210,12 @@ void ScreenManager::updateScreens(QByteArray reply)
         }
     }
 
-    if (notify) {
+    if (updateLocalHost) {
+        removeScreen(m_localHostname);
+        Screen screen(m_localHostname);
+        screen.setId(m_appConfig->screenId());
+        m_arrangementStrategy->addScreen(m_screenListModel, screen);
+
         emit updateGroupConfig();
     }
 }
