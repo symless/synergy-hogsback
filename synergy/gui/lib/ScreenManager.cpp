@@ -15,7 +15,8 @@
 ScreenManager::ScreenManager() :
     m_screenListModel(NULL),
     m_screenListSnapshotManager(NULL),
-    m_latestConfigSerial(0)
+    m_latestConfigSerial(0),
+    m_configVersion(0)
 {
     m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
     m_localHostname = QHostInfo::localHostName();
@@ -178,7 +179,7 @@ void ScreenManager::updateScreens(QByteArray reply)
     if (!doc.isNull()) {
         if (doc.isObject()) {
             QJsonObject obj = doc.object();
-
+            m_configVersion = obj["configVersion"].toInt();
             QJsonArray screens = obj["screens"].toArray();
             QList<Screen> latestScreenList;
             QSet<QString> latestScreenNameSet;
@@ -244,6 +245,7 @@ void ScreenManager::onUpdateGroupConfig()
 
     QJsonObject jsonObject;
     jsonObject.insert("group", groupObject);
+    jsonObject.insert("version", m_configVersion);
     jsonObject.insert("screenRenderInfo", screenArray);
     QJsonDocument doc(jsonObject);
 

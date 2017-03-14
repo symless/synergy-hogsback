@@ -67,6 +67,7 @@ private:
     QSet<QString> m_screenNameSet;
     QString m_localHostname;
     int m_latestConfigSerial;
+    int m_configVersion;
 };
 
 #endif // SCREENMANAGER_H
