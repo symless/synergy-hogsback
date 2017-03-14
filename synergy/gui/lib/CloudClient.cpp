@@ -14,13 +14,13 @@
 // https://alpha1.cloud.symless.com/
 // http://127.0.0.1:8080/
 
-static const char kJoinGroupUrl[] = "http://192.168.3.113:8080/group/join";
-static const char kLeaveGroupUrl[] = "http://192.168.3.113:8080/group/leave";
-static const char kLoginUrl[] = "http://192.168.3.113:8080/login";
-static const char kIdentifyUrl[] = "http://192.168.3.113:8080/user/identify";
-static const char kscreensUrl[] = "http://192.168.3.113:8080/group/screens";
-static const char kUpdateGroupConfigUrl[] = "http://192.168.3.113:8080/group/update";
-static const char kReportUrl[] = "http://192.168.3.113:8080/report";
+static const char kJoinGroupUrl[] = "http://alpha1.cloud.symless.com/group/join";
+static const char kLeaveGroupUrl[] = "http://alpha1.cloud.symless.com/group/leave";
+static const char kLoginUrl[] = "http://alpha1.cloud.symless.com/login";
+static const char kIdentifyUrl[] = "http://alpha1.cloud.symless.com/user/identify";
+static const char kscreensUrl[] = "http://alpha1.cloud.symless.com/group/screens";
+static const char kUpdateGroupConfigUrl[] = "http://alpha1.cloud.symless.com/group/update";
+static const char kReportUrl[] = "http://alpha1.cloud.symless.com/report";
 static const int kPollingTimeout = 60000; // 1 minite
 
 CloudClient::CloudClient(QObject* parent) : QObject(parent)
