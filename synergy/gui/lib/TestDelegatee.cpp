@@ -67,15 +67,11 @@ void TestDelegatee::onReadyRead()
     QDataStream in;
     in.setDevice(m_tcpClient);
     in.setVersion(QDataStream::Qt_5_5);
-    in.startTransaction();
 
     QByteArray raw;
     in >> raw;
 
     QString message(raw);
-    if (!in.commitTransaction()) {
-        return;
-    }
 
     if (message == "ServerHello") {
         m_results[m_testIndex] = true;
