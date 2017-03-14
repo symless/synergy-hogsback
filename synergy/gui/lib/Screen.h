@@ -35,15 +35,17 @@ public:
 	void setName(QString n);
 	void setState(ScreenState s);
 
+    bool getLocked() const;
+    void setLocked(bool value);
+
 private:
     int m_id;
     int m_posX;
     int m_posY;
 	QString m_name;
-
-private:
 	ScreenState m_state;
 	QString m_stateImage;
+    bool locked;
     static QHash<ScreenState, QString> m_stateImages;
 };
 

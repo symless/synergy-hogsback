@@ -44,6 +44,8 @@ public:
     float scale() const;
     void setScale(float s);
     QList<Screen> getScreenList() const;
+    void lockScreen(int index);
+    void unlockScreen(int index);
 
 signals:
     void scaleChanged();

@@ -140,6 +140,16 @@ bool ScreenManager::addScreen(QString name)
     return m_arrangementStrategy->addScreen(m_screenListModel, screen);
 }
 
+void ScreenManager::lockScreen(int index)
+{
+    m_screenListModel->lockScreen(index);
+}
+
+void ScreenManager::unlockScreen(int index)
+{
+    m_screenListModel->unlockScreen(index);
+}
+
 bool ScreenManager::removeScreen(QString name, bool notify)
 {
     if (m_screenListModel->findScreen(name) == -1) {
@@ -188,6 +198,15 @@ void ScreenManager::updateScreens(QByteArray reply)
                 QJsonObject obj = v.toObject();
                 QString screenName = obj["name"].toString();
                 latestScreenNameSet.insert(screenName);
+
+                int index = m_screenListModel->findScreen(screenName);
+                if (index != -1) {
+                    const Screen& s = m_screenListModel->getScreen(index);
+                    if (s.getLocked()) {
+                        continue;
+                    }
+                }
+
                 Screen screen(screenName);
                 screen.setId(obj["id"].toInt());
                 screen.setPosX(obj["posX"].toInt());

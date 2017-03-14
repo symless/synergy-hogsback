@@ -130,6 +130,24 @@ QList<Screen> ScreenListModel::getScreenList() const
     return m_screens;
 }
 
+void ScreenListModel::lockScreen(int index)
+{
+    if (index < 0 || index >= m_screens.count()) {
+        return;
+    }
+
+    m_screens[index].setLocked(true);
+}
+
+void ScreenListModel::unlockScreen(int index)
+{
+    if (index < 0 || index >= m_screens.count()) {
+        return;
+    }
+
+    m_screens[index].setLocked(true);
+}
+
 int ScreenListModel::findScreen(QString name)
 {
     for (int index = 0; index < m_screens.count(); index++) {

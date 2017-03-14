@@ -254,11 +254,13 @@ Rectangle {
                                 modelIndex = screenManager.getModelIndex(
                                                 screenIcon.x + 45,
                                                 screenIcon.y + 45)
+                                screenManager.lockScreen(modelIndex)
                             }
                             onReleased: {
                                 screenManager.moveModel(modelIndex,
                                                 screenIcon.x - beginDrag.x,
                                                 screenIcon.y - beginDrag.y)
+                                screenManager.unlockScreen(modelIndex)
                             }
                             onHoveredChanged: {
                                 if (name !== localHostname.hostname()) {
