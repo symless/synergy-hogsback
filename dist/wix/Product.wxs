@@ -14,6 +14,8 @@
 			<ComponentGroupRef Id="ProductComponents"/>
 			<ComponentGroupRef Id="OpenSSLComponents"/>
 			<ComponentGroupRef Id="ProductQtPluginComponents"/>
+			<ComponentGroupRef Id="QtQuickComponents"/>
+			<ComponentGroupRef Id="QtQuick2Components"/>
 			<MergeRef Id="CRT"/>
             <?if $(var.Configuration) = "Debug" ?>
 			    <MergeRef Id="DebugCRT"/>
@@ -130,5 +132,64 @@
 				<File Source="$(var.ResPath)/openssl/synergy.conf"/>
 			</Component>
 		</ComponentGroup>
+		<ComponentGroup Directory="QtQuick" Id="QtQuickComponents">
+            <ComponentGroup Directory="Controls">
+                    <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Controls\plugins.qmltypes" />
+                    <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Controls\qmldir" />
+                    <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Controls\qtquickcontrolsplugin.dll" />
+                <ComponentGroup Directory="Styles">
+                        <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Controls\Styles\qmldir" />
+                    <ComponentGroup Directory="Flat">
+                            <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Controls\Styles\Flat\qmldir" />
+                            <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Controls\Styles\Flat\qtquickextrasflatplugin.dll" />
+                    </ComponentGroup>
+                </ComponentGroup>
+            </ComponentGroup>
+            <ComponentGroup Directory="Dialogs">
+                    <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Dialogs\dialogplugin.dll" />
+                    <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Dialogs\plugins.qmltypes" />
+                    <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Dialogs\qmldir" />
+                <ComponentGroup Directory="Private">
+                        <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Dialogs\Private\dialogsprivateplugin.dll" />
+                        <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Dialogs\Private\plugins.qmltypes" />
+                        <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Dialogs\Private\qmldir" />
+                </ComponentGroup>
+            </ComponentGroup>
+            <ComponentGroup Directory="Extras">
+                    <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Extras\plugins.qmltypes" />
+                    <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Extras\qmldir" />
+                    <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Extras\qtquickextrasplugin.dll" />
+                <ComponentGroup Directory="Private">
+                        <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Extras\Private\CircularButton.qml" />
+                        <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Extras\Private\CircularButtonStyleHelper.qml" />
+                        <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Extras\Private\CircularTickmarkLabel.qml" />
+                        <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Extras\Private\Handle.qml" />
+                        <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Extras\Private\PieMenuIcon.qml" />
+                        <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Extras\Private\qmldir" />
+                        <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Extras\Private\TextSingleton.qml" />
+                </ComponentGroup>
+            </ComponentGroup>
+            <ComponentGroup Directory="Layouts">
+                    <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Layouts\plugins.qmltypes" />
+                    <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Layouts\qmldir" />
+                    <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Layouts\qquicklayoutsplugin.dll" />
+            </ComponentGroup>
+            <ComponentGroup Directory="PrivateWidgets">
+                    <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\PrivateWidgets\plugins.qmltypes" />
+                    <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\PrivateWidgets\qmldir" />
+                    <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\PrivateWidgets\widgetsplugin.dll" />
+            </ComponentGroup>
+            <ComponentGroup Directory="Window.2">
+                    <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Window.2\plugins.qmltypes" />
+                    <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Window.2\qmldir" />
+                    <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Window.2\windowplugin.dll" />
+            </ComponentGroup>
+        </ComponentGroup>
+        
+        <ComponentGroup Directory="QtQuick.2" Id="QtQuick2Components">
+                <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick.2\plugins.qmltypes" />
+                <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick.2\qmldir" />
+                <File KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick.2\qtquick2plugin.dll" />
+        </ComponentGroup>
 	</Fragment>
 </Wix>
