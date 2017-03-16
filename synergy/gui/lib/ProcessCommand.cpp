@@ -89,6 +89,7 @@ QStringList ProcessCommand::arguments(bool serverMode) const
         // configuration file
         arguments << "-c";
         QString configFilename = directoryManager->configFileDir();
+        configFilename += '/';
         configFilename += kDefaultConfigFile;
         arguments << configFilename;
 
