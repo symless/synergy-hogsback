@@ -28,6 +28,8 @@ QString ProcessCommand::command(bool serverMode) const
 {
     DirectoryManager directoryManager;
     QString command(directoryManager.installedDir());
+    command += '/';
+
     if (serverMode) {
         command += kServerCmd;
     }
