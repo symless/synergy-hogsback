@@ -70,6 +70,7 @@ private:
     QString m_localHostname;
     int m_latestConfigSerial;
     int m_configVersion;
+    int m_previousServerId;
 };
 
 #endif // SCREENMANAGER_H

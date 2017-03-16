@@ -16,7 +16,8 @@ ScreenManager::ScreenManager() :
     m_screenListModel(NULL),
     m_screenListSnapshotManager(NULL),
     m_latestConfigSerial(0),
-    m_configVersion(0)
+    m_configVersion(0),
+    m_previousServerId(-1)
 {
     m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
     m_localHostname = QHostInfo::localHostName();
@@ -123,7 +124,8 @@ void ScreenManager::onKeyPressed (int const key)
             saveSnapshot();
             break;
         case Qt::Key_A:
-            startCoreProcess();
+            m_cloudClient->claimServer();
+            //startCoreProcess();
             break;
     }
 }
@@ -190,7 +192,15 @@ void ScreenManager::updateScreens(QByteArray reply)
         if (doc.isObject()) {
             QJsonObject obj = doc.object();
             auto const& groupObject = obj["group"].toObject();
+
+            // TODO: refactor this code
             m_configVersion = groupObject["configVersion"].toInt();
+            int serverId = groupObject["serverId"].toInt();
+            bool newServer = false;
+            if (m_previousServerId != serverId) {
+                newServer = true;
+            }
+
             QJsonArray screens = obj["screens"].toArray();
             QList<Screen> latestScreenList;
             QSet<QString> latestScreenNameSet;
@@ -204,6 +214,30 @@ void ScreenManager::updateScreens(QByteArray reply)
                     const Screen& s = m_screenListModel->getScreen(index);
                     if (s.getLocked()) {
                         continue;
+                    }
+                }
+
+                // TODO: refactor this code
+                if (newServer) {
+                    if (serverId == m_appConfig->screenId()) {
+                        m_processManager->setProcessMode(kServerMode);
+                    }
+                    else {
+                        m_processManager->setProcessMode(kClientMode);
+                    }
+
+                    if (obj["id"].toInt() == serverId) {
+                        QString ipList = obj["ipList"].toString();
+                        QStringList ips = ipList.split(',');
+
+                        // TODO: find matching local IP
+                        if (!ips.empty()) {
+                            m_processManager->setServerIp(ips.first());
+                        }
+
+                        startCoreProcess();
+
+                        m_previousServerId = serverId;
                     }
                 }
 
