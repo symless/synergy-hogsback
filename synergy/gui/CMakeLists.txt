@@ -33,7 +33,7 @@ target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
 )
 
 target_link_libraries (${PROJECT_NAME}
-    synlib
+    guilib
     fmt
     libzmq-static
     ${SODIUM_LIBRARIES}
@@ -45,3 +45,6 @@ if (WIN32)
     target_link_libraries (${PROJECT_NAME} ws2_32 rpcrt4 iphlpapi)
 endif()
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    install (TARGETS ${PROJECT_NAME} DESTINATION ${SYNERGY_BUNDLE_BINARY_DIR})
+endif()

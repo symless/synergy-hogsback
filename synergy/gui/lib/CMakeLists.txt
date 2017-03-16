@@ -24,6 +24,6 @@ set (GUI_LIB_SOURCES
     TestDelegatee.cpp
 )
 
-add_library (synlib ${GUI_LIB_SOURCES})
-target_compile_definitions (synlib PRIVATE -DSYNLIB)
-qt5_use_modules (synlib Core Widgets Quick Network)
+add_library (guilib ${GUI_LIB_SOURCES})
+target_compile_definitions (guilib PRIVATE -DSYNLIB)
+qt5_use_modules (guilib Core Widgets Quick Network)

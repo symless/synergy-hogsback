@@ -1,5 +1,5 @@
 TEMPLATE = lib
-TARGET = synlib
+TARGET = guilib
 QT += qml quick widgets network
 DEFINES += SYNLIB
 
