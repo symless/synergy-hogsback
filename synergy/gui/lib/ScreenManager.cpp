@@ -186,6 +186,8 @@ void ScreenManager::startCoreProcess()
 void ScreenManager::updateScreens(QByteArray reply)
 {
     bool updateLocalHost = false;
+    bool newServer = false;
+    int serverId = m_previousServerId;
 
     QJsonDocument doc = QJsonDocument::fromJson(reply);
     if (!doc.isNull()) {
@@ -195,8 +197,7 @@ void ScreenManager::updateScreens(QByteArray reply)
 
             // TODO: refactor this code
             m_configVersion = groupObject["configVersion"].toInt();
-            int serverId = groupObject["serverId"].toInt();
-            bool newServer = false;
+            serverId = groupObject["serverId"].toInt();
             if (m_previousServerId != serverId) {
                 newServer = true;
             }
@@ -234,10 +235,6 @@ void ScreenManager::updateScreens(QByteArray reply)
                         if (!ips.empty()) {
                             m_processManager->setServerIp(ips.first());
                         }
-
-                        startCoreProcess();
-
-                        m_previousServerId = serverId;
                     }
                 }
 
@@ -277,6 +274,11 @@ void ScreenManager::updateScreens(QByteArray reply)
         m_arrangementStrategy->addScreen(m_screenListModel, screen);
 
         emit updateGroupConfig();
+    }
+
+    if (newServer) {
+        startCoreProcess();
+        m_previousServerId = serverId;
     }
 }
 
