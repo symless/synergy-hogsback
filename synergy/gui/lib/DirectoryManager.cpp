@@ -18,7 +18,7 @@ DirectoryManager::~DirectoryManager()
 
 QString DirectoryManager::profileDir()
 {
-    return "";
+    return installedDir();
 }
 
 QString DirectoryManager::configFileDir()
@@ -28,5 +28,5 @@ QString DirectoryManager::configFileDir()
 
 QString DirectoryManager::installedDir()
 {
-    return "";
+    return QCoreApplication::applicationDirPath();
 }
