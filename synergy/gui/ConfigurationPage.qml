@@ -74,38 +74,6 @@ Rectangle {
                 smooth: true
                 source: "qrc:/res/image/synergy-icon.png"
             }
-
-            // option icon
-            Rectangle {
-                id: option
-                width: 30
-                height: 30
-                z: 1
-                anchors.right: parent.right
-                anchors.rightMargin: 20
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 20
-                color: "transparent"
-
-                MouseArea {
-                    id: optionMouseArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onPressed: {
-                        dropMenu.state = dropMenu.state === "dropDown" ?
-                                    "" : "dropDown"
-                    }
-                }
-
-                Image {
-                    id: optionImage
-                    width: parent.width
-                    height: parent.height
-                    fillMode: Image.Stretch
-                    smooth: true
-                    source: "qrc:/res/image/option.png"
-                }
-            }
         }
 
         // separator
