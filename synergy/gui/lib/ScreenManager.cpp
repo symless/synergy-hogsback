@@ -124,6 +124,7 @@ void ScreenManager::onKeyPressed (int const key)
             saveSnapshot();
             break;
         case Qt::Key_A:
+            LogManager::debug(QString("claim to be server"));
             m_cloudClient->claimServer();
             //startCoreProcess();
             break;
