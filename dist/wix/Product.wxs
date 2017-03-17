@@ -47,6 +47,8 @@
 			</Component>
 		</DirectoryRef>
 		<Icon Id="synergy.ico" SourceFile="$(var.ResPath)/synergy.ico"/>
+        <WixVariable Id="WixUIBannerBmp" Value="$(var.ResPath)\banner.bmp"/>
+        <WixVariable Id="WixUIDialogBmp" Value="$(var.ResPath)\dialog.bmp"/>
 		<Property Id="ARPPRODUCTICON" Value="synergy.ico"/>
 		<Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER"/>
 		<Property Id="MSIRESTARTMANAGERCONTROL" Value="Disable"/>
