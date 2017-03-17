@@ -25,7 +25,7 @@ QString DirectoryManager::profileDir()
     // persist the directory
     QDir dir = profileDir;
     if (!dir.exists()) {
-        dir.mkdir(dir.path());
+        dir.mkpath(dir.path());
     }
 
     return profileDir;
