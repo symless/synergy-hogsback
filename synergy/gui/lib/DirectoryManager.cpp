@@ -4,6 +4,7 @@
 #include "LogManager.h"
 
 #include <QStandardPaths>
+#include <QDir>
 #include <QCoreApplication>
 #include <stdexcept>
 
@@ -19,7 +20,15 @@ DirectoryManager::~DirectoryManager()
 
 QString DirectoryManager::profileDir()
 {
-    return QStandardPaths::standardLocations(QStandardPaths::AppConfigLocation).first();
+    QString profileDir = QStandardPaths::standardLocations(QStandardPaths::AppConfigLocation).first();
+
+    // persist the directory
+    QDir dir = profileDir;
+    if (!dir.exists()) {
+        dir.mkdir(dir.path());
+    }
+
+    return profileDir;
 }
 
 QString DirectoryManager::configFileDir()
