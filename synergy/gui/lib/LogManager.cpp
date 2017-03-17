@@ -25,7 +25,7 @@ QObject* LogManager::instance(QQmlEngine* engine,
 LogManager::LogManager()
 {
     DirectoryManager directoryManager;
-    s_file.setFileName(directoryManager.installedDir() + kDefaultLogFile);
+    s_file.setFileName(directoryManager.profileDir() + '/'+ kDefaultLogFile);
     s_file.open(QIODevice::WriteOnly);
 }
 

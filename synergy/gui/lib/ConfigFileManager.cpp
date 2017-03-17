@@ -23,7 +23,7 @@ void ConfigFileManager::writeConfigurationFile(QString path)
     QString filename;
     if (path.isEmpty()) {
         DirectoryManager directoryManager;
-        filename = directoryManager.configFileDir() + kDefaultConfigFile;
+        filename = directoryManager.configFileDir() + '/' + kDefaultConfigFile;
     }
     else {
         filename = path + kDefaultConfigFile;

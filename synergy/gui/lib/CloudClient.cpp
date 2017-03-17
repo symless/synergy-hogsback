@@ -21,6 +21,7 @@ static const char kIdentifyUrl[] = "https://alpha1.cloud.symless.com/user/identi
 static const char kscreensUrl[] = "https://alpha1.cloud.symless.com/group/screens";
 static const char kUpdateGroupConfigUrl[] = "https://alpha1.cloud.symless.com/group/update";
 static const char kReportUrl[] = "https://alpha1.cloud.symless.com/report";
+static const char kClaimServerUrl[] = "https://alpha1.cloud.symless.com/group/server/claim";
 static const int kPollingTimeout = 60000; // 1 minite
 
 CloudClient::CloudClient(QObject* parent) : QObject(parent)
@@ -239,6 +240,22 @@ void CloudClient::getScreens()
     connect (reply, &QNetworkReply::finished, [this, reply]{
         onGetScreensFinished (reply);
     });
+}
+
+void CloudClient::claimServer()
+{
+    QUrl claimUrl = QUrl(kClaimServerUrl);
+    QNetworkRequest req(claimUrl);
+    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
+
+    QJsonObject jsonObject;
+    jsonObject.insert("screenId", qint64(m_screenId));
+    jsonObject.insert("groupId", qint64(m_groupId));
+    QJsonDocument doc(jsonObject);
+
+    m_networkManager->post(req, doc.toJson());
+
 }
 
 void CloudClient::report(int destId, QString successfulIpList, QString failedIpList)

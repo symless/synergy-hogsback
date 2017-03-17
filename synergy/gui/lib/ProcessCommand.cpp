@@ -28,6 +28,8 @@ QString ProcessCommand::command(bool serverMode) const
 {
     DirectoryManager directoryManager;
     QString command(directoryManager.installedDir());
+    command += '/';
+
     if (serverMode) {
         command += kServerCmd;
     }
@@ -87,6 +89,7 @@ QStringList ProcessCommand::arguments(bool serverMode) const
         // configuration file
         arguments << "-c";
         QString configFilename = directoryManager->configFileDir();
+        configFilename += '/';
         configFilename += kDefaultConfigFile;
         arguments << configFilename;
 

@@ -74,38 +74,6 @@ Rectangle {
                 smooth: true
                 source: "qrc:/res/image/synergy-icon.png"
             }
-
-            // option icon
-            Rectangle {
-                id: option
-                width: 30
-                height: 30
-                z: 1
-                anchors.right: parent.right
-                anchors.rightMargin: 20
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 20
-                color: "transparent"
-
-                MouseArea {
-                    id: optionMouseArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onPressed: {
-                        dropMenu.state = dropMenu.state === "dropDown" ?
-                                    "" : "dropDown"
-                    }
-                }
-
-                Image {
-                    id: optionImage
-                    width: parent.width
-                    height: parent.height
-                    fillMode: Image.Stretch
-                    smooth: true
-                    source: "qrc:/res/image/option.png"
-                }
-            }
         }
 
         // separator
@@ -115,72 +83,6 @@ Rectangle {
             width: parent.width
             height: 7
             color:"#96C13D"
-        }
-
-        // drop menu
-        Rectangle {
-            id: dropMenu
-            width:120;
-            z: 1
-            anchors.right: parent.right
-            anchors.top: configurationPageBackgroundSeparator.bottom
-            property variant items: ["Add a new screen"]
-            smooth:true;
-
-            Rectangle {
-                id:dropDown
-                width: parent.width;
-                height:0;
-                clip:true;
-                radius:4;
-                anchors.top: parent.top;
-                anchors.margins: 2;
-                color: "lightgray"
-
-                ListView {
-                    id:listView
-                    height:200;
-                    model: dropMenu.items
-                    currentIndex: 0
-                    delegate: Item{
-                        width:dropMenu.width;
-                        height: 30;
-
-                        Rectangle {
-                            anchors.fill: parent
-                            color: dropDownItemMouseArea.containsMouse ? "white" : "transparent"
-                        }
-
-                        Text {
-                            text: modelData
-                            anchors.horizontalCenter: parent.horizontalCenter;
-                            anchors.verticalCenter: parent.verticalCenter;
-                        }
-
-                        MouseArea {
-                            id: dropDownItemMouseArea
-                            anchors.fill: parent;
-                            hoverEnabled: true
-                            onClicked: {
-                                dropMenu.state = ""
-                                if (index == 0) {
-                                    // screenManager.addScreen("Unknown")
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            states: State {
-                name: "dropDown";
-                PropertyChanges { target: dropDown; height: 30 * dropMenu.items.length }
-            }
-
-            transitions: Transition {
-                NumberAnimation { target: dropDown; properties: "height";
-                    easing.type: Easing.OutExpo; duration: 1000 }
-            }
         }
 
         // background
@@ -262,11 +164,6 @@ Rectangle {
                                                 screenIcon.y - beginDrag.y)
                                 screenManager.unlockScreen(modelIndex)
                             }
-                            onHoveredChanged: {
-                                if (name !== localHostname.hostname()) {
-                                    shutdownImage.visible = !shutdownImage.visible
-                                }
-                            }
                         }
 
                         Image {
@@ -276,28 +173,6 @@ Rectangle {
                             fillMode: Image.Stretch
                             smooth: true
                             source: stateImage
-
-                            Image {
-                                id: shutdownImage
-                                width: 20
-                                height: 20
-                                anchors.top: parent.top
-                                anchors.topMargin: 9
-                                anchors.right: parent.right
-                                anchors.rightMargin: 9
-                                fillMode: Image.PreserveAspectFit
-                                smooth: true
-                                visible: false
-                                source: "qrc:/res/image/shutdown.png"
-
-                                MouseArea {
-                                    id: shutdownMouseArea
-                                    anchors.fill: parent
-                                    onReleased: {
-                                        // screenManager.removeScreen(name, true)
-                                    }
-                                }
-                            }
 
                             Text {
                                 width: parent.width - 20

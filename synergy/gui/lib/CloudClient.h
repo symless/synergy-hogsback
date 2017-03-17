@@ -29,6 +29,7 @@ public:
 
     void report(int destId, QString successfulIp, QString failedIp);
     void updateGroupConfig(QJsonDocument& doc);
+    void claimServer();
 
 signals:
     void loginOk();
