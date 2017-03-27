@@ -71,8 +71,8 @@ void LogManager::appendRaw(const QString& text)
 {
     foreach(QString line, text.split(QRegExp("\r|\n|\r\n"))) {
         if (!line.isEmpty()) {
-            // QTextStream stream(&s_file);
-            // stream << line << endl;
+            QTextStream stream(&s_file);
+            stream << line << endl;
             qDebug() << line << endl;
         }
     }
