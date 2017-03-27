@@ -93,30 +93,6 @@ QStringList ProcessCommand::arguments(bool serverMode) const
         configFilename += kDefaultConfigFile;
         arguments << configFilename;
 
-#ifdef Q_OS_WIN
-        // screen resolution info for DPI calculation, Windows only
-        DeviceManager* deviceManager;
-        if (m_deviceManager != NULL) {
-            deviceManager = m_deviceManager;
-        }
-        else {
-            deviceManager = new DeviceManager();
-        }
-
-        arguments << "--res-w";
-        arguments << QString::number(deviceManager->resolutionWidth());
-        arguments << "--res-h";
-        arguments << QString::number(deviceManager->resolutionHeight());
-        arguments << "--prm-wc";
-        arguments << QString::number(deviceManager->primaryMonitorWidth() / 2);
-        arguments << "--prm-hc";
-        arguments << QString::number(deviceManager->primaryMonitorHeight() / 2);
-
-        if (m_deviceManager == NULL) {
-            delete deviceManager;
-        }
-#endif
-
         arguments << "--address";
         arguments << ":24800";
     }
