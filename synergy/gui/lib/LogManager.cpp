@@ -61,6 +61,11 @@ void LogManager::debug(const QString& text)
     appendRaw(timeStamp() + " DEBUG: " + text);
 }
 
+QString LogManager::logFilename()
+{
+    return s_file.fileName();
+}
+
 QString LogManager::timeStamp()
 {
     QDateTime current = QDateTime::currentDateTime();

@@ -20,6 +20,7 @@ public:
 	static void warning(const QString& text);
 	static void info(const QString& text);
 	static void debug(const QString& text);
+    static QString logFilename();
 
 	~LogManager();
 
