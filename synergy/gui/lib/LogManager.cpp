@@ -11,7 +11,7 @@ QObject* LogManager::s_instance = NULL;
 QFile LogManager::s_file;
 
 const QString kDefaultLogFile = "synergy.log";
-
+const QString kGUILogPrefix = "[ UI ] ";
 QObject* LogManager::instance(QQmlEngine* engine,
                                         QJSEngine* scriptEngine)
 {
@@ -36,29 +36,29 @@ LogManager::~LogManager()
     }
 }
 
-void LogManager::row(const QString& text)
+void LogManager::raw(const QString& text)
 {
     appendRaw(text);
 }
 void LogManager::error(const QString& text)
 {
-    appendRaw(timeStamp() + " ERROR: " + text);
+    appendRaw(kGUILogPrefix + timeStamp() + " ERROR: " + text);
 }
 
 void LogManager::warning(const QString& text)
 {
-    appendRaw(timeStamp() + " WARNNIG: " + text);
+    appendRaw(kGUILogPrefix + timeStamp() + " WARNNIG: " + text);
 }
 
 void LogManager::info(const QString& text)
 {
-    appendRaw(timeStamp() + " INFO: " + text);
+    appendRaw(kGUILogPrefix + timeStamp() + " INFO: " + text);
 }
 
 void LogManager::debug(const QString& text)
 {
 
-    appendRaw(timeStamp() + " DEBUG: " + text);
+    appendRaw(kGUILogPrefix + timeStamp() + " DEBUG: " + text);
 }
 
 QString LogManager::logFilename()

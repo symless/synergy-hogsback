@@ -65,9 +65,9 @@ void ProcessManager::startProcess()
     connect(m_process, SIGNAL(finished(int, QProcess::ExitStatus)),
         this, SLOT(exit(int, QProcess::ExitStatus)));
     connect(m_process, SIGNAL(readyReadStandardOutput()),
-        this, SLOT(logOutput()));
+        this, SLOT(logCoreOutput()));
     connect(m_process, SIGNAL(readyReadStandardError()),
-        this, SLOT(logError()));
+        this, SLOT(logCoreError()));
 
     ProcessCommand processCommand;
     QString command = processCommand.command(
@@ -118,19 +118,19 @@ void ProcessManager::exit(int exitCode, QProcess::ExitStatus)
     }
 }
 
-void ProcessManager::logOutput()
+void ProcessManager::logCoreOutput()
 {
     if (m_process) {
         QString text(m_process->readAllStandardOutput());
         foreach(QString line, text.split(QRegExp("\r|\n|\r\n"))) {
             if (!line.isEmpty()) {
-                LogManager::info(line);
+                LogManager::raw("[Core] " + line);
             }
         }
     }
 }
 
-void ProcessManager::logError()
+void ProcessManager::logCoreError()
 {
     if (m_process) {
         LogManager::error(m_process->readAllStandardError());

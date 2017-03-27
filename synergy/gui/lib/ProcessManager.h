@@ -25,8 +25,8 @@ public:
 
 private slots:
     void exit(int exitCode, QProcess::ExitStatus);
-    void logOutput();
-    void logError();
+    void logCoreOutput();
+    void logCoreError();
 
 private:
     void startProcessOnWin();

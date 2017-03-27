@@ -15,7 +15,7 @@ class LIB_SPEC LogManager : public QObject
 public:
 	static QObject* instance(QQmlEngine* engine = NULL, QJSEngine* scriptEngine = NULL);
 
-	static void row(const QString& text);
+    static void raw(const QString& text);
 	static void error(const QString& text);
 	static void warning(const QString& text);
 	static void info(const QString& text);
