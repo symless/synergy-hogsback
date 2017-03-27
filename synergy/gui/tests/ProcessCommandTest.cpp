@@ -1,7 +1,6 @@
 #include "ProcessCommandTest.h"
 
 #include "ProcessCommand.h"
-#include "MockDeviceManager.h"
 #include "MockDirectoryManager.h"
 
 ProcessCommandTest::ProcessCommandTest(QObject* parent) : QObject(parent)
@@ -12,9 +11,7 @@ ProcessCommandTest::ProcessCommandTest(QObject* parent) : QObject(parent)
 void ProcessCommandTest::arguments_serverMode_validServerArgument()
 {
     ProcessCommand processCommand;
-    MockDeviceManager mockDeviceManager;
     MockDirectoryManager mockDirectoryManager;
-    processCommand.setDeviceManager(&mockDeviceManager);
     processCommand.setDirectoryManager(&mockDirectoryManager);
     QStringList args = processCommand.arguments(true);
 
@@ -28,9 +25,7 @@ void ProcessCommandTest::arguments_serverMode_validServerArgument()
 void ProcessCommandTest::arguments_clientMode_validClientArgument()
 {
     ProcessCommand processCommand;
-    MockDeviceManager mockDeviceManager;
     MockDirectoryManager mockDirectoryManager;
-    processCommand.setDeviceManager(&mockDeviceManager);
     processCommand.setDirectoryManager(&mockDirectoryManager);
     processCommand.setServerIp("1.1.1.1");
     QStringList args = processCommand.arguments(false);
@@ -42,9 +37,7 @@ void ProcessCommandTest::arguments_clientModeWithoutServerIP_emptyClientArgument
 {
     // empty client argument because of no server ip specified
     ProcessCommand processCommand;
-    MockDeviceManager mockDeviceManager;
     MockDirectoryManager mockDirectoryManager;
-    processCommand.setDeviceManager(&mockDeviceManager);
     processCommand.setDirectoryManager(&mockDirectoryManager);
     QStringList args = processCommand.arguments(false);
 

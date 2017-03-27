@@ -8,7 +8,6 @@ set (GUI_TEST_SOURCES
     ProcessCommandTest.cpp
     ScreenBBArrangementTest.cpp
     AutoTest.h
-    mock/MockDeviceManager.cpp
     mock/MockDirectoryManager.cpp
     mock/MockScreenModel.cpp
 )

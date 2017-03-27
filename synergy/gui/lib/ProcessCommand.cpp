@@ -1,7 +1,6 @@
 #include "ProcessCommand.h"
 
 #include "AppConfig.h"
-#include "DeviceManager.h"
 #include "DirectoryManager.h"
 #include "Common.h"
 
@@ -18,7 +17,6 @@ const QString kClientCmd = "synergyc";
 
 ProcessCommand::ProcessCommand(QObject* parent) :
     QObject(parent),
-    m_deviceManager(NULL),
     m_directoryManager(NULL)
 {
 
@@ -116,11 +114,6 @@ QStringList ProcessCommand::arguments(bool serverMode) const
 void ProcessCommand::setServerIp(const QString ip)
 {
     m_serverIp = ip;
-}
-
-void ProcessCommand::setDeviceManager(DeviceManager* dm)
-{
-    m_deviceManager = dm;
 }
 
 void ProcessCommand::setDirectoryManager(DirectoryManager* dm)

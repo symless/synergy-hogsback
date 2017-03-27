@@ -8,7 +8,6 @@ set (GUI_LIB_SOURCES
     ConnectivityTester.cpp
     CoreInterface.cpp
     DebugLevel.cpp
-    DeviceManager.cpp
     DirectoryManager.cpp
     Hostname.cpp
     IpManager.cpp
