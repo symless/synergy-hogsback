@@ -21,6 +21,7 @@ int main(int argc, char* argv[])
 
     QApplication app(argc, argv);
     LogManager::instance();
+    LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
 
     try {
         qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");
