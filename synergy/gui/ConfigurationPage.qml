@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.2
+import QtQuick.Controls.Styles 1.1
 
 import com.synergy.gui 1.0
 
@@ -36,6 +37,15 @@ Rectangle {
         target: applicationWindow
         onKeyReceived: {
             screenManager.onKeyPressed(key)
+
+            if (key == Qt.Key_QuoteLeft) {
+                if (logConsole.height === 0) {
+                    logConsole.height = 100
+                }
+                else {
+                    logConsole.height = 0
+                }
+            }
         }
     }
 
@@ -63,6 +73,7 @@ Rectangle {
             width: parent.width
             height: 70
             color:"white"
+            z: 1
 
             Image {
                 id: logoImage
@@ -83,6 +94,39 @@ Rectangle {
             width: parent.width
             height: 7
             color:"#96C13D"
+            z: 1
+        }
+
+        // log console
+        Rectangle {
+            id: logConsole
+            anchors.top: configurationPageBackgroundSeparator.bottom
+            width: parent.width
+            height: 0
+            color:"black"
+            z: 2
+            Behavior on height {NumberAnimation {duration: 500; easing.type: Easing.OutQuad}}
+
+            TextArea {
+                id: logConsoleTextArea
+                anchors.fill: parent
+                style: TextAreaStyle {
+                    backgroundColor: "black"
+                    textColor: "white"
+                }
+
+                readOnly: true
+                text: "Test\nTest\nTest\nTest\nTest\nTest\n"
+
+                onHeightChanged: {
+                    if (height <= 60) {
+                        logConsoleTextArea.verticalScrollBarPolicy = Qt.ScrollBarAlwaysOff
+                    }
+                    else {
+                        logConsoleTextArea.verticalScrollBarPolicy = Qt.ScrollBarAlwaysOn
+                    }
+                }
+            }
         }
 
         // background
@@ -92,6 +136,7 @@ Rectangle {
             width: parent.width
             anchors.bottom: parent.bottom
             color:"#3F95B8"
+            z: 1
         }
 
         // hostname
