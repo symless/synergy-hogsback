@@ -26,7 +26,7 @@ LogManager::LogManager()
 {
     DirectoryManager directoryManager;
     s_file.setFileName(directoryManager.profileDir() + '/'+ kDefaultLogFile);
-    s_file.open(QIODevice::WriteOnly);
+    s_file.open(QIODevice::WriteOnly | QIODevice::Append);
 }
 
 LogManager::~LogManager()
