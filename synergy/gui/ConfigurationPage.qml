@@ -118,6 +118,10 @@ Rectangle {
                     color: "white"
                     wrapMode: Text.WordWrap
                 }
+
+                onCountChanged: {
+                    logConsoleListView.positionViewAtEnd()
+                }
             }
         }
 
