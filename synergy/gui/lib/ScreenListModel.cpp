@@ -145,7 +145,7 @@ void ScreenListModel::unlockScreen(int index)
         return;
     }
 
-    m_screens[index].setLocked(true);
+    m_screens[index].setLocked(false);
 }
 
 int ScreenListModel::findScreen(QString name)

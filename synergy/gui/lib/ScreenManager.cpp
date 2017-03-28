@@ -16,7 +16,7 @@ ScreenManager::ScreenManager() :
     m_screenListModel(NULL),
     m_screenListSnapshotManager(NULL),
     m_latestConfigSerial(0),
-    m_configVersion(0),
+    m_configVersion(-1),
     m_previousServerId(-1)
 {
     m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
@@ -197,7 +197,11 @@ void ScreenManager::updateScreens(QByteArray reply)
             auto const& groupObject = obj["group"].toObject();
 
             // TODO: refactor this code
-            m_configVersion = groupObject["configVersion"].toInt();
+            int const configVersion = groupObject["configVersion"].toInt();
+            if (m_configVersion == configVersion) {
+                return;
+            }
+            m_configVersion = configVersion;
             serverId = groupObject["serverId"].toInt();
             if (m_previousServerId != serverId) {
                 newServer = true;
