@@ -1,5 +1,6 @@
 #include "TestDelegatee.h"
 
+#include "LogManager.h"
 #include <QTcpSocket>
 #include <QHostAddress>
 #include <QDataStream>
@@ -75,7 +76,7 @@ void TestDelegatee::onReadyRead()
 
     if (message == "ServerHello") {
         m_results[m_testIndex] = true;
-        qDebug() << m_ipList[m_testIndex] << "pass";
+        LogManager::debug(QString("%1 pass").arg(m_ipList[m_testIndex]));
     }
 
     disconnect(m_tcpClient, &QAbstractSocket::connected, this, &TestDelegatee::onConnected);
