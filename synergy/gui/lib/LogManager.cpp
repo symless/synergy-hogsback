@@ -6,9 +6,13 @@
 #include <QDateTime>
 #include <QTextStream>
 #include <QDebug>
+#include <QQmlContext>
 
 QObject* LogManager::s_instance = NULL;
+QQmlContext* LogManager::s_qmlContext = NULL;
 QFile LogManager::s_file;
+QStringList LogManager::s_logLines;
+int LogManager::s_maximumLogLines = 100;
 
 const QString kDefaultLogFile = "synergy.log";
 const QString kGUILogPrefix = "[ UI ] ";
@@ -79,6 +83,29 @@ void LogManager::appendRaw(const QString& text)
             QTextStream stream(&s_file);
             stream << line << endl;
             qDebug() << line << endl;
+
+            if (s_logLines.size() > s_maximumLogLines) {
+                s_logLines.pop_front();
+            }
+
+            s_logLines.push_back(line);
+            updateLogLineModel();
         }
     }
+}
+
+void LogManager::updateLogLineModel()
+{
+    if (s_qmlContext == NULL) {
+        return;
+    }
+
+    s_qmlContext->setContextProperty("LoggingModel", QVariant::fromValue(s_logLines));
+}
+
+void LogManager::setQmlContext(QQmlContext* value)
+{
+    s_qmlContext = value;
+
+    updateLogLineModel();
 }

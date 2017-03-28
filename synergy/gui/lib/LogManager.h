@@ -6,6 +6,9 @@
 #include <QObject>
 #include <QQmlEngine>
 #include <QFile>
+#include <QStringList>
+
+class QQmlContext;
 
 class LIB_SPEC LogManager : public QObject
 {
@@ -14,6 +17,7 @@ class LIB_SPEC LogManager : public QObject
 
 public:
 	static QObject* instance(QQmlEngine* engine = NULL, QJSEngine* scriptEngine = NULL);
+    ~LogManager();
 
     static void raw(const QString& text);
 	static void error(const QString& text);
@@ -21,19 +25,21 @@ public:
 	static void info(const QString& text);
 	static void debug(const QString& text);
     static QString logFilename();
-
-	~LogManager();
+    static void setQmlContext(QQmlContext* value);
 
 private:
-	LogManager();
+    LogManager();
 
-	static QString timeStamp();
+    static QString timeStamp();
 	static void appendRaw(const QString& text);
+    static void updateLogLineModel();
 
 private:
 	static QFile s_file;
-
+    static QStringList s_logLines;
 	static QObject* s_instance;
+    static QQmlContext* s_qmlContext;
+    static int s_maximumLogLines;
 };
 
 #endif // LOGMANAGER_H

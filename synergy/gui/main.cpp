@@ -20,8 +20,6 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationName("Synergy v2");
 
     QApplication app(argc, argv);
-    LogManager::instance();
-    LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
 
     try {
         qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");
@@ -31,8 +29,12 @@ int main(int argc, char* argv[])
         qmlRegisterType<CloudClient>("com.synergy.gui", 1, 0, "CloudClient");
         qmlRegisterType<ConnectivityTester>("com.synergy.gui", 1, 0, "ConnectivityTester");
         qmlRegisterSingletonType<AppConfig>("com.synergy.gui", 1, 0, "AppConfig", AppConfig::instance);
+
         QQmlApplicationEngine engine(QUrl(QStringLiteral("qrc:/main.qml")));
 
+        LogManager::instance();
+        LogManager::setQmlContext(engine.rootContext());
+        LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
         QIcon icon(":res/image/synergy-icon.png");
         app.setWindowIcon(icon);
 
