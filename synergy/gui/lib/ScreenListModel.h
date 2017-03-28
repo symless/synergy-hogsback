@@ -1,5 +1,5 @@
-#ifndef SERVERCONFIGURATION_H
-#define SERVERCONFIGURATION_H
+#ifndef SCREENlISTMODEL_H
+#define SCREENlISTMODEL_H
 
 #include "LibMacro.h"
 #include "Screen.h"
@@ -54,10 +54,8 @@ protected:
     QHash<int, QByteArray> roleNames() const;
 
 private:
-    friend class ConfigMessageConvertor;
-
     QList<Screen> m_screens;
     float m_scale;
 };
 
-#endif // SERVERCONFIGURATION_H
+#endif // SCREENlISTMODEL_H
