@@ -198,7 +198,7 @@ void ScreenManager::updateScreens(QByteArray reply)
 
             // TODO: refactor this code
             int const configVersion = groupObject["configVersion"].toInt();
-            if (m_configVersion == configVersion) {
+            if (m_configVersion > configVersion) {
                 return;
             }
             m_configVersion = configVersion;
@@ -247,9 +247,8 @@ void ScreenManager::updateScreens(QByteArray reply)
                 screen.setId(obj["id"].toInt());
                 screen.setPosX(obj["posX"].toInt());
                 screen.setPosY(obj["posY"].toInt());
-                screen.setState(kDisconnected);
-                if (!obj.contains("activeGroup") ||
-                    obj["expired"].toBool()) {
+                screen.setState(kConnected);
+                if (!obj["active"].toBool()) {
                     screen.setState(kInactive);
                 }
 
