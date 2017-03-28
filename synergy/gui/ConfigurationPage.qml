@@ -1,6 +1,5 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.2
-import QtQuick.Controls.Styles 1.1
 
 import com.synergy.gui 1.0
 
@@ -104,27 +103,20 @@ Rectangle {
             width: parent.width
             height: 0
             color:"black"
+            clip: true
             z: 2
             Behavior on height {NumberAnimation {duration: 500; easing.type: Easing.OutQuad}}
 
-            TextArea {
-                id: logConsoleTextArea
+            ListView {
+                id: logConsoleListView
                 anchors.fill: parent
-                style: TextAreaStyle {
-                    backgroundColor: "black"
-                    textColor: "white"
-                }
 
-                readOnly: true
-                text: "Test\nTest\nTest\nTest\nTest\nTest\n"
-
-                onHeightChanged: {
-                    if (height <= 60) {
-                        logConsoleTextArea.verticalScrollBarPolicy = Qt.ScrollBarAlwaysOff
-                    }
-                    else {
-                        logConsoleTextArea.verticalScrollBarPolicy = Qt.ScrollBarAlwaysOn
-                    }
+                model: LoggingModel
+                delegate: Text {
+                    width: parent.width
+                    text: modelData
+                    color: "white"
+                    wrapMode: Text.WordWrap
                 }
             }
         }
