@@ -96,6 +96,16 @@ Rectangle {
             z: 1
         }
 
+        // separator 2
+        Rectangle {
+            id: configurationPageBackgroundSeparator2
+            anchors.top: logConsole.bottom
+            width: parent.width
+            height: logConsole.height > 0 ? 7 : 0
+            color:"#96C13D"
+            z: 3
+        }
+
         // log console
         Rectangle {
             id: logConsole
