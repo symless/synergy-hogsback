@@ -2,6 +2,7 @@
 
 #include "TestDelegatee.h"
 #include "CloudClient.h"
+#include "LogManager.h"
 
 #include <QHostInfo>
 #include <QJsonDocument>
@@ -138,10 +139,10 @@ void ConnectivityTester::onStartTesting()
     TestDelegatee* delegatee = new TestDelegatee(m_pendingTestCases.front());
 
     m_testThread = new QThread();
-    connect(delegatee, SIGNAL(done(QList<bool>)), this, SLOT(onTestDelegateeDone(QList<bool>)));
-    connect(delegatee, SIGNAL(done(QList<bool>)), m_testThread, SLOT(quit()));
-    connect(delegatee, SIGNAL(done(QList<bool>)), delegatee, SLOT(deleteLater()));
-    connect(m_testThread, SIGNAL(finished()), m_testThread, SLOT(deleteLater()));
+    connect(delegatee, &TestDelegatee::done, this, &ConnectivityTester::onTestDelegateeDone);
+    connect(delegatee, &TestDelegatee::done, m_testThread, &QThread::quit);
+    connect(delegatee, &TestDelegatee::done, delegatee, &TestDelegatee::deleteLater);
+    connect(m_testThread, &QThread::finished, m_testThread, &QThread::deleteLater);
     delegatee->moveToThread(m_testThread);
     m_testThread->start();
 
@@ -175,6 +176,7 @@ void ConnectivityTester::onTestDelegateeDone(QList<bool> results)
 
         if (result) {
             successfulIpList.append(ipList[i]);
+            LogManager::debug(QString("connectivity test pass: %1").arg(ipList[i]));
         }
         else {
             failedIpList.append(ipList[i]);

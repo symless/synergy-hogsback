@@ -16,6 +16,8 @@ int LogManager::s_maximumLogLines = 100;
 
 const QString kDefaultLogFile = "synergy.log";
 const QString kGUILogPrefix = "[ UI ] ";
+
+// TODO: Make LogManager thread safe
 QObject* LogManager::instance(QQmlEngine* engine,
                                         QJSEngine* scriptEngine)
 {

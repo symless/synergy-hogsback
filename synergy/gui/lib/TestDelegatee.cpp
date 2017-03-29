@@ -76,7 +76,6 @@ void TestDelegatee::onReadyRead()
 
     if (message == "ServerHello") {
         m_results[m_testIndex] = true;
-        LogManager::debug(QString("%1 pass").arg(m_ipList[m_testIndex]));
     }
 
     disconnect(m_tcpClient, &QAbstractSocket::connected, this, &TestDelegatee::onConnected);
