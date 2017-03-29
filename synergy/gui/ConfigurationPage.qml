@@ -156,6 +156,7 @@ Rectangle {
             anchors.top: configurationPageBackgroundSeparator.bottom
             anchors.bottom: parent.bottom
             width: parent.width
+            z: 1
 
             states: [
                 State { when: !screenArrangementScrollView.visible;
