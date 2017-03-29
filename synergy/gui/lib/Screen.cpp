@@ -1,4 +1,6 @@
 #include "Screen.h"
+#include "LogManager.h"
+#include "Common.h"
 
 QHash<ScreenState, QString> Screen::m_stateImages;
 
@@ -43,13 +45,24 @@ QString Screen::stateImage() const
     return m_stateImage;
 }
 
-void Screen::setPosX(int x)
+void Screen::setPosX(int const x)
 {
+    if ((x <= -kScreenIconWidth) || (x >= kDefaultViewWidth)) {
+        LogManager::warning (QString("Attempted to set screen position x coordinate "
+                                     "outside visible area. x = %1").arg(x));
+        return;
+    }
+
     m_posX = x;
 }
 
-void Screen::setPosY(int y)
+void Screen::setPosY(int const y)
 {
+    if ((y <= -kScreenIconHeight) || (y >= kDefaultViewHeight)) {
+        LogManager::warning (QString("Attempted to set screen position y coordinate "
+                                     "outside visible area. y = %1").arg(y));
+        return;
+    }
     m_posY = y;
 }
 
