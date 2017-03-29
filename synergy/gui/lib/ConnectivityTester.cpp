@@ -56,12 +56,11 @@ void ConnectivityTester::testNewScreens(QByteArray reply)
         QJsonArray screens = obj["screens"].toArray();
         QSet<int> latestScreenIdSet;
         foreach (QJsonValue const& v, screens) {
-            if (!obj.contains("activeGroup") ||
-                obj["expired"].toBool()) {
+            QJsonObject obj = v.toObject();
+            if (!obj["active"].toBool()) {
                 continue;
             }
 
-            QJsonObject obj = v.toObject();
             QString screenName = obj["name"].toString();
 
             if (screenName != m_localHostname) {
