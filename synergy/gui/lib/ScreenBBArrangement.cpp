@@ -557,5 +557,12 @@ QVector2D ScreenBBArrangement::combineAdjustments(
 		}
 	}
 
+    if (minAdjustmentX == INT_MAX) {
+        minAdjustmentX = 0;
+    }
+
+    if (minAdjustmentY == INT_MAX) {
+        minAdjustmentY = 0;
+    }
 	return QVector2D(minAdjustmentX, minAdjustmentY);
 }
