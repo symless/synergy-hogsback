@@ -32,6 +32,7 @@ ScreenManager::ScreenManager() :
 ScreenManager::~ScreenManager()
 {
     delete m_arrangementStrategy;
+    delete m_screenListSnapshotManager;
 }
 
 int ScreenManager::getModelIndex(int x, int y)
