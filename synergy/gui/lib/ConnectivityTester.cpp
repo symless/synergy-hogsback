@@ -16,7 +16,8 @@ ConnectivityTester::ConnectivityTester(QObject* parent) :
     QObject(parent),
     m_localHostname(QHostInfo::localHostName()),
     m_tcpServer(new QTcpServer()),
-    m_testThread(NULL)
+    m_testThread(NULL),
+    m_testCaseBatchSize(0)
 {
     m_tcpServer->listen(QHostAddress::Any, kServerPort);
     connect(m_tcpServer, &QTcpServer::newConnection, this,
@@ -68,7 +69,7 @@ void ConnectivityTester::testNewScreens(QByteArray reply)
                 int screenId = obj["id"].toInt();
                 latestScreenIdSet.insert(screenId);
                 QSet<int>::const_iterator i = m_screenIdSet.find(screenId);
-                if (i == m_screenIdSet.end()) {
+                if (i == m_screenIdSet.end() && m_testThread == NULL) {
                     // new screen detected, get ip list
                     QString ipList = obj["ipList"].toString();
                     if (ipList.isEmpty()) {
@@ -79,14 +80,19 @@ void ConnectivityTester::testNewScreens(QByteArray reply)
                     testCase += ',';
                     testCase += ipList;
 
-                    // start connectivity test
+                    // add connectivity test case
                     m_pendingTestCases.push_back(testCase);
-                    emit startTesting();
+                    m_testCaseBatchSize++;
 
                     // add into set
                     m_screenIdSet.insert(screenId);
                 }
             }
+        }
+
+        if (m_testCaseBatchSize > 0 && m_testThread == NULL) {
+            // start connectivity test
+            emit startTesting();
         }
 
         // remove inactive screen id
@@ -114,7 +120,6 @@ void ConnectivityTester::onConnectionReadyRead()
 
     QDataStream in;
     in.setDevice(socket);
-    in.setVersion(QDataStream::Qt_5_5);
 
     QByteArray raw;
     in >> raw;
@@ -124,7 +129,6 @@ void ConnectivityTester::onConnectionReadyRead()
     if (message == "ClientHello") {
         QByteArray block;
         QDataStream out(&block, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_5_5);
         out << "ServerHello";
         socket->write(block);
     }
@@ -136,7 +140,7 @@ void ConnectivityTester::onStartTesting()
         return;
     }
 
-    TestDelegatee* delegatee = new TestDelegatee(m_pendingTestCases.front());
+    TestDelegatee* delegatee = new TestDelegatee(m_pendingTestCases, m_testCaseBatchSize);
 
     m_testThread = new QThread();
     connect(delegatee, &TestDelegatee::done, this, &ConnectivityTester::onTestDelegateeDone);
@@ -150,48 +154,48 @@ void ConnectivityTester::onStartTesting()
                               Qt::QueuedConnection);
 }
 
-void ConnectivityTester::onTestDelegateeDone(QList<bool> results)
+void ConnectivityTester::onTestDelegateeDone(QMap<QString, bool> results)
 {
-    QString testCase = m_pendingTestCases.front();
-    QStringList parts;
-    parts = testCase.split(',');
-    int screenId = -1;
-    QList<QString> ipList;
+    for (int i = 0; i < m_testCaseBatchSize; i++) {
+        QString testCase = m_pendingTestCases[i];
+        QStringList parts;
+        parts = testCase.split(',');
 
-    if (parts.size() > 1) {
-        screenId = parts[0].toInt();
-        for (int i = 1; i < parts.size(); i++) {
-            ipList.append(parts[i]);
+        int screenId = -1;
+        QList<QString> ipList;
+
+        if (parts.size() > 1) {
+            screenId = parts[0].toInt();
+            for (int i = 1; i < parts.size(); i++) {
+                ipList.append(parts[i]);
+            }
         }
+
+        QStringList successfulIpList;
+        QStringList failedIpList;
+
+        for (int i = 0; i < ipList.size(); i++) {
+            bool r = results[ipList[i]];
+
+            if (r) {
+                successfulIpList.append(ipList[i]);
+                LogManager::debug(QString("connectivity test pass: %1").arg(ipList[i]));
+            }
+            else {
+                failedIpList.append(ipList[i]);
+            }
+        }
+
+        QString successfulIp = successfulIpList.join(',');
+        QString failedIp = failedIpList.join(',');
+
+        m_cloudClient->report(screenId, successfulIp, failedIp);
+
+        // TODO: record this screen id and successful test
+
+        m_pendingTestCases.pop_front();
     }
 
-    QStringList successfulIpList;
-    QStringList failedIpList;
-
-    for (int i = 0; i < ipList.size(); i++) {
-        bool result = false;
-        if (i < results.size()) {
-            result = results[i];
-        }
-
-        if (result) {
-            successfulIpList.append(ipList[i]);
-            LogManager::debug(QString("connectivity test pass: %1").arg(ipList[i]));
-        }
-        else {
-            failedIpList.append(ipList[i]);
-        }
-    }
-
-    QString successfulIp = successfulIpList.join(',');
-    QString failedIp = failedIpList.join(',');
-
-    m_cloudClient->report(screenId, successfulIp, failedIp);
-
-    m_pendingTestCases.pop_front();
     m_testThread = NULL;
-
-    if (!m_pendingTestCases.isEmpty()) {
-        emit startTesting();
-    }
+    m_testCaseBatchSize = 0;
 }

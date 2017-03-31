@@ -8,7 +8,7 @@
 
 #include <QTimer>
 #include <QSet>
-#include <QQueue>
+#include <QList>
 
 class CloudClient;
 class QTcpServer;
@@ -36,16 +36,17 @@ private slots:
     void onNewConnection();
     void onConnectionReadyRead();
     void onStartTesting();
-    void onTestDelegateeDone(QList<bool> results);
+    void onTestDelegateeDone(QMap<QString, bool> results);
 
 private:
     QTimer m_timer;
     QSet<int> m_screenIdSet;
-    QQueue<QString> m_pendingTestCases;
+    QList<QString> m_pendingTestCases;
     QString m_localHostname;
     CloudClient* m_cloudClient;
     QTcpServer* m_tcpServer;
     QThread* m_testThread;
+    int m_testCaseBatchSize;
 };
 
 #endif // CONNECTIVITYTESTER_H
