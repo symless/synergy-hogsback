@@ -219,7 +219,7 @@ void ScreenManager::updateScreens(QByteArray reply)
                 int index = m_screenListModel->findScreen(screenName);
                 if (index != -1) {
                     const Screen& s = m_screenListModel->getScreen(index);
-                    if (s.getLocked()) {
+                    if (s.locked()) {
                         continue;
                     }
                 }

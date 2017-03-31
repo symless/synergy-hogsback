@@ -35,7 +35,7 @@ public:
 	void setName(QString n);
 	void setState(ScreenState s);
 
-    bool getLocked() const;
+    bool locked() const;
     void setLocked(bool value);
 
 private:
@@ -45,7 +45,7 @@ private:
 	QString m_name;
 	ScreenState m_state;
 	QString m_stateImage;
-    bool locked;
+    bool m_locked;
     static QHash<ScreenState, QString> m_stateImages;
 };
 

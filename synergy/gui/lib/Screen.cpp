@@ -10,7 +10,7 @@ Screen::Screen(QString name) :
     m_posY(-1),
     m_name(name),
     m_state(kDisconnected),
-    locked(false)
+    m_locked(false)
 {
     m_stateImages[kConnected] = "qrc:/res/image/screen-active.png";
     m_stateImages[kConnecting] = "qrc:/res/image/screen_icon_running.png";
@@ -77,14 +77,14 @@ void Screen::setState(ScreenState s)
     m_stateImage = m_stateImages[m_state];
 }
 
-bool Screen::getLocked() const
+bool Screen::locked() const
 {
-    return locked;
+    return m_locked;
 }
 
 void Screen::setLocked(bool value)
 {
-    locked = value;
+    m_locked = value;
 }
 
 int Screen::id() const
