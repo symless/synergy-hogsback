@@ -191,6 +191,7 @@ void ScreenManager::startCoreProcess()
 void ScreenManager::updateScreens(QByteArray reply)
 {
     bool updateLocalHost = false;
+    bool newServerDetected = false;
     int serverId = m_previousServerId;
 
     QJsonDocument doc = QJsonDocument::fromJson(reply);
@@ -206,9 +207,8 @@ void ScreenManager::updateScreens(QByteArray reply)
             m_configVersion = configVersion;
             serverId = groupObject["serverId"].toInt();
             if (m_previousServerId != serverId) {
-                updateConfigFile();
-                emit newServer(serverId);
-                m_previousServerId = serverId;
+                // delay emitting the signal until we update all the screens
+                newServerDetected = true;
             }
 
             QJsonArray screens = obj["screens"].toArray();
@@ -253,6 +253,12 @@ void ScreenManager::updateScreens(QByteArray reply)
 
             m_screenListModel->update(latestScreenList);
         }
+    }
+
+    if (newServerDetected) {
+        updateConfigFile();
+        emit newServer(serverId);
+        m_previousServerId = serverId;
     }
 
     if (updateLocalHost) {
