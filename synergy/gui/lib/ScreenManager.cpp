@@ -206,8 +206,8 @@ void ScreenManager::updateScreens(QByteArray reply)
             m_configVersion = configVersion;
             serverId = groupObject["serverId"].toInt();
             if (m_previousServerId != serverId) {
-                emit newServer(serverId);
                 updateConfigFile();
+                emit newServer(serverId);
                 m_previousServerId = serverId;
             }
 
