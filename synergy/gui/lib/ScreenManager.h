@@ -49,6 +49,7 @@ public:
 
 signals:
     void updateGroupConfig();
+    void newServer(int serverId);
 
 private:
     int processMode();

@@ -25,7 +25,7 @@ public:
     Q_PROPERTY(CloudClient* cloudClient WRITE setCloudClient)
 
     void setCloudClient(CloudClient* cloudClient);
-
+    QStringList getSuccessfulResults(int screenId) const;
 signals:
     void cloudClientSet();
     void startTesting();
@@ -47,7 +47,7 @@ private:
     QTcpServer* m_tcpServer;
     QThread* m_testThread;
     int m_testCaseBatchSize;
-    QMap<int, QStringList> m_screenConnectivityResults;
+    QMap<int, QStringList> m_screenSuccessfulResults;
 };
 
 #endif // CONNECTIVITYTESTER_H

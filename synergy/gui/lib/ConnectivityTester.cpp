@@ -45,6 +45,16 @@ void ConnectivityTester::setCloudClient(CloudClient* cloudClient)
     m_timer.start(1000);
 }
 
+QStringList ConnectivityTester::getSuccessfulResults(int screenId) const
+{
+    if (m_screenSuccessfulResults.contains(screenId)) {
+        return m_screenSuccessfulResults[screenId];
+    }
+    else {
+        return QStringList();
+    }
+}
+
 void ConnectivityTester::testNewScreens(QByteArray reply)
 {
     QJsonDocument doc = QJsonDocument::fromJson(reply);
@@ -202,7 +212,7 @@ void ConnectivityTester::onTestDelegateeDone(QMap<QString, bool> results)
         m_cloudClient->report(screenId, successfulIp, failedIp);
 
         // update connectivity results
-        m_screenConnectivityResults[screenId] = successfulIpList;
+        m_screenSuccessfulResults[screenId] = successfulIpList;
 
         m_pendingTestCases.pop_front();
     }

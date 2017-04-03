@@ -1,9 +1,11 @@
 #include "ProcessManager.h"
 
+#include "ConnectivityTester.h"
 #include "ProcessCommand.h"
 #include "ScreenListModel.h"
 #include "LogManager.h"
 #include "ProcessMode.h"
+#include "AppConfig.h"
 #include <iostream>
 #ifndef Q_OS_WIN
 #include <unistd.h>
@@ -15,7 +17,7 @@ ProcessManager::ProcessManager() :
     m_active(true),
     m_serverIp()
 {
-
+    m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
 }
 
 int ProcessManager::processMode()
@@ -36,6 +38,16 @@ bool ProcessManager::active()
 void ProcessManager::setActive(bool active)
 {
     m_active = active;
+}
+
+ConnectivityTester* ProcessManager::connectivityTester()
+{
+    return m_connectivityTester;
+}
+
+void ProcessManager::setConnectivityTester(ConnectivityTester* tester)
+{
+    m_connectivityTester = tester;
 }
 
 void ProcessManager::start()
@@ -105,6 +117,33 @@ QString ProcessManager::serverIp() const
 void ProcessManager::setServerIp(const QString& serverIp)
 {
     m_serverIp = serverIp;
+}
+
+void ProcessManager::newServerDetected(int serverId)
+{
+    // decide which mode local screen should be
+    if (serverId == m_appConfig->screenId()) {
+        setProcessMode(kServerMode);
+    }
+    else {
+        setProcessMode(kClientMode);
+
+        QStringList r = m_connectivityTester->getSuccessfulResults(serverId);
+
+        if (!r.empty()) {
+            // TODO: furthur ip matching test
+            setServerIp(r.first());
+            LogManager::debug(QString("connecting to server: %1").arg(r.first()));
+        }
+        else {
+            LogManager::debug(QString("can not find any successful connectivity result for the server screen: %1").arg(serverId));
+            LogManager::debug(QString("retry in 3 seconds"));
+            QTimer::singleShot(3000, this, SLOT(newServerDetected(serverId)));
+            return;
+        }
+    }
+
+    start();
 }
 
 void ProcessManager::exit(int exitCode, QProcess::ExitStatus)
