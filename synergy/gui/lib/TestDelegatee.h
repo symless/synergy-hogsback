@@ -31,10 +31,14 @@ public slots:
 private:
     void cleanUp();
 
+public:
+    typedef QMap<QString, bool> TestResults;
+
 private:
+
     QList<QString> m_ipList;
     QMap<QTcpSocket*, QString> m_socketIpMap;
-    QMap<QString, bool> m_results;
+    TestResults m_results;
 };
 
 #endif // TESTDELEGATEE_H

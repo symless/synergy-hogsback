@@ -11,6 +11,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QThread>
+#include <QMetaType>
 
 ConnectivityTester::ConnectivityTester(QObject* parent) :
     QObject(parent),
@@ -143,6 +144,8 @@ void ConnectivityTester::onStartTesting()
     TestDelegatee* delegatee = new TestDelegatee(m_pendingTestCases, m_testCaseBatchSize);
 
     m_testThread = new QThread();
+    qRegisterMetaType<TestDelegatee::TestResults>("TestResults");
+
     connect(delegatee, &TestDelegatee::done, this, &ConnectivityTester::onTestDelegateeDone);
     connect(delegatee, &TestDelegatee::done, m_testThread, &QThread::quit);
     connect(delegatee, &TestDelegatee::done, delegatee, &TestDelegatee::deleteLater);
