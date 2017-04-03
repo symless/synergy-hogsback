@@ -138,7 +138,9 @@ void ProcessManager::newServerDetected(int serverId)
         else {
             LogManager::debug(QString("can not find any successful connectivity result for the server screen: %1").arg(serverId));
             LogManager::debug(QString("retry in 3 seconds"));
-            QTimer::singleShot(3000, this, SLOT(newServerDetected(serverId)));
+            QTimer::singleShot(3000, this, [=](){
+                newServerDetected(serverId);
+            });
             return;
         }
     }
