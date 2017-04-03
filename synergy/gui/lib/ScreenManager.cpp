@@ -86,6 +86,9 @@ void ScreenManager::setScreenModel(ScreenListModel* screenListModel)
 void ScreenManager::setProcessManager(ProcessManager* processManager)
 {
     m_processManager = processManager;
+
+    connect(this, &ScreenManager::newServer, m_processManager,
+        &ProcessManager::newServerDetected);
 }
 
 void ScreenManager::setViewWidth(int w)
@@ -188,7 +191,7 @@ void ScreenManager::startCoreProcess()
 void ScreenManager::updateScreens(QByteArray reply)
 {
     bool updateLocalHost = false;
-    bool newServer = false;
+    bool newServerDetected = false;
     int serverId = m_previousServerId;
 
     QJsonDocument doc = QJsonDocument::fromJson(reply);
@@ -197,7 +200,6 @@ void ScreenManager::updateScreens(QByteArray reply)
             QJsonObject obj = doc.object();
             auto const& groupObject = obj["group"].toObject();
 
-            // TODO: refactor this code
             int const configVersion = groupObject["configVersion"].toInt();
             if (m_configVersion > configVersion) {
                 return;
@@ -205,7 +207,8 @@ void ScreenManager::updateScreens(QByteArray reply)
             m_configVersion = configVersion;
             serverId = groupObject["serverId"].toInt();
             if (m_previousServerId != serverId) {
-                newServer = true;
+                // delay emitting the signal until we update all the screens
+                newServerDetected = true;
             }
 
             QJsonArray screens = obj["screens"].toArray();
@@ -219,28 +222,8 @@ void ScreenManager::updateScreens(QByteArray reply)
                 int index = m_screenListModel->findScreen(screenName);
                 if (index != -1) {
                     const Screen& s = m_screenListModel->getScreen(index);
-                    if (s.getLocked()) {
+                    if (s.locked()) {
                         continue;
-                    }
-                }
-
-                // TODO: refactor this code
-                if (newServer) {
-                    if (serverId == m_appConfig->screenId()) {
-                        m_processManager->setProcessMode(kServerMode);
-                    }
-                    else {
-                        m_processManager->setProcessMode(kClientMode);
-                    }
-
-                    if (obj["id"].toInt() == serverId) {
-                        QString ipList = obj["ipList"].toString();
-                        QStringList ips = ipList.split(',');
-
-                        // TODO: find matching local IP
-                        if (!ips.empty()) {
-                            m_processManager->setServerIp(ips.first());
-                        }
                     }
                 }
 
@@ -272,6 +255,12 @@ void ScreenManager::updateScreens(QByteArray reply)
         }
     }
 
+    if (newServerDetected) {
+        updateConfigFile();
+        emit newServer(serverId);
+        m_previousServerId = serverId;
+    }
+
     if (updateLocalHost) {
         removeScreen(m_localHostname);
         Screen screen(m_localHostname);
@@ -279,11 +268,6 @@ void ScreenManager::updateScreens(QByteArray reply)
         m_arrangementStrategy->addScreen(m_screenListModel, screen);
 
         emit updateGroupConfig();
-    }
-
-    if (newServer) {
-        startCoreProcess();
-        m_previousServerId = serverId;
     }
 }
 

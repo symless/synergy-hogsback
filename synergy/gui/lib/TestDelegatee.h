@@ -4,6 +4,8 @@
 #include "LibMacro.h"
 
 #include <QString>
+#include <QList>
+#include <QMap>
 #include <QObject>
 
 class QTcpSocket;
@@ -14,24 +16,29 @@ class LIB_SPEC TestDelegatee : public QObject
 {
     Q_OBJECT
 public:
-    TestDelegatee(QString& testCase, QObject *parent = 0);
+    TestDelegatee(const QList<QString>& testCases, int batchSize, QObject* parent = 0);
+    ~TestDelegatee();
 
 signals:
-    void done(QList<bool>);
+    void done(QMap<QString, bool>);
 
 public slots:
     void start();
     void onConnected();
     void onReadyRead();
-    void onSocketError();
+    void onTestFinish();
 
 private:
-    QString m_testCase;
-    QString m_screenId;
+    void cleanUp();
+
+public:
+    typedef QMap<QString, bool> TestResults;
+
+private:
+
     QList<QString> m_ipList;
-    QList<bool> m_results;
-    QTcpSocket* m_tcpClient;
-    int m_testIndex;
+    QMap<QTcpSocket*, QString> m_socketIpMap;
+    TestResults m_results;
 };
 
 #endif // TESTDELEGATEE_H
