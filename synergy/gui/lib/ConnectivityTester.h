@@ -47,6 +47,7 @@ private:
     QTcpServer* m_tcpServer;
     QThread* m_testThread;
     int m_testCaseBatchSize;
+    QMap<int, QStringList> m_screenConnectivityResults;
 };
 
 #endif // CONNECTIVITYTESTER_H

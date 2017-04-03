@@ -194,7 +194,8 @@ void ConnectivityTester::onTestDelegateeDone(QMap<QString, bool> results)
 
         m_cloudClient->report(screenId, successfulIp, failedIp);
 
-        // TODO: record this screen id and successful test
+        // Update connectivity results
+        m_screenConnectivityResults[screenId] = successfulIpList;
 
         m_pendingTestCases.pop_front();
     }
