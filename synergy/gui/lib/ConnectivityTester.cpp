@@ -56,22 +56,26 @@ void ConnectivityTester::testNewScreens(QByteArray reply)
     if (doc.isObject()) {
         QJsonObject obj = doc.object();
 
+        // we only care about the screen information
         QJsonArray screens = obj["screens"].toArray();
         QSet<int> latestScreenIdSet;
         foreach (QJsonValue const& v, screens) {
             QJsonObject obj = v.toObject();
+            // skip inactive screens
             if (!obj["active"].toBool()) {
                 continue;
             }
 
             QString screenName = obj["name"].toString();
 
+            // skip local screen
             if (screenName != m_localHostname) {
                 int screenId = obj["id"].toInt();
                 latestScreenIdSet.insert(screenId);
                 QSet<int>::const_iterator i = m_screenIdSet.find(screenId);
+                // if this is a new screen and there is not a connectivity test running already
                 if (i == m_screenIdSet.end() && m_testThread == NULL) {
-                    // new screen detected, get ip list
+                    // get ip list
                     QString ipList = obj["ipList"].toString();
                     if (ipList.isEmpty()) {
                         continue;
@@ -91,8 +95,8 @@ void ConnectivityTester::testNewScreens(QByteArray reply)
             }
         }
 
+        // start connectivity test
         if (m_testCaseBatchSize > 0 && m_testThread == NULL) {
-            // start connectivity test
             emit startTesting();
         }
 
@@ -159,6 +163,7 @@ void ConnectivityTester::onStartTesting()
 
 void ConnectivityTester::onTestDelegateeDone(QMap<QString, bool> results)
 {
+    // iterate through all tested cases
     for (int i = 0; i < m_testCaseBatchSize; i++) {
         QString testCase = m_pendingTestCases[i];
         QStringList parts;
@@ -177,6 +182,7 @@ void ConnectivityTester::onTestDelegateeDone(QMap<QString, bool> results)
         QStringList successfulIpList;
         QStringList failedIpList;
 
+        // extract successful and failed test results
         for (int i = 0; i < ipList.size(); i++) {
             bool r = results[ipList[i]];
 
@@ -192,9 +198,10 @@ void ConnectivityTester::onTestDelegateeDone(QMap<QString, bool> results)
         QString successfulIp = successfulIpList.join(',');
         QString failedIp = failedIpList.join(',');
 
+        // report to cloud
         m_cloudClient->report(screenId, successfulIp, failedIp);
 
-        // Update connectivity results
+        // update connectivity results
         m_screenConnectivityResults[screenId] = successfulIpList;
 
         m_pendingTestCases.pop_front();
