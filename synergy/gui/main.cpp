@@ -13,6 +13,8 @@
 #include <QQmlApplicationEngine>
 #include <stdexcept>
 
+void openAccessibilityDialog();
+
 int main(int argc, char* argv[])
 {
     QCoreApplication::setOrganizationName("Symless");
@@ -20,6 +22,8 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationName("Synergy v2");
 
     QApplication app(argc, argv);
+
+    openAccessibilityDialog();
 
     try {
         qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");
