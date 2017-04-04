@@ -15,5 +15,7 @@
         <file>res/image/synergy-logo.png</file>
         <file>Version.qml</file>
         <file>res/image/synergy-icon.png</file>
+        <file>res/image/option-active.png</file>
+        <file>res/image/option-inactive.png</file>
     </qresource>
 </RCC>

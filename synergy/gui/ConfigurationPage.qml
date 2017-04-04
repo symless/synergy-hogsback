@@ -198,7 +198,7 @@ Rectangle {
                         property int modelIndex
 
                         MouseArea {
-                            id: mouse
+                            id: screenMouseArea
                             anchors.fill: parent
                             drag.target: screenIcon
                             drag.axis: Drag.XandYAxis
@@ -239,6 +239,20 @@ Rectangle {
                                 fontSizeMode: Text.HorizontalFit
                                 horizontalAlignment: Text.AlignHCenter
                                 elide: Text.ElideRight
+                            }
+
+                            Image {
+                                id: itemOptionImage
+                                parent: itemImage
+                                anchors.right: parent.right
+                                anchors.rightMargin: 9
+                                anchors.top: parent.top
+                                anchors.topMargin: 9
+                                height: 5
+                                fillMode: Image.PreserveAspectFit
+                                smooth: true
+                                visible: screenMouseArea.containsMouse
+                                source: screenState == "Connected" ? "qrc:/res/image/option-active.png" : "qrc:/res/image/option-inactive.png"
                             }
                         }
                     }
