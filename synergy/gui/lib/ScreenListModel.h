@@ -14,7 +14,8 @@ public:
         kPosXRole = Qt::UserRole + 1,
         kPosYRole,
         kNameRole,
-        kStateImageRole
+        kStateImageRole,
+        kScreenStateRole
     };
 
     ScreenListModel();

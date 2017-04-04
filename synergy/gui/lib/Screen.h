@@ -27,7 +27,7 @@ public:
 	int posX() const;
 	int posY() const;
 	QString name() const;
-	ScreenState state() const;
+    QString stateString() const;
 	QString stateImage() const;
 
 	void setPosX(int x);

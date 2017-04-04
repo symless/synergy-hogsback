@@ -35,9 +35,20 @@ QString Screen::name() const
     return m_name;
 }
 
-ScreenState Screen::state() const
+QString Screen::stateString() const
 {
-    return m_state;
+    switch(m_state) {
+    case kConnected:
+        return "Connected";
+    case kConnecting:
+        return "Connecting";
+    case kDisconnected:
+        return "Disconnected";
+    case kInactive:
+        return "Inactive";
+    }
+
+    return "Inactive";
 }
 
 QString Screen::stateImage() const

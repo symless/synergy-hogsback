@@ -234,7 +234,7 @@ Rectangle {
                                 text: name
                                 font.pixelSize: 15
                                 minimumPixelSize: 15
-                                color: "white"
+                                color: screenState == "Connected" ? "black" : "white"
                                 font.family: "Tahoma"
                                 fontSizeMode: Text.HorizontalFit
                                 horizontalAlignment: Text.AlignHCenter

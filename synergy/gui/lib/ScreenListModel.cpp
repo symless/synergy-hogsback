@@ -102,7 +102,8 @@ QVariant ScreenListModel::data(const QModelIndex& index, int role) const
         return screen.name();
     else if (role == kStateImageRole)
         return screen.stateImage();
-
+    else if (role == kScreenStateRole)
+        return screen.stateString();
     return QVariant();
 }
 
@@ -121,6 +122,7 @@ QHash<int, QByteArray> ScreenListModel::roleNames() const
     roles[kPosYRole] = "posY";
     roles[kNameRole] = "name";
     roles[kStateImageRole] = "stateImage";
+    roles[kScreenStateRole] = "screenState";
 
     return roles;
 }
