@@ -17,5 +17,8 @@
         <file>res/image/synergy-icon.png</file>
         <file>res/image/option-active.png</file>
         <file>res/image/option-inactive.png</file>
+        <file>res/image/screen-edit.png</file>
+        <file>res/image/edit.png</file>
+        <file>res/image/unsub.png</file>
     </qresource>
 </RCC>

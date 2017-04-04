@@ -217,10 +217,16 @@ Rectangle {
                                                 screenIcon.y - beginDrag.y)
                                 screenManager.unlockScreen(modelIndex)
                             }
+
+                            onHoveredChanged: {
+                                if (!screenMouseArea.containsMouse) {
+                                    screenImage.source = stateImage
+                                }
+                            }
                         }
 
                         Image {
-                            id: itemImage
+                            id: screenImage
                             parent: screenIcon
                             anchors.fill: parent
                             fillMode: Image.Stretch
@@ -228,6 +234,7 @@ Rectangle {
                             source: stateImage
 
                             Text {
+                                id: screenNameText
                                 width: parent.width - 20
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.horizontalCenter: parent.horizontalCenter
@@ -239,11 +246,12 @@ Rectangle {
                                 fontSizeMode: Text.HorizontalFit
                                 horizontalAlignment: Text.AlignHCenter
                                 elide: Text.ElideRight
+                                visible: screenImage.source != "qrc:/res/image/screen-edit.png"
                             }
 
                             Image {
-                                id: itemOptionImage
-                                parent: itemImage
+                                id: screenOptionImage
+                                parent: screenImage
                                 anchors.right: parent.right
                                 anchors.rightMargin: 9
                                 anchors.top: parent.top
@@ -251,8 +259,53 @@ Rectangle {
                                 height: 5
                                 fillMode: Image.PreserveAspectFit
                                 smooth: true
-                                visible: screenMouseArea.containsMouse
+                                visible: screenMouseArea.containsMouse && screenImage.source != "qrc:/res/image/screen-edit.png"
                                 source: screenState == "Connected" ? "qrc:/res/image/option-active.png" : "qrc:/res/image/option-inactive.png"
+                            }
+
+                            MouseArea {
+                                id: screenOptionMouseArea
+                                anchors.right: parent.right
+                                anchors.rightMargin: 9
+                                anchors.top: parent.top
+                                anchors.topMargin: 9
+                                height: screenOptionImage.height
+                                width: screenOptionImage.width
+                                hoverEnabled: true
+                                z: 1
+                                onHoveredChanged: {
+                                    if (screenOptionMouseArea.containsMouse) {
+                                        screenImage.source = "qrc:/res/image/screen-edit.png"
+                                    }
+                                }
+                            }
+
+                            Image {
+                                id: screenUnsubIcon
+                                parent: screenImage
+                                width: 35
+                                height: width
+                                anchors.right: parent.horizontalCenter
+                                anchors.rightMargin: 5
+                                anchors.verticalCenter: parent.verticalCenter
+                                fillMode: Image.PreserveAspectFit
+                                smooth: true
+                                visible: screenImage.source == "qrc:/res/image/screen-edit.png"
+                                source: "qrc:/res/image/unsub.png"
+                            }
+
+                            Image {
+                                id: screenEditIcon
+                                parent: screenImage
+                                width: 35
+                                height: width
+                                anchors.left: parent.horizontalCenter
+                                anchors.leftMargin: 5
+                                anchors.verticalCenter: parent.verticalCenter
+                                fillMode: Image.PreserveAspectFit
+                                smooth: true
+                                visible: screenImage.source == "qrc:/res/image/screen-edit.png"
+                                source: "qrc:/res/image/edit.png"
                             }
                         }
                     }
