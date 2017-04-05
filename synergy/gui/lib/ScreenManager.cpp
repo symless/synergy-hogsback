@@ -89,6 +89,8 @@ void ScreenManager::setProcessManager(ProcessManager* processManager)
 
     connect(this, &ScreenManager::newServer, m_processManager,
         &ProcessManager::newServerDetected);
+    connect(m_processManager, &ProcessManager::screenStateChanged, this,
+        &ScreenManager::onScreenStateChanged);
 }
 
 void ScreenManager::setViewWidth(int w)
@@ -234,6 +236,9 @@ void ScreenManager::updateScreens(QByteArray reply)
                 screen.setPosX(obj["posX"].toInt());
                 screen.setPosY(obj["posY"].toInt());
                 screen.setState(screenState);
+                if (!obj["active"].toBool()) {
+                    screen.setState(kInactive);
+                }
                 latestScreenList.push_back(screen);
             }
 
@@ -267,6 +272,11 @@ void ScreenManager::updateScreens(QByteArray reply)
         // if new server is not the local machine, only the local machine is in connecting status
         else {
             int index = m_screenListModel->findScreen(serverId);
+            if (index != -1) {
+                m_screenListModel->setScreenState(index, kConnected);
+            }
+
+            index = m_screenListModel->findScreen(m_appConfig->screenId());
             if (index != -1) {
                 m_screenListModel->setScreenState(index, kConnecting);
             }
@@ -307,4 +317,12 @@ void ScreenManager::onUpdateGroupConfig()
     QJsonDocument doc(jsonObject);
 
     m_cloudClient->updateGroupConfig(doc);
+}
+
+void ScreenManager::onScreenStateChanged(QPair<QString, ScreenState> r)
+{
+    int index = m_screenListModel->findScreen(r.first);
+    if (index != -1) {
+        m_screenListModel->setScreenState(index, r.second);
+    }
 }

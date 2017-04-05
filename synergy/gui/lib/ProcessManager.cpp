@@ -6,6 +6,9 @@
 #include "LogManager.h"
 #include "ProcessMode.h"
 #include "AppConfig.h"
+
+#include <QtNetwork>
+#include <QtGlobal>
 #include <iostream>
 #ifndef Q_OS_WIN
 #include <unistd.h>
@@ -166,6 +169,33 @@ void ProcessManager::logCoreOutput()
         foreach(QString line, text.split(QRegExp("\r|\n|\r\n"))) {
             if (!line.isEmpty()) {
                 LogManager::raw("[Core] " + line);
+
+                // TODO: use proper IPC
+                // check key outputs
+                if (line.contains("started server, waiting for clients") ||
+                    line.contains("connected to server")) {
+                    QPair<QString, ScreenState> r;
+                    r.first = QHostInfo::localHostName();
+                    r.second = kConnected;
+                    emit screenStateChanged(r);
+                }
+                else if (line.contains("\" has connected")) {
+                    QPair<QString, ScreenState> r;
+                    QStringList result = line.split('"');
+                    Q_ASSERT(result.size() == 3);
+
+                    if (result.size() == 3) {
+                        r.first = result[1];
+                        r.second = kConnected;
+                        emit screenStateChanged(r);
+                    }
+                }
+                else if (line.contains("connecting to")) {
+                    QPair<QString, ScreenState> r;
+                    r.first = QHostInfo::localHostName();
+                    r.second = kConnecting;
+                    emit screenStateChanged(r);
+                }
             }
         }
     }
