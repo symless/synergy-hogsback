@@ -55,10 +55,12 @@ Rectangle {
         anchors.bottom: parent.bottom
         width: parent.width
 
+        // add localhost as the initial screen
         Component.onCompleted: {
             applicationWindow.cloudClient.addScreen(localHostname.hostname())
         }
 
+        // version label
         Version {
             anchors.left: parent.left
             anchors.leftMargin: 5
@@ -75,6 +77,7 @@ Rectangle {
             color:"white"
             z: 1
 
+            // Synergy logo
             Image {
                 id: logoImage
                 anchors.left: parent.left
@@ -97,7 +100,8 @@ Rectangle {
             z: 1
         }
 
-        // separator 2
+        // separator 2, which is coinciding with the saparator above in the beginning
+        // when console expands out, this is at the bottom of the console
         Rectangle {
             id: configurationPageBackgroundSeparator2
             anchors.top: logConsole.bottom
@@ -130,6 +134,7 @@ Rectangle {
                     wrapMode: Text.WordWrap
                 }
 
+                // always focus on the last line
                 onCountChanged: {
                     logConsoleListView.positionViewAtEnd()
                 }
@@ -161,26 +166,13 @@ Rectangle {
             font.pixelSize: 30
         }
 
-        // server configuration
+        // configuration area
         ScrollView {
             id: screenArrangementScrollView
             anchors.top: configurationPageBackgroundSeparator.bottom
             anchors.bottom: parent.bottom
             width: parent.width
             z: 1
-
-            states: [
-                State { when: !screenArrangementScrollView.visible;
-                    PropertyChanges {
-                        target: screenArrangementScrollView
-                        opacity: 0.0
-                    }
-                }
-            ]
-
-            transitions: Transition {
-                NumberAnimation { property: "opacity"; duration: 700}
-            }
 
             Item {
                 id: screenArrangement
@@ -189,6 +181,8 @@ Rectangle {
 
                 Repeater {
                     model: screenListModel
+
+                    // individual screen
                     Item {
                         id: screenIcon
                         x: posX; y: posY
@@ -198,6 +192,7 @@ Rectangle {
                         property int modelIndex: -1
                         property var editMode: false
 
+                        // mouse area that covers the whole individual screen
                         MouseArea {
                             id: screenMouseArea
                             anchors.fill: parent
@@ -223,6 +218,7 @@ Rectangle {
                             }
 
                             onClicked: {
+                                // right click activate and deactivate edit mode
                                 if(mouse.button === Qt.RightButton) {
                                     screenIcon.editMode = !screenIcon.editMode;
                                     if (screenIcon.editMode === false) {
@@ -235,6 +231,7 @@ Rectangle {
                             }
                         }
 
+                        // selected border
                         Rectangle {
                             anchors.fill: parent
                             color: "transparent"
@@ -245,6 +242,7 @@ Rectangle {
                             visible: modelIndex === index
                         }
 
+                        // screen image
                         Image {
                             id: screenImage
                             parent: screenIcon
@@ -253,6 +251,7 @@ Rectangle {
                             smooth: true
                             source: stateImage
 
+                            // screen name
                             Text {
                                 id: screenNameText
                                 width: parent.width - 20
@@ -269,6 +268,7 @@ Rectangle {
                                 visible: screenImage.source != "qrc:/res/image/screen-edit.png"
                             }
 
+                            // unsubscrible button in edit mode
                             Image {
                                 id: screenUnsubIcon
                                 parent: screenImage
@@ -283,6 +283,7 @@ Rectangle {
                                 source: "qrc:/res/image/unsub.png"
                             }
 
+                            // furthur edit button in edit mode
                             Image {
                                 id: screenEditIcon
                                 parent: screenImage
@@ -297,6 +298,7 @@ Rectangle {
                                 source: "qrc:/res/image/edit.png"
                             }
 
+                            // connecting prograss bar background
                             Rectangle {
                                 id: connectingBar
                                 visible: screenState == "Connecting" && screenImage.source != "qrc:/res/image/screen-edit.png"
@@ -309,6 +311,7 @@ Rectangle {
                                 z: 1
                                 color: "#828282"
 
+                                // connecting prograss sliding bar
                                 Rectangle {
                                     id: connectingSlidingBar
                                     x: -width
