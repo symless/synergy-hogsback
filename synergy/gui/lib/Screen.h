@@ -38,6 +38,8 @@ public:
     bool locked() const;
     void setLocked(bool value);
 
+    ScreenState state() const;
+
 private:
     int m_id;
     int m_posX;

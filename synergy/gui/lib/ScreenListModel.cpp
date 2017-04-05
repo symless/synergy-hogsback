@@ -150,10 +150,30 @@ void ScreenListModel::unlockScreen(int index)
     m_screens[index].setLocked(false);
 }
 
+void ScreenListModel::setScreenState(int index, ScreenState state)
+{
+    if (index < 0 || index > getScreenModeSize()) {
+        return;
+    }
+
+    m_screens[index].setState(state);
+
+    dataChanged(getIndex(index), getIndex(index));
+}
+
 int ScreenListModel::findScreen(QString name)
 {
     for (int index = 0; index < m_screens.count(); index++) {
         if (m_screens[index].name() == name) return index;
+    }
+
+    return -1;
+}
+
+int ScreenListModel::findScreen(int screenId)
+{
+    for (int index = 0; index < m_screens.count(); index++) {
+        if (m_screens[index].id() == screenId) return index;
     }
 
     return -1;

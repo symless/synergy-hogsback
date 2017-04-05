@@ -307,6 +307,41 @@ Rectangle {
                                 visible: screenImage.source == "qrc:/res/image/screen-edit.png"
                                 source: "qrc:/res/image/edit.png"
                             }
+
+                            Rectangle {
+                                id: connectingBar
+                                visible: screenState == "Connecting" && screenImage.source != "qrc:/res/image/screen-edit.png"
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                anchors.bottom: parent.bottom
+                                anchors.bottomMargin: 15
+                                width: parent.width / 7 * 5
+                                height: 5
+                                clip: true
+                                z: 1
+                                color: "#828282"
+
+                                Rectangle {
+                                    id: connectingSlidingBar
+                                    x: -width
+                                    width: 35
+                                    height: 5
+                                    color: "#96C13D"
+
+                                    states: [
+                                        State {
+                                            when: connectingBar.visible
+                                            PropertyChanges {
+                                                target: connectingSlidingBar
+                                                x: connectingBar.width
+                                            }
+                                        }
+                                    ]
+
+                                    transitions: Transition {
+                                        NumberAnimation { loops: Animation.Infinite; property: "x"; duration: 1500}
+                                    }
+                                }
+                            }
                         }
                     }
                 }
