@@ -196,6 +196,7 @@ Rectangle {
                         height: screenListModel.screenIconHeight()
                         property point beginDrag
                         property int modelIndex
+                        property var editMode: false
 
                         MouseArea {
                             id: screenMouseArea
@@ -203,6 +204,8 @@ Rectangle {
                             drag.target: screenIcon
                             drag.axis: Drag.XandYAxis
                             hoverEnabled: true
+                            acceptedButtons: Qt.LeftButton | Qt.RightButton
+
                             onPressed: {
                                 beginDrag = Qt.point(screenIcon.x,
                                                 screenIcon.y);
@@ -218,9 +221,15 @@ Rectangle {
                                 screenManager.unlockScreen(modelIndex)
                             }
 
-                            onHoveredChanged: {
-                                if (!screenMouseArea.containsMouse) {
-                                    screenImage.source = stateImage
+                            onClicked: {
+                                if(mouse.button === Qt.RightButton) {
+                                    screenIcon.editMode = !screenIcon.editMode;
+                                    if (screenIcon.editMode === false) {
+                                        screenImage.source = stateImage
+                                    }
+                                    else {
+                                        screenImage.source = "qrc:/res/image/screen-edit.png"
+                                    }
                                 }
                             }
                         }
@@ -247,37 +256,6 @@ Rectangle {
                                 horizontalAlignment: Text.AlignHCenter
                                 elide: Text.ElideRight
                                 visible: screenImage.source != "qrc:/res/image/screen-edit.png"
-                            }
-
-                            Image {
-                                id: screenOptionImage
-                                parent: screenImage
-                                anchors.right: parent.right
-                                anchors.rightMargin: 9
-                                anchors.top: parent.top
-                                anchors.topMargin: 9
-                                height: 5
-                                fillMode: Image.PreserveAspectFit
-                                smooth: true
-                                visible: screenMouseArea.containsMouse && screenImage.source != "qrc:/res/image/screen-edit.png"
-                                source: screenState == "Connected" ? "qrc:/res/image/option-active.png" : "qrc:/res/image/option-inactive.png"
-                            }
-
-                            MouseArea {
-                                id: screenOptionMouseArea
-                                anchors.right: parent.right
-                                anchors.rightMargin: 9
-                                anchors.top: parent.top
-                                anchors.topMargin: 9
-                                height: screenOptionImage.height
-                                width: screenOptionImage.width
-                                hoverEnabled: true
-                                z: 1
-                                onHoveredChanged: {
-                                    if (screenOptionMouseArea.containsMouse) {
-                                        screenImage.source = "qrc:/res/image/screen-edit.png"
-                                    }
-                                }
                             }
 
                             Image {
