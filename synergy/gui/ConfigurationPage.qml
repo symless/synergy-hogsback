@@ -195,7 +195,7 @@ Rectangle {
                         width: screenListModel.screenIconWidth()
                         height: screenListModel.screenIconHeight()
                         property point beginDrag
-                        property int modelIndex
+                        property int modelIndex: -1
                         property var editMode: false
 
                         MouseArea {
@@ -219,6 +219,7 @@ Rectangle {
                                                 screenIcon.x - beginDrag.x,
                                                 screenIcon.y - beginDrag.y)
                                 screenManager.unlockScreen(modelIndex)
+                                modelIndex = -1
                             }
 
                             onClicked: {
@@ -232,6 +233,16 @@ Rectangle {
                                     }
                                 }
                             }
+                        }
+
+                        Rectangle {
+                            anchors.fill: parent
+                            color: "transparent"
+                            border.color: "white"
+                            border.width: 2
+                            radius: 4
+                            z: 1
+                            visible: modelIndex === index
                         }
 
                         Image {
