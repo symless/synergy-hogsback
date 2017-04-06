@@ -20,4 +20,9 @@ include_directories(
 )
 
 qt5_use_modules (gui-tests Test)
-target_link_libraries (gui-tests guilib)
+
+target_link_libraries (gui-tests guilib
+    ${ApplicationServices_LIBRARY}
+    ${Foundation_LIBRARY}
+    ${AppKit_LIBRARY}
+)

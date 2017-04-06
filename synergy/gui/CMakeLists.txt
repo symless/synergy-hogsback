@@ -20,11 +20,11 @@ add_subdirectory (simulator)
 
 add_executable (${PROJECT_NAME} WIN32
     main.cpp
-    Accessibility.mm
     qml.qrc
     main.qml
     AdvancedPage.qml
     ActivationPage.qml
+    AccessibilityPage.qml
     ConfigSettingView.qml
     ConfigurationPage.qml
     CustomBorder.qml
