@@ -30,6 +30,10 @@ ApplicationWindow {
         cloudClient.removeScreen()
     }
 
+    AccessibilityManager {
+        id: accessibilityManager
+    }
+
     StackView {
         id: stackView
         anchors.fill: parent
@@ -39,13 +43,18 @@ ApplicationWindow {
             keyReceived(event.key)
         }
 
+        function nextPage() {
+            if (!accessibilityManager.processHasAccessibility()) {
+                return {item : Qt.resolvedUrl("AccessibilityPage.qml"), properties: { objectName: "AccessibilityPage"}}
+            } else if (cloudClient.verifyUser()) {
+                return {item : Qt.resolvedUrl("ConfigurationPage.qml"), properties: { objectName: "ConfigurationPage"}}
+            } else {
+                return {item : Qt.resolvedUrl("ActivationPage.qml"), properties: { objectName: "ActivationPage"}}
+            }
+        }
+
         initialItem: {
-            if (cloudClient.verifyUser()) {
-                [{item : Qt.resolvedUrl("ConfigurationPage.qml"), properties: { objectName: "ConfigurationPage"}}]
-            }
-            else {
-                [{item : Qt.resolvedUrl("ActivationPage.qml"), properties: { objectName: "ActivationPage"}}]
-            }
+            nextPage()
         }
 
         onCurrentItemChanged: {
