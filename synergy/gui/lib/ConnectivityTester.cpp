@@ -160,11 +160,11 @@ void ConnectivityTester::onStartTesting()
     m_testThread = new QThread();
     qRegisterMetaType<TestDelegatee::TestResults>("TestResults");
 
-    connect(delegatee, &TestDelegatee::done, this, &ConnectivityTester::onTestDelegateeDone);
-    connect(delegatee, &TestDelegatee::done, m_testThread, &QThread::quit);
-    connect(delegatee, &TestDelegatee::done, delegatee, &TestDelegatee::deleteLater);
-    connect(m_testThread, &QThread::finished, m_testThread, &QThread::deleteLater);
     delegatee->moveToThread(m_testThread);
+    connect(delegatee, &TestDelegatee::done, this, &ConnectivityTester::onTestDelegateeDone);
+    connect(delegatee, &TestDelegatee::done, delegatee, &TestDelegatee::deleteLater);
+    connect(delegatee, &TestDelegatee::done, m_testThread, &QThread::quit);
+    connect(m_testThread, &QThread::finished, m_testThread, &QThread::deleteLater);
     m_testThread->start();
 
     QMetaObject::invokeMethod(delegatee, "start",
