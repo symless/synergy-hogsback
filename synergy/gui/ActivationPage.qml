@@ -217,6 +217,13 @@ Rectangle {
                     hint.text = error
                 }
             }
+
+            Connections {
+                target: cloudClient
+                onInvalidAuth: {
+                    hint.text = "Invalid credentials. Please login again."
+                }
+            }
         }
     }
 }

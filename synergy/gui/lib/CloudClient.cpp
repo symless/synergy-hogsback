@@ -408,5 +408,10 @@ bool CloudClient::replyHasError(QNetworkReply* reply)
         result = true;
     }
 
+    // access denied, e.g. bad auth token
+    if (statusCode == 403) {
+        emit invalidAuth();
+    }
+
     return result;
 }

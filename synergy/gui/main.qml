@@ -26,6 +26,22 @@ ApplicationWindow {
         }
     }
 
+    Connections {
+        target: cloudClient
+        onInvalidAuth: {
+            AppConfig.clearAuth()
+            var r = stackView.find(function(item) {
+                return item.objectName === "ActivationPage"
+            })
+            if (r) {
+                stackView.pop({item : Qt.resolvedUrl("ActivationPage.qml"), properties: { objectName: "ActivationPage"}})
+            }
+            else {
+                stackView.push({item : Qt.resolvedUrl("ActivationPage.qml"), properties: { objectName: "ActivationPage"}, replace: true})
+            }
+        }
+    }
+
     onClosing: {
         cloudClient.removeScreen()
     }

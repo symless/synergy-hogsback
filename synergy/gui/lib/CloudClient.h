@@ -35,6 +35,7 @@ signals:
     void loginOk();
     void loginFail(QString error);
     void receivedScreens(QByteArray reply);
+    void invalidAuth();
 
 private slots:
     void onLoginFinished(QNetworkReply* reply);
