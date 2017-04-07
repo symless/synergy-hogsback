@@ -22,12 +22,32 @@ ApplicationWindow {
         target: cloudClient
         onLoginOk: {
             AppConfig.save()
-            stackView.push({item : Qt.resolvedUrl("ConfigurationPage.qml")})
+            stackView.push(stackView.nextPage())
+        }
+    }
+
+    Connections {
+        target: cloudClient
+        onInvalidAuth: {
+            AppConfig.clearAuth()
+            var r = stackView.find(function(item) {
+                return item.objectName === "ActivationPage"
+            })
+            if (r) {
+                stackView.pop({item : Qt.resolvedUrl("ActivationPage.qml"), properties: { objectName: "ActivationPage"}})
+            }
+            else {
+                stackView.push({item : Qt.resolvedUrl("ActivationPage.qml"), properties: { objectName: "ActivationPage"}, replace: true})
+            }
         }
     }
 
     onClosing: {
         cloudClient.removeScreen()
+    }
+
+    AccessibilityManager {
+        id: accessibilityManager
     }
 
     StackView {
@@ -39,17 +59,23 @@ ApplicationWindow {
             keyReceived(event.key)
         }
 
+        function nextPage() {
+            if (!accessibilityManager.processHasAccessibility()) {
+                return {item : Qt.resolvedUrl("AccessibilityPage.qml"), properties: { objectName: "AccessibilityPage"}}
+            } else if (cloudClient.verifyUser()) {
+                return {item : Qt.resolvedUrl("ConfigurationPage.qml"), properties: { objectName: "ConfigurationPage"}}
+            } else {
+                return {item : Qt.resolvedUrl("ActivationPage.qml"), properties: { objectName: "ActivationPage"}}
+            }
+        }
+
         initialItem: {
-            if (cloudClient.verifyUser()) {
-                [{item : Qt.resolvedUrl("ConfigurationPage.qml"), properties: { objectName: "ConfigurationPage"}}]
-            }
-            else {
-                [{item : Qt.resolvedUrl("ActivationPage.qml"), properties: { objectName: "ActivationPage"}}]
-            }
+            nextPage()
         }
 
         onCurrentItemChanged: {
             if (stackView.currentItem) {
+                stackView.currentItem.forceActiveFocus()
                 if (stackView.currentItem.objectName == "ActivationPage") {
                     cloudClient.getUserToken()
                 }

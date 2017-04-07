@@ -6,12 +6,18 @@
 #include <QDateTime>
 #include <QTextStream>
 #include <QDebug>
+#include <QQmlContext>
 
 QObject* LogManager::s_instance = NULL;
+QQmlContext* LogManager::s_qmlContext = NULL;
 QFile LogManager::s_file;
+QStringList LogManager::s_logLines;
+int LogManager::s_maximumLogLines = 100;
 
 const QString kDefaultLogFile = "synergy.log";
+const QString kGUILogPrefix = "[ UI ] ";
 
+// TODO: Make LogManager thread safe
 QObject* LogManager::instance(QQmlEngine* engine,
                                         QJSEngine* scriptEngine)
 {
@@ -26,7 +32,7 @@ LogManager::LogManager()
 {
     DirectoryManager directoryManager;
     s_file.setFileName(directoryManager.profileDir() + '/'+ kDefaultLogFile);
-    s_file.open(QIODevice::WriteOnly);
+    s_file.open(QIODevice::WriteOnly | QIODevice::Append);
 }
 
 LogManager::~LogManager()
@@ -36,29 +42,34 @@ LogManager::~LogManager()
     }
 }
 
-void LogManager::row(const QString& text)
+void LogManager::raw(const QString& text)
 {
     appendRaw(text);
 }
 void LogManager::error(const QString& text)
 {
-    appendRaw(timeStamp() + " ERROR: " + text);
+    appendRaw(kGUILogPrefix + timeStamp() + " ERROR: " + text);
 }
 
 void LogManager::warning(const QString& text)
 {
-    appendRaw(timeStamp() + " WARNNIG: " + text);
+    appendRaw(kGUILogPrefix + timeStamp() + " WARNNIG: " + text);
 }
 
 void LogManager::info(const QString& text)
 {
-    appendRaw(timeStamp() + " INFO: " + text);
+    appendRaw(kGUILogPrefix + timeStamp() + " INFO: " + text);
 }
 
 void LogManager::debug(const QString& text)
 {
 
-    appendRaw(timeStamp() + " DEBUG: " + text);
+    appendRaw(kGUILogPrefix + timeStamp() + " DEBUG: " + text);
+}
+
+QString LogManager::logFilename()
+{
+    return s_file.fileName();
 }
 
 QString LogManager::timeStamp()
@@ -71,9 +82,32 @@ void LogManager::appendRaw(const QString& text)
 {
     foreach(QString line, text.split(QRegExp("\r|\n|\r\n"))) {
         if (!line.isEmpty()) {
-            // QTextStream stream(&s_file);
-            // stream << line << endl;
+            QTextStream stream(&s_file);
+            stream << line << endl;
             qDebug() << line << endl;
+
+            if (s_logLines.size() > s_maximumLogLines) {
+                s_logLines.pop_front();
+            }
+
+            s_logLines.push_back(line);
+            updateLogLineModel();
         }
     }
+}
+
+void LogManager::updateLogLineModel()
+{
+    if (s_qmlContext == NULL) {
+        return;
+    }
+
+    s_qmlContext->setContextProperty("LoggingModel", QVariant::fromValue(s_logLines));
+}
+
+void LogManager::setQmlContext(QQmlContext* value)
+{
+    s_qmlContext = value;
+
+    updateLogLineModel();
 }

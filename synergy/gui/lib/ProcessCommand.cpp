@@ -1,7 +1,6 @@
 #include "ProcessCommand.h"
 
 #include "AppConfig.h"
-#include "DeviceManager.h"
 #include "DirectoryManager.h"
 #include "Common.h"
 
@@ -18,7 +17,6 @@ const QString kClientCmd = "synergyc";
 
 ProcessCommand::ProcessCommand(QObject* parent) :
     QObject(parent),
-    m_deviceManager(NULL),
     m_directoryManager(NULL)
 {
 
@@ -93,30 +91,6 @@ QStringList ProcessCommand::arguments(bool serverMode) const
         configFilename += kDefaultConfigFile;
         arguments << configFilename;
 
-#ifdef Q_OS_WIN
-        // screen resolution info for DPI calculation, Windows only
-        DeviceManager* deviceManager;
-        if (m_deviceManager != NULL) {
-            deviceManager = m_deviceManager;
-        }
-        else {
-            deviceManager = new DeviceManager();
-        }
-
-        arguments << "--res-w";
-        arguments << QString::number(deviceManager->resolutionWidth());
-        arguments << "--res-h";
-        arguments << QString::number(deviceManager->resolutionHeight());
-        arguments << "--prm-wc";
-        arguments << QString::number(deviceManager->primaryMonitorWidth() / 2);
-        arguments << "--prm-hc";
-        arguments << QString::number(deviceManager->primaryMonitorHeight() / 2);
-
-        if (m_deviceManager == NULL) {
-            delete deviceManager;
-        }
-#endif
-
         arguments << "--address";
         arguments << ":24800";
     }
@@ -140,11 +114,6 @@ QStringList ProcessCommand::arguments(bool serverMode) const
 void ProcessCommand::setServerIp(const QString ip)
 {
     m_serverIp = ip;
-}
-
-void ProcessCommand::setDeviceManager(DeviceManager* dm)
-{
-    m_deviceManager = dm;
 }
 
 void ProcessCommand::setDirectoryManager(DirectoryManager* dm)

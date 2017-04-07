@@ -16,7 +16,7 @@ ScreenManager::ScreenManager() :
     m_screenListModel(NULL),
     m_screenListSnapshotManager(NULL),
     m_latestConfigSerial(0),
-    m_configVersion(0),
+    m_configVersion(-1),
     m_previousServerId(-1)
 {
     m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
@@ -32,6 +32,7 @@ ScreenManager::ScreenManager() :
 ScreenManager::~ScreenManager()
 {
     delete m_arrangementStrategy;
+    delete m_screenListSnapshotManager;
 }
 
 int ScreenManager::getModelIndex(int x, int y)
@@ -85,6 +86,11 @@ void ScreenManager::setScreenModel(ScreenListModel* screenListModel)
 void ScreenManager::setProcessManager(ProcessManager* processManager)
 {
     m_processManager = processManager;
+
+    connect(this, &ScreenManager::newServer, m_processManager,
+        &ProcessManager::newServerDetected);
+    connect(m_processManager, &ProcessManager::screenStateChanged, this,
+        &ScreenManager::onScreenStateChanged);
 }
 
 void ScreenManager::setViewWidth(int w)
@@ -187,7 +193,7 @@ void ScreenManager::startCoreProcess()
 void ScreenManager::updateScreens(QByteArray reply)
 {
     bool updateLocalHost = false;
-    bool newServer = false;
+    bool newServerDetected = false;
     int serverId = m_previousServerId;
 
     QJsonDocument doc = QJsonDocument::fromJson(reply);
@@ -196,11 +202,15 @@ void ScreenManager::updateScreens(QByteArray reply)
             QJsonObject obj = doc.object();
             auto const& groupObject = obj["group"].toObject();
 
-            // TODO: refactor this code
-            m_configVersion = groupObject["configVersion"].toInt();
+            int const configVersion = groupObject["configVersion"].toInt();
+            if (m_configVersion > configVersion) {
+                return;
+            }
+            m_configVersion = configVersion;
             serverId = groupObject["serverId"].toInt();
             if (m_previousServerId != serverId) {
-                newServer = true;
+                // delay emitting the signal until we update all the screens
+                newServerDetected = true;
             }
 
             QJsonArray screens = obj["screens"].toArray();
@@ -210,45 +220,25 @@ void ScreenManager::updateScreens(QByteArray reply)
                 QJsonObject obj = v.toObject();
                 QString screenName = obj["name"].toString();
                 latestScreenNameSet.insert(screenName);
-
+                ScreenState screenState = kInactive;
                 int index = m_screenListModel->findScreen(screenName);
                 if (index != -1) {
                     const Screen& s = m_screenListModel->getScreen(index);
-                    if (s.getLocked()) {
+                    if (s.locked()) {
                         continue;
                     }
-                }
 
-                // TODO: refactor this code
-                if (newServer) {
-                    if (serverId == m_appConfig->screenId()) {
-                        m_processManager->setProcessMode(kServerMode);
-                    }
-                    else {
-                        m_processManager->setProcessMode(kClientMode);
-                    }
-
-                    if (obj["id"].toInt() == serverId) {
-                        QString ipList = obj["ipList"].toString();
-                        QStringList ips = ipList.split(',');
-
-                        // TODO: find matching local IP
-                        if (!ips.empty()) {
-                            m_processManager->setServerIp(ips.first());
-                        }
-                    }
+                    screenState = s.state();
                 }
 
                 Screen screen(screenName);
                 screen.setId(obj["id"].toInt());
                 screen.setPosX(obj["posX"].toInt());
                 screen.setPosY(obj["posY"].toInt());
-                screen.setState(kDisconnected);
-                if (!obj.contains("activeGroup") ||
-                    obj["expired"].toBool()) {
+                screen.setState(screenState);
+                if (!obj["active"].toBool()) {
                     screen.setState(kInactive);
                 }
-
                 latestScreenList.push_back(screen);
             }
 
@@ -268,6 +258,31 @@ void ScreenManager::updateScreens(QByteArray reply)
         }
     }
 
+    if (newServerDetected) {
+        updateConfigFile();
+        emit newServer(serverId);
+        m_previousServerId = serverId;
+
+        // if new server is the local machine, everyone should be in connecting status
+        if (serverId == m_appConfig->screenId()) {
+            for (int i = 0; i < m_screenListModel->getScreenModeSize(); i++) {
+                m_screenListModel->setScreenState(i, kConnecting);
+            }
+        }
+        // if new server is not the local machine, only the local machine is in connecting status
+        else {
+            int index = m_screenListModel->findScreen(serverId);
+            if (index != -1) {
+                m_screenListModel->setScreenState(index, kConnected);
+            }
+
+            index = m_screenListModel->findScreen(m_appConfig->screenId());
+            if (index != -1) {
+                m_screenListModel->setScreenState(index, kConnecting);
+            }
+        }
+    }
+
     if (updateLocalHost) {
         removeScreen(m_localHostname);
         Screen screen(m_localHostname);
@@ -275,11 +290,6 @@ void ScreenManager::updateScreens(QByteArray reply)
         m_arrangementStrategy->addScreen(m_screenListModel, screen);
 
         emit updateGroupConfig();
-    }
-
-    if (newServer) {
-        startCoreProcess();
-        m_previousServerId = serverId;
     }
 }
 
@@ -307,4 +317,12 @@ void ScreenManager::onUpdateGroupConfig()
     QJsonDocument doc(jsonObject);
 
     m_cloudClient->updateGroupConfig(doc);
+}
+
+void ScreenManager::onScreenStateChanged(QPair<QString, ScreenState> r)
+{
+    int index = m_screenListModel->findScreen(r.first);
+    if (index != -1) {
+        m_screenListModel->setScreenState(index, r.second);
+    }
 }

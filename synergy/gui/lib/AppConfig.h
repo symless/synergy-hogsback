@@ -20,6 +20,7 @@ public:
     Q_INVOKABLE int userId();
     Q_INVOKABLE QString userToken();
     Q_INVOKABLE void save();
+    Q_INVOKABLE void clearAuth();
 
 	bool dragAndDrop() const;
 	DebugLevel debugLevel();

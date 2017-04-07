@@ -1,5 +1,6 @@
 #include "CloudClient.h"
 
+#include "LogManager.h"
 #include "AppConfig.h"
 
 #include <QNetworkAccessManager>
@@ -222,7 +223,7 @@ void CloudClient::onAddScreenFinished(QNetworkReply* reply)
 void CloudClient::getScreens()
 {
     if (m_groupId == -1) {
-        qDebug() << "retry get screens in 3 secs";
+        LogManager::debug("retry get screens in 3 secs");
         return;
     }
 
@@ -274,7 +275,7 @@ void CloudClient::report(int destId, QString successfulIpList, QString failedIpL
 
     m_networkManager->post(req, doc.toJson());
 
-    qDebug() << "report to cloud: destId " << destId << "successfulIp " << successfulIpList << "failedIp " << failedIpList;
+    LogManager::debug(QString("report to cloud: destId %1 successfulIp %2 failedIp %3").arg(destId).arg(successfulIpList).arg(failedIpList));
 }
 
 void CloudClient::updateGroupConfig(QJsonDocument& doc)
@@ -370,7 +371,7 @@ void CloudClient::onGetScreensFinished(QNetworkReply* reply)
 void CloudClient::onReplyError(QNetworkReply::NetworkError code)
 {
     if (code > 0) {
-        qDebug() << "Network request error: " << code;
+        LogManager::error(QString("Network request error: %1").arg(code));
     }
 }
 
@@ -391,7 +392,7 @@ bool CloudClient::replyHasError(QNetworkReply* reply)
     QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
 
     if (statusCode != 200) {
-        qDebug() << "Reply status code: " << statusCode.toInt();
+        LogManager::error(QString("Reply status code: %1").arg(statusCode.toInt()));
         m_Data = reply->readAll();
         reply->deleteLater();
 
@@ -400,11 +401,16 @@ bool CloudClient::replyHasError(QNetworkReply* reply)
             if (doc.isObject()) {
                 QJsonObject obj = doc.object();
                 QString errorMsg = obj["error"].toString();
-                qDebug() << "Reply error message: " << errorMsg;
+                LogManager::error(QString("Reply error message: %1").arg(errorMsg));
             }
         }
 
         result = true;
+    }
+
+    // access denied, e.g. bad auth token
+    if (statusCode == 403) {
+        emit invalidAuth();
     }
 
     return result;

@@ -49,6 +49,7 @@ public:
 
 signals:
     void updateGroupConfig();
+    void newServer(int serverId);
 
 private:
     int processMode();
@@ -57,6 +58,7 @@ private:
 private slots:
     void updateScreens(QByteArray reply);
     void onUpdateGroupConfig();
+    void onScreenStateChanged(QPair<QString, ScreenState> r);
 
 private:
     ScreenListModel* m_screenListModel;

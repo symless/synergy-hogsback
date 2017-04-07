@@ -81,6 +81,13 @@ void AppConfig::save()
     m_settings.sync();
 }
 
+void AppConfig::clearAuth()
+{
+    m_userToken = "";
+    m_userId = -1;
+    save();
+}
+
 void AppConfig::setUserToken(const QString& token)
 {
     m_userToken = token;

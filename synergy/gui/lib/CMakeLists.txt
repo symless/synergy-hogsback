@@ -1,14 +1,18 @@
 cmake_minimum_required (VERSION 3.4)
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set (GUI_LIB_MACOS_SOURCES Accessibility.mm)
+endif()
+
 set (GUI_LIB_SOURCES
     AppConfig.cpp
+    AccessibilityManager.cpp
     Common.cpp
     CloudClient.cpp
     ConfigFileManager.cpp
     ConnectivityTester.cpp
     CoreInterface.cpp
     DebugLevel.cpp
-    DeviceManager.cpp
     DirectoryManager.cpp
     Hostname.cpp
     IpManager.cpp
@@ -22,6 +26,7 @@ set (GUI_LIB_SOURCES
     ScreenManager.cpp
     ServerInfo.cpp
     TestDelegatee.cpp
+    ${GUI_LIB_MACOS_SOURCES}
 )
 
 add_library (guilib ${GUI_LIB_SOURCES})

@@ -13,13 +13,14 @@ Rectangle {
         id: screenListModel
     }
 
-    ProcessManager {
-        id: processManager
-    }
-
     ConnectivityTester {
         id: connectivityTester
         cloudClient: applicationWindow.cloudClient
+    }
+
+    ProcessManager {
+        id: processManager
+        connectivityTester: connectivityTester
     }
 
     ScreenManager {
@@ -36,6 +37,15 @@ Rectangle {
         target: applicationWindow
         onKeyReceived: {
             screenManager.onKeyPressed(key)
+
+            if (key == Qt.Key_QuoteLeft) {
+                if (logConsole.height === 0) {
+                    logConsole.height = 100
+                }
+                else {
+                    logConsole.height = 0
+                }
+            }
         }
     }
 
@@ -45,10 +55,12 @@ Rectangle {
         anchors.bottom: parent.bottom
         width: parent.width
 
+        // add localhost as the initial screen
         Component.onCompleted: {
             applicationWindow.cloudClient.addScreen(localHostname.hostname())
         }
 
+        // version label
         Version {
             anchors.left: parent.left
             anchors.leftMargin: 5
@@ -63,7 +75,9 @@ Rectangle {
             width: parent.width
             height: 70
             color:"white"
+            z: 1
 
+            // Synergy logo
             Image {
                 id: logoImage
                 anchors.left: parent.left
@@ -83,6 +97,48 @@ Rectangle {
             width: parent.width
             height: 7
             color:"#96C13D"
+            z: 1
+        }
+
+        // separator 2, which is coinciding with the saparator above in the beginning
+        // when console expands out, this is at the bottom of the console
+        Rectangle {
+            id: configurationPageBackgroundSeparator2
+            anchors.top: logConsole.bottom
+            width: parent.width
+            height: logConsole.height > 0 ? 7 : 0
+            color:"#96C13D"
+            z: 3
+        }
+
+        // log console
+        Rectangle {
+            id: logConsole
+            anchors.top: configurationPageBackgroundSeparator.bottom
+            width: parent.width
+            height: 0
+            color:"black"
+            clip: true
+            z: 2
+            Behavior on height {NumberAnimation {duration: 500; easing.type: Easing.OutQuad}}
+
+            ListView {
+                id: logConsoleListView
+                anchors.fill: parent
+
+                model: LoggingModel
+                delegate: Text {
+                    width: parent.width
+                    text: modelData
+                    color: "white"
+                    wrapMode: Text.WordWrap
+                }
+
+                // always focus on the last line
+                onCountChanged: {
+                    logConsoleListView.positionViewAtEnd()
+                }
+            }
         }
 
         // background
@@ -92,6 +148,7 @@ Rectangle {
             width: parent.width
             anchors.bottom: parent.bottom
             color:"#3F95B8"
+            z: 1
         }
 
         // hostname
@@ -109,25 +166,13 @@ Rectangle {
             font.pixelSize: 30
         }
 
-        // server configuration
+        // configuration area
         ScrollView {
             id: screenArrangementScrollView
             anchors.top: configurationPageBackgroundSeparator.bottom
             anchors.bottom: parent.bottom
             width: parent.width
-
-            states: [
-                State { when: !screenArrangementScrollView.visible;
-                    PropertyChanges {
-                        target: screenArrangementScrollView
-                        opacity: 0.0
-                    }
-                }
-            ]
-
-            transitions: Transition {
-                NumberAnimation { property: "opacity"; duration: 700}
-            }
+            z: 1
 
             Item {
                 id: screenArrangement
@@ -136,20 +181,26 @@ Rectangle {
 
                 Repeater {
                     model: screenListModel
+
+                    // individual screen
                     Item {
                         id: screenIcon
                         x: posX; y: posY
                         width: screenListModel.screenIconWidth()
                         height: screenListModel.screenIconHeight()
                         property point beginDrag
-                        property int modelIndex
+                        property int modelIndex: -1
+                        property var editMode: false
 
+                        // mouse area that covers the whole individual screen
                         MouseArea {
-                            id: mouse
+                            id: screenMouseArea
                             anchors.fill: parent
                             drag.target: screenIcon
                             drag.axis: Drag.XandYAxis
                             hoverEnabled: true
+                            acceptedButtons: Qt.LeftButton | Qt.RightButton
+
                             onPressed: {
                                 beginDrag = Qt.point(screenIcon.x,
                                                 screenIcon.y);
@@ -163,29 +214,125 @@ Rectangle {
                                                 screenIcon.x - beginDrag.x,
                                                 screenIcon.y - beginDrag.y)
                                 screenManager.unlockScreen(modelIndex)
+                                modelIndex = -1
+                            }
+
+                            onClicked: {
+                                // right click activate and deactivate edit mode
+                                if(mouse.button === Qt.RightButton) {
+                                    screenIcon.editMode = !screenIcon.editMode;
+                                    if (screenIcon.editMode === false) {
+                                        screenImage.source = stateImage
+                                    }
+                                    else {
+                                        screenImage.source = "qrc:/res/image/screen-edit.png"
+                                    }
+                                }
                             }
                         }
 
+                        // selected border
+                        Rectangle {
+                            anchors.fill: parent
+                            color: "transparent"
+                            border.color: "white"
+                            border.width: 2
+                            radius: 4
+                            z: 1
+                            visible: modelIndex === index
+                        }
+
+                        // screen image
                         Image {
-                            id: itemImage
+                            id: screenImage
                             parent: screenIcon
                             anchors.fill: parent
                             fillMode: Image.Stretch
                             smooth: true
                             source: stateImage
 
+                            // screen name
                             Text {
+                                id: screenNameText
                                 width: parent.width - 20
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: name
                                 font.pixelSize: 15
                                 minimumPixelSize: 15
-                                color: "white"
+                                color: screenState == "Connected" ? "black" : "white"
                                 font.family: "Tahoma"
                                 fontSizeMode: Text.HorizontalFit
                                 horizontalAlignment: Text.AlignHCenter
                                 elide: Text.ElideRight
+                                visible: screenImage.source != "qrc:/res/image/screen-edit.png"
+                            }
+
+                            // unsubscrible button in edit mode
+                            Image {
+                                id: screenUnsubIcon
+                                parent: screenImage
+                                width: 35
+                                height: width
+                                anchors.right: parent.horizontalCenter
+                                anchors.rightMargin: 5
+                                anchors.verticalCenter: parent.verticalCenter
+                                fillMode: Image.PreserveAspectFit
+                                smooth: true
+                                visible: screenImage.source == "qrc:/res/image/screen-edit.png"
+                                source: "qrc:/res/image/unsub.png"
+                            }
+
+                            // furthur edit button in edit mode
+                            Image {
+                                id: screenEditIcon
+                                parent: screenImage
+                                width: 35
+                                height: width
+                                anchors.left: parent.horizontalCenter
+                                anchors.leftMargin: 5
+                                anchors.verticalCenter: parent.verticalCenter
+                                fillMode: Image.PreserveAspectFit
+                                smooth: true
+                                visible: screenImage.source == "qrc:/res/image/screen-edit.png"
+                                source: "qrc:/res/image/edit.png"
+                            }
+
+                            // connecting prograss bar background
+                            Rectangle {
+                                id: connectingBar
+                                visible: screenState == "Connecting" && screenImage.source != "qrc:/res/image/screen-edit.png"
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                anchors.bottom: parent.bottom
+                                anchors.bottomMargin: 15
+                                width: parent.width / 7 * 5
+                                height: 5
+                                clip: true
+                                z: 1
+                                color: "#828282"
+
+                                // connecting prograss sliding bar
+                                Rectangle {
+                                    id: connectingSlidingBar
+                                    x: -width
+                                    width: 35
+                                    height: 5
+                                    color: "#96C13D"
+
+                                    states: [
+                                        State {
+                                            when: connectingBar.visible
+                                            PropertyChanges {
+                                                target: connectingSlidingBar
+                                                x: connectingBar.width
+                                            }
+                                        }
+                                    ]
+
+                                    transitions: Transition {
+                                        NumberAnimation { loops: Animation.Infinite; property: "x"; duration: 1500}
+                                    }
+                                }
                             }
                         }
                     }

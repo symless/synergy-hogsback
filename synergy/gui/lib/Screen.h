@@ -27,7 +27,7 @@ public:
 	int posX() const;
 	int posY() const;
 	QString name() const;
-	ScreenState state() const;
+    QString stateString() const;
 	QString stateImage() const;
 
 	void setPosX(int x);
@@ -35,8 +35,10 @@ public:
 	void setName(QString n);
 	void setState(ScreenState s);
 
-    bool getLocked() const;
+    bool locked() const;
     void setLocked(bool value);
+
+    ScreenState state() const;
 
 private:
     int m_id;
@@ -45,7 +47,7 @@ private:
 	QString m_name;
 	ScreenState m_state;
 	QString m_stateImage;
-    bool locked;
+    bool m_locked;
     static QHash<ScreenState, QString> m_stateImages;
 };
 

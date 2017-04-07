@@ -1,9 +1,14 @@
 #include "ProcessManager.h"
 
+#include "ConnectivityTester.h"
 #include "ProcessCommand.h"
 #include "ScreenListModel.h"
 #include "LogManager.h"
 #include "ProcessMode.h"
+#include "AppConfig.h"
+
+#include <QtNetwork>
+#include <QtGlobal>
 #include <iostream>
 #ifndef Q_OS_WIN
 #include <unistd.h>
@@ -15,7 +20,7 @@ ProcessManager::ProcessManager() :
     m_active(true),
     m_serverIp()
 {
-
+    m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
 }
 
 int ProcessManager::processMode()
@@ -36,6 +41,16 @@ bool ProcessManager::active()
 void ProcessManager::setActive(bool active)
 {
     m_active = active;
+}
+
+ConnectivityTester* ProcessManager::connectivityTester()
+{
+    return m_connectivityTester;
+}
+
+void ProcessManager::setConnectivityTester(ConnectivityTester* tester)
+{
+    m_connectivityTester = tester;
 }
 
 void ProcessManager::start()
@@ -65,9 +80,9 @@ void ProcessManager::startProcess()
     connect(m_process, SIGNAL(finished(int, QProcess::ExitStatus)),
         this, SLOT(exit(int, QProcess::ExitStatus)));
     connect(m_process, SIGNAL(readyReadStandardOutput()),
-        this, SLOT(logOutput()));
+        this, SLOT(logCoreOutput()));
     connect(m_process, SIGNAL(readyReadStandardError()),
-        this, SLOT(logError()));
+        this, SLOT(logCoreError()));
 
     ProcessCommand processCommand;
     QString command = processCommand.command(
@@ -107,6 +122,35 @@ void ProcessManager::setServerIp(const QString& serverIp)
     m_serverIp = serverIp;
 }
 
+void ProcessManager::newServerDetected(int serverId)
+{
+    // decide which mode local screen should be
+    if (serverId == m_appConfig->screenId()) {
+        setProcessMode(kServerMode);
+    }
+    else {
+        setProcessMode(kClientMode);
+
+        QStringList r = m_connectivityTester->getSuccessfulResults(serverId);
+
+        if (!r.empty()) {
+            // TODO: furthur ip matching test
+            setServerIp(r.first());
+            LogManager::debug(QString("connecting to server: %1").arg(r.first()));
+        }
+        else {
+            LogManager::debug(QString("can not find any successful connectivity result for the server screen: %1").arg(serverId));
+            LogManager::debug(QString("retry in 3 seconds"));
+            QTimer::singleShot(3000, this, [=](){
+                newServerDetected(serverId);
+            });
+            return;
+        }
+    }
+
+    start();
+}
+
 void ProcessManager::exit(int exitCode, QProcess::ExitStatus)
 {
     if (exitCode == 0) {
@@ -118,19 +162,46 @@ void ProcessManager::exit(int exitCode, QProcess::ExitStatus)
     }
 }
 
-void ProcessManager::logOutput()
+void ProcessManager::logCoreOutput()
 {
     if (m_process) {
         QString text(m_process->readAllStandardOutput());
         foreach(QString line, text.split(QRegExp("\r|\n|\r\n"))) {
             if (!line.isEmpty()) {
-                LogManager::info(line);
+                LogManager::raw("[Core] " + line);
+
+                // TODO: use proper IPC
+                // check key outputs
+                if (line.contains("started server, waiting for clients") ||
+                    line.contains("connected to server")) {
+                    QPair<QString, ScreenState> r;
+                    r.first = QHostInfo::localHostName();
+                    r.second = kConnected;
+                    emit screenStateChanged(r);
+                }
+                else if (line.contains("\" has connected")) {
+                    QPair<QString, ScreenState> r;
+                    QStringList result = line.split('"');
+                    Q_ASSERT(result.size() == 3);
+
+                    if (result.size() == 3) {
+                        r.first = result[1];
+                        r.second = kConnected;
+                        emit screenStateChanged(r);
+                    }
+                }
+                else if (line.contains("connecting to")) {
+                    QPair<QString, ScreenState> r;
+                    r.first = QHostInfo::localHostName();
+                    r.second = kConnecting;
+                    emit screenStateChanged(r);
+                }
             }
         }
     }
 }
 
-void ProcessManager::logError()
+void ProcessManager::logCoreError()
 {
     if (m_process) {
         LogManager::error(m_process->readAllStandardError());

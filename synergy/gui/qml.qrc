@@ -10,13 +10,18 @@
         <file>CustomCheckBox.qml</file>
         <file>GeneralSettingView.qml</file>
         <file>LogSettingView.qml</file>
-        <file>res/image/option.png</file>
-        <file>res/image/shutdown.png</file>
-        <file>res/image/signal.png</file>
         <file>ActivationPage.qml</file>
         <file>res/image/google.png</file>
         <file>res/image/synergy-logo.png</file>
         <file>Version.qml</file>
         <file>res/image/synergy-icon.png</file>
+        <file>res/image/screen-edit.png</file>
+        <file>res/image/edit.png</file>
+        <file>res/image/unsub.png</file>
+        <file>AccessibilityPage.qml</file>
+        <file>res/image/privacy-security.png</file>
+        <file>res/image/tick-synergy.png</file>
+        <file>res/image/unlock-settings.png</file>
+        <file>res/image/type-password.png</file>
     </qresource>
 </RCC>
