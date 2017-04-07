@@ -14,7 +14,7 @@ Rectangle {
         id: versionNumber
         anchors.left: parent.left
         color: textColor
-        text: "Version: Synergy 2.0.0-alpha2"
+        text: "Version: Synergy 2.0-alpha3"
         font.family: fontFamily
         font.pointSize: 11
         renderType: Text.NativeRendering
