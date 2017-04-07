@@ -163,7 +163,7 @@ void ConnectivityTester::onStartTesting()
     delegatee->moveToThread(m_testThread);
     connect(delegatee, &TestDelegatee::done, this, &ConnectivityTester::onTestDelegateeDone);
     connect(delegatee, &TestDelegatee::done, delegatee, &TestDelegatee::deleteLater);
-    connect(delegatee, &TestDelegatee::done, m_testThread, &QThread::quit);
+    connect(delegatee, &QObject::destroyed, m_testThread, &QThread::quit);
     connect(m_testThread, &QThread::finished, m_testThread, &QThread::deleteLater);
     m_testThread->start();
 
