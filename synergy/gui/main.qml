@@ -59,6 +59,7 @@ ApplicationWindow {
 
         onCurrentItemChanged: {
             if (stackView.currentItem) {
+                stackView.currentItem.forceActiveFocus()
                 if (stackView.currentItem.objectName == "ActivationPage") {
                     cloudClient.getUserToken()
                 }
