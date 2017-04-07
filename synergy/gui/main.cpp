@@ -4,6 +4,7 @@
 #include "ScreenManager.h"
 #include "LogManager.h"
 #include "ProcessManager.h"
+#include "AccessibilityManager.h"
 #include "AppConfig.h"
 #include "Hostname.h"
 #include "Common.h"
@@ -12,6 +13,8 @@
 #include <QtQuick>
 #include <QQmlApplicationEngine>
 #include <stdexcept>
+
+void openAccessibilityDialog();
 
 int main(int argc, char* argv[])
 {
@@ -26,6 +29,7 @@ int main(int argc, char* argv[])
         qmlRegisterType<ScreenListModel>("com.synergy.gui", 1, 0, "ScreenListModel");
         qmlRegisterType<ScreenManager>("com.synergy.gui", 1, 0, "ScreenManager");
         qmlRegisterType<ProcessManager>("com.synergy.gui", 1, 0, "ProcessManager");
+        qmlRegisterType<AccessibilityManager>("com.synergy.gui", 1, 0, "AccessibilityManager");
         qmlRegisterType<CloudClient>("com.synergy.gui", 1, 0, "CloudClient");
         qmlRegisterType<ConnectivityTester>("com.synergy.gui", 1, 0, "ConnectivityTester");
         qmlRegisterSingletonType<AppConfig>("com.synergy.gui", 1, 0, "AppConfig", AppConfig::instance);

@@ -7,6 +7,13 @@ set (CMAKE_AUTORCC ON)
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DQT_QML_DEBUG ")
 
 find_package (Qt5 COMPONENTS Core Widgets Quick Network)
+
+if (APPLE)
+    find_library (ApplicationServices_LIBRARY ApplicationServices)
+    find_library (Foundation_LIBRARY Foundation)
+    find_library (AppKit_LIBRARY AppKit)
+endif()
+
 add_subdirectory (lib)
 add_subdirectory (tests)
 add_subdirectory (simulator)
@@ -17,6 +24,7 @@ add_executable (${PROJECT_NAME} WIN32
     main.qml
     AdvancedPage.qml
     ActivationPage.qml
+    AccessibilityPage.qml
     ConfigSettingView.qml
     ConfigurationPage.qml
     CustomBorder.qml
@@ -39,6 +47,10 @@ target_link_libraries (${PROJECT_NAME}
     ${SODIUM_LIBRARIES}
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
+    ${APP_SERVICES_LIBRARY}
+    ${ApplicationServices_LIBRARY}
+    ${Foundation_LIBRARY}
+    ${AppKit_LIBRARY}
 )
 
 if (WIN32)

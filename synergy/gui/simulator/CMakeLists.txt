@@ -16,5 +16,9 @@ add_executable (${PROJECT_NAME}
 )
 
 include_directories (../lib)
-target_link_libraries (${PROJECT_NAME} guilib)
+target_link_libraries (${PROJECT_NAME} guilib
+    ${ApplicationServices_LIBRARY}
+    ${Foundation_LIBRARY}
+    ${AppKit_LIBRARY}
+)
 qt5_use_modules (${PROJECT_NAME} Core Widgets Network)
