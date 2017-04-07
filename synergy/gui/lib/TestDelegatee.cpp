@@ -98,5 +98,6 @@ void TestDelegatee::cleanUp()
 
         socket->abort();
         socket->deleteLater();
+        i++;
     }
 }
