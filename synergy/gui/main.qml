@@ -22,7 +22,7 @@ ApplicationWindow {
         target: cloudClient
         onLoginOk: {
             AppConfig.save()
-            stackView.push({item : Qt.resolvedUrl("ConfigurationPage.qml")})
+            stackView.push(stackView.nextPage())
         }
     }
 
