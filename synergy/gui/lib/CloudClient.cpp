@@ -15,14 +15,14 @@
 // https://alpha1.cloud.symless.com/
 // http://127.0.0.1:8080/
 
-static const char kJoinGroupUrl[] = "https://alpha1.cloud.symless.com/group/join";
-static const char kLeaveGroupUrl[] = "https://alpha1.cloud.symless.com/group/leave";
-static const char kLoginUrl[] = "https://alpha1.cloud.symless.com/login";
-static const char kIdentifyUrl[] = "https://alpha1.cloud.symless.com/user/identify";
-static const char kscreensUrl[] = "https://alpha1.cloud.symless.com/group/screens";
-static const char kUpdateGroupConfigUrl[] = "https://alpha1.cloud.symless.com/group/update";
-static const char kReportUrl[] = "https://alpha1.cloud.symless.com/report";
-static const char kClaimServerUrl[] = "https://alpha1.cloud.symless.com/group/server/claim";
+static const char kJoinGroupUrl[] = "http://192.168.3.55:8080/group/join";
+static const char kLeaveGroupUrl[] = "http://192.168.3.55:8080/group/leave";
+static const char kLoginUrl[] = "http://192.168.3.55:8080/login";
+static const char kIdentifyUrl[] = "http://192.168.3.55:8080/user/identify";
+static const char kscreensUrl[] = "http://192.168.3.55:8080/group/screens";
+static const char kUpdateGroupConfigUrl[] = "http://192.168.3.55:8080/group/update";
+static const char kReportUrl[] = "http://192.168.3.55:8080/report";
+static const char kClaimServerUrl[] = "http://192.168.3.55:8080/group/server/claim";
 static const int kPollingTimeout = 60000; // 1 minite
 
 CloudClient::CloudClient(QObject* parent) : QObject(parent)
