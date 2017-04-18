@@ -259,6 +259,9 @@ void ScreenManager::updateScreens(QByteArray reply)
         updateConfigFile();
         emit newServer(serverId);
         m_previousServerId = serverId;
+
+        QPair<QString, ScreenState> p (m_localHostname, kConnecting);
+        onScreenStateChanged(p);
     }
 
     if (updateLocalHost) {
