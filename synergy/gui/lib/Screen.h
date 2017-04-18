@@ -26,14 +26,14 @@ public:
     void setId(int id);
 	int posX() const;
 	int posY() const;
-	QString name() const;
-    QString stateString() const;
+    QString name() const;
 	QString stateImage() const;
 
 	void setPosX(int x);
 	void setPosY(int y);
 	void setName(QString n);
 	void setState(ScreenState s);
+    void setState(QString s);
 
     bool locked() const;
     void setLocked(bool value);

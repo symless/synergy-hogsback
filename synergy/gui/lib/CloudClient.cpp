@@ -1,5 +1,6 @@
 #include "CloudClient.h"
 
+#include "Screen.h"
 #include "LogManager.h"
 #include "AppConfig.h"
 
@@ -23,6 +24,7 @@ static const char kscreensUrl[] = "http://192.168.3.55:8080/group/screens";
 static const char kUpdateGroupConfigUrl[] = "http://192.168.3.55:8080/group/update";
 static const char kReportUrl[] = "http://192.168.3.55:8080/report";
 static const char kClaimServerUrl[] = "http://192.168.3.55:8080/group/server/claim";
+static const char kUpdateScreenUrl[] = "http://192.168.3.55:8080/screen/update";
 static const int kPollingTimeout = 60000; // 1 minite
 
 CloudClient::CloudClient(QObject* parent) : QObject(parent)
@@ -180,6 +182,7 @@ void CloudClient::addScreen(QString name)
     QJsonObject screenObject;
     screenObject.insert("name", name);
     screenObject.insert("ipList", ipList.join(","));
+    screenObject.insert("status", "Disconnected");
 
     QJsonObject groupObject;
     groupObject.insert ("name", "default");
@@ -257,6 +260,23 @@ void CloudClient::claimServer()
 
     m_networkManager->post(req, doc.toJson());
 
+}
+
+void CloudClient::updateScreen(const Screen& screen)
+{
+    QUrl claimUrl = QUrl(kUpdateScreenUrl);
+    QNetworkRequest req(claimUrl);
+    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
+
+    QJsonObject screenObject;
+    screenObject.insert("id", screen.id());
+    screenObject.insert("name", screen.name());
+    screenObject.insert("status", screenStateToString(screen.state()));
+
+    QJsonDocument doc(screenObject);
+
+    m_networkManager->post(req, doc.toJson());
 }
 
 void CloudClient::report(int destId, QString successfulIpList, QString failedIpList)

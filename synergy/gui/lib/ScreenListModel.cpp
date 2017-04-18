@@ -103,7 +103,7 @@ QVariant ScreenListModel::data(const QModelIndex& index, int role) const
     else if (role == kStateImageRole)
         return screen.stateImage();
     else if (role == kScreenStateRole)
-        return screen.stateString();
+        return screenStateToString(screen.state());
     return QVariant();
 }
 

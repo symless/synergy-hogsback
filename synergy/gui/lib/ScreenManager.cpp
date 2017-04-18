@@ -220,22 +220,19 @@ void ScreenManager::updateScreens(QByteArray reply)
                 QJsonObject obj = v.toObject();
                 QString screenName = obj["name"].toString();
                 latestScreenNameSet.insert(screenName);
-                ScreenState screenState = kInactive;
                 int index = m_screenListModel->findScreen(screenName);
                 if (index != -1) {
                     const Screen& s = m_screenListModel->getScreen(index);
                     if (s.locked()) {
                         continue;
                     }
-
-                    screenState = s.state();
                 }
 
                 Screen screen(screenName);
                 screen.setId(obj["id"].toInt());
                 screen.setPosX(obj["posX"].toInt());
                 screen.setPosY(obj["posY"].toInt());
-                screen.setState(screenState);
+                screen.setState(obj["status"].toString());
                 if (!obj["active"].toBool()) {
                     screen.setState(kInactive);
                 }
@@ -262,25 +259,6 @@ void ScreenManager::updateScreens(QByteArray reply)
         updateConfigFile();
         emit newServer(serverId);
         m_previousServerId = serverId;
-
-        // if new server is the local machine, everyone should be in connecting status
-        if (serverId == m_appConfig->screenId()) {
-            for (int i = 0; i < m_screenListModel->getScreenModeSize(); i++) {
-                m_screenListModel->setScreenState(i, kConnecting);
-            }
-        }
-        // if new server is not the local machine, only the local machine is in connecting status
-        else {
-            int index = m_screenListModel->findScreen(serverId);
-            if (index != -1) {
-                m_screenListModel->setScreenState(index, kConnected);
-            }
-
-            index = m_screenListModel->findScreen(m_appConfig->screenId());
-            if (index != -1) {
-                m_screenListModel->setScreenState(index, kConnecting);
-            }
-        }
     }
 
     if (updateLocalHost) {
@@ -324,5 +302,8 @@ void ScreenManager::onScreenStateChanged(QPair<QString, ScreenState> r)
     int index = m_screenListModel->findScreen(r.first);
     if (index != -1) {
         m_screenListModel->setScreenState(index, r.second);
+        const Screen& s = m_screenListModel->getScreen(index);
+
+        m_cloudClient->updateScreen(s);
     }
 }

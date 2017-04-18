@@ -10,6 +10,7 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 class AppConfig;
+class Screen;
 
 class LIB_SPEC CloudClient : public QObject
 {
@@ -30,6 +31,7 @@ public:
     void report(int destId, QString successfulIp, QString failedIp);
     void updateGroupConfig(QJsonDocument& doc);
     void claimServer();
+    void updateScreen(const Screen& screen);
 
 signals:
     void loginOk();
