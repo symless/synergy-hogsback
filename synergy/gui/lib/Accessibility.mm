@@ -13,7 +13,7 @@ processHasAccessibility() {
 void
 openAccessibilityDialog() {
     NSDictionary* options = @{static_cast<id> (kAXTrustedCheckOptionPrompt): @YES};
-    return AXIsProcessTrustedWithOptions(static_cast<CFDictionaryRef> (options));
+    AXIsProcessTrustedWithOptions(static_cast<CFDictionaryRef> (options));
 }
 
 } // extern "C++"
