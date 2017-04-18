@@ -12,8 +12,8 @@ processHasAccessibility() {
 
 void
 openAccessibilityDialog() {
-    NSString* urlString = @"x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility";
-    [[NSWorkspace sharedWorkspace] openURL: [NSURL URLWithString:urlString]];
+    NSDictionary* options = @{static_cast<id> (kAXTrustedCheckOptionPrompt): @YES};
+    return AXIsProcessTrustedWithOptions(static_cast<CFDictionaryRef> (options));
 }
 
 } // extern "C++"
