@@ -2,7 +2,12 @@
 #include "LogManager.h"
 #include "Common.h"
 
-QHash<ScreenStatus, QString> Screen::m_statusImages;
+QHash<ScreenStatus, QString> Screen::m_statusImages = {
+    {kConnected, "qrc:/res/image/screen-active.png"},
+    {kConnecting, "qrc:/res/image/screen-inactive.png"},
+    {kDisconnected, "qrc:/res/image/screen-inactive.png"},
+    {kInactive, "qrc:/res/image/screen-inactive.png"}
+};
 
 Screen::Screen(QString name) :
     m_id(-1),
@@ -12,11 +17,6 @@ Screen::Screen(QString name) :
     m_status(kInactive),
     m_locked(false)
 {
-    m_statusImages[kConnected] = "qrc:/res/image/screen-active.png";
-    m_statusImages[kConnecting] = "qrc:/res/image/screen-inactive.png";
-    m_statusImages[kDisconnected] = "qrc:/res/image/screen-inactive.png";
-    m_statusImages[kInactive] = "qrc:/res/image/screen-inactive.png";
-
     m_statusImage = m_statusImages[m_status];
 }
 
