@@ -222,7 +222,7 @@ Rectangle {
                                 if(mouse.button === Qt.RightButton) {
                                     screenIcon.editMode = !screenIcon.editMode;
                                     if (screenIcon.editMode === false) {
-                                        screenImage.source = stateImage
+                                        screenImage.source = statusImage
                                     }
                                     else {
                                         screenImage.source = "qrc:/res/image/screen-edit.png"
@@ -249,7 +249,7 @@ Rectangle {
                             anchors.fill: parent
                             fillMode: Image.Stretch
                             smooth: true
-                            source: stateImage
+                            source: statusImage
 
                             // screen name
                             Text {
@@ -260,7 +260,7 @@ Rectangle {
                                 text: name
                                 font.pixelSize: 15
                                 minimumPixelSize: 15
-                                color: screenState == "Connected" ? "black" : "white"
+                                color: screenStatus == "Connected" ? "black" : "white"
                                 font.family: "Tahoma"
                                 fontSizeMode: Text.HorizontalFit
                                 horizontalAlignment: Text.AlignHCenter
@@ -301,7 +301,7 @@ Rectangle {
                             // connecting prograss bar background
                             Rectangle {
                                 id: connectingBar
-                                visible: screenState == "Connecting" && screenImage.source != "qrc:/res/image/screen-edit.png"
+                                visible: screenStatus == "Connecting" && screenImage.source != "qrc:/res/image/screen-edit.png"
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 anchors.bottom: parent.bottom
                                 anchors.bottomMargin: 15

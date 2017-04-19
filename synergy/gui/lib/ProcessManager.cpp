@@ -174,27 +174,27 @@ void ProcessManager::logCoreOutput()
                 // check key outputs
                 if (line.contains("started server, waiting for clients") ||
                     line.contains("connected to server")) {
-                    QPair<QString, ScreenState> r;
+                    QPair<QString, ScreenStatus> r;
                     r.first = QHostInfo::localHostName();
                     r.second = kConnected;
-                    emit screenStateChanged(r);
+                    emit screenStatusChanged(r);
                 }
                 else if (line.contains("\" has connected")) {
-                    QPair<QString, ScreenState> r;
+                    QPair<QString, ScreenStatus> r;
                     QStringList result = line.split('"');
                     Q_ASSERT(result.size() == 3);
 
                     if (result.size() == 3) {
                         r.first = result[1];
                         r.second = kConnected;
-                        emit screenStateChanged(r);
+                        emit screenStatusChanged(r);
                     }
                 }
                 else if (line.contains("connecting to")) {
-                    QPair<QString, ScreenState> r;
+                    QPair<QString, ScreenStatus> r;
                     r.first = QHostInfo::localHostName();
                     r.second = kConnecting;
-                    emit screenStateChanged(r);
+                    emit screenStatusChanged(r);
                 }
             }
         }

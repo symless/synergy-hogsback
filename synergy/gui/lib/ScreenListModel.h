@@ -14,8 +14,8 @@ public:
         kPosXRole = Qt::UserRole + 1,
         kPosYRole,
         kNameRole,
-        kStateImageRole,
-        kScreenStateRole
+        kStatusImageRole,
+        kScreenStatusRole
     };
 
     ScreenListModel();
@@ -48,7 +48,7 @@ public:
     QList<Screen> getScreenList() const;
     void lockScreen(int index);
     void unlockScreen(int index);
-    void setScreenState(int index, ScreenState state);
+    void setScreenStatus(int index, ScreenStatus status);
 
 signals:
     void scaleChanged();

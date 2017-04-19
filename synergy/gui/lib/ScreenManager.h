@@ -58,7 +58,7 @@ private:
 private slots:
     void updateScreens(QByteArray reply);
     void onUpdateGroupConfig();
-    void onScreenStateChanged(QPair<QString, ScreenState> r);
+    void onScreenStatusChanged(QPair<QString, ScreenStatus> r);
 
 private:
     ScreenListModel* m_screenListModel;

@@ -89,8 +89,8 @@ void ScreenManager::setProcessManager(ProcessManager* processManager)
 
     connect(this, &ScreenManager::newServer, m_processManager,
         &ProcessManager::newServerDetected);
-    connect(m_processManager, &ProcessManager::screenStateChanged, this,
-        &ScreenManager::onScreenStateChanged);
+    connect(m_processManager, &ProcessManager::screenStatusChanged, this,
+        &ScreenManager::onScreenStatusChanged);
 }
 
 void ScreenManager::setViewWidth(int w)
@@ -232,9 +232,9 @@ void ScreenManager::updateScreens(QByteArray reply)
                 screen.setId(obj["id"].toInt());
                 screen.setPosX(obj["posX"].toInt());
                 screen.setPosY(obj["posY"].toInt());
-                screen.setState(obj["status"].toString());
+                screen.setStatus(obj["status"].toString());
                 if (!obj["active"].toBool()) {
-                    screen.setState(kInactive);
+                    screen.setStatus(kInactive);
                 }
                 latestScreenList.push_back(screen);
             }
@@ -260,8 +260,8 @@ void ScreenManager::updateScreens(QByteArray reply)
         emit newServer(serverId);
         m_previousServerId = serverId;
 
-        QPair<QString, ScreenState> p (m_localHostname, kConnecting);
-        onScreenStateChanged(p);
+        QPair<QString, ScreenStatus> p (m_localHostname, kConnecting);
+        onScreenStatusChanged(p);
     }
 
     if (updateLocalHost) {
@@ -300,11 +300,11 @@ void ScreenManager::onUpdateGroupConfig()
     m_cloudClient->updateGroupConfig(doc);
 }
 
-void ScreenManager::onScreenStateChanged(QPair<QString, ScreenState> r)
+void ScreenManager::onScreenStatusChanged(QPair<QString, ScreenStatus> r)
 {
     int index = m_screenListModel->findScreen(r.first);
     if (index != -1) {
-        m_screenListModel->setScreenState(index, r.second);
+        m_screenListModel->setScreenStatus(index, r.second);
         const Screen& s = m_screenListModel->getScreen(index);
 
         m_cloudClient->updateScreen(s);

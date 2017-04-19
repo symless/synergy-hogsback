@@ -1,19 +1,19 @@
-#ifndef SCREENSTATE
-#define SCREENSTATE
+#ifndef SCREENSTATUS
+#define SCREENSTATUS
 
 #include <QString>
 
-enum ScreenState {
+enum ScreenStatus {
     kConnected,
     kConnecting,
     kDisconnected,
     kInactive
 };
 
-static ScreenState
-stringToScreenState(QString str)
+static ScreenStatus
+stringToScreenStatus(QString str)
 {
-    ScreenState status = kInactive;
+    ScreenStatus status = kInactive;
 
     if (str.contains("Connected", Qt::CaseInsensitive)) {
         status = kConnected;
@@ -32,7 +32,7 @@ stringToScreenState(QString str)
 }
 
 static QString
-screenStateToString(ScreenState s)
+screenStatusToString(ScreenStatus s)
 {
     switch(s) {
     case kConnected:
@@ -49,4 +49,4 @@ screenStateToString(ScreenState s)
 }
 
 
-#endif // SCREENSTATE
+#endif // SCREENSTATUS

@@ -2,7 +2,7 @@
 #define PROCESSMANAGER_H
 
 #include "LibMacro.h"
-#include "ScreenState.h"
+#include "ScreenStatus.h"
 
 #include <QQuickItem>
 #include <QProcess>
@@ -31,7 +31,7 @@ public:
     void setServerIp(const QString& serverIp);
 
 signals:
-    void screenStateChanged(QPair<QString, ScreenState>);
+    void screenStatusChanged(QPair<QString, ScreenStatus>);
 
 public slots:
      void newServerDetected(int serverId);

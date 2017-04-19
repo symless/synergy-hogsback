@@ -2,7 +2,7 @@
 #define SCREEN_H
 
 #include "LibMacro.h"
-#include "ScreenState.h"
+#include "ScreenStatus.h"
 
 #include <QString>
 #include <QHash>
@@ -27,28 +27,28 @@ public:
 	int posX() const;
 	int posY() const;
     QString name() const;
-	QString stateImage() const;
+    QString statusImage() const;
 
 	void setPosX(int x);
 	void setPosY(int y);
 	void setName(QString n);
-	void setState(ScreenState s);
-    void setState(QString s);
+    void setStatus(ScreenStatus s);
+    void setStatus(QString s);
 
     bool locked() const;
     void setLocked(bool value);
 
-    ScreenState state() const;
+    ScreenStatus status() const;
 
 private:
     int m_id;
     int m_posX;
     int m_posY;
 	QString m_name;
-	ScreenState m_state;
-	QString m_stateImage;
+    ScreenStatus m_status;
+    QString m_statusImage;
     bool m_locked;
-    static QHash<ScreenState, QString> m_stateImages;
+    static QHash<ScreenStatus, QString> m_statusImages;
 };
 
 #endif // SCREEN_H

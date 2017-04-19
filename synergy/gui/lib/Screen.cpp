@@ -2,22 +2,22 @@
 #include "LogManager.h"
 #include "Common.h"
 
-QHash<ScreenState, QString> Screen::m_stateImages;
+QHash<ScreenStatus, QString> Screen::m_statusImages;
 
 Screen::Screen(QString name) :
     m_id(-1),
     m_posX(-1),
     m_posY(-1),
     m_name(name),
-    m_state(kInactive),
+    m_status(kInactive),
     m_locked(false)
 {
-    m_stateImages[kConnected] = "qrc:/res/image/screen-active.png";
-    m_stateImages[kConnecting] = "qrc:/res/image/screen-inactive.png";
-    m_stateImages[kDisconnected] = "qrc:/res/image/screen-inactive.png";
-    m_stateImages[kInactive] = "qrc:/res/image/screen-inactive.png";
+    m_statusImages[kConnected] = "qrc:/res/image/screen-active.png";
+    m_statusImages[kConnecting] = "qrc:/res/image/screen-inactive.png";
+    m_statusImages[kDisconnected] = "qrc:/res/image/screen-inactive.png";
+    m_statusImages[kInactive] = "qrc:/res/image/screen-inactive.png";
 
-    m_stateImage = m_stateImages[m_state];
+    m_statusImage = m_statusImages[m_status];
 }
 
 int Screen::posX() const
@@ -35,9 +35,9 @@ QString Screen::name() const
     return m_name;
 }
 
-QString Screen::stateImage() const
+QString Screen::statusImage() const
 {
-    return m_stateImage;
+    return m_statusImage;
 }
 
 void Screen::setPosX(int const x)
@@ -66,16 +66,16 @@ void Screen::setName(QString n)
     m_name = n;
 }
 
-void Screen::setState(ScreenState s)
+void Screen::setStatus(ScreenStatus s)
 {
-    m_state = s;
-    m_stateImage = m_stateImages[m_state];
+    m_status = s;
+    m_statusImage = m_statusImages[m_status];
 }
 
-void Screen::setState(QString s)
+void Screen::setStatus(QString s)
 {
-    ScreenState status = stringToScreenState(s);
-    setState(status);
+    ScreenStatus status = stringToScreenStatus(s);
+    setStatus(status);
 }
 
 bool Screen::locked() const
@@ -88,9 +88,9 @@ void Screen::setLocked(bool value)
     m_locked = value;
 }
 
-ScreenState Screen::state() const
+ScreenStatus Screen::status() const
 {
-    return m_state;
+    return m_status;
 }
 
 int Screen::id() const

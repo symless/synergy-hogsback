@@ -100,10 +100,10 @@ QVariant ScreenListModel::data(const QModelIndex& index, int role) const
         return screen.posY();
     else if (role == kNameRole)
         return screen.name();
-    else if (role == kStateImageRole)
-        return screen.stateImage();
-    else if (role == kScreenStateRole)
-        return screenStateToString(screen.state());
+    else if (role == kStatusImageRole)
+        return screen.statusImage();
+    else if (role == kScreenStatusRole)
+        return screenStatusToString(screen.status());
     return QVariant();
 }
 
@@ -121,8 +121,8 @@ QHash<int, QByteArray> ScreenListModel::roleNames() const
     roles[kPosXRole] = "posX";
     roles[kPosYRole] = "posY";
     roles[kNameRole] = "name";
-    roles[kStateImageRole] = "stateImage";
-    roles[kScreenStateRole] = "screenState";
+    roles[kStatusImageRole] = "statusImage";
+    roles[kScreenStatusRole] = "screenStatus";
 
     return roles;
 }
@@ -150,13 +150,13 @@ void ScreenListModel::unlockScreen(int index)
     m_screens[index].setLocked(false);
 }
 
-void ScreenListModel::setScreenState(int index, ScreenState state)
+void ScreenListModel::setScreenStatus(int index, ScreenStatus status)
 {
     if (index < 0 || index > getScreenModeSize()) {
         return;
     }
 
-    m_screens[index].setState(state);
+    m_screens[index].setStatus(status);
 
     dataChanged(getIndex(index), getIndex(index));
 }
