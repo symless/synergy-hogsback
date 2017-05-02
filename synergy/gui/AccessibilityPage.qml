@@ -13,7 +13,7 @@ Rectangle {
         Rectangle {
             id: rectangle1
             anchors.fill: parent
-            color:"#e5e4e4"
+            color:"#3F95B8"
 
             Version {
                 anchors.left: parent.left
@@ -58,329 +58,53 @@ Rectangle {
                 width: 489
                 color: "transparent"
                 anchors.horizontalCenter: parent.horizontalCenter
-                //anchors.verticalCenter: parent.verticalCenter
                 anchors.top: accessibilityPageBackgroundSeparator.bottom
                 anchors.topMargin: 30
                 anchors.bottom: rectangle1.bottom
-                anchors.bottomMargin: 30
+                anchors.bottomMargin: 130
+
+                AnimatedImage {
+                    id: tutorial
+                    anchors.fill: parent
+                    fillMode: Image.PreserveAspectFit
+                    source: "qrc:/res/image/accessibility-tutorial.gif"
+
+                    onFrameChanged: {
+                        if (tutorial.currentFrame <= 23) {
+                            hint.text = "Synergy needs your help before it can control your Mac"
+                        }
+                        else if (tutorial.currentFrame <= 63) {
+                            hint.text = "Open Security & Pravicy Preferences"
+                        }
+                        else if (tutorial.currentFrame <= 134) {
+                            hint.text = "Click the padlock at the bottom left"
+                        }
+                        else if (tutorial.currentFrame <= 167) {
+                            hint.text = "You will be asked to enter your macOS password"
+                        }
+                        else {
+                            hint.text = "Finally, tick Synergy in the App list"
+                        }
+                    }
+                }
 
                 Text {
                     id: hint
-                    color: "black"
+                    color: "white"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: tutorial.bottom
+                    anchors.topMargin: 45
                     font.bold: false
-                    width: parent.width
                     horizontalAlignment: Text.AlignHCenter
-                    font.pointSize: 14
+                    font.pointSize: 18
                     font.family: "Myriad Pro"
-                    text: "Synergy needs your help before it can control your Mac\n"
-                          + "Follow the steps below to get going."
                     renderType: Text.NativeRendering
-                }
 
-                Rectangle {
-
-                    id: accessibilityTutViewHolder
-                    border.width: 10
-                    border.color: "#333333"
-                    radius: 5
-                    antialiasing: true
-                    width: parent.width
-                    height: 275
-                    anchors.top: hint.bottom
-                    anchors.topMargin: 20
-                    color:"#3f95b8"
-
-                    Rectangle {
-                        id: accessibilityTutViewHolderInner
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.leftMargin: 10
-                        anchors.rightMargin: 10
-                        height: 275
-                        clip: true
-                        color: "transparent"
-
-                        Controls.SwipeView {
-                            id: accessibilityTutView
-                            anchors.fill: parent
-                            currentIndex: 0
-
-                            Rectangle {
-                                color: "transparent"
-
-                                Rectangle {
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.margins: 15
-                                    color: "transparent"
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    height: 150
-
-                                    Image {
-                                        id: logo0
-                                        source: "res/image/privacy-security.png"
-                                        anchors.horizontalCenter: parent.horizontalCenter
-                                        fillMode: Image.Pad
-                                        visible: false
-                                    }
-
-                                    DropShadow {
-                                        anchors.fill: logo0
-                                        horizontalOffset: 5
-                                        verticalOffset: 5
-                                        radius: 8.0
-                                        samples: 17
-                                        color: "#30000000"
-                                        source: logo0
-                                    }
-
-                                    MouseArea {
-                                        anchors.fill: logo0
-                                        hoverEnabled: true
-                                        cursorShape: Qt.PointingHandCursor
-
-                                        onClicked: {
-                                           openAccessibilityButton.clicked()
-                                        }
-                                    }
-
-                                    Text {
-                                        id: gjhitghjet90
-                                        color: "white"
-                                        text: "Click the icon above to open Security & Privacy Preferences"
-                                        font.family: "Myriad Pro"
-                                        anchors.top: logo0.bottom
-                                        anchors.topMargin: 15
-                                        width: parent.width
-                                        horizontalAlignment: Text.AlignHCenter
-                                        wrapMode: Text.Wrap
-                                        renderType: Text.NativeRendering
-                                    }
-
-                                    Button {
-                                        id: openAccessibilityButton
-                                        text: "Open Security && Privacy Preferences"
-                                        anchors.horizontalCenter: parent.horizontalCenter
-                                        anchors.top: gjhitghjet90.bottom
-                                        anchors.topMargin: 15
-                                        onClicked: {
-                                            accessibilityManager.openAccessibilityDialog();
-                                            accessibilityTutView.currentIndex += 1;
-                                        }
-                                        visible: false
-                                    }
-                                }
-                            }
-
-                            Rectangle {
-                                color: "transparent"
-
-                                Rectangle {
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.margins: 15
-                                    color: "transparent"
-                                    height: 120
-                                    clip: true
-                                    anchors.verticalCenter: parent.verticalCenter
-
-                                    Image {
-                                        id: unlockSettingsImage
-                                        fillMode: Image.Pad
-                                        source: "res/image/unlock-settings.png"
-                                        anchors.horizontalCenter: parent.horizontalCenter
-                                        visible: false
-                                    }
-
-                                    DropShadow {
-                                        anchors.fill: unlockSettingsImage
-                                        horizontalOffset: 5
-                                        verticalOffset: 5
-                                        radius: 8.0
-                                        samples: 17
-                                        color: "#30000000"
-                                        source: unlockSettingsImage
-                                    }
-
-                                    Text {
-                                        id: gjhitghjet2
-                                        color: "white"
-                                        text: "In the dialog that just opened, click the padlock in the bottom left hand corner."
-                                        font.family: "Myriad Pro"
-                                        anchors.top: unlockSettingsImage.bottom
-                                        anchors.topMargin: 15
-                                        width: parent.width
-                                        horizontalAlignment: Text.AlignHCenter
-                                        wrapMode: Text.Wrap
-                                        renderType: Text.NativeRendering
-                                    }
-                                }
-                            }
-
-                            Rectangle {
-                                color: "transparent"
-
-                                Rectangle {
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.margins: 15
-                                    color: "transparent"
-                                    height: 210
-                                    clip: true
-                                    anchors.verticalCenter: parent.verticalCenter
-
-                                    Image {
-                                        id: typePasswordImage
-                                        fillMode: Image.Pad
-                                        source: "res/image/type-password.png"
-                                        anchors.horizontalCenter: parent.horizontalCenter
-                                    }
-
-                                    DropShadow {
-                                        anchors.fill: typePasswordImage
-                                        horizontalOffset: 5
-                                        verticalOffset: 5
-                                        radius: 8.0
-                                        samples: 17
-                                        color: "#30000000"
-                                        source: typePasswordImage
-                                    }
-
-                                    Text {
-                                        id: gjhitghjet3
-                                        color: "white"
-                                        text: "You will be asked to enter your macOS password"
-                                        font.family: "Myriad Pro"
-                                        anchors.top: typePasswordImage.bottom
-                                        anchors.margins: 15
-                                        anchors.topMargin: 10
-                                        width: parent.width
-                                        horizontalAlignment: Text.AlignHCenter
-                                        wrapMode: Text.Wrap
-                                        renderType: Text.NativeRendering
-                                    }
-                                }
-                            }
-
-                            Rectangle {
-                                color: "transparent"
-
-                                Rectangle {
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.margins: 15
-                                    color: "transparent"
-                                    height: 150
-                                    clip: true
-                                    anchors.verticalCenter: parent.verticalCenter
-
-                                    Image {
-                                        id: tickSynergyImage
-                                        fillMode: Image.Pad
-                                        source: "res/image/tick-synergy.png"
-                                        anchors.horizontalCenter: parent.horizontalCenter
-                                    }
-
-                                    DropShadow {
-                                        anchors.fill: tickSynergyImage
-                                        horizontalOffset: 5
-                                        verticalOffset: 5
-                                        radius: 8.0
-                                        samples: 17
-                                        color: "#30000000"
-                                        source: tickSynergyImage
-                                    }
-
-                                    Text {
-                                        id: gjhitghjet4
-                                        color: "white"
-                                        text: "Tick Synergy in the app list"
-                                        font.family: "Myriad Pro"
-                                        anchors.top: tickSynergyImage.bottom
-                                        anchors.margins: 15
-                                        anchors.topMargin: 10
-                                        width: parent.width
-                                        horizontalAlignment: Text.AlignHCenter
-                                        wrapMode: Text.Wrap
-                                        renderType: Text.NativeRendering
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-
-                    Controls.PageIndicator {
-                        id: accessibilityTutPageIndicator
-                        count: accessibilityTutView.count
-                        currentIndex: accessibilityTutView.currentIndex
-                        interactive: true
-
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.bottom: accessibilityTutViewHolder.bottom
-                        anchors.bottomMargin: 14
-                        anchors.topMargin: 15
-
-                        onCurrentIndexChanged: {
-                            accessibilityTutView.currentIndex = currentIndex
-                        }
-                    }
-                }
-
-                Rectangle {
-                    anchors.top: accessibilityTutViewHolder.bottom
-                    anchors.topMargin: 15
-                    height: 70
-                    width: parent.width
-                    color: "transparent"
-
-                    Button {
-                        id: checkAccessibilityButton
-                        text: "I'm Done"
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.top: parent.top
-                        onClicked: {
-                            if (accessibilityManager.processHasAccessibility()) {
-                                stackView.push (stackView.nextPage())
-                            } else {
-                                checkAccessibilityFailureText.visible = true
-                                accessibilityTutView.currentIndex = 0
-                            }
-                        }
-                    }
-
-                    Text {
-                        id: checkAccessibilityFailureText
-                        font.family: "Myriad Pro"
-                        color: "black"
-                        text: "Sorry, it looks like that didn't work.\n Follow the steps above and try again."
-                        anchors.top: checkAccessibilityButton.bottom
-                        anchors.topMargin: 10
-                        wrapMode: Text.Wrap
-                        width: parent.width
-                        horizontalAlignment: Text.AlignHCenter
-                        visible: false
-                        renderType: Text.NativeRendering
-                    }
-                }
-
-                Connections {
-                    target: applicationWindow
-                    onKeyReceived: {
-                        if (key == Qt.Key_Return) {
-                            if (accessibilityTutView.currentIndex == 0) {
-                                openAccessibilityButton.clicked();
-                                checkAccessibilityFailureText.visible = false
-                            } else if ((accessibilityTutView.currentIndex == (accessibilityTutView.count - 1))) {
-                                checkAccessibilityButton.clicked()
-                            } else {
-                                accessibilityTutView.currentIndex += 1
-                                checkAccessibilityFailureText.visible = false
-                            }
-                        } else if (key == Qt.Key_Left) {
-                                accessibilityTutView.currentIndex -= 1
-                        } else if (key == Qt.Key_Right) {
-                                accessibilityTutView.currentIndex += 1
+                    Behavior on text {
+                        SequentialAnimation {
+                            NumberAnimation { target: hint; property: "opacity"; to: 0 }
+                            PropertyAction {}
+                            NumberAnimation { target: hint; property: "opacity"; to: 1 }
                         }
                     }
                 }

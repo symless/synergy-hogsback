@@ -19,9 +19,9 @@
         <file>res/image/edit.png</file>
         <file>res/image/unsub.png</file>
         <file>AccessibilityPage.qml</file>
-        <file>res/image/privacy-security.png</file>
         <file>res/image/tick-synergy.png</file>
         <file>res/image/unlock-settings.png</file>
         <file>res/image/type-password.png</file>
+        <file>res/image/accessibility-tutorial.gif</file>
     </qresource>
 </RCC>
