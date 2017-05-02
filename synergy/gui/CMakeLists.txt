@@ -22,15 +22,11 @@ add_executable (${PROJECT_NAME} WIN32
     main.cpp
     qml.qrc
     main.qml
-    AdvancedPage.qml
     ActivationPage.qml
     AccessibilityPage.qml
-    ConfigSettingView.qml
     ConfigurationPage.qml
     CustomBorder.qml
     CustomCheckBox.qml
-    GeneralSettingView.qml
-    LogSettingView.qml
     Version.qml
 )
 
