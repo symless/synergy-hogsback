@@ -3,13 +3,9 @@
         <file>res/image/screen-inactive.png</file>
         <file>res/image/screen-active.png</file>
         <file>main.qml</file>
-        <file>AdvancedPage.qml</file>
-        <file>ConfigSettingView.qml</file>
         <file>ConfigurationPage.qml</file>
         <file>CustomBorder.qml</file>
         <file>CustomCheckBox.qml</file>
-        <file>GeneralSettingView.qml</file>
-        <file>LogSettingView.qml</file>
         <file>ActivationPage.qml</file>
         <file>res/image/google.png</file>
         <file>res/image/synergy-logo.png</file>
