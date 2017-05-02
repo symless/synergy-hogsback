@@ -10,6 +10,10 @@ Rectangle {
         id: accessibilityPage
         anchors.fill: parent
 
+        Component.onCompleted: {
+            accessibilityManager.openAccessibilityDialog()
+        }
+
         Rectangle {
             id: rectangle1
             anchors.fill: parent
