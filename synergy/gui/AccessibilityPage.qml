@@ -14,6 +14,17 @@ Rectangle {
             accessibilityManager.openAccessibilityDialog()
         }
 
+        Timer {
+            id: accessibilityPullingTimer
+            interval: 500; running: true; repeat: true
+            onTriggered: {
+                if (accessibilityManager.processHasAccessibility()) {
+                     accessibilityPullingTimer.stop()
+                     stackView.push (stackView.nextPage())
+                 }
+            }
+        }
+
         Rectangle {
             id: rectangle1
             anchors.fill: parent
