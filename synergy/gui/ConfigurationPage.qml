@@ -281,6 +281,14 @@ Rectangle {
                                 smooth: true
                                 visible: screenImage.source == "qrc:/res/image/screen-edit.png"
                                 source: "qrc:/res/image/unsub.png"
+
+                                MouseArea {
+                                    id: unsubScreenMouseArea
+                                    anchors.fill: parent
+                                    onPressed: {
+                                        stackView.toPage("ProfilePage")
+                                    }
+                                }
                             }
 
                             // furthur edit button in edit mode

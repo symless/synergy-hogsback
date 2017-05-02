@@ -30,15 +30,7 @@ ApplicationWindow {
         target: cloudClient
         onInvalidAuth: {
             AppConfig.clearAuth()
-            var r = stackView.find(function(item) {
-                return item.objectName === "ActivationPage"
-            })
-            if (r) {
-                stackView.pop({item : Qt.resolvedUrl("ActivationPage.qml"), properties: { objectName: "ActivationPage"}})
-            }
-            else {
-                stackView.push({item : Qt.resolvedUrl("ActivationPage.qml"), properties: { objectName: "ActivationPage"}, replace: true})
-            }
+            toPage("ActivationPage")
         }
     }
 
@@ -79,6 +71,18 @@ ApplicationWindow {
                 if (stackView.currentItem.objectName == "ActivationPage") {
                     cloudClient.getUserToken()
                 }
+            }
+        }
+
+        function toPage(name) {
+            var r = stackView.find(function(item) {
+                return item.objectName === name
+            })
+            if (r) {
+                stackView.pop({item : Qt.resolvedUrl(name + ".qml"), properties: { objectName: name}})
+            }
+            else {
+                stackView.push({item : Qt.resolvedUrl(name + ".qml"), properties: { objectName: name}, replace: true})
             }
         }
     }
