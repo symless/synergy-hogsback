@@ -19,5 +19,6 @@
         <file>res/image/unlock-settings.png</file>
         <file>res/image/type-password.png</file>
         <file>res/image/accessibility-tutorial.gif</file>
+        <file>ProfilePage.qml</file>
     </qresource>
 </RCC>
