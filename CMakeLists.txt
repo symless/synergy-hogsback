@@ -39,12 +39,12 @@ message (STATUS "Synergy version is " ${SYNERGY_VERSION})
 
 
 if (WIN32)
-    # Configure for Windows Vista and above. Vista has extended support from
-    # Microsoft until April 11, 2017
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa383745(v=vs.85).aspx
-    add_definitions (/DNTDDI_VERSION=0x06000000)
-    add_definitions (/D_WIN32_WINNT=0x0600)
-    add_definitions (/DWINVER=0x0600)
+    # Configure for Windows 7 and above. Vista went out of extended support from
+    # Microsoft on April 11th 2017
+    # Docs: https://msdn.microsoft.com/en-us/library/windows/desktop/aa383745(v=vs.85).aspx
+    add_definitions (/DNTDDI_VERSION=0x06010000)
+    add_definitions (/D_WIN32_WINNT=0x0601)
+    add_definitions (/DWINVER=0x0601)
 
     if (MSVC)
         #set (SYNERGY_WARNING_FLAGS /W4)
