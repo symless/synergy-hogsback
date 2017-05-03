@@ -6,6 +6,7 @@
 
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
+#include <QHostInfo>
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QTimer>
@@ -167,7 +168,7 @@ void CloudClient::onUpdateGroupConfigFinished(QNetworkReply *reply)
     }
 }
 
-void CloudClient::joinGroup(QString name)
+void CloudClient::joinGroup(int64_t groupId)
 {
     static const QUrl addScreenUrl = QUrl(kJoinGroupUrl);
     QNetworkRequest req (addScreenUrl);
@@ -184,12 +185,18 @@ void CloudClient::joinGroup(QString name)
     }
 
     QJsonObject screenObject;
-    screenObject.insert("name", name);
+
+    screenObject.insert("name", QHostInfo::localHostName());
     screenObject.insert("ipList", ipList.join(","));
     screenObject.insert("status", "Disconnected");
 
     QJsonObject groupObject;
-    groupObject.insert ("name", "default");
+    if (groupId == -1) {
+        groupObject.insert ("name", "default");
+    }
+    else {
+        groupObject.insert ("id", groupId);
+    }
 
     QJsonObject jsonObject;
     jsonObject.insert("screen", screenObject);
