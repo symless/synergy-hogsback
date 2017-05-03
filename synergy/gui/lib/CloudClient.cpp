@@ -123,7 +123,7 @@ void CloudClient::getUserId(bool initialCall)
                 this, &CloudClient::onReplyError);
 }
 
-void CloudClient::removeScreen() {
+void CloudClient::leaveGroup() {
     static const QUrl removeScreenUrl = QUrl(kLeaveGroupUrl);
     QNetworkRequest req (removeScreenUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
@@ -141,6 +141,11 @@ void CloudClient::removeScreen() {
     /*connect (reply, &QNetworkReply::finished, [this, reply]() {
        this->onRemoveScreenFinished (reply);
     });*/
+}
+
+void CloudClient::unsubGroup()
+{
+
 }
 
 
@@ -162,7 +167,7 @@ void CloudClient::onUpdateGroupConfigFinished(QNetworkReply *reply)
     }
 }
 
-void CloudClient::addScreen(QString name)
+void CloudClient::joinGroup(QString name)
 {
     static const QUrl addScreenUrl = QUrl(kJoinGroupUrl);
     QNetworkRequest req (addScreenUrl);
@@ -193,11 +198,11 @@ void CloudClient::addScreen(QString name)
 
     auto reply = m_networkManager->post(req, doc.toJson());
     connect (reply, &QNetworkReply::finished, [this, reply]() {
-       this->onAddScreenFinished (reply);
+       this->onJoinGroupFinished (reply);
     });
 }
 
-void CloudClient::onAddScreenFinished(QNetworkReply* reply)
+void CloudClient::onJoinGroupFinished(QNetworkReply* reply)
 {
     reply->deleteLater();
     if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200) {
