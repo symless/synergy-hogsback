@@ -1,11 +1,10 @@
 cmake_minimum_required (VERSION 3.4)
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
+                       "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 set (CMAKE_CXX_STANDARD 14)
 set (CMAKE_CXX_EXTENSIONS OFF)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
-
-set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-                       "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
@@ -13,38 +12,56 @@ set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
 #
 # Version
 #
-if ((NOT DEFINED SYNERGY_VERSION_MAJOR) AND (DEFINED ENV{SYNERGY_VERSION_MAJOR}))
-    set (SYNERGY_VERSION_MAJOR $ENV{SYNERGY_VERSION_MAJOR})
-    set (SYNERGY_VERSION_MINOR $ENV{SYNERGY_VERSION_MINOR})
-    set (SYNERGY_VERSION_PATCH $ENV{SYNERGY_VERSION_PATCH})
-    set (SYNERGY_VERSION_STAGE $ENV{SYNERGY_VERSION_STAGE})
+if (NOT DEFINED SYNERGY_VERSION_MAJOR)
+    if (DEFINED ENV{SYNERGY_VERSION_MAJOR})
+        set (SYNERGY_VERSION_MAJOR $ENV{SYNERGY_VERSION_MAJOR})
+    else()
+        set (SYNERGY_VERSION_MAJOR 2)
+        message (WARNING "SYNERGY_VERSION_MAJOR not set. Defaulted to ${SYNERGY_VERSION_MAJOR}")
+    endif()
 endif()
 
-if (DEFINED SYNERGY_VERSION_MAJOR)
-    set (VERSION_MAJOR ${SYNERGY_VERSION_MAJOR})
-    set (VERSION_MINOR ${SYNERGY_VERSION_MINOR})
-    set (VERSION_REV ${SYNERGY_VERSION_PATCH})
-    set (VERSION_STAGE ${SYNERGY_VERSION_STAGE})
-else()
-    message (WARNING "Synergy version number not set by build environment.")
-    set (VERSION_MAJOR 2)
-    set (VERSION_MINOR 0)
-    set (VERSION_REV 0)
-    set (VERSION_STAGE git)
+if (NOT DEFINED SYNERGY_VERSION_MINOR)
+    if (DEFINED ENV{SYNERGY_VERSION_MINOR})
+        set (SYNERGY_VERSION_MINOR $ENV{SYNERGY_VERSION_MINOR})
+    else()
+        set (SYNERGY_VERSION_MINOR 0)
+        message (WARNING "(SYNERGY_VERSION_MINOR not set. Defaulted to ${SYNERGY_VERSION_MINOR}")
+    endif()
 endif()
 
-set (SYNERGY_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_REV}")
-set (VERSION ${SYNERGY_VERSION})
+if (NOT DEFINED SYNERGY_VERSION_PATCH)
+    if (DEFINED ENV{SYNERGY_VERSION_PATCH})
+        set (SYNERGY_VERSION_PATCH $ENV{SYNERGY_VERSION_PATCH})
+    else()
+        set (SYNERGY_VERSION_PATCH 0)
+        message (WARNING "SYNERGY_VERSION_PATCH not set. Defaulted to ${SYNERGY_VERSION_PATCH}")
+    endif()
+endif()
+
+if (NOT DEFINED SYNERGY_VERSION_STAGE)
+    if (DEFINED ENV{SYNERGY_VERSION_STAGE})
+        set (SYNERGY_VERSION_STAGE $ENV{SYNERGY_VERSION_STAGE})
+    else()
+        set (SYNERGY_VERSION_STAGE "git")
+        message (WARNING "SYNERGY_VERSION_STAGE not set. Defaulted to ${SYNERGY_VERSION_STAGE}")
+    endif()
+endif()
+
+if ((NOT DEFINED SYNERGY_REVISION) AND (DEFINED ENV{SYNERGY_REVISION}))
+    set (SYNERGY_REVISION $ENV{SYNERGY_REVISION})
+endif()
+
+set (SYNERGY_VERSION "${SYNERGY_VERSION_MAJOR}.${SYNERGY_VERSION_MINOR}.${SYNERGY_VERSION_PATCH}")
 message (STATUS "Synergy version is " ${SYNERGY_VERSION})
 
-
 if (WIN32)
-    # Configure for Windows Vista and above. Vista has extended support from
-    # Microsoft until April 11, 2017
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/aa383745(v=vs.85).aspx
-    add_definitions (/DNTDDI_VERSION=0x06000000)
-    add_definitions (/D_WIN32_WINNT=0x0600)
-    add_definitions (/DWINVER=0x0600)
+    # Configure for Windows 7 and above. Vista went out of extended support from
+    # Microsoft on April 11th 2017
+    # Docs: https://msdn.microsoft.com/en-us/library/windows/desktop/aa383745(v=vs.85).aspx
+    add_definitions (/DNTDDI_VERSION=0x06010000)
+    add_definitions (/D_WIN32_WINNT=0x0601)
+    add_definitions (/DWINVER=0x0601)
 
     if (MSVC)
         #set (SYNERGY_WARNING_FLAGS /W4)
