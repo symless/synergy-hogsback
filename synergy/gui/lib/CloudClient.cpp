@@ -21,7 +21,7 @@ static const char kLeaveGroupUrl[] = "https://alpha1.cloud.symless.com/group/lea
 static const char kUnsubGroupUrl[] = "https://alpha1.cloud.symless.com/group/unsub";
 static const char kLoginUrl[] = "https://alpha1.cloud.symless.com/login";
 static const char kIdentifyUrl[] = "https://alpha1.cloud.symless.com/user/identify";
-static const char kscreensUrl[] = "https://alpha1.cloud.symless.com/group/screens";
+static const char kGroupScreensUrl[] = "https://alpha1.cloud.symless.com/group/screens";
 static const char kUpdateGroupConfigUrl[] = "https://alpha1.cloud.symless.com/group/update";
 static const char kReportUrl[] = "https://alpha1.cloud.symless.com/report";
 static const char kClaimServerUrl[] = "https://alpha1.cloud.symless.com/group/server/claim";
@@ -126,8 +126,8 @@ void CloudClient::getUserId(bool initialCall)
 }
 
 void CloudClient::leaveGroup() {
-    static const QUrl removeScreenUrl = QUrl(kLeaveGroupUrl);
-    QNetworkRequest req (removeScreenUrl);
+    static const QUrl leaveGroupUrl = QUrl(kLeaveGroupUrl);
+    QNetworkRequest req (leaveGroupUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -279,8 +279,8 @@ void CloudClient::getScreens()
         return;
     }
 
-    QUrl screensUrl = QUrl(kscreensUrl);
-    QNetworkRequest req(screensUrl);
+    QUrl groupScreensUrl = QUrl(kGroupScreensUrl);
+    QNetworkRequest req(groupScreensUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
