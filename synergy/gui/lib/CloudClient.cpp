@@ -18,6 +18,7 @@
 // http://127.0.0.1:8080/
 static const char kJoinGroupUrl[] = "https://alpha1.cloud.symless.com/group/join";
 static const char kLeaveGroupUrl[] = "https://alpha1.cloud.symless.com/group/leave";
+static const char kUnsubGroupUrl[] = "https://alpha1.cloud.symless.com/group/unsub";
 static const char kLoginUrl[] = "https://alpha1.cloud.symless.com/login";
 static const char kIdentifyUrl[] = "https://alpha1.cloud.symless.com/user/identify";
 static const char kscreensUrl[] = "https://alpha1.cloud.symless.com/group/screens";
@@ -146,7 +147,17 @@ void CloudClient::leaveGroup() {
 
 void CloudClient::unsubGroup()
 {
+    static const QUrl unsubGroupUrl = QUrl(kUnsubGroupUrl);
+    QNetworkRequest req (unsubGroupUrl);
+    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
+    QJsonObject jsonObject;
+    jsonObject.insert("screen", qint64(m_screenId));
+    jsonObject.insert("group", qint64(m_groupId));
+    QJsonDocument doc (jsonObject);
+
+    m_networkManager->post(req, doc.toJson());
 }
 
 

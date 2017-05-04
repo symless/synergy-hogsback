@@ -286,6 +286,7 @@ Rectangle {
                                     id: unsubScreenMouseArea
                                     anchors.fill: parent
                                     onPressed: {
+                                        applicationWindow.cloudClient.unsubGroup()
                                         stackView.toPage("ProfilePage")
                                     }
                                 }
