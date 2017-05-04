@@ -65,9 +65,9 @@ Rectangle {
                     font.family: "Tahoma"
                     font.bold: false
                     horizontalAlignment: Text.AlignHCenter
-                    anchors.top: signInArea.bottom
+                    anchors.top: profileArea.bottom
                     anchors.topMargin: 10
-                    anchors.horizontalCenter: signInArea.horizontalCenter
+                    anchors.horizontalCenter: profileArea.horizontalCenter
                     font.pixelSize: 10
                     text: "This is the profile page"
                 }
