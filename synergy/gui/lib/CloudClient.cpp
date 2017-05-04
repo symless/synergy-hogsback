@@ -9,6 +9,7 @@
 #include <QHostInfo>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QJsonArray>
 #include <QTimer>
 #include <QDebug>
 #include <QEventLoop>
@@ -16,6 +17,7 @@
 
 // https://alpha1.cloud.symless.com/
 // http://127.0.0.1:8080/
+static const char kUserGroupsUrl[] = "http://alpha1.cloud.symless.com/user/groups";
 static const char kJoinGroupUrl[] = "https://alpha1.cloud.symless.com/group/join";
 static const char kLeaveGroupUrl[] = "https://alpha1.cloud.symless.com/group/leave";
 static const char kUnsubGroupUrl[] = "https://alpha1.cloud.symless.com/group/unsub";
@@ -176,6 +178,38 @@ void CloudClient::onUpdateGroupConfigFinished(QNetworkReply *reply)
     }
 }
 
+void CloudClient::onUserGroupsFinished(QNetworkReply *reply)
+{
+    if (replyHasError(reply)) {
+        return;
+    }
+
+    m_Data = reply->readAll();
+    reply->deleteLater();
+    QByteArray token = reply->rawHeader("X-Auth-Token");
+    m_appConfig->setUserToken(token);
+
+    QJsonDocument doc = QJsonDocument::fromJson(m_Data);
+
+    if (doc.isNull()) {
+        return;
+    }
+
+    if (doc.isObject()) {
+        QJsonObject obj = doc.object();
+
+        QJsonArray groups = obj["groups"].toArray();
+
+        foreach (QJsonValue const& v, groups) {
+            QJsonObject obj = v.toObject();
+            int groupId = obj["id"].toInt();
+            QString groupName = obj["name"].toString();
+
+            LogManager::debug(QString("group ID: %1 name: %2").arg(groupId).arg(groupName));
+        }
+    }
+}
+
 void CloudClient::joinGroup(int64_t groupId)
 {
     static const QUrl joinGroupUrl = QUrl(kJoinGroupUrl);
@@ -292,6 +326,23 @@ void CloudClient::getScreens()
     auto reply = m_networkManager->post(req, doc.toJson());
     connect (reply, &QNetworkReply::finished, [this, reply]{
         onGetScreensFinished (reply);
+    });
+}
+
+void CloudClient::userGroups()
+{
+    if (m_appConfig->userToken().isEmpty()) {
+        return;
+    }
+
+    QUrl userGroupsUrl = QUrl(kUserGroupsUrl);
+    QNetworkRequest req(userGroupsUrl);
+    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
+
+    auto reply = m_networkManager->get(req);
+    connect (reply, &QNetworkReply::finished, [this, reply]() {
+        onUserGroupsFinished (reply);
     });
 }
 
