@@ -140,9 +140,6 @@ void CloudClient::leaveGroup() {
     auto reply = m_networkManager->post(req, doc.toJson());
     connect (reply, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
-    /*connect (reply, &QNetworkReply::finished, [this, reply]() {
-       this->onRemoveScreenFinished (reply);
-    });*/
 }
 
 void CloudClient::unsubGroup()
