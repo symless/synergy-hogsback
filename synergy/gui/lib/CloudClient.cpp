@@ -17,7 +17,7 @@
 
 // https://alpha1.cloud.symless.com/
 // http://127.0.0.1:8080/
-static const char kUserGroupsUrl[] = "http://alpha1.cloud.symless.com/user/groups";
+static const char kUserGroupsUrl[] = "https://alpha1.cloud.symless.com/user/groups";
 static const char kJoinGroupUrl[] = "https://alpha1.cloud.symless.com/group/join";
 static const char kLeaveGroupUrl[] = "https://alpha1.cloud.symless.com/group/leave";
 static const char kUnsubGroupUrl[] = "https://alpha1.cloud.symless.com/group/unsub";
