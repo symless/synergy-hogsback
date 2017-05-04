@@ -178,8 +178,8 @@ void CloudClient::onUpdateGroupConfigFinished(QNetworkReply *reply)
 
 void CloudClient::joinGroup(int64_t groupId)
 {
-    static const QUrl addScreenUrl = QUrl(kJoinGroupUrl);
-    QNetworkRequest req (addScreenUrl);
+    static const QUrl joinGroupUrl = QUrl(kJoinGroupUrl);
+    QNetworkRequest req (joinGroupUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -199,13 +199,43 @@ void CloudClient::joinGroup(int64_t groupId)
     screenObject.insert("status", "Disconnected");
 
     QJsonObject groupObject;
-    if (groupId == -1) {
-        groupObject.insert ("name", "default");
-    }
-    else {
-        groupObject.insert ("id", groupId);
+    groupObject.insert ("id", groupId);
+
+    QJsonObject jsonObject;
+    jsonObject.insert("screen", screenObject);
+    jsonObject.insert("group", groupObject);
+    QJsonDocument doc(jsonObject);
+
+    auto reply = m_networkManager->post(req, doc.toJson());
+    connect (reply, &QNetworkReply::finished, [this, reply]() {
+       this->onJoinGroupFinished (reply);
+    });
+}
+
+void CloudClient::joinGroup(QString groupName)
+{
+    static const QUrl joinGroupUrl = QUrl(kJoinGroupUrl);
+    QNetworkRequest req (joinGroupUrl);
+    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
+
+    QStringList ipList;
+
+    foreach (QHostAddress const& address, QNetworkInterface::allAddresses()) {
+        if (address.protocol() == QAbstractSocket::IPv4Protocol &&
+                address != QHostAddress(QHostAddress::LocalHost)) {
+            ipList.push_back(address.toString());
+        }
     }
 
+    QJsonObject screenObject;
+
+    screenObject.insert("name", QHostInfo::localHostName());
+    screenObject.insert("ipList", ipList.join(","));
+    screenObject.insert("status", "Disconnected");
+
+    QJsonObject groupObject;
+    groupObject.insert ("name", groupName);
     QJsonObject jsonObject;
     jsonObject.insert("screen", screenObject);
     jsonObject.insert("group", groupObject);
