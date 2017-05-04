@@ -35,7 +35,7 @@ ApplicationWindow {
     }
 
     onClosing: {
-        cloudClient.removeScreen()
+        cloudClient.leaveGroup()
     }
 
     AccessibilityManager {

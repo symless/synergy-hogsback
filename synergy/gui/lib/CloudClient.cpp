@@ -6,8 +6,10 @@
 
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
+#include <QHostInfo>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QJsonArray>
 #include <QTimer>
 #include <QDebug>
 #include <QEventLoop>
@@ -15,11 +17,13 @@
 
 // https://alpha1.cloud.symless.com/
 // http://127.0.0.1:8080/
+static const char kUserGroupsUrl[] = "https://alpha1.cloud.symless.com/user/groups";
 static const char kJoinGroupUrl[] = "https://alpha1.cloud.symless.com/group/join";
 static const char kLeaveGroupUrl[] = "https://alpha1.cloud.symless.com/group/leave";
+static const char kUnsubGroupUrl[] = "https://alpha1.cloud.symless.com/group/unsub";
 static const char kLoginUrl[] = "https://alpha1.cloud.symless.com/login";
 static const char kIdentifyUrl[] = "https://alpha1.cloud.symless.com/user/identify";
-static const char kscreensUrl[] = "https://alpha1.cloud.symless.com/group/screens";
+static const char kGroupScreensUrl[] = "https://alpha1.cloud.symless.com/group/screens";
 static const char kUpdateGroupConfigUrl[] = "https://alpha1.cloud.symless.com/group/update";
 static const char kReportUrl[] = "https://alpha1.cloud.symless.com/report";
 static const char kClaimServerUrl[] = "https://alpha1.cloud.symless.com/group/server/claim";
@@ -123,9 +127,9 @@ void CloudClient::getUserId(bool initialCall)
                 this, &CloudClient::onReplyError);
 }
 
-void CloudClient::removeScreen() {
-    static const QUrl removeScreenUrl = QUrl(kLeaveGroupUrl);
-    QNetworkRequest req (removeScreenUrl);
+void CloudClient::leaveGroup() {
+    static const QUrl leaveGroupUrl = QUrl(kLeaveGroupUrl);
+    QNetworkRequest req (leaveGroupUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -138,9 +142,21 @@ void CloudClient::removeScreen() {
     auto reply = m_networkManager->post(req, doc.toJson());
     connect (reply, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
-    /*connect (reply, &QNetworkReply::finished, [this, reply]() {
-       this->onRemoveScreenFinished (reply);
-    });*/
+}
+
+void CloudClient::unsubGroup()
+{
+    static const QUrl unsubGroupUrl = QUrl(kUnsubGroupUrl);
+    QNetworkRequest req (unsubGroupUrl);
+    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
+
+    QJsonObject jsonObject;
+    jsonObject.insert("screen", qint64(m_screenId));
+    jsonObject.insert("group", qint64(m_groupId));
+    QJsonDocument doc (jsonObject);
+
+    m_networkManager->post(req, doc.toJson());
 }
 
 
@@ -162,10 +178,42 @@ void CloudClient::onUpdateGroupConfigFinished(QNetworkReply *reply)
     }
 }
 
-void CloudClient::addScreen(QString name)
+void CloudClient::onUserGroupsFinished(QNetworkReply *reply)
 {
-    static const QUrl addScreenUrl = QUrl(kJoinGroupUrl);
-    QNetworkRequest req (addScreenUrl);
+    if (replyHasError(reply)) {
+        return;
+    }
+
+    m_Data = reply->readAll();
+    reply->deleteLater();
+    QByteArray token = reply->rawHeader("X-Auth-Token");
+    m_appConfig->setUserToken(token);
+
+    QJsonDocument doc = QJsonDocument::fromJson(m_Data);
+
+    if (doc.isNull()) {
+        return;
+    }
+
+    if (doc.isObject()) {
+        QJsonObject obj = doc.object();
+
+        QJsonArray groups = obj["groups"].toArray();
+
+        foreach (QJsonValue const& v, groups) {
+            QJsonObject obj = v.toObject();
+            int groupId = obj["id"].toInt();
+            QString groupName = obj["name"].toString();
+
+            LogManager::debug(QString("group ID: %1 name: %2").arg(groupId).arg(groupName));
+        }
+    }
+}
+
+void CloudClient::joinGroup(int64_t groupId)
+{
+    static const QUrl joinGroupUrl = QUrl(kJoinGroupUrl);
+    QNetworkRequest req (joinGroupUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -179,12 +227,13 @@ void CloudClient::addScreen(QString name)
     }
 
     QJsonObject screenObject;
-    screenObject.insert("name", name);
+
+    screenObject.insert("name", QHostInfo::localHostName());
     screenObject.insert("ipList", ipList.join(","));
     screenObject.insert("status", "Disconnected");
 
     QJsonObject groupObject;
-    groupObject.insert ("name", "default");
+    groupObject.insert ("id", groupId);
 
     QJsonObject jsonObject;
     jsonObject.insert("screen", screenObject);
@@ -193,11 +242,46 @@ void CloudClient::addScreen(QString name)
 
     auto reply = m_networkManager->post(req, doc.toJson());
     connect (reply, &QNetworkReply::finished, [this, reply]() {
-       this->onAddScreenFinished (reply);
+       this->onJoinGroupFinished (reply);
     });
 }
 
-void CloudClient::onAddScreenFinished(QNetworkReply* reply)
+void CloudClient::joinGroup(QString groupName)
+{
+    static const QUrl joinGroupUrl = QUrl(kJoinGroupUrl);
+    QNetworkRequest req (joinGroupUrl);
+    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
+
+    QStringList ipList;
+
+    foreach (QHostAddress const& address, QNetworkInterface::allAddresses()) {
+        if (address.protocol() == QAbstractSocket::IPv4Protocol &&
+                address != QHostAddress(QHostAddress::LocalHost)) {
+            ipList.push_back(address.toString());
+        }
+    }
+
+    QJsonObject screenObject;
+
+    screenObject.insert("name", QHostInfo::localHostName());
+    screenObject.insert("ipList", ipList.join(","));
+    screenObject.insert("status", "Disconnected");
+
+    QJsonObject groupObject;
+    groupObject.insert ("name", groupName);
+    QJsonObject jsonObject;
+    jsonObject.insert("screen", screenObject);
+    jsonObject.insert("group", groupObject);
+    QJsonDocument doc(jsonObject);
+
+    auto reply = m_networkManager->post(req, doc.toJson());
+    connect (reply, &QNetworkReply::finished, [this, reply]() {
+       this->onJoinGroupFinished (reply);
+    });
+}
+
+void CloudClient::onJoinGroupFinished(QNetworkReply* reply)
 {
     reply->deleteLater();
     if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200) {
@@ -229,8 +313,8 @@ void CloudClient::getScreens()
         return;
     }
 
-    QUrl screensUrl = QUrl(kscreensUrl);
-    QNetworkRequest req(screensUrl);
+    QUrl groupScreensUrl = QUrl(kGroupScreensUrl);
+    QNetworkRequest req(groupScreensUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -242,6 +326,23 @@ void CloudClient::getScreens()
     auto reply = m_networkManager->post(req, doc.toJson());
     connect (reply, &QNetworkReply::finished, [this, reply]{
         onGetScreensFinished (reply);
+    });
+}
+
+void CloudClient::userGroups()
+{
+    if (m_appConfig->userToken().isEmpty()) {
+        return;
+    }
+
+    QUrl userGroupsUrl = QUrl(kUserGroupsUrl);
+    QNetworkRequest req(userGroupsUrl);
+    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
+
+    auto reply = m_networkManager->get(req);
+    connect (reply, &QNetworkReply::finished, [this, reply]() {
+        onUserGroupsFinished (reply);
     });
 }
 

@@ -24,9 +24,12 @@ public:
     Q_INVOKABLE void getUserToken();
     Q_INVOKABLE bool verifyUser();
     Q_INVOKABLE void getUserId(bool initialCall = true);
-    Q_INVOKABLE void addScreen(QString name);
-    Q_INVOKABLE void removeScreen();
+    Q_INVOKABLE void joinGroup(int64_t groupId);
+    Q_INVOKABLE void joinGroup(QString groupName = "default");
+    Q_INVOKABLE void leaveGroup();
+    Q_INVOKABLE void unsubGroup();
     Q_INVOKABLE void getScreens();
+    Q_INVOKABLE void userGroups();
 
     void report(int destId, QString successfulIp, QString failedIp);
     void updateGroupConfig(QJsonDocument& doc);
@@ -44,9 +47,10 @@ private slots:
     void onGetIdentifyFinished(QNetworkReply* reply);
     void onGetUserIdFinished(QNetworkReply* reply);
     void onGetScreensFinished(QNetworkReply* reply);
-    void onAddScreenFinished(QNetworkReply* reply);
+    void onJoinGroupFinished(QNetworkReply* reply);
     void onRemoveScreenFinished(QNetworkReply* reply);
     void onUpdateGroupConfigFinished(QNetworkReply* reply);
+    void onUserGroupsFinished(QNetworkReply* reply);
     void onReplyError(QNetworkReply::NetworkError code);
     void onRetryGetUserId();
 

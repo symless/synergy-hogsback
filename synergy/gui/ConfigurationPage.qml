@@ -57,7 +57,7 @@ Rectangle {
 
         // add localhost as the initial screen
         Component.onCompleted: {
-            applicationWindow.cloudClient.addScreen(localHostname.hostname())
+            applicationWindow.cloudClient.joinGroup()
         }
 
         // version label
@@ -347,6 +347,7 @@ Rectangle {
                                     id: unsubScreenMouseArea
                                     anchors.fill: parent
                                     onPressed: {
+                                        applicationWindow.cloudClient.unsubGroup()
                                         stackView.toPage("ProfilePage")
                                     }
                                 }
