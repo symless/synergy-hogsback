@@ -85,7 +85,7 @@ Rectangle {
                             hint.text = "Synergy needs your help before it can control your Mac"
                         }
                         else if (tutorial.currentFrame <= 63) {
-                            hint.text = "Open Security & Pravicy Preferences"
+                            hint.text = "Open Security & Privacy Preferences"
                         }
                         else if (tutorial.currentFrame <= 134) {
                             hint.text = "Click the padlock at the bottom left"
@@ -94,7 +94,7 @@ Rectangle {
                             hint.text = "You will be asked to enter your macOS password"
                         }
                         else {
-                            hint.text = "Finally, tick Synergy in the App list"
+                            hint.text = "Finally, tick Synergy in the app list"
                         }
                     }
                 }

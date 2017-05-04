@@ -4,7 +4,6 @@ import QtQuick.Controls 1.2
 import com.synergy.gui 1.0
 
 Rectangle {
-
     Item {
         id: profilePage
         anchors.fill: parent
@@ -12,7 +11,9 @@ Rectangle {
         Rectangle {
             id: rectangle1
             anchors.fill: parent
-            color:"#3f95b8"
+            color:"#E5E4E4"
+            border.width: 1
+            border.color: "black"
 
             Version {
                 anchors.left: parent.left
@@ -52,8 +53,8 @@ Rectangle {
 
             Rectangle {
                 id: profileArea
-                width: 350
-                height: 235
+                width: parent.width * 0.618
+                height: parent.height * 0.618
                 color: "black"
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.verticalCenter: parent.verticalCenter
@@ -61,13 +62,13 @@ Rectangle {
                 Text {
                     id: hint
                     z: 1
-                    color: "White"
+                    color: "black"
                     font.family: "Tahoma"
                     font.bold: false
                     horizontalAlignment: Text.AlignHCenter
-                    anchors.top: signInArea.bottom
+                    anchors.top: profileArea.bottom
                     anchors.topMargin: 10
-                    anchors.horizontalCenter: signInArea.horizontalCenter
+                    anchors.horizontalCenter: profileArea.horizontalCenter
                     font.pixelSize: 10
                     text: "This is the profile page"
                 }

@@ -20,5 +20,9 @@
         <file>res/image/type-password.png</file>
         <file>res/image/accessibility-tutorial.gif</file>
         <file>ProfilePage.qml</file>
+        <file>res/image/profile-icon.svg</file>
+        <file>ProfileMenuButton.qml</file>
+        <file>ProfileMenu.qml</file>
+        <file>SynergyButtonStyle.qml</file>
     </qresource>
 </RCC>

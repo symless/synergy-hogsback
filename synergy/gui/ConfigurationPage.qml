@@ -1,5 +1,5 @@
-import QtQuick 2.0
-import QtQuick.Controls 1.2
+import QtQuick 2.7
+import QtQuick.Controls 1.4
 
 import com.synergy.gui 1.0
 
@@ -66,6 +66,7 @@ Rectangle {
             anchors.leftMargin: 5
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 5
+            z: 2
         }
 
         // background header
@@ -74,19 +75,78 @@ Rectangle {
             anchors.top: parent.top
             width: parent.width
             height: 70
-            color:"white"
-            z: 1
+            color: "white"
+            z: 2
 
             // Synergy logo
             Image {
                 id: logoImage
                 anchors.left: parent.left
-                anchors.leftMargin: 15
+                anchors.leftMargin: 20
                 anchors.verticalCenter: parent.verticalCenter
-                height: parent.height - 20
                 fillMode: Image.PreserveAspectFit
                 smooth: true
                 source: "qrc:/res/image/synergy-icon.png"
+            }
+
+            Image {
+                id: profileButton
+                anchors.right: parent.right
+                anchors.rightMargin: 20
+                anchors.verticalCenter: parent.verticalCenter
+                source: "qrc:/res/image/profile-icon.svg"
+                sourceSize.width: 36
+                sourceSize.height: 28
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        profileMenu.visible = !profileMenu.visible;
+                        openProfileMenuAnimation.running = profileMenu.visible
+                        closeProfileMenuAnimation.running = !openProfileMenuAnimation.running
+                    }
+                }
+            }
+
+            ProfileMenu {
+                id: profileMenu
+                visible: false
+                x: profileButton.x - width + profileButton.width
+                y: profileButton.y + profileButton.height + 10
+
+                ParallelAnimation {
+                    id: openProfileMenuAnimation
+                    ScaleAnimator {
+                        target: profileMenu
+                        from: 0
+                        to: 1
+                        duration: 400
+                    }
+                    OpacityAnimator {
+                        target: profileMenu;
+                        from: 0;
+                        to: 1;
+                        duration: 600
+                    }
+                    running: false;
+                }
+
+                ParallelAnimation {
+                    id: closeProfileMenuAnimation
+                    ScaleAnimator {
+                        target: profileMenu
+                        from: 1
+                        to: 0
+                        duration: 400
+                    }
+                    OpacityAnimator {
+                        target: profileMenu;
+                        from: 1;
+                        to: 0;
+                        duration: 600
+                    }
+                    running: false;
+                }
             }
         }
 
@@ -154,9 +214,10 @@ Rectangle {
         // hostname
         Text {
             id: hostname
-            z: 1
+            z: 2
             text: localHostname.hostname()
-            font.family: "Tahoma"
+            color: "#4D4D4D"
+            font.family: "AlternateGotNo3D"
             font.bold: false
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
@@ -258,10 +319,10 @@ Rectangle {
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: name
-                                font.pixelSize: 15
-                                minimumPixelSize: 15
+                                font.pixelSize: 18
+                                minimumPixelSize: 18
                                 color: screenStatus == "Connected" ? "black" : "white"
-                                font.family: "Tahoma"
+                                font.family: "AlternateGotNo3D"
                                 fontSizeMode: Text.HorizontalFit
                                 horizontalAlignment: Text.AlignHCenter
                                 elide: Text.ElideRight

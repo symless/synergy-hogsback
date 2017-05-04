@@ -28,7 +28,10 @@ add_executable (${PROJECT_NAME} WIN32
     CustomBorder.qml
     CustomCheckBox.qml
     ProfilePage.qml
+    ProfileMenu.qml
+    ProfileMenuButton.qml
     Version.qml
+    SynergyButtonStyle.qml
 )
 
 target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC

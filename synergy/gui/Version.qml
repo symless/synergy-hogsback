@@ -8,7 +8,7 @@ Rectangle {
     z: 1
 
     property color textColor :  "white"
-    property string fontFamily : "Sans"
+    property string fontFamily : "sans"
 
     Text {
         id: versionNumber
@@ -16,7 +16,7 @@ Rectangle {
         color: textColor
         text: "Version: Synergy 2.0-alpha3"
         font.family: fontFamily
-        font.pointSize: 11
+        font.pointSize: 8
         renderType: Text.NativeRendering
     }
 
@@ -26,7 +26,7 @@ Rectangle {
         color: textColor
         text: "Alpha testing only, do not redistribute"
         font.family: fontFamily
-        font.pointSize: 11
+        font.pointSize: 8
         renderType: Text.NativeRendering
     }
 }
