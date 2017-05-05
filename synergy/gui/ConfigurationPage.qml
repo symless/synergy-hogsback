@@ -121,6 +121,10 @@ Rectangle {
                 x: profileButton.x - width + profileButton.width
                 y: profileButton.y + profileButton.height + 10
 
+                onProfileCreated: {
+                    applicationWindow.cloudClient.joinGroup(name)
+                }
+
                 ParallelAnimation {
                     id: openProfileMenuAnimation
                     ScaleAnimator {

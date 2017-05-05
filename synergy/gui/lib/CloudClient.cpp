@@ -197,7 +197,6 @@ void CloudClient::onUserGroupsFinished(QNetworkReply *reply)
             QJsonObject obj = v.toObject();
             int groupId = obj["id"].toInt();
             QString groupName = obj["name"].toString();
-
             LogManager::debug(QString("group ID: %1 name: %2").arg(groupId).arg(groupName));
         }
     }

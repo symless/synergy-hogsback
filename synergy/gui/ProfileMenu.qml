@@ -5,6 +5,7 @@ import QtQuick.Controls.Styles 1.4
 import com.synergy.gui 1.0
 
 Rectangle {
+   signal profileCreated (string name)
    id: profileMenuFrame
    color: "#4D4D4D"
    width: 160
@@ -12,20 +13,19 @@ Rectangle {
 
    Rectangle {
        id: profileMenu
-       visible: isOpen
-       focus: isOpen
+       visible: true
+       focus: true
        width: parent.width - 2
        height: childrenRect.height
        anchors {
            margins: 1
            centerIn: parent
        }
-       property bool isOpen: true
-       signal switchProfile (int profileId)
 
        Column {
            id: profileList
            width: parent.width
+           property int editIndex: -1;
            anchors {
                top: parent.top
                horizontalCenter: parent.horizontalCenter
@@ -39,23 +39,19 @@ Rectangle {
                id: profileListView
                model: profileListModel
                delegate: ProfileMenuButton {
-                   profileName: profile.name
-                   profileId: profile.id
+                   profileName: profName
+                   profileId: profId
+                   editFocus: profileList.editIndex == index
+
+                   onEditCompleted: {
+                        profileList.editIndex = -1
+                        profileCreated (profileName)
+                   }
+                   onEditCancelled: {
+                        profileList.editIndex = -1
+                        profileListModel.pop()
+                   }
                }
-           }
-
-           ProfileMenuButton {
-               profileName: "Work"
-               profileId: 2
-               onButtonClicked: switchProfile(profileId);
-               clicked: true
-           }
-
-           ProfileMenuButton {
-               profileName: "Big Momma's House"
-               profileId: 2
-               onButtonClicked: switchProfile(profileId);
-               clicked: true
            }
 
            Rectangle {
@@ -75,6 +71,12 @@ Rectangle {
                        anchors.margins: 10
                        anchors.fill: parent
                        style: SynergyButtonStyle {}
+                       activeFocusOnPress: true
+                       onClicked: {
+                           if (profileList.editIndex == -1) {
+                                profileList.editIndex = profileListModel.add()
+                           }
+                       }
                    }
                }
             }

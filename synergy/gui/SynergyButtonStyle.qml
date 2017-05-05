@@ -20,6 +20,6 @@ ButtonStyle {
    background: Rectangle {
         implicitWidth: 100
         implicitHeight: 25
-        color: control.hovered ? "#5D7CBD" : "#4D4D4D"
+        color: "#4D4D4D"
    }
 }
