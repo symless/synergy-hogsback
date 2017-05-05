@@ -152,23 +152,16 @@ void CloudClient::unsubGroup()
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
     QJsonObject jsonObject;
-    jsonObject.insert("screen", qint64(m_screenId));
-    jsonObject.insert("group", qint64(m_groupId));
+    jsonObject.insert("screenId", qint64(m_screenId));
+    jsonObject.insert("groupId", qint64(m_groupId));
     QJsonDocument doc (jsonObject);
 
-    m_networkManager->post(req, doc.toJson());
-}
+    auto reply = m_networkManager->post(req, doc.toJson());
 
+    connect (reply, &QNetworkReply::finished, [this, reply](){
+        onUnsubGroupFinished (reply);
+    });
 
-void CloudClient::onRemoveScreenFinished(QNetworkReply* reply)
-{
-    reply->deleteLater();
-    if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200) {
-        return;
-    }
-
-    m_screenId = -1;
-    m_groupId = -1;
 }
 
 void CloudClient::onUpdateGroupConfigFinished(QNetworkReply *reply)
@@ -208,6 +201,16 @@ void CloudClient::onUserGroupsFinished(QNetworkReply *reply)
             LogManager::debug(QString("group ID: %1 name: %2").arg(groupId).arg(groupName));
         }
     }
+}
+
+void CloudClient::onUnsubGroupFinished(QNetworkReply *reply)
+{
+    if (replyHasError(reply)) {
+        return;
+    }
+
+    m_groupId = -1;
+    syncConfig();
 }
 
 void CloudClient::joinGroup(QString groupName)

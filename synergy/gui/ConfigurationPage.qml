@@ -32,6 +32,13 @@ Rectangle {
         cloudClient: applicationWindow.cloudClient
     }
 
+    Connections {
+        target: screenManager
+        onLocalhostUnsubscribed: {
+            stackView.toPage("ProfilePage")
+        }
+    }
+
     // TODO: This is for testing, remove before release
     Connections {
         target: applicationWindow
@@ -348,7 +355,6 @@ Rectangle {
                                     anchors.fill: parent
                                     onPressed: {
                                         applicationWindow.cloudClient.unsubGroup()
-                                        stackView.toPage("ProfilePage")
                                     }
                                 }
                             }

@@ -47,9 +47,9 @@ private slots:
     void onGetUserIdFinished(QNetworkReply* reply);
     void onGetScreensFinished(QNetworkReply* reply);
     void onJoinGroupFinished(QNetworkReply* reply);
-    void onRemoveScreenFinished(QNetworkReply* reply);
     void onUpdateGroupConfigFinished(QNetworkReply* reply);
     void onUserGroupsFinished(QNetworkReply* reply);
+    void onUnsubGroupFinished(QNetworkReply* reply);
     void onReplyError(QNetworkReply::NetworkError code);
     void onRetryGetUserId();
 

@@ -239,14 +239,20 @@ void ScreenManager::updateScreens(QByteArray reply)
                 latestScreenList.push_back(screen);
             }
 
-            if (!latestScreenNameSet.contains(m_localHostname)) {
+            if (!latestScreenNameSet.contains(m_localHostname) &&
+                m_appConfig->groupId() != -1) {
                 latestScreenNameSet.insert(m_localHostname);
                 updateLocalHost = true;
             }
+
             // remove unsub screen
             m_screenNameSet.subtract(latestScreenNameSet);
             for (const QString& name : m_screenNameSet) {
                 removeScreen(name);
+
+                if (name == m_localHostname) {
+                    emit localhostUnsubscribed();
+                }
             }
 
             m_screenNameSet = latestScreenNameSet;

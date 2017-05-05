@@ -50,6 +50,7 @@ public:
 signals:
     void updateGroupConfig();
     void newServer(int serverId);
+    void localhostUnsubscribed();
 
 private:
     int processMode();
