@@ -26,6 +26,7 @@ set (GUI_LIB_SOURCES
     ScreenManager.cpp
     Profile.cpp
     ProfileListModel.cpp
+    ProfileManager.cpp
     ServerInfo.cpp
     TestDelegatee.cpp
     ${GUI_LIB_MACOS_SOURCES}

@@ -6,6 +6,7 @@
 #include <QNetworkReply>
 #include <QTime>
 #include <QObject>
+#include <QQmlEngine>
 
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -35,10 +36,13 @@ public:
     void claimServer();
     void updateScreen(const Screen& screen);
 
+    static QObject* instance(QQmlEngine* engine = NULL, QJSEngine* scriptEngine = NULL);
+
 signals:
     void loginOk();
     void loginFail(QString error);
     void receivedScreens(QByteArray reply);
+    void receivedGroups(QMap<QString, int>);
     void invalidAuth();
 
 private slots:

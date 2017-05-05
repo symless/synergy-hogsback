@@ -12,14 +12,9 @@ ApplicationWindow {
     minimumHeight: 600
     title: qsTr("Synergy")
     signal keyReceived(int key)
-    property alias cloudClient: cloudClient
-
-    CloudClient {
-        id: cloudClient
-    }
 
     Connections {
-        target: cloudClient
+        target: CloudClient
         onLoginOk: {
             AppConfig.save()
             stackView.push(stackView.nextPage())
@@ -27,15 +22,15 @@ ApplicationWindow {
     }
 
     Connections {
-        target: cloudClient
+        target: CloudClient
         onInvalidAuth: {
             AppConfig.clearAuth()
-            toPage("ActivationPage")
+            stackView.toPage("ActivationPage")
         }
     }
 
     onClosing: {
-        cloudClient.leaveGroup()
+        CloudClient.leaveGroup()
     }
 
     AccessibilityManager {
@@ -54,7 +49,7 @@ ApplicationWindow {
         function nextPage() {
             if (!accessibilityManager.processHasAccessibility()) {
                 return {item : Qt.resolvedUrl("AccessibilityPage.qml"), properties: { objectName: "AccessibilityPage"}}
-            } else if (cloudClient.verifyUser()) {
+            } else if (CloudClient.verifyUser()) {
                 return {item : Qt.resolvedUrl("ConfigurationPage.qml"), properties: { objectName: "ConfigurationPage"}}
             } else {
                 return {item : Qt.resolvedUrl("ActivationPage.qml"), properties: { objectName: "ActivationPage"}}
@@ -69,7 +64,7 @@ ApplicationWindow {
             if (stackView.currentItem) {
                 stackView.currentItem.forceActiveFocus()
                 if (stackView.currentItem.objectName == "ActivationPage") {
-                    cloudClient.getUserToken()
+                    CloudClient.getUserToken()
                 }
             }
         }

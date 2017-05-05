@@ -6,13 +6,13 @@ import com.synergy.gui 1.0
 
 Rectangle {
    signal profileCreated (string name)
-   id: profileMenuFrame
+   property ProfileListModel listModel: ProfileManager.listModel()
+   id: profileMenu
    color: "#4D4D4D"
    width: 160
    height: childrenRect.height + 2
 
    Rectangle {
-       id: profileMenu
        visible: true
        focus: true
        width: parent.width - 2
@@ -31,13 +31,9 @@ Rectangle {
                horizontalCenter: parent.horizontalCenter
            }
 
-           ProfileListModel {
-               id: profileListModel
-           }
-
            Repeater {
                id: profileListView
-               model: profileListModel
+               model: profileMenu.listModel
                delegate: ProfileMenuButton {
                    profileName: profName
                    profileId: profId
@@ -49,7 +45,7 @@ Rectangle {
                    }
                    onEditCancelled: {
                         profileList.editIndex = -1
-                        profileListModel.pop()
+                        profileMenu.listModel.pop()
                    }
                }
            }
@@ -74,7 +70,7 @@ Rectangle {
                        activeFocusOnPress: true
                        onClicked: {
                            if (profileList.editIndex == -1) {
-                                profileList.editIndex = profileListModel.add()
+                                profileList.editIndex = profileMenu.listModel.add()
                            }
                        }
                    }

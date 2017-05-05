@@ -3,8 +3,6 @@
 
 ProfileListModel::ProfileListModel()
 {
-    m_profiles.emplace_back (1, QString("Home"));
-    m_profiles.emplace_back (2, QString("Work"));
 }
 
 int
@@ -53,4 +51,17 @@ ProfileListModel::pop()
     beginRemoveRows(QModelIndex(), rowCount() - 1, rowCount() - 1);
     m_profiles.pop_back();
     endRemoveRows();
+}
+
+void
+ProfileListModel::loadFromMap(QMap<QString, int> groupMap)
+{
+    beginRemoveRows(QModelIndex(), 0, rowCount() ? rowCount() - 1 : 0);
+    m_profiles.clear();
+    endRemoveRows();
+    beginInsertRows(QModelIndex(), 0, groupMap.size() ? groupMap.size() - 1 : 0);
+    for (auto& key: groupMap.keys()) {
+        m_profiles.emplace_back (-1, key); /* TODO: actually insert profile id */
+    }
+    endInsertRows();
 }

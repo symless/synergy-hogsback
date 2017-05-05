@@ -15,7 +15,6 @@ Rectangle {
 
     ConnectivityTester {
         id: connectivityTester
-        cloudClient: applicationWindow.cloudClient
     }
 
     ProcessManager {
@@ -29,7 +28,6 @@ Rectangle {
         processManager: processManager
         viewWidth: screenArrangementScrollView.width
         viewHeight: screenArrangementScrollView.height
-        cloudClient: applicationWindow.cloudClient
     }
 
     Connections {
@@ -64,7 +62,8 @@ Rectangle {
 
         // add localhost as the initial screen
         Component.onCompleted: {
-            applicationWindow.cloudClient.joinGroup()
+            CloudClient.joinGroup()
+            CloudClient.userGroups()
         }
 
         // version label
@@ -122,7 +121,14 @@ Rectangle {
                 y: profileButton.y + profileButton.height + 10
 
                 onProfileCreated: {
-                    applicationWindow.cloudClient.joinGroup(name)
+                    CloudClient.joinGroup(name)
+                }
+
+                onVisibleChanged: {
+                    if (visible) {
+                        CloudClient.userGroups()
+                        listModel = ProfileManager.listModel()
+                    }
                 }
 
                 ParallelAnimation {
@@ -358,7 +364,7 @@ Rectangle {
                                     id: unsubScreenMouseArea
                                     anchors.fill: parent
                                     onPressed: {
-                                        applicationWindow.cloudClient.unsubGroup()
+                                        CloudClient.unsubGroup()
                                     }
                                 }
                             }

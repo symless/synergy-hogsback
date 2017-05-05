@@ -97,7 +97,7 @@ Rectangle {
                                 Qt.openUrlExternally(url)
 
                                 hint.text = ""
-                                cloudClient.getUserId()
+                                CloudClient.getUserId()
                             }
                             else {
                                 hint.text = "Can't connect with Synergy Cloud. Please check your Internet connection."
@@ -180,7 +180,7 @@ Rectangle {
                             hint.text = ""
 
                             // contact Cloud
-                            cloudClient.login(email.text, password.text)
+                            CloudClient.login(email.text, password.text)
                         }
                         else {
                             hint.text = "Empty email or password"
@@ -212,14 +212,14 @@ Rectangle {
             }
 
             Connections {
-                target: cloudClient
+                target: CloudClient
                 onLoginFail: {
                     hint.text = error
                 }
             }
 
             Connections {
-                target: cloudClient
+                target: CloudClient
                 onInvalidAuth: {
                     hint.text = "Invalid credentials. Please login again."
                 }

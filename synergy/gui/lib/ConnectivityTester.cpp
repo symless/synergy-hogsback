@@ -26,23 +26,17 @@ ConnectivityTester::ConnectivityTester(QObject* parent) :
 
     connect(this, &ConnectivityTester::startTesting, this,
         &ConnectivityTester::onStartTesting);
+
+    m_cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
+    connect(m_cloudClient, SIGNAL(receivedScreens(QByteArray)), this,
+            SLOT(testNewScreens(QByteArray)));
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(pollScreens()));
+    m_timer.start(1000);
 }
 
 ConnectivityTester::~ConnectivityTester()
 {
     delete m_tcpServer;
-}
-
-void ConnectivityTester::setCloudClient(CloudClient* cloudClient)
-{
-    if (cloudClient == NULL) return;
-
-    m_cloudClient = cloudClient;
-
-    connect(m_cloudClient, SIGNAL(receivedScreens(QByteArray)), this,
-            SLOT(testNewScreens(QByteArray)));
-    connect(&m_timer, SIGNAL(timeout()), this, SLOT(pollScreens()));
-    m_timer.start(1000);
 }
 
 QStringList ConnectivityTester::getSuccessfulResults(int screenId) const
