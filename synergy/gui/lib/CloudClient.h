@@ -24,7 +24,6 @@ public:
     Q_INVOKABLE void getUserToken();
     Q_INVOKABLE bool verifyUser();
     Q_INVOKABLE void getUserId(bool initialCall = true);
-    Q_INVOKABLE void joinGroup(int64_t groupId);
     Q_INVOKABLE void joinGroup(QString groupName = "default");
     Q_INVOKABLE void leaveGroup();
     Q_INVOKABLE void unsubGroup();
