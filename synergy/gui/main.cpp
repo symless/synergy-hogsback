@@ -8,6 +8,7 @@
 #include "AppConfig.h"
 #include "Hostname.h"
 #include "Common.h"
+#include <ProfileListModel.h>
 
 #include <QApplication>
 #include <QtQuick>
@@ -32,14 +33,16 @@ int main(int argc, char* argv[])
         qmlRegisterType<AccessibilityManager>("com.synergy.gui", 1, 0, "AccessibilityManager");
         qmlRegisterType<CloudClient>("com.synergy.gui", 1, 0, "CloudClient");
         qmlRegisterType<ConnectivityTester>("com.synergy.gui", 1, 0, "ConnectivityTester");
+        qRegisterMetaType<Profile>();
+        qmlRegisterType<Profile>("com.synergy.gui", 1, 0, "Profile");
+        qmlRegisterType<ProfileListModel>("com.synergy.gui", 1, 0, "ProfileListModel");
         qmlRegisterSingletonType<AppConfig>("com.synergy.gui", 1, 0, "AppConfig", AppConfig::instance);
 
         QQmlApplicationEngine engine;
         LogManager::instance();
         LogManager::setQmlContext(engine.rootContext());
         LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
-        engine.load(QUrl(QStringLiteral("qrc:/main.qml")))
-                ;
+        engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
         QIcon icon(":res/image/synergy-icon.png");
         app.setWindowIcon(icon);
 

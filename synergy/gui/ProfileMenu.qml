@@ -2,6 +2,8 @@ import QtQuick 2.0
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 
+import com.synergy.gui 1.0
+
 Rectangle {
    id: profileMenuFrame
    color: "#4D4D4D"
@@ -29,10 +31,17 @@ Rectangle {
                horizontalCenter: parent.horizontalCenter
            }
 
-           ProfileMenuButton {
-               profileName: "Home"
-               profileId: 1
-               onButtonClicked: switchProfile(profileId);
+           ProfileListModel {
+               id: profileListModel
+           }
+
+           Repeater {
+               id: profileListView
+               model: profileListModel
+               delegate: ProfileMenuButton {
+                   profileName: profile.name
+                   profileId: profile.id
+               }
            }
 
            ProfileMenuButton {
@@ -51,7 +60,7 @@ Rectangle {
 
            Rectangle {
                id: profileMenuOptions
-               height: 45
+               height: 50
                width: parent.width
                color: "#4D4D4D"
 
@@ -62,7 +71,7 @@ Rectangle {
                     height: parent.height - 1
 
                     Button {
-                       text: "Save"
+                       text: "New Profile"
                        anchors.margins: 10
                        anchors.fill: parent
                        style: SynergyButtonStyle {}

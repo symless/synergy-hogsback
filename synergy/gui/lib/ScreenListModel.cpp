@@ -111,7 +111,7 @@ QModelIndex ScreenListModel::getIndex(int row, int column,
                                  const QModelIndex& parent) const
 {
     return hasIndex(row, column, parent) ?
-                createIndex(row, column, (void*)&m_screens[row])
+                createIndex(row, column, nullptr)
                 : QModelIndex();
 }
 

@@ -24,6 +24,8 @@ set (GUI_LIB_SOURCES
     ScreenListModel.cpp
     ScreenListSnapshotManager.cpp
     ScreenManager.cpp
+    Profile.cpp
+    ProfileListModel.cpp
     ServerInfo.cpp
     TestDelegatee.cpp
     ${GUI_LIB_MACOS_SOURCES}
