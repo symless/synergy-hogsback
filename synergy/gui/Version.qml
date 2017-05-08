@@ -16,7 +16,7 @@ Rectangle {
         color: textColor
         text: "Version: Synergy 2.0-alpha3"
         font.family: fontFamily
-        font.pointSize: 8
+        font.pointSize: 12
         renderType: Text.NativeRendering
     }
 
@@ -26,7 +26,7 @@ Rectangle {
         color: textColor
         text: "Alpha testing only, do not redistribute"
         font.family: fontFamily
-        font.pointSize: 8
+        font.pointSize: 12
         renderType: Text.NativeRendering
     }
 }
