@@ -81,20 +81,17 @@ Rectangle {
                     source: "qrc:/res/image/accessibility-tutorial.gif"
 
                     onFrameChanged: {
-                        if (tutorial.currentFrame <= 23) {
-                            hint.text = "Synergy needs your help before it can control your Mac"
-                        }
-                        else if (tutorial.currentFrame <= 63) {
-                            hint.text = "Open Security & Privacy Preferences"
-                        }
-                        else if (tutorial.currentFrame <= 134) {
+                        if (tutorial.currentFrame <= 105) {
                             hint.text = "Click the padlock at the bottom left"
                         }
-                        else if (tutorial.currentFrame <= 167) {
+                        else if (tutorial.currentFrame <= 209) {
                             hint.text = "You will be asked to enter your macOS password"
                         }
+                        else if (tutorial.currentFrame <= 273) {
+                            hint.text = "Tick Synergy in the app list"
+                        }
                         else {
-                            hint.text = "Finally, tick Synergy in the app list"
+                            hint.text = "Close Security & Privacy Preferences"
                         }
                     }
                 }
@@ -104,7 +101,7 @@ Rectangle {
                     color: "white"
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: tutorial.bottom
-                    anchors.topMargin: 45
+                    anchors.topMargin: 10
                     font.bold: false
                     horizontalAlignment: Text.AlignHCenter
                     font.pointSize: 18
@@ -118,6 +115,39 @@ Rectangle {
                             NumberAnimation { target: hint; property: "opacity"; to: 1 }
                         }
                     }
+                }
+
+                Rectangle {
+                    id: openAccessibilityButton
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: hint.bottom
+                    anchors.topMargin: 25
+                    width: childrenRect.width + 30
+                    height: childrenRect.height + 20
+                    color: "#4D4D4D"
+
+                    Text {
+                        id: openAccessibilityText
+                        color: "white"
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        font.bold: false
+                        font.pointSize: 14
+                        font.underline: apenAccessibilityMouseArea.containsMouse
+                        font.family: "Myriad Pro"
+                        renderType: Text.NativeRendering
+                        text: "Open Security & Privacy Preferences"
+                    }
+
+                    MouseArea {
+                        id: apenAccessibilityMouseArea
+                        anchors.fill: openAccessibilityText
+                        hoverEnabled: true
+                        onClicked: {
+                            accessibilityManager.openAccessibilityDialog()
+                        }
+                    }
+
                 }
             }
         }
