@@ -6,10 +6,6 @@ Rectangle {
         id: accessibilityPage
         anchors.fill: parent
 
-        Component.onCompleted: {
-            accessibilityManager.openAccessibilityDialog()
-        }
-
         Timer {
             id: accessibilityPullingTimer
             interval: 500; running: true; repeat: true
