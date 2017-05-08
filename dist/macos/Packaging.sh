@@ -108,8 +108,8 @@ echo '
            set arrangement of viewOptions to not arranged
            set icon size of viewOptions to 72
            set background picture of viewOptions to file ".background:'${DMG_BACKGROUND_IMG}'"
-           set position of item "'${APP_NAME}'.app" of container window to {155, 233}
-           set position of item "Applications" of container window to {347, 232}
+           set position of item "'${APP_NAME}'.app" of container window to {145, 270}
+           set position of item "Applications" of container window to {355, 270}
            close
            open
            update without registering applications
