@@ -60,6 +60,7 @@ private slots:
     void updateScreens(QByteArray reply);
     void onUpdateGroupConfig();
     void onScreenStatusChanged(QPair<QString, ScreenStatus> r);
+    void onLocalInputDetected();
 
 private:
     ScreenListModel* m_screenListModel;

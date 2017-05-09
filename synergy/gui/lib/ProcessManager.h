@@ -32,6 +32,7 @@ public:
 
 signals:
     void screenStatusChanged(QPair<QString, ScreenStatus>);
+    void localInputDetected();
 
 public slots:
      void newServerDetected(int serverId);

@@ -91,6 +91,8 @@ void ScreenManager::setProcessManager(ProcessManager* processManager)
         &ProcessManager::newServerDetected);
     connect(m_processManager, &ProcessManager::screenStatusChanged, this,
         &ScreenManager::onScreenStatusChanged);
+    connect(m_processManager, &ProcessManager::localInputDetected, this,
+            &ScreenManager::onLocalInputDetected);
 }
 
 void ScreenManager::setViewWidth(int w)
@@ -315,4 +317,9 @@ void ScreenManager::onScreenStatusChanged(QPair<QString, ScreenStatus> r)
 
         m_cloudClient->updateScreen(s);
     }
+}
+
+void ScreenManager::onLocalInputDetected()
+{
+    m_cloudClient->claimServer();
 }

@@ -195,6 +195,8 @@ void ProcessManager::logCoreOutput()
                     r.first = QHostInfo::localHostName();
                     r.second = kConnecting;
                     emit screenStatusChanged(r);
+                } else if (line.contains("local input detected")) {
+                    emit localInputDetected();
                 }
             }
         }
