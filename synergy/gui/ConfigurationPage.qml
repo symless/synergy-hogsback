@@ -45,7 +45,7 @@ Rectangle {
         onKeyReceived: {
             screenManager.onKeyPressed(key)
 
-            if (key == Qt.Key_QuoteLeft) {
+            if (key == Qt.Key_Tab) {
                 if (logConsole.height === 0) {
                     logConsole.height = 100
                 }
