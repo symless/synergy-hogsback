@@ -15,10 +15,19 @@
 #include <QQmlApplicationEngine>
 #include <stdexcept>
 
+#ifdef Q_OS_DARWIN
+#include <cstdlib>
+#endif
+
 void openAccessibilityDialog();
 
 int main(int argc, char* argv[])
 {
+#ifdef Q_OS_DARWIN
+    /* Workaround for QTBUG-40332 - "High ping when QNetworkAccessManager is instantiated" */
+    ::setenv ("QT_BEARER_POLL_TIMEOUT", "-1", 1);
+#endif
+
     QCoreApplication::setOrganizationName("Symless");
     QCoreApplication::setOrganizationDomain("http://symless.com/");
     QCoreApplication::setApplicationName("Synergy v2");
