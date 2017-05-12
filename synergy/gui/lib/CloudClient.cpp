@@ -267,8 +267,15 @@ void CloudClient::onJoinGroupFinished(QNetworkReply* reply)
         return;
     }
 
+    int64_t originalGroupId = m_groupId;
+
     m_screenId = screen.toInt();
     m_groupId = group.toInt();
+
+    // HACK: Remove this hack after we have profile finished
+    if (m_groupId != originalGroupId) {
+        claimServer();
+    }
 
     syncConfig();
 }

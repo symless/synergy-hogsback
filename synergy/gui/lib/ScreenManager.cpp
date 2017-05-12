@@ -263,15 +263,6 @@ void ScreenManager::updateScreens(QByteArray reply)
         }
     }
 
-    if (newServerDetected) {
-        updateConfigFile();
-        emit newServer(serverId);
-        m_previousServerId = serverId;
-
-        QPair<QString, ScreenStatus> p (m_localHostname, kConnecting);
-        onScreenStatusChanged(p);
-    }
-
     if (updateLocalHost) {
         removeScreen(m_localHostname);
         Screen screen(m_localHostname);
@@ -279,6 +270,15 @@ void ScreenManager::updateScreens(QByteArray reply)
         m_arrangementStrategy->addScreen(m_screenListModel, screen);
 
         emit updateGroupConfig();
+    }
+
+    if (newServerDetected) {
+        updateConfigFile();
+        emit newServer(serverId);
+        m_previousServerId = serverId;
+
+        QPair<QString, ScreenStatus> p (m_localHostname, kConnecting);
+        onScreenStatusChanged(p);
     }
 }
 
