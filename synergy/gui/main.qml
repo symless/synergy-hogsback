@@ -74,7 +74,7 @@ ApplicationWindow {
             }
         }
 
-        function toPage(name) {       
+        function toPage(name) {
             var r = stackView.find(function(item) {
                 return item.objectName === name
             })
