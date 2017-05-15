@@ -29,7 +29,6 @@ ApplicationWindow {
     Connections {
         target: cloudClient
         onInvalidAuth: {
-            AppConfig.clearAuth()
             stackView.toPage("ActivationPage")
         }
     }
@@ -69,6 +68,7 @@ ApplicationWindow {
             if (stackView.currentItem) {
                 stackView.currentItem.forceActiveFocus()
                 if (stackView.currentItem.objectName == "ActivationPage") {
+                    AppConfig.clearAuth()
                     cloudClient.getUserToken()
                 }
             }
