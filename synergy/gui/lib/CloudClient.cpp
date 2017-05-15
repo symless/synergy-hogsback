@@ -17,18 +17,22 @@
 
 // https://alpha1.cloud.symless.com/
 // http://127.0.0.1:8080/
-static const char kUserGroupsUrl[] = "https://alpha1.cloud.symless.com/user/groups";
-static const char kJoinGroupUrl[] = "https://alpha1.cloud.symless.com/group/join";
-static const char kLeaveGroupUrl[] = "https://alpha1.cloud.symless.com/group/leave";
-static const char kUnsubGroupUrl[] = "https://alpha1.cloud.symless.com/group/unsub";
-static const char kLoginUrl[] = "https://alpha1.cloud.symless.com/login";
-static const char kIdentifyUrl[] = "https://alpha1.cloud.symless.com/user/identify";
-static const char kGroupScreensUrl[] = "https://alpha1.cloud.symless.com/group/screens";
-static const char kUpdateGroupConfigUrl[] = "https://alpha1.cloud.symless.com/group/update";
-static const char kReportUrl[] = "https://alpha1.cloud.symless.com/report";
-static const char kClaimServerUrl[] = "https://alpha1.cloud.symless.com/group/server/claim";
-static const char kUpdateScreenUrl[] = "https://alpha1.cloud.symless.com/screen/update";
-static const int kPollingTimeout = 60000; // 1 minite
+#define SYNERGY_CLOUD_URI "https://alpha1.cloud.symless.com"
+
+static const char kUserGroupsUrl[] = SYNERGY_CLOUD_URI "/user/groups";
+static const char kJoinGroupUrl[] = SYNERGY_CLOUD_URI "/group/join";
+static const char kLeaveGroupUrl[] = SYNERGY_CLOUD_URI "/group/leave";
+static const char kUnsubGroupUrl[] = SYNERGY_CLOUD_URI "/group/unsub";
+static const char kLoginUrl[] = SYNERGY_CLOUD_URI "/login";
+static const char kIdentifyUrl[] = SYNERGY_CLOUD_URI "/user/identify";
+static const char kGroupScreensUrl[] = SYNERGY_CLOUD_URI "/group/screens";
+static const char kUpdateGroupConfigUrl[] = SYNERGY_CLOUD_URI "/group/update";
+static const char kReportUrl[] = SYNERGY_CLOUD_URI "/report";
+static const char kClaimServerUrl[] = SYNERGY_CLOUD_URI "/group/server/claim";
+static const char kUpdateScreenUrl[] = SYNERGY_CLOUD_URI "/screen/update";
+static const int kPollingTimeout = 60000; // 1 minute
+
+#undef SYNERGY_CLOUD_URI
 
 CloudClient::CloudClient(QObject* parent) : QObject(parent)
 {
