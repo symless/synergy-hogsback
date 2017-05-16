@@ -1,4 +1,5 @@
 cmake_minimum_required (VERSION 3.4)
+
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
                        "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
@@ -17,7 +18,7 @@ if (NOT DEFINED SYNERGY_VERSION_MAJOR)
         set (SYNERGY_VERSION_MAJOR $ENV{SYNERGY_VERSION_MAJOR})
     else()
         set (SYNERGY_VERSION_MAJOR 2)
-        message (WARNING "SYNERGY_VERSION_MAJOR not set. Defaulted to ${SYNERGY_VERSION_MAJOR}")
+        message (WARNING "SYNERGY_VERSION_MAJOR not set.")
     endif()
 endif()
 
@@ -26,7 +27,7 @@ if (NOT DEFINED SYNERGY_VERSION_MINOR)
         set (SYNERGY_VERSION_MINOR $ENV{SYNERGY_VERSION_MINOR})
     else()
         set (SYNERGY_VERSION_MINOR 0)
-        message (WARNING "(SYNERGY_VERSION_MINOR not set. Defaulted to ${SYNERGY_VERSION_MINOR}")
+        message (WARNING "(SYNERGY_VERSION_MINOR not set.")
     endif()
 endif()
 
@@ -35,7 +36,7 @@ if (NOT DEFINED SYNERGY_VERSION_PATCH)
         set (SYNERGY_VERSION_PATCH $ENV{SYNERGY_VERSION_PATCH})
     else()
         set (SYNERGY_VERSION_PATCH 0)
-        message (WARNING "SYNERGY_VERSION_PATCH not set. Defaulted to ${SYNERGY_VERSION_PATCH}")
+        message (WARNING "SYNERGY_VERSION_PATCH not set.")
     endif()
 endif()
 
@@ -44,7 +45,7 @@ if (NOT DEFINED SYNERGY_VERSION_STAGE)
         set (SYNERGY_VERSION_STAGE $ENV{SYNERGY_VERSION_STAGE})
     else()
         set (SYNERGY_VERSION_STAGE "git")
-        message (WARNING "SYNERGY_VERSION_STAGE not set. Defaulted to ${SYNERGY_VERSION_STAGE}")
+        message (WARNING "SYNERGY_VERSION_STAGE not set.")
     endif()
 endif()
 
@@ -52,13 +53,25 @@ if ((NOT DEFINED SYNERGY_REVISION) AND (DEFINED ENV{SYNERGY_REVISION}))
     set (SYNERGY_REVISION $ENV{SYNERGY_REVISION})
 endif()
 
+if (SYNERGY_VERSION_STAGE STREQUAL "git")
+    if (NOT DEFINED SYNERGY_REVISION)
+        message (FATAL_ERROR "SYNERGY_REVISION not set.")
+    endif()
+    set (SYNERGY_VERSION_TAG "git${SYNERGY_REVISION}")
+else()
+    set (SYNERGY_VERSION_TAG "${SYNERGY_VERSION_STAGE}")
+endif()
+
 set (SYNERGY_VERSION "${SYNERGY_VERSION_MAJOR}.${SYNERGY_VERSION_MINOR}.${SYNERGY_VERSION_PATCH}")
-message (STATUS "Synergy version is " ${SYNERGY_VERSION})
+set (SYNERGY_VERSION_FULL "${SYNERGY_VERSION}-${SYNERGY_VERSION_TAG}")
+message (STATUS "Full version string is " ${SYNERGY_VERSION_FULL})
+
 
 if (WIN32)
     # Configure for Windows 7 and above. Vista went out of extended support from
     # Microsoft on April 11th 2017
     # Docs: https://msdn.microsoft.com/en-us/library/windows/desktop/aa383745(v=vs.85).aspx
+
     add_definitions (/DNTDDI_VERSION=0x06010000)
     add_definitions (/D_WIN32_WINNT=0x0601)
     add_definitions (/DWINVER=0x0601)
@@ -67,45 +80,53 @@ if (WIN32)
         #set (SYNERGY_WARNING_FLAGS /W4)
     endif()
 
-elseif (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
-    set (SYNERGY_WARNING_FLAGS  -Weverything
-                                -Wno-c++98-compat -Wno-c++98-compat-pedantic)
+elseif (UNIX)
+    if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+        set (SYNERGY_WARNING_FLAGS  -Weverything
+                                    -Wno-c++98-compat -Wno-c++98-compat-pedantic)
+        set (SYNERGY_CXX_FLAGS_RELEASE "-O2 -flto -fvisibility=hidden -DNDEBUG")
 
-elseif (CMAKE_COMPILER_IS_GNUCXX)
-    set (SYNERGY_WARNING_FLAGS -Wall -Wextra -Wpedantic
-                               -Wconversion -Wsign-conversion -Wformat=2)
-    set (SYNERGY_CXX_FLAGS_RELEASE "-Os -flto -fvisibility=hidden -DNDEBUG")
+    elseif (CMAKE_COMPILER_IS_GNUCXX)
+        set (SYNERGY_WARNING_FLAGS -Wall -Wextra -Wpedantic
+                                   -Wconversion -Wsign-conversion -Wformat=2)
+        set (SYNERGY_CXX_FLAGS_RELEASE "-O2 -flto -fvisibility=hidden -DNDEBUG")
+    endif()
 
+    if (NOT DEFINED SYNERGY_SCAN_BUILD)
+        add_definitions (${SYNERGY_WARNING_FLAGS})
+    endif()
+
+    # TODO: cleanup if statements
+    if ((DEFINED SYNERGY_CXX_FLAGS_RELEASE) AND (CMAKE_BUILD_TYPE EQUAL "Release"))
+        set (CMAKE_CXX_FLAGS_RELEASE ${SYNERGY_CXX_FLAGS_RELEASE})
+    elseif ((DEFINED SYNERGY_CXX_FLAGS_DEBUG) AND (CMAKE_BUILD_TYPE EQUAL "Debug"))
+        set (CMAKE_CXX_FLAGS_DEBUG ${SYNERGY_CXX_FLAGS_DEBUG})
+    endif()
 endif()
-
-
-if (NOT DEFINED SCAN_BUILD)
-    add_definitions (${SYNERGY_WARNING_FLAGS})
-endif()
-
-
-if ((DEFINED SYNERGY_CXX_FLAGS_RELEASE) AND (CMAKE_BUILD_TYPE EQUAL "Release"))
-    set (CMAKE_CXX_FLAGS_RELEASE ${SYNERGY_CXX_FLAGS_RELEASE})
-elseif ((DEFINED SYNERGY_CXX_FLAGS_DEBUG) AND (CMAKE_BUILD_TYPE EQUAL "Debug"))
-    set (CMAKE_CXX_FLAGS_DEBUG ${SYNERGY_CXX_FLAGS_DEBUG})
-endif()
-
 
 set (Boost_USE_STATIC_LIBS ON)
 set (Boost_USE_STATIC_RUNTIME OFF)
 set (Boost_USE_MULTITHREADED ON)
 
 find_package (Threads REQUIRED)
+
+# TODO: check the minimum version on CentOS 7 and Debian Jessie
 find_package (Boost 1.53 REQUIRED COMPONENTS system date_time)
 
 add_definitions (-DZMQ_STATIC)
 add_definitions (-DZMQ_BUILD_DRAFT_API)
+
+# TODO: only set this on Windows?
 add_definitions (-DZMQ_USE_LIBSODIUM)
 include_directories (BEFORE SYSTEM third_party/libzmq/include)
 include_directories (BEFORE SYSTEM third_party/cppzmq)
 
 include_directories (third_party/catch/include)
 add_subdirectory (third_party)
+
+
+# TODO: move this to an included file
+# TODO: move this up?
 
 #
 # Configure_file... but for directories, recursively.
@@ -163,6 +184,8 @@ endif()
 #
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     configure_files (${CMAKE_CURRENT_SOURCE_DIR}/dist/rpm ${CMAKE_BINARY_DIR}/rpm)
+    install(FILES synergy/core/res/synergy.svg DESTINATION share/icons)
+    install(FILES synergy/core/res/synergy2.desktop DESTINATION share/applications)
 endif()
 
 include_directories (.)
