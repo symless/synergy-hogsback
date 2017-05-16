@@ -158,5 +158,18 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     configure_files (${CMAKE_CURRENT_SOURCE_DIR}/dist/wix ${CMAKE_BINARY_DIR}/installer)
 endif()
 
+#
+# Linux installation
+#
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    configure_files (${CMAKE_CURRENT_SOURCE_DIR}/dist/rpm ${CMAKE_BINARY_DIR}/rpm)
+    install(FILES res/synergy.svg DESTINATION share/icons)
+    if("${VERSION_MAJOR}" STREQUAL "2") 
+        install(FILES res/synergy2.desktop DESTINATION share/applications)
+    else()
+        install(FILES res/synergy.desktop DESTINATION share/applications)
+    endif()
+endif()
+
 include_directories (.)
 add_subdirectory (synergy)
