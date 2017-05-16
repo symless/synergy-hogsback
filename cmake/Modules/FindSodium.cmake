@@ -1,8 +1,5 @@
 
-message (STATUS "SODIUM_INCLUDE_HINTS = ${SODIUM_INCLUDE_HINTS}")
 message (STATUS "ENV{LIBSODIUM_INCLUDE_DIR} = $ENV{LIBSODIUM_INCLUDE_DIR}")
-
-message (STATUS "SODIUM_LIBRARY_HINTS = ${SODIUM_LIBRARY_HINTS}")
 message (STATUS "ENV{LIBSODIUM_LIBRARY_DIR} = $ENV{LIBSODIUM_LIBRARY_DIR}")
 
 if (MSVC)
@@ -32,16 +29,24 @@ else()
     endif()
 endif()
 
+message (STATUS "SODIUM_INCLUDE_HINTS = ${SODIUM_INCLUDE_HINTS}")
+message (STATUS "SODIUM_LIBRARY_HINTS = ${SODIUM_LIBRARY_HINTS}")
 
-find_path (SODIUM_INCLUDE_DIRS NAMES sodium.h
-                               HINTS ${SODIUM_INCLUDE_HINTS})
+find_path(
+    SODIUM_INCLUDE_DIRS
+    NAMES sodium.h
+    HINTS ${SODIUM_INCLUDE_HINTS}
+)
 
-find_library (SODIUM_LIBRARIES NAMES libsodium.a libsodium sodium
-                               HINTS ${SODIUM_LIBRARY_HINTS})
+find_library(
+    SODIUM_LIBRARIES
+    NAMES libsodium sodium
+    HINTS ${SODIUM_LIBRARY_HINTS}
+)
 
+message (STATUS "SODIUM_INCLUDE_DIRS = ${SODIUM_INCLUDE_DIRS}")
+message (STATUS "SODIUM_LIBRARIES = ${SODIUM_LIBRARIES}")
 
 include (FindPackageHandleStandardArgs)
-
-find_package_handle_standard_args (SODIUM DEFAULT_MSG SODIUM_LIBRARIES
-                                   SODIUM_INCLUDE_DIRS)
+find_package_handle_standard_args (SODIUM DEFAULT_MSG SODIUM_LIBRARIES SODIUM_INCLUDE_DIRS)
 mark_as_advanced (SODIUM_FOUND SODIUM_LIBRARIES SODIUM_INCLUDE_DIRS)
