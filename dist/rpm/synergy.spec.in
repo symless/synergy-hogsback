@@ -1,44 +1,27 @@
-# -*- rpm-spec -*-
-Summary: Keyboard and mouse sharing utility
 Name: synergy
-Release: 1
-License: GPLv2
+Version: @SYNERGY_VERSION@
+Summary: Keyboard and mouse sharing solution
 Group: Applications/Productivity
-URL: http://symless.com/
-Source: http://symless.com/download/
-Vendor: The Synergy Project
-Packager: Nick Bolton <nick@symless.com>
-Version: ${in:version}
+URL: https://symless.com/synergy
+Source: https://symless.com/synergy/downloads
+Vendor: Symless
+Packager: Symless <engineering@symless.com>
+License: GPLv2
+Release: 1
 
 %description
-Synergy is free and open source software for sharing one mouse and keyboard
-between multiple computers. Works on Windows, Mac OS X, Linux.
-
-%prep
-source=%{_topdir}/../..
-
-mkdir -p %{buildroot}/%{_datarootdir}/applications
-mkdir -p %{buildroot}/%{_datarootdir}/icons
-mkdir -p %{buildroot}/%{_bindir}
-
-cp $source/bin/synergy %{buildroot}%{_bindir}
-cp $source/bin/synergyc %{buildroot}%{_bindir}
-cp $source/bin/synergys %{buildroot}%{_bindir}
-cp $source/bin/synergyd %{buildroot}%{_bindir}
-cp $source/bin/syntool %{buildroot}%{_bindir}
-cp $source/res/synergy.desktop %{buildroot}%{_datarootdir}/applications
-cp $source/res/synergy.ico %{buildroot}%{_datarootdir}/icons
+Synergy allows you to share one mouse and keyboard between multiple computers.
+Work seamlessly across Windows, macOS and Linux.
 
 %files
 %defattr(755,root,root,-)
-%{_bindir}/synergy
+%{_bindir}/synergy2
 %{_bindir}/synergyc
 %{_bindir}/synergys
-%{_bindir}/synergyd
 %{_bindir}/syntool
-%attr(644,-,-) %{_datarootdir}/applications/synergy.desktop
-%attr(644,-,-) %{_datarootdir}/icons/synergy.ico
+%attr(644,-,-) %{_datarootdir}/applications/synergy2.desktop
+%attr(644,-,-) %{_datarootdir}/icons/synergy.svg
 
 %changelog
-* Thu Mar 20 2014 Nick Bolton <nick@symless.com>
+* Wed Apr 26 2017 Symless <engineering@symless.com>
 - Initial version of the package
