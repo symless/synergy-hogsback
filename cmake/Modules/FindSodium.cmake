@@ -30,7 +30,7 @@ else()
         set (SODIUM_LIBRARY_HINTS ${PC_SODIUM_LIBRARY_DIRS}
                                   ${PC_SODIUM_LIBRARY_DIRS}/*)
     endif()
-endif ()
+endif()
 
 
 find_path (SODIUM_INCLUDE_DIRS NAMES sodium.h
