@@ -11,13 +11,12 @@
     path = third_party/flatbuffers
     url = https://github.com/google/flatbuffers.git
 [submodule "synergy"]
-	path = synergy/core
+    path = synergy/core
     url = https://github.com/symless/synergy.git
-    branch = v2.0
 [submodule "libsodium"]
-	path = third_party/libsodium
-	url = https://github.com/jedisct1/libsodium.git
-	branch = stable
+    path = third_party/libsodium
+    url = https://github.com/jedisct1/libsodium.git
+    branch = stable
 [submodule "catch"]
-	path = third_party/catch
-	url = https://github.com/philsquared/Catch.git
+    path = third_party/catch
+    url = https://github.com/philsquared/Catch.git
