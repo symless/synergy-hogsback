@@ -120,7 +120,7 @@ Rectangle {
                         anchors.topMargin: 14
                     }
 
-                    Text {
+                    BodyText {
                         id: orText
                         width: parent.width
                         horizontalAlignment: Text.AlignHCenter
@@ -194,17 +194,14 @@ Rectangle {
                 }
             }
 
-            Text {
+            BodyText {
                 id: hint
                 z: 1
                 color: "White"
-                font.family: "Tahoma"
-                font.bold: false
                 horizontalAlignment: Text.AlignHCenter
                 anchors.top: signInArea.bottom
                 anchors.topMargin: 10
                 anchors.horizontalCenter: signInArea.horizontalCenter
-                font.pixelSize: 10
             }
 
             Connections {
