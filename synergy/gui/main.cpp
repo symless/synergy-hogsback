@@ -33,6 +33,8 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationName("Synergy v2");
 
     QApplication app(argc, argv);
+    QIcon icon(":res/image/synergy-icon.png");
+    app.setWindowIcon(icon);
 
     try {
         qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");
@@ -52,8 +54,6 @@ int main(int argc, char* argv[])
         LogManager::setQmlContext(engine.rootContext());
         LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
         engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-        QIcon icon(":res/image/synergy-icon.png");
-        app.setWindowIcon(icon);
 
         return app.exec();
     }
