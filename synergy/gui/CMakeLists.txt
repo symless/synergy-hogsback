@@ -35,7 +35,6 @@ add_executable (${PROJECT_NAME} WIN32
     ProfileMenuButton.qml
     Version.qml
     SynergyButton.qml
-    SynergyButtonStyle.qml
 )
 
 target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
