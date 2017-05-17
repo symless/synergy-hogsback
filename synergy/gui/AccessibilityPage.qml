@@ -1,4 +1,5 @@
 import QtQuick 2.5
+import QtQuick.Controls 1.4
 import com.synergy.gui 1.0
 
 Rectangle {
@@ -86,17 +87,13 @@ Rectangle {
                     }
                 }
 
-                Text {
+                HeaderText {
                     id: hint
                     color: "white"
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: tutorial.bottom
                     anchors.topMargin: 10
-                    font.bold: false
                     horizontalAlignment: Text.AlignHCenter
-                    font.pointSize: 18
-                    font.family: "Myriad Pro"
-                    renderType: Text.NativeRendering
 
                     Behavior on text {
                         SequentialAnimation {
@@ -107,37 +104,16 @@ Rectangle {
                     }
                 }
 
-                Rectangle {
+                SynergyButton {
                     id: openAccessibilityButton
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: hint.bottom
                     anchors.topMargin: 25
-                    width: childrenRect.width + 30
-                    height: childrenRect.height + 20
-                    color: "#4D4D4D"
+                    buttonText: "Open Security & Privacy Preferences"
 
-                    Text {
-                        id: openAccessibilityText
-                        color: "white"
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.verticalCenter: parent.verticalCenter
-                        font.bold: false
-                        font.pointSize: 14
-                        font.underline: apenAccessibilityMouseArea.containsMouse
-                        font.family: "Myriad Pro"
-                        renderType: Text.NativeRendering
-                        text: "Open Security & Privacy Preferences"
+                    onButtonClicked: {
+                        accessibilityManager.openAccessibilityDialog()
                     }
-
-                    MouseArea {
-                        id: apenAccessibilityMouseArea
-                        anchors.fill: openAccessibilityText
-                        hoverEnabled: true
-                        onClicked: {
-                            accessibilityManager.openAccessibilityDialog()
-                        }
-                    }
-
                 }
             }
         }

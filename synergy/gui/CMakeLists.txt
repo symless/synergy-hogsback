@@ -34,6 +34,7 @@ add_executable (${PROJECT_NAME} WIN32
     ProfileMenu.qml
     ProfileMenuButton.qml
     Version.qml
+    SynergyButton.qml
     SynergyButtonStyle.qml
 )
 
