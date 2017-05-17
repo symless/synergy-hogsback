@@ -190,7 +190,7 @@ Rectangle {
                 anchors.fill: parent
 
                 model: LoggingModel
-                delegate: Text {
+                delegate: BodyText {
                     width: parent.width
                     text: modelData
                     color: "white"
@@ -215,19 +215,16 @@ Rectangle {
         }
 
         // hostname
-        Text {
+        HeaderText {
             id: hostname
             z: 2
             text: localHostname.hostname()
             color: "#4D4D4D"
-            font.family: "AlternateGotNo3D"
-            font.bold: false
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             anchors.top: parent.top
             anchors.topMargin: 15
             anchors.horizontalCenter: parent.horizontalCenter
-            font.pixelSize: 30
         }
 
         // configuration area
@@ -316,17 +313,13 @@ Rectangle {
                             source: statusImage
 
                             // screen name
-                            Text {
+                            HeaderText {
                                 id: screenNameText
                                 width: parent.width - 20
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: name
-                                font.pixelSize: 18
-                                minimumPixelSize: 18
                                 color: screenStatus == "Connected" ? "black" : "white"
-                                font.family: "AlternateGotNo3D"
-                                fontSizeMode: Text.HorizontalFit
                                 horizontalAlignment: Text.AlignHCenter
                                 elide: Text.ElideRight
                                 visible: screenImage.source != "qrc:/res/image/screen-edit.png"

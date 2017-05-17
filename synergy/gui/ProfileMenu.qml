@@ -70,11 +70,10 @@ Rectangle {
                     anchors.bottom: parent.bottom
                     height: parent.height - 1
 
-                    Button {
-                       text: "New Profile"
+                    SynergyButton {
+                       buttonText: "New Profile"
                        anchors.margins: 10
                        anchors.fill: parent
-                       style: SynergyButtonStyle {}
                    }
                }
             }
