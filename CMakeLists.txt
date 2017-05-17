@@ -10,8 +10,6 @@ set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
 
-find_package (Sodium)
-
 #
 # Version
 #
@@ -81,7 +79,6 @@ if (WIN32)
     if (MSVC)
         #set (SYNERGY_WARNING_FLAGS /W4)
     endif()
-
 elseif (UNIX)
     if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
         set (SYNERGY_WARNING_FLAGS  -Weverything
@@ -119,19 +116,19 @@ add_definitions (-DZMQ_STATIC)
 add_definitions (-DZMQ_BUILD_DRAFT_API)
 
 # TODO: only set this on Windows?
-add_definitions (-DZMQ_USE_LIBSODIUM)
+# add_definitions (-DZMQ_USE_LIBSODIUM)
+
 include_directories (BEFORE SYSTEM third_party/libzmq/include)
 include_directories (BEFORE SYSTEM third_party/cppzmq)
+include_directories (BEFORE SYSTEM third_party/catch/include)
 
-include_directories (third_party/catch/include)
 add_subdirectory (third_party)
-
 
 # TODO: move this to an included file
 # TODO: move this up?
 
 #
-# Configure_file... but for directories, recursively.
+# Like the CMake configure_file macro, but for directories. Works recursively.
 #
 macro (configure_files srcDir destDir)
     message (STATUS "Configuring directory ${destDir}")
