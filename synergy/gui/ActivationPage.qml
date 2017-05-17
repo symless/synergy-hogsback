@@ -1,5 +1,6 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
+import QtQuick.Controls.Styles 1.4
 
 import com.synergy.gui 1.0
 
@@ -148,6 +149,9 @@ Rectangle {
                     anchors.topMargin: 10
                     placeholderText: qsTr("Email")
                     horizontalAlignment: Text.AlignHCenter
+                    style: TextFieldStyle {
+                        border.color: "white"
+                    }
                 }
 
                 TextField {
@@ -160,6 +164,9 @@ Rectangle {
                     placeholderText: qsTr("Password")
                     horizontalAlignment: Text.AlignHCenter
                     echoMode: TextInput.Password
+                    style: TextFieldStyle {
+                        border.color: "white"
+                    }
                 }
 
                 Button {
