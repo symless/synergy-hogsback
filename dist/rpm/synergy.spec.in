@@ -8,7 +8,7 @@ Vendor: Symless
 Packager: Symless <engineering@symless.com>
 License: GPLv2
 Release: 1
-Requires: qt5-qtquickcontrols
+Requires: qt5-qtquickcontrols qt5-qtsvg
 
 %description
 Synergy allows you to share one mouse and keyboard between multiple computers.
@@ -24,5 +24,5 @@ Work seamlessly across Windows, macOS and Linux.
 %attr(644,-,-) %{_datarootdir}/icons/synergy.svg
 
 %changelog
-* Wed Apr 26 2017 Symless <engineering@symless.com>
+* Wed May 17 2017 Symless <engineering@symless.com>
 - Initial version of the package
