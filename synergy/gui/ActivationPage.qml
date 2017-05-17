@@ -15,10 +15,6 @@ Rectangle {
             color:"#3f95b8"
 
             Version {
-                anchors.left: parent.left
-                anchors.leftMargin: 5
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 5
             }
 
             // background header

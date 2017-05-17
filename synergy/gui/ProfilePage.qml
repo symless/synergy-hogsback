@@ -16,10 +16,6 @@ Rectangle {
             border.color: "black"
 
             Version {
-                anchors.left: parent.left
-                anchors.leftMargin: 5
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 5
             }
 
             // background header

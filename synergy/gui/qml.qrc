@@ -24,5 +24,8 @@
         <file>ProfileMenuButton.qml</file>
         <file>ProfileMenu.qml</file>
         <file>SynergyButtonStyle.qml</file>
+        <file>BodyText.qml</file>
+        <file>HeaderText.qml</file>
+        <file>LogoText.qml</file>
     </qresource>
 </RCC>

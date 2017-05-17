@@ -69,10 +69,6 @@ Rectangle {
 
         // version label
         Version {
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 5
             z: 2
         }
 

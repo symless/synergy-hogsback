@@ -23,12 +23,6 @@ Rectangle {
             color:"#3F95B8"
 
             Version {
-                anchors.left: parent.left
-                anchors.leftMargin: 5
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 5
-                textColor: "black"
-                fontFamily: "Myriad Pro"
             }
 
             // background header

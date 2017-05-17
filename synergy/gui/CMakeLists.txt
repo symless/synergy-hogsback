@@ -27,6 +27,9 @@ add_executable (${PROJECT_NAME} WIN32
     ConfigurationPage.qml
     CustomBorder.qml
     CustomCheckBox.qml
+    BodyText.qml
+    HeaderText.qml
+    LogoText.qml
     ProfilePage.qml
     ProfileMenu.qml
     ProfileMenuButton.qml
