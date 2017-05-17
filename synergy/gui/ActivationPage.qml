@@ -150,7 +150,7 @@ Rectangle {
                     placeholderText: qsTr("Email")
                     horizontalAlignment: Text.AlignHCenter
                     style: TextFieldStyle {
-                        border.color: "white"
+                        background: Rectangle { color: "white" }
                     }
                 }
 
@@ -165,7 +165,7 @@ Rectangle {
                     horizontalAlignment: Text.AlignHCenter
                     echoMode: TextInput.Password
                     style: TextFieldStyle {
-                        border.color: "white"
+                        background: Rectangle { color: "white" }
                     }
                 }
 
