@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.5
 import com.synergy.gui 1.0
 
 Rectangle {
