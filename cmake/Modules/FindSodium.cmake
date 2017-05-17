@@ -32,7 +32,7 @@ find_path (
 
 find_library (
     SODIUM_LIBRARIES
-    NAMES libsodium sodium
+    NAMES libsodium.a sodium.a libsodium sodium
     HINTS ${SODIUM_LIBRARY_HINTS}
 )
 
