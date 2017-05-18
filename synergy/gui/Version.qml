@@ -7,7 +7,7 @@ Rectangle {
     anchors.left: parent.left
     anchors.leftMargin: 5
     anchors.bottom: parent.bottom
-    anchors.bottomMargin: 10
+    anchors.bottomMargin: 5
     color: "#00000000"
     z: 1
 
@@ -17,13 +17,15 @@ Rectangle {
     BodyText {
         id: versionNumber
         anchors.left: parent.left
+        anchors.bottom: versionWarning.top
         color: textColor
         text: "Version: Synergy 2.0-alpha3"
     }
 
     BodyText {
+        id: versionWarning
         anchors.left: parent.left
-        anchors.top: versionNumber.bottom
+        anchors.bottom: parent.bottom
         color: textColor
         text: "Alpha testing only, do not redistribute"
     }
