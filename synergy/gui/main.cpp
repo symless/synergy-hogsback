@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
     app.setWindowIcon(icon);
 
     qreal dpi = QGuiApplication::primaryScreen()->physicalDotsPerInch() * app.devicePixelRatio();
-    qreal ppp = dpi / 72;
+    qreal pixelPerPoint = dpi / 72;
 
     try {
         qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");
@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
         LogManager::setQmlContext(engine.rootContext());
         LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
 
-        engine.rootContext()->setContextProperty("PixelPerPoint", ppp);
+        engine.rootContext()->setContextProperty("PixelPerPoint", pixelPerPoint);
         engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
         return app.exec();
     }
