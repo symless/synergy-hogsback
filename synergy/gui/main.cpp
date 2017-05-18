@@ -36,8 +36,13 @@ int main(int argc, char* argv[])
     QIcon icon(":res/image/synergy-icon.png");
     app.setWindowIcon(icon);
 
+#if defined(Q_OS_WIN)
     qreal dpi = QGuiApplication::primaryScreen()->logicalDotsPerInch() * app.devicePixelRatio();
+#else
+    qreal dpi = QGuiApplication::primaryScreen()->physicalDotsPerInch() * app.devicePixelRatio();
+#endif
     qreal ppp = dpi / 72;
+
     try {
         qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");
         qmlRegisterType<ScreenListModel>("com.synergy.gui", 1, 0, "ScreenListModel");
