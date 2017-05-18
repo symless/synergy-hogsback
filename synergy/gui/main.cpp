@@ -36,6 +36,8 @@ int main(int argc, char* argv[])
     QIcon icon(":res/image/synergy-icon.png");
     app.setWindowIcon(icon);
 
+    qreal dpi = QGuiApplication::primaryScreen()->logicalDotsPerInch() * app.devicePixelRatio();
+    qreal ppp = dpi / 72;
     try {
         qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");
         qmlRegisterType<ScreenListModel>("com.synergy.gui", 1, 0, "ScreenListModel");
@@ -53,8 +55,9 @@ int main(int argc, char* argv[])
         LogManager::instance();
         LogManager::setQmlContext(engine.rootContext());
         LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
-        engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
+        engine.rootContext()->setContextProperty("PixelPerPoint", ppp);
+        engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
         return app.exec();
     }
     catch (std::runtime_error& e) {

@@ -14,6 +14,10 @@ ApplicationWindow {
     signal keyReceived(int key)
     property alias cloudClient: cloudClient
 
+    function dp(v) {
+        return v * PixelPerPoint;
+    }
+
     CloudClient {
         id: cloudClient
     }

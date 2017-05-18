@@ -3,4 +3,5 @@ import QtQuick 2.5
 Text {
     color: "black"
     font.family: "Museo"
+    font.pixelSize: dp(22)
 }
