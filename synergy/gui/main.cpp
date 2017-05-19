@@ -37,6 +37,7 @@ int main(int argc, char* argv[])
     app.setWindowIcon(icon);
 
     qreal dpi = QGuiApplication::primaryScreen()->physicalDotsPerInch();
+    // 72 points = 1 inch
     qreal pixelPerPoint = dpi / 72;
 
     try {
