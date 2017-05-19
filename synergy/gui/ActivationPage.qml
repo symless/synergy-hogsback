@@ -23,16 +23,16 @@ Rectangle {
                 id: activationPageBackgroundHeader
                 anchors.top: parent.top
                 width: parent.width
-                height: 94
+                height: dp(65)
                 color:"white"
 
                 Image {
                     id: logo
                     fillMode :Image.PreserveAspectFit
                     anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 15
+                    anchors.bottomMargin: dp(10)
                     anchors.top: parent.top
-                    anchors.topMargin: 15
+                    anchors.topMargin: dp(10)
                     anchors.horizontalCenter: parent.horizontalCenter
                     source: "res/image/synergy-logo.png"
                 }
@@ -43,14 +43,14 @@ Rectangle {
                 id: activationPageBackgroundSeparator
                 anchors.top: activationPageBackgroundHeader.bottom
                 width: parent.width
-                height: 7
+                height: dp(5)
                 color:"#96C13D"
             }
 
             Rectangle {
                 id: signInArea
-                width: 350
-                height: 235
+                width: dp(245)
+                height: dp(165)
                 color: "transparent"
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.verticalCenter: parent.verticalCenter
@@ -59,8 +59,8 @@ Rectangle {
                     id: socialLogin
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
-                    width: 200
-                    height: 50
+                    width: dp(140)
+                    height: dp(35)
                     color: "transparent"
                     Image {
                         id: googleImage
@@ -106,47 +106,50 @@ Rectangle {
                 Rectangle {
                     id: orSaparator
                     width: parent.width
-                    height: 30
+                    height: dp(21)
                     anchors.top: socialLogin.bottom
-                    anchors.topMargin: 10
+                    anchors.topMargin: dp(7)
                     color: "transparent"
 
                     Rectangle {
-                        border.width: 1
-                        height: 2
-                        width: parent.width / 2 - 10
+                        id: leftBar
+                        border.width: dp(1)
+                        height: dp(2)
+                        width: (parent.width - orText.width * 2) / 2
                         border.color: "#2d2b19"
                         anchors.left: parent.left
                         anchors.top: parent.top
-                        anchors.topMargin: 14
+                        anchors.topMargin: dp(10)
+                        color: border.color
                     }
 
                     BodyText {
                         id: orText
-                        width: parent.width
                         horizontalAlignment: Text.AlignHCenter
+                        anchors.horizontalCenter: parent.horizontalCenter
                         anchors.verticalCenter: parent.verticalCenter
                         text: "Or"
                     }
 
                     Rectangle {
-                        border.width: 1
-                        height: 2
-                        width: parent.width / 2 - 10
-                        border.color: "#2d2b19"
+                        border.width: leftBar.border.width
+                        height: leftBar.height
+                        width: leftBar.width
+                        border.color: leftBar.border.color
                         anchors.right: parent.right
                         anchors.top: parent.top
-                        anchors.topMargin: 14
+                        anchors.topMargin: leftBar.anchors.topMargin
+                        color: border.color
                     }
                 }
 
                 TextField {
                     id: email
                     z: 2
-                    height: 35
+                    height: dp(25)
                     width: parent.width
                     anchors.top : orSaparator.bottom
-                    anchors.topMargin: 10
+                    anchors.topMargin: dp(7)
                     placeholderText: qsTr("Email")
                     horizontalAlignment: Text.AlignHCenter
                     style: TextFieldStyle {
@@ -157,10 +160,10 @@ Rectangle {
                 TextField {
                     id: password
                     z: 2
-                    height: 35
+                    height: email.height
                     width: parent.width
                     anchors.top : email.bottom
-                    anchors.topMargin: 10
+                    anchors.topMargin: email.anchors.topMargin
                     placeholderText: qsTr("Password")
                     horizontalAlignment: Text.AlignHCenter
                     echoMode: TextInput.Password
@@ -172,10 +175,10 @@ Rectangle {
                 Button {
                     id: signInButton
                     z: 2
-                    height: 35
+                    height: email.height
                     width: parent.width
                     anchors.top : password.bottom
-                    anchors.topMargin: 10
+                    anchors.topMargin: email.anchors.topMargin
                     text: "Sign in"
 
                     onClicked: {
@@ -207,7 +210,7 @@ Rectangle {
                 color: "White"
                 horizontalAlignment: Text.AlignHCenter
                 anchors.top: signInArea.bottom
-                anchors.topMargin: 10
+                anchors.topMargin: email.anchors.topMargin
                 anchors.horizontalCenter: signInArea.horizontalCenter
             }
 
