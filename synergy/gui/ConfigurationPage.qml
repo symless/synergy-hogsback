@@ -82,7 +82,7 @@ Rectangle {
             z: 2
 
             // hostname
-            HeaderText {
+            LogoText {
                 id: hostname
                 z: 2
                 text: localHostname.hostname()
