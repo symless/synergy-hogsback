@@ -1,5 +1,6 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
+
 import com.synergy.gui 1.0
 
 Rectangle {
@@ -23,24 +24,23 @@ Rectangle {
             anchors.fill: parent
             color:"#3F95B8"
 
-            Version {
-            }
+            Version {}
 
             // background header
             Rectangle {
                 id: accessibilityPageBackgroundHeader
                 anchors.top: parent.top
                 width: parent.width
-                height: 94
+                height: dp(65)
                 color:"white"
 
                 Image {
                     id: logo
                     fillMode :Image.PreserveAspectFit
                     anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 15
+                    anchors.bottomMargin: dp(10)
                     anchors.top: parent.top
-                    anchors.topMargin: 15
+                    anchors.topMargin: dp(10)
                     anchors.horizontalCenter: parent.horizontalCenter
                     source: "res/image/synergy-logo.png"
                 }
@@ -51,19 +51,19 @@ Rectangle {
                 id: accessibilityPageBackgroundSeparator
                 anchors.top: accessibilityPageBackgroundHeader.bottom
                 width: parent.width
-                height: 7
+                height: dp(5)
                 color:"#96C13D"
             }
 
             Rectangle {
                 id: accessibilityArea
-                width: 489
+                width: dp(340)
                 color: "transparent"
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.top: accessibilityPageBackgroundSeparator.bottom
-                anchors.topMargin: 30
+                anchors.topMargin: dp(20)
                 anchors.bottom: rectangle1.bottom
-                anchors.bottomMargin: 130
+                anchors.bottomMargin: dp(90)
 
                 AnimatedImage {
                     id: tutorial
@@ -92,7 +92,7 @@ Rectangle {
                     color: "white"
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: tutorial.bottom
-                    anchors.topMargin: 10
+                    anchors.topMargin: dp(7)
                     horizontalAlignment: Text.AlignHCenter
 
                     Behavior on text {
@@ -108,8 +108,9 @@ Rectangle {
                     id: openAccessibilityButton
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: hint.bottom
-                    anchors.topMargin: 25
+                    anchors.topMargin: dp(17)
                     buttonText: "Open Security & Privacy Preferences"
+                    fontSize: dp(10)
 
                     onButtonClicked: {
                         accessibilityManager.openAccessibilityDialog()
