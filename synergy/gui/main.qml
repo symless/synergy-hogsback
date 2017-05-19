@@ -6,10 +6,10 @@ import com.synergy.gui 1.0
 ApplicationWindow {
     id : applicationWindow
     visible: true
-    width: 800
-    height: 600
-    minimumWidth: 800
-    minimumHeight: 600
+    width: dp(600)
+    height: dp(450)
+    minimumWidth: dp(600)
+    minimumHeight: dp(450)
     title: qsTr("Synergy")
     signal keyReceived(int key)
     property alias cloudClient: cloudClient
