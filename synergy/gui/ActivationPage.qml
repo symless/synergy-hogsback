@@ -114,7 +114,7 @@ Rectangle {
                     Rectangle {
                         id: leftBar
                         border.width: dp(1)
-                        height: dp(2)
+                        height: dp(1)
                         width: (parent.width - orText.width * 2) / 2
                         border.color: "#2d2b19"
                         anchors.left: parent.left
