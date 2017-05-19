@@ -47,7 +47,7 @@ Rectangle {
 
             if (key == Qt.Key_Tab) {
                 if (logConsole.height === 0) {
-                    logConsole.height = 100
+                    logConsole.height = dp(70)
                 }
                 else {
                     logConsole.height = 0
@@ -77,7 +77,7 @@ Rectangle {
             id: configurationPageBackgroundHeader
             anchors.top: parent.top
             width: parent.width
-            height: 70
+            height: dp(65)
             color: "white"
             z: 2
 
@@ -85,7 +85,7 @@ Rectangle {
             Image {
                 id: logoImage
                 anchors.left: parent.left
-                anchors.leftMargin: 20
+                anchors.leftMargin: dp(14)
                 anchors.verticalCenter: parent.verticalCenter
                 fillMode: Image.PreserveAspectFit
                 smooth: true
@@ -110,7 +110,7 @@ Rectangle {
             id: configurationPageBackgroundSeparator
             anchors.top: configurationPageBackgroundHeader.bottom
             width: parent.width
-            height: 7
+            height: dp(5)
             color:"#96C13D"
             z: 1
         }
@@ -121,7 +121,7 @@ Rectangle {
             id: configurationPageBackgroundSeparator2
             anchors.top: logConsole.bottom
             width: parent.width
-            height: logConsole.height > 0 ? 7 : 0
+            height: logConsole.height > 0 ? dp(5) : 0
             color:"#96C13D"
             z: 3
         }
@@ -236,7 +236,7 @@ Rectangle {
                             anchors.fill: parent
                             color: "transparent"
                             border.color: "white"
-                            border.width: 2
+                            border.width: dp(1)
                             radius: 4
                             z: 1
                             visible: modelIndex === index
@@ -254,7 +254,7 @@ Rectangle {
                             // screen name
                             HeaderText {
                                 id: screenNameText
-                                width: parent.width - 20
+                                width: parent.width - dp(14)
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: name
@@ -268,10 +268,10 @@ Rectangle {
                             Image {
                                 id: screenUnsubIcon
                                 parent: screenImage
-                                width: 35
+                                width: dp(25)
                                 height: width
                                 anchors.right: parent.horizontalCenter
-                                anchors.rightMargin: 5
+                                anchors.rightMargin: dp(4)
                                 anchors.verticalCenter: parent.verticalCenter
                                 fillMode: Image.PreserveAspectFit
                                 smooth: true
@@ -291,10 +291,10 @@ Rectangle {
                             Image {
                                 id: screenEditIcon
                                 parent: screenImage
-                                width: 35
+                                width: dp(25)
                                 height: width
                                 anchors.left: parent.horizontalCenter
-                                anchors.leftMargin: 5
+                                anchors.leftMargin: dp(4)
                                 anchors.verticalCenter: parent.verticalCenter
                                 fillMode: Image.PreserveAspectFit
                                 smooth: true
@@ -308,9 +308,9 @@ Rectangle {
                                 visible: screenStatus == "Connecting" && screenImage.source != "qrc:/res/image/screen-edit.png"
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 anchors.bottom: parent.bottom
-                                anchors.bottomMargin: 15
+                                anchors.bottomMargin: dp(10)
                                 width: parent.width / 7 * 5
-                                height: 5
+                                height: dp(4)
                                 clip: true
                                 z: 1
                                 color: "#828282"
@@ -319,8 +319,8 @@ Rectangle {
                                 Rectangle {
                                     id: connectingSlidingBar
                                     x: -width
-                                    width: 35
-                                    height: 5
+                                    width: dp(25)
+                                    height: dp(4)
                                     color: "#96C13D"
 
                                     states: [
