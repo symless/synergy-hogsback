@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
     QIcon icon(":res/image/synergy-icon.png");
     app.setWindowIcon(icon);
 
-    qreal dpi = QGuiApplication::primaryScreen()->physicalDotsPerInch() * app.devicePixelRatio();
+    qreal dpi = QGuiApplication::primaryScreen()->physicalDotsPerInch();
     qreal pixelPerPoint = dpi / 72;
 
     try {
