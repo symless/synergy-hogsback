@@ -1,46 +1,35 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
-import QtQuick.Controls.Styles 1.4
 
 Rectangle {
+    id: buttonRect
     property color backgroundColour: "#4D4D4D"
     property string buttonText
     property int fontSize: 14
     property bool underlineOnHover: true
     signal buttonClicked
 
-    width: childrenRect.width + 20
-    height: childrenRect.height + 10
+    width: text.width + dp(15)
+    height: text.height + dp(7)
     color: backgroundColour
 
-    Button {
-        text: buttonText
+    HeaderText {
+        id: text
+        color: "white"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
-        style: ButtonStyle {
-            label: Component {
-                Text {
-                    color: "white"
-                    anchors.fill: parent
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    text: control.text
-                    renderType: Text.NativeRendering
-                    font {
-                        family: "AlternateGotNo3D"
-                        pointSize: fontSize
-                        bold: true
-                        underline: control.hovered && underlineOnHover
-                    }
-                }
-            }
-
-            background: Rectangle {
-                anchors.fill: parent
-                color: backgroundColour
-            }
+        text: buttonText
+        font {
+            pixelSize: fontSize
+            bold: true
+            underline: buttonMouseArea.containsMouse & underlineOnHover
         }
+    }
 
+    MouseArea {
+        id:buttonMouseArea
+        anchors.fill: parent
+        hoverEnabled: true
         onClicked: {
             buttonClicked()
         }
