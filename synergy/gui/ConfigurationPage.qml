@@ -81,17 +81,6 @@ Rectangle {
             color: "white"
             z: 2
 
-            // Synergy logo
-            Image {
-                id: logoImage
-                anchors.left: parent.left
-                anchors.leftMargin: dp(14)
-                anchors.verticalCenter: parent.verticalCenter
-                fillMode: Image.PreserveAspectFit
-                smooth: true
-                source: "qrc:/res/image/synergy-icon.png"
-            }
-
             // hostname
             HeaderText {
                 id: hostname
