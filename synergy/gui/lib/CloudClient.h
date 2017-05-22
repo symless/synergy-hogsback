@@ -29,6 +29,7 @@ public:
     Q_INVOKABLE void unsubGroup();
     Q_INVOKABLE void getScreens();
     Q_INVOKABLE void userGroups();
+    Q_INVOKABLE void getLatestVersion();
 
     void report(int destId, QString successfulIp, QString failedIp);
     void updateGroupConfig(QJsonDocument& doc);
@@ -50,6 +51,7 @@ private slots:
     void onUpdateGroupConfigFinished(QNetworkReply* reply);
     void onUserGroupsFinished(QNetworkReply* reply);
     void onUnsubGroupFinished(QNetworkReply* reply);
+    void onGetLatestVersionFinished(QNetworkReply* reply);
     void onReplyError(QNetworkReply::NetworkError code);
     void onRetryGetUserId();
 

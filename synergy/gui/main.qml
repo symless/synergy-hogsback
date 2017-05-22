@@ -22,6 +22,10 @@ ApplicationWindow {
         id: cloudClient
     }
 
+    Component.onCompleted: {
+        cloudClient.getLatestVersion()
+    }
+
     Connections {
         target: cloudClient
         onLoginOk: {
@@ -91,4 +95,3 @@ ApplicationWindow {
         }
     }
 }
-

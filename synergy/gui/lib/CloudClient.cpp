@@ -34,6 +34,7 @@ static const char kUpdateGroupConfigUrl[] = SYNERGY_CLOUD_URI "/group/update";
 static const char kReportUrl[] = SYNERGY_CLOUD_URI "/report";
 static const char kClaimServerUrl[] = SYNERGY_CLOUD_URI "/group/server/claim";
 static const char kUpdateScreenUrl[] = SYNERGY_CLOUD_URI "/screen/update";
+static const char kLatestVersionUrl[] = SYNERGY_CLOUD_URI "/version";
 static const int kPollingTimeout = 60000; // 1 minute
 
 #undef SYNERGY_CLOUD_URI
@@ -221,6 +222,28 @@ void CloudClient::onUnsubGroupFinished(QNetworkReply *reply)
     syncConfig();
 }
 
+void CloudClient::onGetLatestVersionFinished(QNetworkReply *reply)
+{
+    if (replyHasError(reply)) {
+        return;
+    }
+
+    m_Data = reply->readAll();
+    reply->deleteLater();
+
+    QJsonDocument doc = QJsonDocument::fromJson(m_Data);
+
+    if (doc.isNull()) {
+        return;
+    }
+
+    if (doc.isObject()) {
+        QJsonObject obj = doc.object();
+        QString version = obj["latestVersion"].toString();
+        LogManager::debug(QString("Latest version: %1").arg(version));
+    }
+}
+
 void CloudClient::joinGroup(QString groupName)
 {
     static const QUrl joinGroupUrl = QUrl(kJoinGroupUrl);
@@ -325,6 +348,17 @@ void CloudClient::userGroups()
     auto reply = m_networkManager->get(req);
     connect (reply, &QNetworkReply::finished, [this, reply]() {
         onUserGroupsFinished (reply);
+    });
+}
+
+void CloudClient::getLatestVersion()
+{
+    QUrl latestVersionUrl = QUrl(kLatestVersionUrl);
+    QNetworkRequest req(latestVersionUrl);
+
+    auto reply = m_networkManager->get(req);
+    connect (reply, &QNetworkReply::finished, [this, reply]() {
+        onGetLatestVersionFinished (reply);
     });
 }
 
