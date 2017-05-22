@@ -17,7 +17,11 @@
 
 // https://alpha1.cloud.symless.com/
 // http://127.0.0.1:8080/
+#ifdef SYNERGY_DEV_ENV
 #define SYNERGY_CLOUD_URI "https://alpha1.cloud.symless.com"
+#else
+#define SYNERGY_CLOUD_URI "https://api.cloud.symless.com"
+#endif
 
 static const char kUserGroupsUrl[] = SYNERGY_CLOUD_URI "/user/groups";
 static const char kJoinGroupUrl[] = SYNERGY_CLOUD_URI "/group/join";
