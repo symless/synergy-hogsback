@@ -9,15 +9,14 @@ if [ -d "$dir" ]; then
   cd "$dir"
 fi
 
-# set up your app name, version number, and background image file name
+# set up your app name and background image file name
 APP_NAME="Synergy"
-VERSION="2.0.0"
 DMG_BACKGROUND_IMG="Background.png"
 
 # you should not need to change these
 APP_EXE="${APP_NAME}.app/Contents/MacOS/synergy2"
 
-VOL_NAME="${APP_NAME} ${VERSION}"   # volume name will be "SuperCoolApp 1.0.0"
+VOL_NAME="${APP_NAME}"   # volume name will be "SuperCoolApp 1.0.0"
 DMG_TMP="${VOL_NAME}-temp.dmg"
 DMG_FINAL="${VOL_NAME}.dmg"         # final DMG name will be "SuperCoolApp 1.0.0.dmg"
 STAGING_DIR="./Install"             # we copy all our stuff into this dir
