@@ -12,7 +12,6 @@ Rectangle {
     z: 1
 
     property color textColor :  "white"
-    property string fontFamily : "sans"
 
     BodyText {
         id: versionNumber
