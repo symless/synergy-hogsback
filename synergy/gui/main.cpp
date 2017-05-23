@@ -2,6 +2,7 @@
 #include "CloudClient.h"
 #include "ScreenListModel.h"
 #include "ScreenManager.h"
+#include "TrialValidator.h"
 #include "LogManager.h"
 #include "ProcessManager.h"
 #include "AccessibilityManager.h"
@@ -12,6 +13,7 @@
 #include <ProfileListModel.h>
 
 #include <QApplication>
+#include <QMessageBox>
 #include <QtQuick>
 #include <QQmlApplicationEngine>
 #include <stdexcept>
@@ -36,6 +38,14 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
     QIcon icon(":res/image/synergy-icon.png");
     app.setWindowIcon(icon);
+
+    TrialValidator trialValidator;
+    if (!trialValidator.isValid()) {
+        QMessageBox msgBox;
+        msgBox.setText("This version is not supported anymore. Please <a href='https://www.symless.com'>download</a> the latest build.");
+        msgBox.exec();
+        return 0;
+    }
 
     qreal dpi = QGuiApplication::primaryScreen()->physicalDotsPerInch();
     // 72 points = 1 inch

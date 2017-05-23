@@ -17,6 +17,8 @@ set (GUI_LIB_SOURCES
     Hostname.cpp
     IpManager.cpp
     LogManager.cpp
+    Profile.cpp
+    ProfileListModel.cpp
     ProcessCommand.cpp
     ProcessManager.cpp
     ScreenBBArrangement.cpp
@@ -24,16 +26,17 @@ set (GUI_LIB_SOURCES
     ScreenListModel.cpp
     ScreenListSnapshotManager.cpp
     ScreenManager.cpp
-    Profile.cpp
-    ProfileListModel.cpp
     ServerInfo.cpp
+    TrialValidator.cpp
     TestDelegatee.cpp
     VersionManager.cpp
     ${GUI_LIB_MACOS_SOURCES}
 )
 
 add_library (guilib ${GUI_LIB_SOURCES})
-target_compile_definitions (guilib PRIVATE -DSYNLIB -DSYNERGY_VERSION_STRING=${SYNERGY_VERSION_STRING})
+target_compile_definitions (guilib PRIVATE -DSYNLIB
+    -DSYNERGY_VERSION_STRING=${SYNERGY_VERSION_STRING}
+    -DSYNERGY_BUILD_DATE=${SYNERGY_BUILD_DATE})
 if (DEFINED SYNERGY_DEVELOP_ENV)
     target_compile_definitions(guilib PRIVATE -DSYNERGY_DEV_ENV=1)
 endif()

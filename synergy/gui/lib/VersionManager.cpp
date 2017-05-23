@@ -1,9 +1,7 @@
 #include "VersionManager.h"
 
 #include "LogManager.h"
-
-#define STRINGIZE_(x) #x
-#define STRINGIZE(x) STRINGIZE_(x)
+#include "Macro.h"
 
 QObject* VersionManager::instance(QQmlEngine* engine, QJSEngine* scriptEngine)
 {
