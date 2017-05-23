@@ -2,6 +2,7 @@
 
 #include "Screen.h"
 #include "LogManager.h"
+#include "VersionManager.h"
 #include "AppConfig.h"
 
 #include <QNetworkAccessManager>
@@ -240,7 +241,8 @@ void CloudClient::onGetLatestVersionFinished(QNetworkReply *reply)
     if (doc.isObject()) {
         QJsonObject obj = doc.object();
         QString version = obj["latestVersion"].toString();
-        LogManager::debug(QString("Latest version: %1").arg(version));
+        VersionManager* versionManager = qobject_cast<VersionManager*>(VersionManager::instance());
+        versionManager->checkUpdate(version);
     }
 }
 

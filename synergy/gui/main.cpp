@@ -5,6 +5,7 @@
 #include "LogManager.h"
 #include "ProcessManager.h"
 #include "AccessibilityManager.h"
+#include "VersionManager.h"
 #include "AppConfig.h"
 #include "Hostname.h"
 #include "Common.h"
@@ -52,6 +53,7 @@ int main(int argc, char* argv[])
         qmlRegisterType<Profile>("com.synergy.gui", 1, 0, "Profile");
         qmlRegisterType<ProfileListModel>("com.synergy.gui", 1, 0, "ProfileListModel");
         qmlRegisterSingletonType<AppConfig>("com.synergy.gui", 1, 0, "AppConfig", AppConfig::instance);
+        qmlRegisterSingletonType<VersionManager>("com.synergy.gui", 1, 0, "VersionManager", VersionManager::instance);
 
         QQmlApplicationEngine engine;
         LogManager::instance();

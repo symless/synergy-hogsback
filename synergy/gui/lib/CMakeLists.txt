@@ -28,12 +28,13 @@ set (GUI_LIB_SOURCES
     ProfileListModel.cpp
     ServerInfo.cpp
     TestDelegatee.cpp
+    VersionManager.cpp
     ${GUI_LIB_MACOS_SOURCES}
 )
 
 add_library (guilib ${GUI_LIB_SOURCES})
-target_compile_definitions (guilib PRIVATE -DSYNLIB)
+target_compile_definitions (guilib PRIVATE -DSYNLIB -DSYNERGY_VERSION_STRING=${SYNERGY_VERSION_STRING})
 if (DEFINED SYNERGY_DEVELOP_ENV)
-    target_compile_definitions(guilib PRIVATE SYNERGY_DEV_ENV=1)
+    target_compile_definitions(guilib PRIVATE -DSYNERGY_DEV_ENV=1)
 endif()
 qt5_use_modules (guilib Core Widgets Quick Network)

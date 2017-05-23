@@ -1,6 +1,8 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
 
+import com.synergy.gui 1.0
+
 Rectangle {
     width: 190
     height: 30
@@ -27,5 +29,19 @@ Rectangle {
         anchors.bottom: parent.bottom
         color: textColor
         text: "Alpha testing only, do not redistribute"
+        onLinkActivated: Qt.openUrlExternally(link)
+
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.NoButton
+            cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+        }
+    }
+
+    Connections {
+        target: VersionManager
+        onNewVersionDetected: {
+            versionWarning.text = newVersion + " is available! Please <a href='https://www.symless.com'>update</a>"
+        }
     }
 }
