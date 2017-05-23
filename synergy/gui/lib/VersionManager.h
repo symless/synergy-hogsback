@@ -15,6 +15,7 @@ public:
 
     void setVersion(const QString v);
     void checkUpdate(const QString& newVersion);
+    Q_INVOKABLE QString buildVersion() const;
 protected:
     VersionManager();
 

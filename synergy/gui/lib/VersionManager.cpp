@@ -32,6 +32,10 @@ void VersionManager::checkUpdate(const QString& newVersion)
     }
 }
 
+QString VersionManager::buildVersion() const {
+    return SYNERGY_VERSION_STRING;
+}
+
 VersionManager::VersionManager()
 {
     setVersion(STRINGIZE(SYNERGY_VERSION_STRING));

@@ -20,7 +20,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.bottom: versionWarning.top
         color: textColor
-        text: "Version: Synergy 2.0-alpha3"
+        text: "Version: Synergy " + VersionManager.buildVersion()
     }
 
     BodyText {
