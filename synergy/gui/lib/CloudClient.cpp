@@ -553,3 +553,9 @@ bool CloudClient::replyHasError(QNetworkReply* reply)
 
     return result;
 }
+
+
+QString
+CloudClient::serverHostname() const {
+    return SYNERGY_CLOUD_URI;
+}

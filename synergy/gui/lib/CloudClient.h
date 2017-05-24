@@ -30,6 +30,7 @@ public:
     Q_INVOKABLE void getScreens();
     Q_INVOKABLE void userGroups();
     Q_INVOKABLE void getLatestVersion();
+    Q_INVOKABLE QString serverHostname() const;
 
     void report(int destId, QString successfulIp, QString failedIp);
     void updateGroupConfig(QJsonDocument& doc);
