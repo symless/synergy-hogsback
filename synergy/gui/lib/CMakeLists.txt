@@ -36,7 +36,7 @@ set (GUI_LIB_SOURCES
 add_library (guilib ${GUI_LIB_SOURCES})
 target_compile_definitions (guilib PRIVATE -DSYNLIB}
     -DSYNERGY_BUILD_DATE=${SYNERGY_BUILD_DATE})
-if (DEFINED SYNERGY_DEVELOP_ENV)
+if (SYNERGY_DEVELOP_ENV)
     target_compile_definitions(guilib PRIVATE -DSYNERGY_DEV_ENV=1)
 endif()
 qt5_use_modules (guilib Core Widgets Quick Network)
