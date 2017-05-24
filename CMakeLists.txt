@@ -15,7 +15,7 @@ set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
 #
 # Deploy
 #
-set (SYNERGY_DEVELOP_ENV OFF)
+option (SYNERGY_DEVELOPER_MODE "Turn on secret developer features" OFF)
 
 #
 # Version

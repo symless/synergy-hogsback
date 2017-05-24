@@ -16,9 +16,7 @@
 #include <QEventLoop>
 #include <QNetworkInterface>
 
-// https://alpha1.cloud.symless.com/
-// http://127.0.0.1:8080/
-#ifdef SYNERGY_DEV_ENV
+#ifdef SYNERGY_DEVELOPER_MODE
 #define SYNERGY_CLOUD_URI "https://alpha1.cloud.symless.com"
 #else
 #define SYNERGY_CLOUD_URI "https://v1.api.cloud.symless.com"
