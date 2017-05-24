@@ -38,8 +38,6 @@ static const char kUpdateScreenUrl[] = SYNERGY_CLOUD_URI "/screen/update";
 static const char kLatestVersionUrl[] = SYNERGY_CLOUD_URI "/version";
 static const int kPollingTimeout = 60000; // 1 minute
 
-#undef SYNERGY_CLOUD_URI
-
 CloudClient::CloudClient(QObject* parent) : QObject(parent)
 {
     m_networkManager = new QNetworkAccessManager(this);
@@ -552,4 +550,10 @@ bool CloudClient::replyHasError(QNetworkReply* reply)
     }
 
     return result;
+}
+
+
+QString
+CloudClient::serverHostname() const {
+    return SYNERGY_CLOUD_URI;
 }

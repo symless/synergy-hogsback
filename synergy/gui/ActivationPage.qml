@@ -81,7 +81,8 @@ Rectangle {
                                 url += "735056519324-0rtc3fo39qol3i6c8irloqbgjrdnt4mi.apps.googleusercontent.com"
                                 url += '&'
                                 url += "redirect_uri="
-                                url += "https://alpha1.cloud.symless.com/login/with-google"
+                                url += cloudClient.serverHostname()
+                                url += "/login/with-google"
                                 url += '&'
                                 url += "response_type"
                                 url += "=code"
