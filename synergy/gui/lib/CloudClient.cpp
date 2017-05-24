@@ -97,19 +97,18 @@ void CloudClient::getUserId(bool initialCall)
         // user Id, we only need to restart the time and skip creating
         // a new poll as the last one probably is not finished yet
         bool skip = false;
-        if (0 < m_elapsedTime.elapsed() &&
-            m_elapsedTime.elapsed() < kPollingTimeout) {
+        if (m_elapsedTimer.remainingTime() > 0) {
             skip = true;
         }
 
-        m_elapsedTime.restart();
+        m_elapsedTimer.start(kPollingTimeout);
 
         if (skip) {
             return;
         }
     }
     else {
-        if (m_elapsedTime.elapsed() > kPollingTimeout) {
+        if (m_elapsedTimer.remainingTime() <= 0) {
             emit loginFail("Failed to use Google to login. Please try again.");
             return;
         }
@@ -489,6 +488,7 @@ void CloudClient::onGetUserIdFinished(QNetworkReply *reply)
     }
     else {
         emit loginOk();
+        m_elapsedTimer.stop();
     }
 }
 

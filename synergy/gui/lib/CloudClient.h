@@ -4,7 +4,7 @@
 #include "LibMacro.h"
 
 #include <QNetworkReply>
-#include <QTime>
+#include <QTimer>
 #include <QObject>
 
 class QNetworkAccessManager;
@@ -64,7 +64,7 @@ private:
     QByteArray m_Data;
     QNetworkAccessManager* m_networkManager;
     AppConfig* m_appConfig;
-    QTime m_elapsedTime;
+    QTimer m_elapsedTimer;
     int64_t m_groupId = -1;
     int64_t m_screenId = -1;
 
