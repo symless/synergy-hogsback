@@ -21,7 +21,7 @@ Precompiled:
     - Qt        (installed using the installer in to C:\Qt)
 
     - Boost     (from https://sourceforge.net/projects/boost/files/boost-binaries/
-                 unzipped to C:\Boost\ and added to PATH)
+                 unzipped to C:\Boost\ and BOOST_ROOT and BOOST_LIBRARYDIR set)
 
     - libsodium (from https://download.libsodium.org/libsodium/releases/
                  unzipped to C:\libsodium)

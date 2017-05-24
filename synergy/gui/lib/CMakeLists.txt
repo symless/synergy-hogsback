@@ -35,9 +35,7 @@ set (GUI_LIB_SOURCES
 )
 
 add_library (guilib ${GUI_LIB_SOURCES})
-
-target_compile_definitions (guilib PRIVATE -DSYNLIB}
-    -DSYNERGY_BUILD_DATE=${SYNERGY_BUILD_DATE})
+target_compile_definitions (guilib PRIVATE -DSYNLIB})
 
 if (SYNERGY_DEVELOPER_MODE)
     target_compile_definitions(guilib PRIVATE -DSYNERGY_DEVELOPER_MODE=1)

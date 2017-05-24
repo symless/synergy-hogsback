@@ -25,12 +25,12 @@ add_subdirectory (flatbuffers EXCLUDE_FROM_ALL)
 # ZeroMQ
 #
 if (APPLE)
-	set (ZMQ_BUILD_FRAMEWORK OFF CACHE BOOL "Build ZeroMQ as an OS X framework" FORCE)
+	set (ZMQ_BUILD_FRAMEWORK OFF CACHE BOOL "ZeroMQ: Build OS X framework" FORCE)
 endif()
 
-set (ENABLE_CURVE ON CACHE BOOL "Enable ZMQ CURVE security" FORCE)
-set (WITH_OPENPGM OFF CACHE BOOL "ZeroMQ: Build with support for OpenPGM" FORCE)
+set (ENABLE_CURVE ON CACHE BOOL "ZeroMQ: Enable CURVE security" FORCE)
 set (WITH_LIBSODIUM ON CACHE BOOL "ZeroMQ: Use libsodium instead of tweetnacl" FORCE)
+set (WITH_OPENPGM OFF CACHE BOOL "ZeroMQ: Build with support for OpenPGM" FORCE)
 
 add_subdirectory (libzmq EXCLUDE_FROM_ALL)
 add_subdirectory (norm EXCLUDE_FROM_ALL)
