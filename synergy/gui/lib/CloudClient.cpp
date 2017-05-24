@@ -21,7 +21,7 @@
 #ifdef SYNERGY_DEV_ENV
 #define SYNERGY_CLOUD_URI "https://alpha1.cloud.symless.com"
 #else
-#define SYNERGY_CLOUD_URI "https://api.cloud.symless.com"
+#define SYNERGY_CLOUD_URI "https://v1.api.cloud.symless.com"
 #endif
 
 static const char kUserGroupsUrl[] = SYNERGY_CLOUD_URI "/user/groups";
