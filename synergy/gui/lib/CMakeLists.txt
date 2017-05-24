@@ -14,6 +14,7 @@ set (GUI_LIB_SOURCES
     CoreInterface.cpp
     DebugLevel.cpp
     DirectoryManager.cpp
+    FontManager.cpp
     Hostname.cpp
     IpManager.cpp
     LogManager.cpp

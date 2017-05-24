@@ -27,5 +27,8 @@
         <file>HeaderText.qml</file>
         <file>LogoText.qml</file>
         <file>SynergyButton.qml</file>
+        <file alias="Raleway.otf">res/font/Raleway.otf</file>
+        <file alias="Museo.otf">res/font/Museo.otf</file>
+        <file alias="AlternateGotNo3D.otf">res/font/AlternateGotNo3D.otf</file>
     </qresource>
 </RCC>

@@ -3,6 +3,7 @@
 #include "ScreenListModel.h"
 #include "ScreenManager.h"
 #include "TrialValidator.h"
+#include "FontManager.h"
 #include "LogManager.h"
 #include "ProcessManager.h"
 #include "AccessibilityManager.h"
@@ -46,6 +47,8 @@ int main(int argc, char* argv[])
         msgBox.exec();
         return 0;
     }
+
+    FontManager::loadAll();
 
     qreal dpi = QGuiApplication::primaryScreen()->physicalDotsPerInch();
     // 72 points = 1 inch
