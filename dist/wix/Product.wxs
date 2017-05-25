@@ -46,10 +46,10 @@
                 <Condition><![CDATA[Installed OR (VersionNT >= 602)]]></Condition>
             </Component>
         </DirectoryRef>
-        <Icon Id="synergy.ico" SourceFile="$(var.ResPath)/synergy.ico"/>
+        <Icon Id="synergy2.ico" SourceFile="$(var.ResPath)/synergy.ico"/>
                 <WixVariable Id="WixUIBannerBmp" Value="$(var.ResPath)\banner.bmp"/>
                 <WixVariable Id="WixUIDialogBmp" Value="$(var.ResPath)\dialog.bmp"/>
-        <Property Id="ARPPRODUCTICON" Value="synergy.ico"/>
+        <Property Id="ARPPRODUCTICON" Value="synergy2.ico"/>
         <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER"/>
         <Property Id="MSIRESTARTMANAGERCONTROL" Value="Disable"/>
         <Property Id="LEGACY_UNINSTALL_EXISTS">
@@ -100,7 +100,7 @@
             </Component>
             <Component Guid="BAC8149B-6287-45BF-9C27-43D71ED40214" Id="Gui">
                 <File Id="GuiProgram" KeyPath="yes" Source="$(var.BinPath)/synergy2.exe">
-                    <Shortcut Advertise="yes" Directory="ProgramMenuFolder" Icon="synergy.ico" Id="GuiShortcut" Name="$(var.Name) 2.0"/>
+                    <Shortcut Advertise="yes" Directory="ProgramMenuFolder" Icon="synergy2.ico" Id="GuiShortcut" Name="$(var.Name) 2.0"/>
                     <fire:FirewallException Id="GuiFirewallException" IgnoreFailure="yes" Name="Synergy 2.0" Scope="any"/>
                 </File>
                 <?if $(var.Configuration) = "Debug" ?>
