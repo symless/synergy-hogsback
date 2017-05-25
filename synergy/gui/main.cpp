@@ -37,9 +37,6 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationName("Synergy v2");
 
     QApplication app(argc, argv);
-    QIcon icon(":res/image/synergy-icon.png");
-    app.setWindowIcon(icon);
-
     TrialValidator trialValidator;
     if (!trialValidator.isValid()) {
         QMessageBox msgBox;

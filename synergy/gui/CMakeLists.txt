@@ -17,9 +17,19 @@ endif()
 add_subdirectory (lib)
 add_subdirectory (tests)
 
+set(icon_resources)
+
+if (WIN32)
+set(icon_resources
+    synergy.ico
+    synergy.rc
+)
+endif()
+
 add_executable (${PROJECT_NAME} WIN32
     main.cpp
     qml.qrc
+    ${icon_resources}
     main.qml
     ActivationPage.qml
     AccessibilityPage.qml
