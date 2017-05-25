@@ -21,8 +21,8 @@ set(icon_resources)
 
 if (WIN32)
 set(icon_resources
-    synergy.ico
-    synergy.rc
+    res/icon/synergy.ico
+    res/synergy.rc
 )
 endif()
 
