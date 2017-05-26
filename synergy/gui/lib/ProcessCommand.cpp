@@ -52,11 +52,7 @@ QStringList ProcessCommand::arguments(bool serverMode) const
             qobject_cast<AppConfig*>(AppConfig::instance());
 
     QStringList arguments;
-    arguments << "-f" << "--no-tray" << "--ipc";
-
-#ifdef Q_OS_WIN
-    arguments << "--stop-on-desk-switch";
-#endif
+    arguments << "-f" << "--no-tray";
 
     // debug level
     arguments << "--debug";
