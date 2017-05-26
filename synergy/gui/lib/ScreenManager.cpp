@@ -128,10 +128,7 @@ void ScreenManager::saveSnapshot()
 void ScreenManager::onKeyPressed (int const key)
 {
     switch (key) {
-        case Qt::Key_S:
-            saveSnapshot();
-            break;
-        case Qt::Key_A:
+        case Qt::Key_F12:
             LogManager::debug(QString("claim to be server"));
             m_cloudClient->claimServer();
             //startCoreProcess();
