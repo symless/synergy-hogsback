@@ -271,7 +271,7 @@ Rectangle {
                                     id: unsubScreenMouseArea
                                     anchors.fill: parent
                                     onPressed: {
-                                        applicationWindow.cloudClient.unsubGroup()
+                                        //applicationWindow.cloudClient.unsubGroup()
                                     }
                                 }
                             }
