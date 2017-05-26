@@ -303,6 +303,7 @@ void ScreenManager::onUpdateGroupConfig()
     QJsonDocument doc(jsonObject);
 
     m_cloudClient->updateGroupConfig(doc);
+    ++m_configVersion;
 }
 
 void ScreenManager::onScreenStatusChanged(QPair<QString, ScreenStatus> r)
