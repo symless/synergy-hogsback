@@ -18,6 +18,10 @@ ApplicationWindow {
         return v * PixelPerPoint;
     }
 
+    function op(dp) {
+        return dp / PixelPerPoint;
+    }
+
     CloudClient {
         id: cloudClient
     }

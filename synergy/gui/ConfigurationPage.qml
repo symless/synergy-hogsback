@@ -27,8 +27,8 @@ Rectangle {
         id: screenManager
         screenListModel: screenListModel
         processManager: processManager
-        viewWidth: screenArrangementScrollView.width
-        viewHeight: screenArrangementScrollView.height
+        //viewWidth: screenArrangementScrollView.width
+        //viewHeight: screenArrangementScrollView.height
         cloudClient: applicationWindow.cloudClient
     }
 
@@ -174,9 +174,9 @@ Rectangle {
                     // individual screen
                     Item {
                         id: screenIcon
-                        x: posX; y: posY
-                        width: screenListModel.screenIconWidth()
-                        height: screenListModel.screenIconHeight()
+                        x: dp(posX); y: dp(posY)
+                        width: dp(screenListModel.screenIconWidth())
+                        height: dp(screenListModel.screenIconHeight())
                         property point beginDrag
                         property int modelIndex: -1
                         property var editMode: false
@@ -194,14 +194,14 @@ Rectangle {
                                 beginDrag = Qt.point(screenIcon.x,
                                                 screenIcon.y);
                                 modelIndex = screenManager.getModelIndex(
-                                                screenIcon.x + 45,
-                                                screenIcon.y + 45)
+                                                op(screenIcon.x + 45),
+                                                op(screenIcon.y + 45))
                                 screenManager.lockScreen(modelIndex)
                             }
                             onReleased: {
                                 screenManager.moveModel(modelIndex,
-                                                screenIcon.x - beginDrag.x,
-                                                screenIcon.y - beginDrag.y)
+                                                op(screenIcon.x - beginDrag.x),
+                                                op(screenIcon.y - beginDrag.y))
                                 screenManager.unlockScreen(modelIndex)
                                 modelIndex = -1
                             }
