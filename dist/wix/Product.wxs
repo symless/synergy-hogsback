@@ -4,7 +4,7 @@
     <Product Id="*" Language="1033" Manufacturer="$(var.Author)" Name="$(var.Name) ($(var.PlatformSimpleName))" UpgradeCode="$(var.UpgradeGuid)" Version="$(var.Version)">
         <Package Compressed="yes" InstallScope="perMachine" InstallerVersion="301"/>
         <MajorUpgrade DowngradeErrorMessage="A newer version of $(var.Name) is already installed."/>
-        <MediaTemplate EmbedCab="yes"/>
+        <MediaTemplate EmbedCab="yes" CompressionLevel="high"/>
 
         <UI Id="UserInterface">
             <Property Id="WixUI_Mode" Value="Custom" />
