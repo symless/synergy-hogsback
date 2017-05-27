@@ -20,49 +20,50 @@
             <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
         </UI>
         <UIRef Id="WixUI_Common" />
-        
-        <!-- causes ICE61 warning, but stops user from installing many instances from nightly builds. -->
+
         <Upgrade Id="$(var.UpgradeGuid)">
             <UpgradeVersion Minimum="0.0.0.0" Property="UPGRADE"/>
         </Upgrade>
+
         <Feature Id="ProductFeature" Title="$(var.Name)">
             <ComponentGroupRef Id="ProductComponents"/>
             <ComponentGroupRef Id="OpenSSLComponents"/>
-            <ComponentGroupRef Id="ProductQtPluginComponents"/>
-            <ComponentGroupRef Id="QtQuickComponents"/>
-            <ComponentGroupRef Id="QtQuick2Components"/>
+            <ComponentGroupRef Id="QtComponents"/>
+
             <MergeRef Id="CRT"/>
-                        <?if $(var.Configuration) = "Debug" ?>
-                    <MergeRef Id="DebugCRT"/>
-                    <?endif ?>
+            <?if $(var.Configuration) = "Debug" ?>
+                <MergeRef Id="DebugCRT"/>
+            <?endif ?>
             <ComponentRef Id="RegistryEntries"/>
         </Feature>
+
         <DirectoryRef Id="TARGETDIR">
             <Component Guid="7CF3564D-1F8E-4D3D-9781-E1EE22D5BD67" Id="RegistryEntries">
-                <RegistryKey ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes" Key="Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers" Root="HKLM">
+                <RegistryKey ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes" 
+                             Key="Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers" Root="HKLM">
                     <RegistryValue Name="[INSTALLFOLDER]synergys.exe" Type="string" Value="~ HIGHDPIAWARE WIN7RTM"/>
                 </RegistryKey>
-                <!-- Windows 8 and later only -->
-                <Condition><![CDATA[Installed OR (VersionNT >= 602)]]></Condition>
+                <Condition><![CDATA[Installed OR (VersionNT >= 602)]]></Condition><!-- Windows 8 and later only -->
             </Component>
         </DirectoryRef>
-        <Icon Id="synergy2.ico" SourceFile="$(var.ResPath)/synergy.ico"/>
-                <WixVariable Id="WixUIBannerBmp" Value="$(var.ResPath)\banner.bmp"/>
-                <WixVariable Id="WixUIDialogBmp" Value="$(var.ResPath)\dialog.bmp"/>
-        <Property Id="ARPPRODUCTICON" Value="synergy2.ico"/>
+
+        <Icon Id="synergy.ico" SourceFile="$(var.ResPath)/synergy.ico"/>
+        <WixVariable Id="WixUIBannerBmp" Value="$(var.ResPath)\banner.bmp"/>
+        <WixVariable Id="WixUIDialogBmp" Value="$(var.ResPath)\dialog.bmp"/>
+        <Property Id="ARPPRODUCTICON" Value="synergy.ico"/>
         <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER"/>
         <Property Id="MSIRESTARTMANAGERCONTROL" Value="Disable"/>
+
         <Property Id="LEGACY_UNINSTALL_EXISTS">
-            <RegistrySearch Id="LegacyRegistrySearch" Key="SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Synergy" Name="UninstallString" Root="HKLM" Type="file" Win64="no">
+            <RegistrySearch Id="LegacyRegistrySearch" Key="SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Synergy" 
+                            Name="UninstallString" Root="HKLM" Type="file" Win64="no">
                 <FileSearch Id="LegacyFileSearch" Name="uninstall.exe"/>
             </RegistrySearch>
         </Property>
-        <Condition Message="An existing installation of $(var.Name) was detected, please uninstall it before continuing.">NOT LEGACY_UNINSTALL_EXISTS
-        </Condition>
+        <Condition Message="An existing installation of $(var.Name) was detected, please uninstall it before continuing.">NOT LEGACY_UNINSTALL_EXISTS</Condition>
+
         <CustomAction ExeCommand="" FileKey="GuiProgram" Id="StartGui" Return="asyncNoWait"/>
-        <UI>
-            <Publish Control="Finish" Dialog="ExitDialog" Event="DoAction" Value="StartGui">NOT Installed</Publish>
-        </UI>
+        <UI><Publish Control="Finish" Dialog="ExitDialog" Event="DoAction" Value="StartGui">NOT Installed</Publish></UI>
     </Product>
     <Fragment>
         <Directory Id="TARGETDIR" Name="SourceDir">
@@ -70,12 +71,9 @@
                 <Directory Id="INSTALLFOLDER" Name="$(var.Name)">
                     <Merge DiskId="1" Id="CRT" Language="0" SourceFile="$(var.CRT)"/>
                     <?if $(var.Configuration) = "Debug" ?>
-                            <Merge DiskId="1" Id="DebugCRT" Language="0" SourceFile="$(var.DebugCRT)"/>
-                        <?endif ?>
+                        <Merge DiskId="1" Id="DebugCRT" Language="0" SourceFile="$(var.DebugCRT)"/>
+                    <?endif ?>
                     <Directory Id="OpenSSLDir" Name="OpenSSL"/>
-                    <Directory Id="PlatformsDir" Name="Platforms"/>
-                    <Directory Id="QT_QUICK" Name="QtQuick"/>
-                    <Directory Id="QT_QUICK2" Name="QtQuick.2"/>
                 </Directory>
             </Directory>
             <Directory Id="ProgramMenuFolder"/>
@@ -85,9 +83,10 @@
         <ComponentGroup Directory="INSTALLFOLDER" Id="ProductComponents">
             <Component Guid="EC9AD3B0-277C-4157-B5C8-5FD5B6A5F4AD" Id="Core">
                 <?if $(var.Configuration) = "Debug" ?>
-                <File Source="$(var.BinPath)/synergyc.pdb"/>
-                <File Source="$(var.BinPath)/synergys.pdb"/>
-                <File Source="$(var.BinPath)/syntool.pdb"/>
+                    <File Source="$(var.BinPath)/synergys.pdb"/>
+                    <File Source="$(var.BinPath)/synergyc.pdb"/>
+                    <File Source="$(var.BinPath)/syntool.pdb"/>
+                    <File Source="C:\Program Files (x86)\Windows Kits\10\bin\$(var.Platform)\ucrt\ucrtbased.dll"/>
                 <?endif ?>
                 <File Source="$(var.BinPath)/synergys.exe">
                     <fire:FirewallException Id="ServerFirewallException" IgnoreFailure="yes" Name="$(var.Name)" Scope="any"/>
@@ -100,41 +99,11 @@
             </Component>
             <Component Guid="BAC8149B-6287-45BF-9C27-43D71ED40214" Id="Gui">
                 <File Id="GuiProgram" KeyPath="yes" Source="$(var.BinPath)/synergy2.exe">
-                    <Shortcut Advertise="yes" Directory="ProgramMenuFolder" Icon="synergy2.ico" Id="GuiShortcut" Name="$(var.Name) 2.0"/>
-                    <fire:FirewallException Id="GuiFirewallException" IgnoreFailure="yes" Name="Synergy 2.0" Scope="any"/>
+                    <Shortcut Advertise="yes" Directory="ProgramMenuFolder" Icon="synergy.ico" Id="GuiShortcut" Name="$(var.Name) 2.0"/>
+                    <fire:FirewallException Id="GuiFirewallException" IgnoreFailure="yes" Name="$(var.Name) 2.0" Scope="any"/>
                 </File>
                 <?if $(var.Configuration) = "Debug" ?>
-                <File Source="$(var.BinPath)/synergy2.pdb"/>
-                <File Source="$(var.QtBinPath)\Qt5Cored.dll"/>
-                <File Source="$(var.QtBinPath)\Qt5Guid.dll"/>
-                <File Source="$(var.QtBinPath)\Qt5Networkd.dll"/>
-                <File Source="$(var.QtBinPath)\Qt5Svgd.dll"/>
-                <File Source="$(var.QtBinPath)\Qt5Widgetsd.dll"/>
-                <File Source="$(var.QtBinPath)\Qt5Quickd.dll"/>
-                <File Source="$(var.QtBinPath)\Qt5Qmld.dll"/>
-                <File Source="$(var.QtBinPath)\libGLESv2d.dll"/>
-                <File Source="$(var.QtBinPath)\libEGLd.dll"/>
-                <!-- Hacky -->
-                <File Source="C:\Program Files (x86)\Windows Kits\10\bin\$(var.Platform)\ucrt\ucrtbased.dll"/>
-                <?else ?>
-                <File Source="$(var.QtBinPath)\Qt5Core.dll"/>
-                <File Source="$(var.QtBinPath)\Qt5Gui.dll"/>
-                <File Source="$(var.QtBinPath)\Qt5Network.dll"/>
-                <File Source="$(var.QtBinPath)\Qt5Svg.dll"/>
-                <File Source="$(var.QtBinPath)\Qt5Widgets.dll"/>
-                <File Source="$(var.QtBinPath)\Qt5Quick.dll"/>
-                <File Source="$(var.QtBinPath)\Qt5Qml.dll"/>
-                <File Source="$(var.QtBinPath)\libGLESv2.dll"/>
-                <File Source="$(var.QtBinPath)\libEGL.dll"/>
-                <?endif ?>
-            </Component>
-        </ComponentGroup>
-        <ComponentGroup Directory="PlatformsDir" Id="ProductQtPluginComponents">
-            <Component Guid="684EFA14-856B-440E-A5E6-E90E04E36B41" Id="QtPlatformPlugin">
-                <?if $(var.Configuration) = "Debug" ?>
-                <File Source="$(var.QtPlatformPath)\qwindowsd.dll"/>
-                <?else ?>
-                <File Source="$(var.QtPlatformPath)\qwindows.dll"/>
+                    <File Source="$(var.BinPath)/synergy2.pdb"/>
                 <?endif ?>
             </Component>
         </ComponentGroup>
@@ -146,179 +115,5 @@
                 <File Source="$(var.ResPath)/openssl/synergy.conf"/>
             </Component>
         </ComponentGroup>
-    </Fragment>
-
-    <Fragment>
-        <DirectoryRef Id="QT_QUICK">
-            <Directory Id="dirB90EBAAE8C722F8EEF6A2A7937508F95" Name="Controls">
-                <Component Id="cmp332C71812172FAE7B1FC8DC456A674FC" Guid="{D80E38AD-B84D-48EB-974F-B33D88805E97}">
-                    <File Id="filAD5ACBC20855B351AD69E6B3D8C97143" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Controls\plugins.qmltypes" />
-                </Component>
-                <Component Id="cmpE35EAD5CABA89D1B2B8ADE2FBAF964BE" Guid="{103978CE-3E76-462E-B645-A0A572CE97F2}">
-                    <File Id="filC420C807C99C755579F6F124AB4262F0" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Controls\qmldir" />
-                </Component>
-                <Component Id="cmp72C196FCA53C978FA201B3BD12EE6315" Guid="{6C43556E-C86E-4CD2-9998-D9F3C9F72576}">
-                    <File Id="fil90D1F5DF8BB3668A1DC5730F599D9F74" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Controls\qtquickcontrolsplugin.dll" />
-                </Component>
-                <Directory Id="dir5A1C55E69BC3B68A8031CCD9DA7FE316" Name="Styles">
-                    <Component Id="cmp912717EB8961A14D901EC6A77B3C5B19" Guid="{DA1683F8-0234-42CC-AB83-95C4039759B2}">
-                        <File Id="fil813CCB55E29561D119DC436C3D67579A" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Controls\Styles\qmldir" />
-                    </Component>
-                    <Directory Id="dirCED3EEAE5226F32FBC3DCC5F3BA4D1E2" Name="Flat">
-                        <Component Id="cmp1648D5FCB859E221850F2760D7AEA9C8" Guid="{7CC8A16E-CF59-4993-BBC0-955D5CCBB8CE}">
-                            <File Id="fil1624CFA8A51DAF8856FB20A189FBDECC" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Controls\Styles\Flat\qmldir" />
-                        </Component>
-                        <Component Id="cmp08116D4E00B872434100D308FCAAF15F" Guid="{1172B682-8A4D-46C8-9C5D-7C8295A6D863}">
-                            <File Id="filE7227E2268C316F51C27D31F0C1D9F10" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Controls\Styles\Flat\qtquickextrasflatplugin.dll" />
-                        </Component>
-                    </Directory>
-                </Directory>
-            </Directory>
-            <Directory Id="dirCB87846541DA25737823A6E1BBF1D45A" Name="Dialogs">
-                <Component Id="cmp2C9AC1E8FC0ECB014E160DE13DCF5798" Guid="{92204B0D-0463-443B-8D77-9BDADC5E3593}">
-                    <File Id="fil541415546A7B471A83CB8F324092519B" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Dialogs\dialogplugin.dll" />
-                </Component>
-                <Component Id="cmp2AFF04046C0F4441845836D5FB6F8CE6" Guid="{8C687C94-E32B-4535-8E3D-7651006E5E80}">
-                    <File Id="fil7FABC75022F3EEE6FB262E1488E92F36" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Dialogs\plugins.qmltypes" />
-                </Component>
-                <Component Id="cmpD5EE05E1D72B11C782AE4C59D0D4B434" Guid="{F33A0197-F7F0-4DC6-89FB-5B6296487BD8}">
-                    <File Id="filC5BABC0FA44457B217DED593B23FADBC" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Dialogs\qmldir" />
-                </Component>
-                <Directory Id="dir76D4927975063D8C2B9A1F2424F6A528" Name="Private">
-                    <Component Id="cmpFCDFACF4DB682B76A680B71ED12B0A4F" Guid="{B32D52CB-780F-4D54-8ADC-6BC1106D0DB4}">
-                        <File Id="fil90567EE334ED5004E93AE5AE3C4D2A6F" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Dialogs\Private\dialogsprivateplugin.dll" />
-                    </Component>
-                    <Component Id="cmp2AD302744D93A2271A8E06D68B01D5C4" Guid="{5E1A839C-7345-4897-A72B-7B8DAA4C182E}">
-                        <File Id="filA43782054EFF8B55E4F0F68C27078B8E" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Dialogs\Private\plugins.qmltypes" />
-                    </Component>
-                    <Component Id="cmpD78092D2EE08D7B50398CED75CEEDF96" Guid="{FF29E7FB-7711-44F4-8884-D9D60897E3E4}">
-                        <File Id="filF69688E6880840CA5C2E034E3BFDA038" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Dialogs\Private\qmldir" />
-                    </Component>
-                </Directory>
-            </Directory>
-            <Directory Id="dir8AE0401C211EE370CC516D6A1953CF04" Name="Extras">
-                <Component Id="cmp4631FB3111DEC94C34E8CA06293E1833" Guid="{83346583-C80A-4B8E-B3CF-81D688990F99}">
-                    <File Id="filA4DABD1FB571E43B565B8D24B69BECD2" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Extras\plugins.qmltypes" />
-                </Component>
-                <Component Id="cmp19A6724299A3199686DD6E6D169E96BC" Guid="{4A6FE840-D60E-4438-9871-4BDA902746BD}">
-                    <File Id="fil391A8585DF6661D37BC18DFECE4D7B69" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Extras\qmldir" />
-                </Component>
-                <Component Id="cmpDEBA852683BC840B5729E397F735C021" Guid="{30042597-D98D-4811-A082-1C880B96E975}">
-                    <File Id="fil00E6206F432159CB0BFD12379C096BF5" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Extras\qtquickextrasplugin.dll" />
-                </Component>
-                <Directory Id="dir3265E0EE2BF59B93F60C949A8C6EF080" Name="Private">
-                    <Component Id="cmp0318EBD2BEE6B623FA464EB9F2CE9156" Guid="{CCB3CD4E-D48A-48CD-9B20-4AFCC8865C1F}">
-                        <File Id="fil4C9F3539258C52B2D7FFC659283F4DFC" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Extras\Private\CircularButton.qml" />
-                    </Component>
-                    <Component Id="cmp66F8B8368C62CE1CE82B7887E9C30E91" Guid="{E7DAA743-FC2C-496F-925A-44072ADDF63E}">
-                        <File Id="fil7D9BC912FE7CE365F59FD74A1C1602C9" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Extras\Private\CircularButtonStyleHelper.qml" />
-                    </Component>
-                    <Component Id="cmpA42A3E2A45E6ED51F3736B7BF341A45A" Guid="{AA8DEC1C-0CDD-49D3-AB6A-A62FEF168681}">
-                        <File Id="filD35B6777D71C25D5E007E6AAD074FEAB" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Extras\Private\CircularTickmarkLabel.qml" />
-                    </Component>
-                    <Component Id="cmp93888CCC92FDFEE47AF15ACF270DE17F" Guid="{36B470DD-347A-47F1-98D1-86A5AA974F4E}">
-                        <File Id="fil3D2188F107DCD7908523D8B24331D7F2" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Extras\Private\Handle.qml" />
-                    </Component>
-                    <Component Id="cmpADB354A3EF6EBC08CF0ED32F0D495B52" Guid="{1B7E2A63-884D-4030-9F2A-40C33E5DFE9B}">
-                        <File Id="fil2A4342CE6F0C72A91A06E5CACDD96D8E" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Extras\Private\PieMenuIcon.qml" />
-                    </Component>
-                    <Component Id="cmpBE3C1967919D33C6BA92584B5EDA0B7A" Guid="{F378AB32-E28C-40ED-9DF6-5F93B9DE0472}">
-                        <File Id="fil4F428E6947CC82F7AAF7AFDD4B5C3255" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Extras\Private\qmldir" />
-                    </Component>
-                    <Component Id="cmp5CCA643BD92B821BBD9003484A7CDF25" Guid="{C68FB25A-FA5E-46E6-A37B-4CAE0F07FB65}">
-                        <File Id="fil19CCA3E0DE0E141507C641C89A87EC1A" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Extras\Private\TextSingleton.qml" />
-                    </Component>
-                </Directory>
-            </Directory>
-            <Directory Id="dir736F9B19E84E7DB13FCB9D57604797EB" Name="Layouts">
-                <Component Id="cmp344E3E6A7E4E8296D8A654183C996A50" Guid="{46694091-7681-439B-83BA-BDBECF132528}">
-                    <File Id="filCED7D7159732CC7E4AAF1D1BDBF87FD3" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Layouts\plugins.qmltypes" />
-                </Component>
-                <Component Id="cmpBF64A3C821F054CE4981D6FB3BAD3789" Guid="{A9ABE699-572D-4684-BE07-CAC3FCEDFB8D}">
-                    <File Id="fil03F47DD7A50413399BEDA0E905EAA6AE" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Layouts\qmldir" />
-                </Component>
-                <Component Id="cmpA3E309FDAE9903AEBC4B0B367707FFE9" Guid="{2F33A53A-8068-4319-9848-015C9F2CE2A4}">
-                    <File Id="fil2C3588E4D05DBCFC63548A47F6AD10C8" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Layouts\qquicklayoutsplugin.dll" />
-                </Component>
-            </Directory>
-            <Directory Id="dirC49AC4B50A8C5C83B6432C567D90E87C" Name="PrivateWidgets">
-                <Component Id="cmp768B44382D1C14D2E695C35D1D67C707" Guid="{B7148B12-E159-4931-8757-8B468F0BECC2}">
-                    <File Id="fil221B4293994C8A7E493EFFA4D1E29F22" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\PrivateWidgets\plugins.qmltypes" />
-                </Component>
-                <Component Id="cmpF4554624AD30EBB21BE6B4A5C00C6576" Guid="{A1DC4305-1C8D-4719-95F4-BFFF48F529C8}">
-                    <File Id="fil62AC22DFA9879C67A1DBE82F24715C13" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\PrivateWidgets\qmldir" />
-                </Component>
-                <Component Id="cmp78D433F17E5089D327002005E20BD268" Guid="{855C4EA4-70B2-467B-B8B5-D2DA1F5E6F73}">
-                    <File Id="fil2F8EB0F714892ABE2A4D888122B6A501" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\PrivateWidgets\widgetsplugin.dll" />
-                </Component>
-            </Directory>
-            <Directory Id="dirCCE7513FC132E2411536000421F07508" Name="Window.2">
-                <Component Id="cmp88BF2B326E877998370B7E349EA95B1D" Guid="{BFEB43BE-B537-44C4-A0A6-D9B3F70006CD}">
-                    <File Id="filB0BC16D0AC9BEBB9D8842134CACEBFD4" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Window.2\plugins.qmltypes" />
-                </Component>
-                <Component Id="cmp477CBD3B2FEA8667A79F8C12E6040A87" Guid="{7324F58E-264F-4EB0-A750-18E674A46960}">
-                    <File Id="fil6C00BB16990674B87D7CA521BD4C4031" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Window.2\qmldir" />
-                </Component>
-                <Component Id="cmp1F7BDCE1C56CEE9AAEEA02EE175EAEE0" Guid="{565FF49E-091E-40F9-AE4D-5DD30E8E5326}">
-                    <File Id="filE685304043B69204E7CF6404AE3F010D" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick\Window.2\windowplugin.dll" />
-                </Component>
-            </Directory>
-        </DirectoryRef>
-
-        <DirectoryRef Id="QT_QUICK2">
-            <Component Id="cmpA30F92E2B3051178673BA0580B3C74E5" Guid="{42B6A77C-C5B2-4D13-980A-ABF470C717DC}">
-                <File Id="filC88FE00C1A8903241BFD435D49D579AA" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick.2\plugins.qmltypes" />
-            </Component>
-            <Component Id="cmp3CFDB58BB485CB4E70F2F5C74164F75B" Guid="{748299AD-CDB0-44F8-B196-D86D8E3CC449}">
-                <File Id="fil8A98CAB0D3078D8C03DE2FC871EA5207" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick.2\qmldir" />
-            </Component>
-            <Component Id="cmp429FB341157EAF04AA8143D23B794115" Guid="{AC4827B4-E3C1-4284-BBD3-F7AA311D79C1}">
-                <File Id="fil198033D3BD773D7FFED03288CE6BBD64" KeyPath="yes" Source="$(var.QtPath)\qml\QtQuick.2\qtquick2plugin.dll" />
-            </Component>
-        </DirectoryRef>
-
-    </Fragment>
-    <Fragment>
-        
-        <ComponentGroup Id="QtQuickComponents">
-            <ComponentRef Id="cmp332C71812172FAE7B1FC8DC456A674FC" />
-            <ComponentRef Id="cmpE35EAD5CABA89D1B2B8ADE2FBAF964BE" />
-            <ComponentRef Id="cmp72C196FCA53C978FA201B3BD12EE6315" />
-            <ComponentRef Id="cmp912717EB8961A14D901EC6A77B3C5B19" />
-            <ComponentRef Id="cmp1648D5FCB859E221850F2760D7AEA9C8" />
-            <ComponentRef Id="cmp08116D4E00B872434100D308FCAAF15F" />
-            <ComponentRef Id="cmp2C9AC1E8FC0ECB014E160DE13DCF5798" />
-            <ComponentRef Id="cmp2AFF04046C0F4441845836D5FB6F8CE6" />
-            <ComponentRef Id="cmpD5EE05E1D72B11C782AE4C59D0D4B434" />
-            <ComponentRef Id="cmpFCDFACF4DB682B76A680B71ED12B0A4F" />
-            <ComponentRef Id="cmp2AD302744D93A2271A8E06D68B01D5C4" />
-            <ComponentRef Id="cmpD78092D2EE08D7B50398CED75CEEDF96" />
-            <ComponentRef Id="cmp4631FB3111DEC94C34E8CA06293E1833" />
-            <ComponentRef Id="cmp19A6724299A3199686DD6E6D169E96BC" />
-            <ComponentRef Id="cmpDEBA852683BC840B5729E397F735C021" />
-            <ComponentRef Id="cmp0318EBD2BEE6B623FA464EB9F2CE9156" />
-            <ComponentRef Id="cmp66F8B8368C62CE1CE82B7887E9C30E91" />
-            <ComponentRef Id="cmpA42A3E2A45E6ED51F3736B7BF341A45A" />
-            <ComponentRef Id="cmp93888CCC92FDFEE47AF15ACF270DE17F" />
-            <ComponentRef Id="cmpADB354A3EF6EBC08CF0ED32F0D495B52" />
-            <ComponentRef Id="cmpBE3C1967919D33C6BA92584B5EDA0B7A" />
-            <ComponentRef Id="cmp5CCA643BD92B821BBD9003484A7CDF25" />
-            <ComponentRef Id="cmp344E3E6A7E4E8296D8A654183C996A50" />
-            <ComponentRef Id="cmpBF64A3C821F054CE4981D6FB3BAD3789" />
-            <ComponentRef Id="cmpA3E309FDAE9903AEBC4B0B367707FFE9" />
-            <ComponentRef Id="cmp768B44382D1C14D2E695C35D1D67C707" />
-            <ComponentRef Id="cmpF4554624AD30EBB21BE6B4A5C00C6576" />
-            <ComponentRef Id="cmp78D433F17E5089D327002005E20BD268" />
-            <ComponentRef Id="cmp88BF2B326E877998370B7E349EA95B1D" />
-            <ComponentRef Id="cmp477CBD3B2FEA8667A79F8C12E6040A87" />
-            <ComponentRef Id="cmp1F7BDCE1C56CEE9AAEEA02EE175EAEE0" />
-        </ComponentGroup>
-
-        <ComponentGroup Id="QtQuick2Components">
-            <ComponentRef Id="cmpA30F92E2B3051178673BA0580B3C74E5" />
-            <ComponentRef Id="cmp3CFDB58BB485CB4E70F2F5C74164F75B" />
-            <ComponentRef Id="cmp429FB341157EAF04AA8143D23B794115" />
-        </ComponentGroup>
-
     </Fragment>
 </Wix>

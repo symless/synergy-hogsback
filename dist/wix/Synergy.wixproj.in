@@ -10,6 +10,7 @@
         <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
         <OutputPath>bin\$(Configuration)\</OutputPath>
         <IntermediateOutputPath>wix\obj\$(Configuration)\</IntermediateOutputPath>
+        <DefineConstants>QtBinPath=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@/@CMAKE_BUILD_TYPE@/Qt</DefineConstants>
     </PropertyGroup>
     <ItemGroup>
         <WixExtension Include="WixFirewallExtension">
@@ -24,8 +25,9 @@
             <HintPath>$(WixExtDir)\WixUIExtension.dll</HintPath>
             <Name>WixUIExtension</Name>
         </WixExtension>
-        <Compile Include="Product.wxs"/>
         <Content Include="Include.wxi"/>
+        <Compile Include="Qt.wxs"/>
+        <Compile Include="Product.wxs"/>
     </ItemGroup>
     <Import Project="$(WixTargetsPath)"/>
 </Project>
