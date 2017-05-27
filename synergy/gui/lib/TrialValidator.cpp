@@ -1,6 +1,5 @@
 #include "TrialValidator.h"
 
-#include "Macro.h"
 #include <QDate>
 #include <QString>
 
@@ -13,7 +12,10 @@ TrialValidator::TrialValidator()
 
 bool TrialValidator::isValid()
 {
-    QString dateString(STRINGIZE(SYNERGY_BUILD_DATE));
+#ifndef SYNERGY_BUILD_DATE
+    return true;
+#endif
+    QString dateString(SYNERGY_BUILD_DATE);
     QDate buildDate = QDate::fromString(dateString, "yyyyMMdd");
     QDate currentDate = QDate::currentDate();
     QDate expiredDate = buildDate.addDays(kTrialDays);

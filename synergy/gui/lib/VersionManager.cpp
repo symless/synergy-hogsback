@@ -1,7 +1,9 @@
 #include "VersionManager.h"
-
 #include "LogManager.h"
-#include "Macro.h"
+
+#ifndef SYNERGY_VERSION_STRING
+#define SYNERGY_VERSION_STRING "2.0.0-snapshot.b1-0badc0de"
+#endif
 
 QObject* VersionManager::instance(QQmlEngine* engine, QJSEngine* scriptEngine)
 {
@@ -38,5 +40,5 @@ QString VersionManager::buildVersion() const {
 
 VersionManager::VersionManager()
 {
-    setVersion(STRINGIZE(SYNERGY_VERSION_STRING));
+    setVersion(SYNERGY_VERSION_STRING);
 }
