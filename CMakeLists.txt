@@ -141,11 +141,6 @@ endif()
 #
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     configure_files (${CMAKE_CURRENT_SOURCE_DIR}/dist/wix ${CMAKE_BINARY_DIR}/installer)
-
-    if (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-        install (FILES "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/crashpad_handler.exe"
-                 DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-    endif()
 endif()
 
 #
