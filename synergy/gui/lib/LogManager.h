@@ -9,6 +9,7 @@
 #include <QStringList>
 
 class QQmlContext;
+class CloudClient;
 
 class LIB_SPEC LogManager : public QObject
 {
@@ -22,12 +23,13 @@ public:
     Q_INVOKABLE void uploadLogFile();
 
     static void raw(const QString& text);
-	static void error(const QString& text);
-	static void warning(const QString& text);
-	static void info(const QString& text);
-	static void debug(const QString& text);
+    static void error(const QString& text);
+    static void warning(const QString& text);
+    static void info(const QString& text);
+    static void debug(const QString& text);
     static QString logFilename();
     static void setQmlContext(QQmlContext* value);
+    static void setCloudClient(CloudClient* value);
 
 private:
     LogManager();
@@ -36,12 +38,20 @@ private:
 	static void appendRaw(const QString& text);
     static void updateLogLineModel();
 
+    bool getLastLines(int lines, QString& content);
+    QString prepareUploadFile();
+    QString generateLogFilename();
+    void upload(QString filename);
+
 private:
 	static QFile s_file;
     static QStringList s_logLines;
 	static QObject* s_instance;
     static QQmlContext* s_qmlContext;
-    static int s_maximumLogLines;
+    static CloudClient* s_cloudClient;
+    static const int s_maximumLogLines;
+    static bool s_uploading;
+    static const int s_maximumUploadLogLines;
 };
 
 #endif // LOGMANAGER_H
