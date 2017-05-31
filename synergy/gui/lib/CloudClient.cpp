@@ -8,12 +8,14 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QHostInfo>
+#include <QFileInfo>
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QTimer>
 #include <QDebug>
 #include <QEventLoop>
+#include <QHttpMultiPart>
 #include <QNetworkInterface>
 
 #ifdef SYNERGY_DEVELOPER_MODE
@@ -34,6 +36,7 @@ static const char kReportUrl[] = SYNERGY_CLOUD_URI "/report";
 static const char kClaimServerUrl[] = SYNERGY_CLOUD_URI "/group/server/claim";
 static const char kUpdateScreenUrl[] = SYNERGY_CLOUD_URI "/screen/update";
 static const char kLatestVersionUrl[] = SYNERGY_CLOUD_URI "/version";
+static const char kLogUploadUrl[] = "https://symless.com/api/client/log";
 static const int kPollingTimeout = 60000; // 1 minute
 
 CloudClient::CloudClient(QObject* parent) : QObject(parent)
@@ -241,6 +244,38 @@ void CloudClient::onGetLatestVersionFinished(QNetworkReply *reply)
     }
 }
 
+void CloudClient::onUploadLogFileFinished(QNetworkReply *reply)
+{
+    if (replyHasError(reply)) {
+        LogManager::error(reply->errorString());
+        return;
+    }
+
+    m_Data = reply->readAll();
+    reply->deleteLater();
+
+    QJsonDocument doc = QJsonDocument::fromJson(m_Data);
+
+    if (doc.isNull()) {
+        return;
+    }
+
+    if (doc.isObject()) {
+        QJsonObject obj = doc.object();
+        bool success = obj["success"].toBool();
+
+        if (success) {
+            QString msg = obj["message"].toString();
+            LogManager::info(msg);
+        }
+    }
+}
+
+void CloudClient::onUploadProgress(qint64 done, qint64 total)
+{
+    // TODO: Show progress in console
+}
+
 void CloudClient::joinGroup(QString groupName)
 {
     static const QUrl joinGroupUrl = QUrl(kJoinGroupUrl);
@@ -390,6 +425,42 @@ void CloudClient::updateScreen(const Screen& screen)
     QJsonDocument doc(screenObject);
 
     m_networkManager->post(req, doc.toJson());
+}
+
+void CloudClient::uploadLogFile(QString filename)
+{
+    QFileInfo fileInfo(filename);
+    QString withoutPath(fileInfo.fileName());
+    QString withoutExt(withoutPath.section('.',0, 0));
+    QHttpMultiPart* multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+
+    QHttpPart idPart;
+    idPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"logId\""));
+    idPart.setBody(withoutExt.toUtf8());
+
+    QHttpPart logPart;
+    logPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"log\"; filename=\"" + withoutPath + "\""));
+    QFile *file = new QFile(filename);
+    file->open(QIODevice::ReadOnly | QIODevice::Text);
+    logPart.setBodyDevice(file);
+    // delete file with the multiPart
+    file->setParent(multiPart);
+
+    multiPart->append(idPart);
+    multiPart->append(logPart);
+
+    QUrl logUploadUrl = QUrl(kLogUploadUrl);
+    QNetworkRequest req(logUploadUrl);
+
+    auto reply = m_networkManager->post(req, multiPart);
+    // delete the multiPart with the reply
+    multiPart->setParent(reply);
+
+    connect (reply, &QNetworkReply::finished, [this, reply]{
+        onUploadLogFileFinished (reply);
+    });
+    connect(reply, SIGNAL(uploadProgress(qint64, qint64)),
+          this, SLOT  (onUploadProgress(qint64, qint64)));
 }
 
 void CloudClient::report(int destId, QString successfulIpList, QString failedIpList)

@@ -28,6 +28,7 @@ ApplicationWindow {
 
     Component.onCompleted: {
         cloudClient.getLatestVersion()
+        LogManager.setCloudClient(cloudClient)
     }
 
     Connections {

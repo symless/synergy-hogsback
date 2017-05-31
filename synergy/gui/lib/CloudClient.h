@@ -36,6 +36,7 @@ public:
     void updateGroupConfig(QJsonDocument& doc);
     void claimServer();
     void updateScreen(const Screen& screen);
+    void uploadLogFile(QString filename);
 
 signals:
     void loginOk();
@@ -53,6 +54,8 @@ private slots:
     void onUserGroupsFinished(QNetworkReply* reply);
     void onUnsubGroupFinished(QNetworkReply* reply);
     void onGetLatestVersionFinished(QNetworkReply* reply);
+    void onUploadLogFileFinished(QNetworkReply* reply);
+    void onUploadProgress(qint64 done, qint64 total);
     void onReplyError(QNetworkReply::NetworkError code);
     void onRetryGetUserId();
 

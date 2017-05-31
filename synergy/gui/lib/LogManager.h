@@ -21,6 +21,7 @@ public:
     ~LogManager();
 
     Q_INVOKABLE void uploadLogFile();
+    Q_INVOKABLE static void setCloudClient(CloudClient* value);
 
     static void raw(const QString& text);
     static void error(const QString& text);
@@ -29,7 +30,6 @@ public:
     static void debug(const QString& text);
     static QString logFilename();
     static void setQmlContext(QQmlContext* value);
-    static void setCloudClient(CloudClient* value);
 
 private:
     LogManager();
