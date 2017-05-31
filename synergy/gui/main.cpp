@@ -26,7 +26,7 @@
 #include <client/settings.h>
 
 static auto const CRASHPAD_TOKEN =
-    "27c61f07c3a6ac73851bb4d34e5615a9a6008f23c3b897acba7c0cee53f08bdc";
+    "cc4db6ef2d4731b276b0a111979336443dc0372624effb79d8b29b26a200e1c6";
 
 #ifdef Q_OS_DARWIN
 #include <cstdlib>
