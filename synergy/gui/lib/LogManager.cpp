@@ -101,8 +101,8 @@ void LogManager::updateLogLineModel()
     if (s_qmlContext == NULL) {
         return;
     }
-
-    s_qmlContext->setContextProperty("LoggingModel", QVariant::fromValue(s_logLines));
+    QString text = s_logLines.join('\n');
+    s_qmlContext->setContextProperty("LoggingModel", QVariant::fromValue(text));
 }
 
 void LogManager::setQmlContext(QQmlContext* value)

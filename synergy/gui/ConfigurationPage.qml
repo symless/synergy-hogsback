@@ -1,5 +1,6 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
+import QtQuick.Controls.Styles 1.1
 
 import com.synergy.gui 1.0
 
@@ -125,21 +126,27 @@ Rectangle {
             z: 2
             Behavior on height {NumberAnimation {duration: 500; easing.type: Easing.OutQuad}}
 
-            ListView {
-                id: logConsoleListView
+            TextArea {
+                id: logConsoleTextArea
                 anchors.fill: parent
+                readOnly: true
+                wrapMode: Text.WordWrap
+                text: LoggingModel
 
-                model: LoggingModel
-                delegate: BodyText {
-                    width: parent.width
-                    text: modelData
-                    color: "white"
-                    wrapMode: Text.WordWrap
+                BodyText {
+                    id: sample
+                }
+
+                style: TextAreaStyle {
+                    backgroundColor: "black"
+                    textColor: "white"
+                    font.family: sample.font.family
+                    font.pixelSize: sample.font.pixelSize
                 }
 
                 // always focus on the last line
-                onCountChanged: {
-                    logConsoleListView.positionViewAtEnd()
+                onLineCountChanged: {
+                    logConsoleTextArea.__verticalScrollBar.value = logConsoleTextArea.__verticalScrollBar.maximumValue
                 }
             }
         }
