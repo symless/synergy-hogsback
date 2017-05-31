@@ -27,7 +27,6 @@ set (GUI_LIB_SOURCES
     ScreenListModel.cpp
     ScreenListSnapshotManager.cpp
     ScreenManager.cpp
-    ServerInfo.cpp
     TrialValidator.cpp
     TestDelegatee.cpp
     VersionManager.cpp
