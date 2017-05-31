@@ -39,7 +39,6 @@ Rectangle {
         }
     }
 
-    // TODO: This is for testing, remove before release
     Connections {
         target: applicationWindow
         onKeyReceived: {
