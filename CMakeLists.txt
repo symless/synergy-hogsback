@@ -32,7 +32,6 @@ if (WIN32)
     if (MSVC)
 		set (SYNERGY_WARNING_FLAGS /W4)
     endif()
-
 elseif (UNIX)
     if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
         set (SYNERGY_WARNING_FLAGS  -Weverything
@@ -71,6 +70,16 @@ add_definitions (-DZMQ_STATIC)
 add_definitions (-DZMQ_BUILD_DRAFT_API)
 include_directories (BEFORE SYSTEM third_party/libzmq/include)
 include_directories (BEFORE SYSTEM third_party/cppzmq)
+
+#
+# Google Breakpad
+#
+if (WIN32)
+if (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+    include_directories (BEFORE SYSTEM "${CMAKE_SOURCE_DIR}/third_party/crashpad")
+    include_directories (BEFORE SYSTEM "${CMAKE_SOURCE_DIR}/third_party/mini_chromium")
+endif()
+endif()
 
 # Boost
 #
@@ -132,6 +141,11 @@ endif()
 #
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     configure_files (${CMAKE_CURRENT_SOURCE_DIR}/dist/wix ${CMAKE_BINARY_DIR}/installer)
+
+    if (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+        install (FILES "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/crashpad_handler.exe"
+                 DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+    endif()
 endif()
 
 #

@@ -18,11 +18,11 @@ DirectoryManager::~DirectoryManager()
 
 }
 
-QString DirectoryManager::profileDir()
+QString
+DirectoryManager::profileDir() const
 {
-    QString profileDir = QStandardPaths::standardLocations(QStandardPaths::AppConfigLocation).first();
-
-    // persist the directory
+    QString profileDir = QStandardPaths::standardLocations
+                         (QStandardPaths::AppConfigLocation).first();
     QDir dir = profileDir;
     if (!dir.exists()) {
         dir.mkpath(dir.path());
@@ -31,12 +31,24 @@ QString DirectoryManager::profileDir()
     return profileDir;
 }
 
-QString DirectoryManager::configFileDir()
+QString
+DirectoryManager::crashDumpDir() const
+{
+    QDir dir (profileDir() + "/dumps/");
+    if (!dir.exists()) {
+        dir.mkpath (dir.path());
+    }
+    return dir.path();
+}
+
+QString
+DirectoryManager::configFileDir() const
 {
     return profileDir();
 }
 
-QString DirectoryManager::installedDir()
+QString
+DirectoryManager::installedDir() const
 {
     return QCoreApplication::applicationDirPath();
 }

@@ -13,9 +13,10 @@ public:
 	DirectoryManager();
 	virtual ~DirectoryManager();
 
-	virtual QString profileDir();
-	virtual QString configFileDir();
-	virtual QString installedDir();
+    virtual QString profileDir() const;
+    virtual QString crashDumpDir() const;
+    virtual QString configFileDir() const;
+    virtual QString installedDir() const;
 };
 
 #endif // DIRECTORYMANAGER_H
