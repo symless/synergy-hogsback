@@ -1,6 +1,6 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
-import QtQuick.Controls.Styles 1.1
+import QtQuick.Controls.Styles 1.4
 
 import com.synergy.gui 1.0
 
@@ -142,6 +142,21 @@ Rectangle {
                     textColor: "white"
                     font.family: sample.font.family
                     font.pixelSize: sample.font.pixelSize
+                }
+
+                menu: Menu {
+                    MenuItem {
+                        text: "&Send log"
+                        shortcut: "Alt+S"
+                        onTriggered: {
+                            LogManager.uploadLogFile()
+                        }
+                    }
+
+                    style: MenuStyle {
+                        font.family: sample.font.family
+                        font.pixelSize: sample.font.pixelSize
+                    }
                 }
 
                 // always focus on the last line

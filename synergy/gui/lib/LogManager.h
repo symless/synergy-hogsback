@@ -19,6 +19,8 @@ public:
 	static QObject* instance(QQmlEngine* engine = NULL, QJSEngine* scriptEngine = NULL);
     ~LogManager();
 
+    Q_INVOKABLE void uploadLogFile();
+
     static void raw(const QString& text);
 	static void error(const QString& text);
 	static void warning(const QString& text);

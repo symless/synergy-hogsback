@@ -25,6 +25,7 @@ QObject* LogManager::instance(QQmlEngine* engine,
     Q_UNUSED(scriptEngine)
 
     static LogManager s_instance;
+    QQmlEngine::setObjectOwnership(&s_instance, QQmlEngine::CppOwnership);
     return &s_instance;
 }
 
@@ -40,6 +41,11 @@ LogManager::~LogManager()
     if (s_file.isOpen()) {
         s_file.close();
     }
+}
+
+void LogManager::uploadLogFile()
+{
+    LogManager::info("Sending log file...");
 }
 
 void LogManager::raw(const QString& text)
