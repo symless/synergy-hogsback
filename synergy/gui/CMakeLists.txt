@@ -20,7 +20,7 @@ add_subdirectory (tests)
 set(icon_resources)
 
 if (WIN32)
-set(icon_resources
+set (icon_resources
     res/icon/synergy.ico
     res/synergy.rc
 )
@@ -67,6 +67,12 @@ target_link_libraries (${PROJECT_NAME}
 
 if (WIN32)
     target_link_libraries (${PROJECT_NAME} ws2_32 rpcrt4 iphlpapi)
+    if (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+        target_link_libraries (${PROJECT_NAME}
+            "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/crashpad_client.lib"
+            "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/crashpad_util.lib"
+            "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/base.lib")
+    endif()
 endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

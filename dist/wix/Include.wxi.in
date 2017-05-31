@@ -4,7 +4,9 @@
     <?define Author="Symless" ?>
     <?define Version="@SYNERGY_VERSION@" ?>
 
-    <?define BinPath="@CMAKE_RUNTIME_OUTPUT_DIRECTORY@/$(var.Configuration)" ?>
+    <?define BinPath="@CMAKE_RUNTIME_OUTPUT_DIRECTORY@/@CMAKE_BUILD_TYPE@" ?>
+    <?define TPBinPath="@CMAKE_SOURCE_DIR@/third_party/precompiled" ?>
+
     <?define ResPath="@CMAKE_CURRENT_SOURCE_DIR@/synergy/core/res" ?>
     <?define ExtPath="@CMAKE_CURRENT_SOURCE_DIR@/synergy/core/ext" ?>
     <?define OpenSSLBinPath="$(var.ExtPath)\openssl\windows\$(var.Platform)\bin" ?>

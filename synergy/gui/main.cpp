@@ -11,6 +11,7 @@
 #include "AppConfig.h"
 #include "Hostname.h"
 #include "Common.h"
+#include <DirectoryManager.h>
 #include <ProfileListModel.h>
 
 #include <QApplication>
@@ -19,24 +20,82 @@
 #include <QQmlApplicationEngine>
 #include <stdexcept>
 
+// TODO: Somehow get these in to a half decent <crashpad/...> form
+#include <client/crashpad_client.h>
+#include <client/crash_report_database.h>
+#include <client/settings.h>
+
+static auto const CRASHPAD_TOKEN =
+    "cc4db6ef2d4731b276b0a111979336443dc0372624effb79d8b29b26a200e1c6";
+
 #ifdef Q_OS_DARWIN
 #include <cstdlib>
 #endif
 
 void openAccessibilityDialog();
 
+static bool
+startCrashHandler()
+{
+    DirectoryManager directoryManager;
+    auto db_path = directoryManager.crashDumpDir().toStdWString();
+    auto handler_path = QDir(directoryManager.installedDir()
+                         + "/crashpad_handler.exe").path().toStdWString();
+
+    using namespace crashpad;
+    base::FilePath db (db_path);
+    base::FilePath handler (handler_path);
+
+    /* Enable uploads */
+    {
+        auto crashReportDatabase = crashpad::CrashReportDatabase::Initialize(db);
+        crashReportDatabase->GetSettings()->SetUploadsEnabled(true);
+    }
+
+    CrashpadClient client;
+    bool rc = false;
+
+    std::string url("https://synergy.sp.backtrace.io:6098");
+    std::map<std::string, std::string> annotations;
+    annotations["token"] = CRASHPAD_TOKEN;
+    annotations["format"] = "minidump";
+
+    std::vector<std::string> arguments;
+    arguments.push_back ("--no-rate-limit");
+
+    rc = client.StartHandler (handler, db, db, url, annotations, arguments,
+        true, /* restartable */
+        true  /* asynchronous_start */
+    );
+    if (!rc) {
+        return false;
+    }
+
+    /* Wait for Crashpad to initialize. */
+    rc = client.WaitForHandlerStart(INFINITE);
+    if (!rc) {
+        return false;
+    }
+
+    return true;
+}
+
 int main(int argc, char* argv[])
 {
 #ifdef Q_OS_DARWIN
-    /* Workaround for QTBUG-40332 - "High ping when QNetworkAccessManager is instantiated" */
+    /* Workaround for QTBUG-40332
+     * "High ping when QNetworkAccessManager is instantiated" */
     ::setenv ("QT_BEARER_POLL_TIMEOUT", "-1", 1);
 #endif
+    QCoreApplication::setOrganizationName ("Symless");
+    QCoreApplication::setOrganizationDomain ("https://symless.com/");
+    QCoreApplication::setApplicationName ("Synergy");
 
-    QCoreApplication::setOrganizationName("Symless");
-    QCoreApplication::setOrganizationDomain("http://symless.com/");
-    QCoreApplication::setApplicationName("Synergy v2");
-
+    /* This must be started after QApplication is constructed, because it
+     * depends on file paths that are unavailable until then */
     QApplication app(argc, argv);
+    startCrashHandler();
+
     TrialValidator trialValidator;
     if (!trialValidator.isValid()) {
         QMessageBox msgBox;
@@ -73,11 +132,11 @@ int main(int argc, char* argv[])
 
         engine.rootContext()->setContextProperty("PixelPerPoint", pixelPerPoint);
         engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+
         return app.exec();
     }
     catch (std::runtime_error& e) {
-        LogManager::error(QString("exception catched: ")
-                            .arg(e.what()));
+        LogManager::error(QString("exception caught: ").arg(e.what()));
         return 0;
     }
 }
