@@ -20,6 +20,7 @@
 #include <QQmlApplicationEngine>
 #include <stdexcept>
 
+#ifdef Q_OS_WIN
 // TODO: Somehow get these in to a half decent <crashpad/...> form
 #include <client/crashpad_client.h>
 #include <client/crash_report_database.h>
@@ -27,6 +28,7 @@
 
 static auto const CRASHPAD_TOKEN =
     "cc4db6ef2d4731b276b0a111979336443dc0372624effb79d8b29b26a200e1c6";
+#endif
 
 #ifdef Q_OS_DARWIN
 #include <cstdlib>
@@ -37,6 +39,7 @@ void openAccessibilityDialog();
 static bool
 startCrashHandler()
 {
+#ifdef Q_OS_WIN
     DirectoryManager directoryManager;
     auto db_path = directoryManager.crashDumpDir().toStdWString();
     auto handler_path = QDir(directoryManager.installedDir()
@@ -76,7 +79,7 @@ startCrashHandler()
     if (!rc) {
         return false;
     }
-
+#endif
     return true;
 }
 
