@@ -74,11 +74,9 @@ include_directories (BEFORE SYSTEM third_party/cppzmq)
 #
 # Google Breakpad
 #
-if (WIN32)
 if (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     include_directories (BEFORE SYSTEM "${CMAKE_SOURCE_DIR}/third_party/crashpad")
     include_directories (BEFORE SYSTEM "${CMAKE_SOURCE_DIR}/third_party/mini_chromium")
-endif()
 endif()
 
 # Boost
