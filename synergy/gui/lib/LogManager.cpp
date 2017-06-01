@@ -164,7 +164,7 @@ QString LogManager::prepareUploadFile()
 {
     QString context;
     if (!getLastLines(s_maximumUploadLogLines, context)) {
-        return false;
+        return QString();
     }
 
     QString filename = generateLogFilename();
