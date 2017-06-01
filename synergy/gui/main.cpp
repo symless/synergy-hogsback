@@ -43,7 +43,7 @@ startCrashHandler()
     DirectoryManager directoryManager;
 
 #if defined(Q_OS_WIN)
-    autob_path = directoryManager.crashDumpDir().toStdWString();
+    auto db_path = directoryManager.crashDumpDir().toStdWString();
     auto handler_path = QDir(directoryManager.installedDir()
                          + "/crashpad_handler.exe").path().toStdWString();
 #elif defined(Q_OS_DARWIN)
