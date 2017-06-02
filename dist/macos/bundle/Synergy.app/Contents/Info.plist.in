@@ -27,5 +27,16 @@
     <string>© 2012-2016, Symless Ltd</string>
     <key>LSMinimumSystemVersion</key>
     <string>10.9.0</string>
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSExceptionDomains</key>
+        <dict>
+            <key>synergy.sp.backtrace.io</key>
+            <dict>
+                <key>NSExceptionRequiresForwardSecrecy</key>
+                <false/>
+            </dict>
+        </dict>
+    </dict>
   </dict>
 </plist>
