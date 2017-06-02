@@ -144,10 +144,6 @@ int main(int argc, char* argv[])
 
         engine.rootContext()->setContextProperty("PixelPerPoint", pixelPerPoint);
         engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-
-        char* volatile x = 0;
-        *x = 0;
-
         return app.exec();
     }
     catch (std::runtime_error& e) {
