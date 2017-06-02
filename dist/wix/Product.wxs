@@ -105,7 +105,7 @@
                 <?if $(var.Configuration) = "Debug" ?>
                     <File Source="$(var.BinPath)/synergy2.pdb"/>
                 <?else ?>
-                    <File Source="$(var.TPBinPath)/crashpad/crashpad_handler.exe"/>
+                    <File Source="$(var.TPBinPath)/crashpad/windows/crashpad_handler.exe"/>
                 <?endif ?>
             </Component>
         </ComponentGroup>
