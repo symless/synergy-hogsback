@@ -20,7 +20,7 @@
 #include <QQmlApplicationEngine>
 #include <stdexcept>
 
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN) || defined (Q_OS_DARWIN)
 // TODO: Somehow get these in to a half decent <crashpad/...> form
 #include <client/crashpad_client.h>
 #include <client/crash_report_database.h>
@@ -39,11 +39,18 @@ void openAccessibilityDialog();
 static bool
 startCrashHandler()
 {
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN) || defined (Q_OS_DARWIN)
     DirectoryManager directoryManager;
+
+#if defined(Q_OS_WIN)
     auto db_path = directoryManager.crashDumpDir().toStdWString();
     auto handler_path = QDir(directoryManager.installedDir()
                          + "/crashpad_handler.exe").path().toStdWString();
+#elif defined(Q_OS_DARWIN)
+    auto db_path = directoryManager.crashDumpDir().toStdString();
+    auto handler_path = QDir(directoryManager.installedDir()
+                         + "/crashpad_handler").path().toStdString();
+#endif
 
     using namespace crashpad;
     base::FilePath db (db_path);
@@ -74,11 +81,13 @@ startCrashHandler()
         return false;
     }
 
+#if defined(Q_OS_WIN)
     /* Wait for Crashpad to initialize. */
     rc = client.WaitForHandlerStart(INFINITE);
     if (!rc) {
         return false;
     }
+#endif
 #endif
     return true;
 }
@@ -135,7 +144,6 @@ int main(int argc, char* argv[])
 
         engine.rootContext()->setContextProperty("PixelPerPoint", pixelPerPoint);
         engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-
         return app.exec();
     }
     catch (std::runtime_error& e) {

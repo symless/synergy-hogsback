@@ -6,6 +6,7 @@ set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+set (CMAKE_XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT "dwarf-with-dsym")
 
 #
 # Synergy Options
@@ -74,11 +75,9 @@ include_directories (BEFORE SYSTEM third_party/cppzmq)
 #
 # Google Breakpad
 #
-if (WIN32)
 if (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     include_directories (BEFORE SYSTEM "${CMAKE_SOURCE_DIR}/third_party/crashpad")
     include_directories (BEFORE SYSTEM "${CMAKE_SOURCE_DIR}/third_party/mini_chromium")
-endif()
 endif()
 
 # Boost
