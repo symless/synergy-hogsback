@@ -20,7 +20,7 @@
 #include <QQmlApplicationEngine>
 #include <stdexcept>
 
-#if defined(Q_OS_WIN) || defined (Q_OS_DARWIN)
+#if (defined(Q_OS_WIN) || defined (Q_OS_DARWIN)) && !defined (QT_DEBUG)
 // TODO: Somehow get these in to a half decent <crashpad/...> form
 #include <client/crashpad_client.h>
 #include <client/crash_report_database.h>
@@ -39,7 +39,7 @@ void openAccessibilityDialog();
 static bool
 startCrashHandler()
 {
-#if defined(Q_OS_WIN) || defined (Q_OS_DARWIN)
+#if (defined(Q_OS_WIN) || defined (Q_OS_DARWIN)) && !defined (QT_DEBUG)
     DirectoryManager directoryManager;
 
 #if defined(Q_OS_WIN)
