@@ -13,7 +13,7 @@
 #include "Common.h"
 #include <DirectoryManager.h>
 #include <ProfileListModel.h>
-
+#include <ProfileManager.h>
 #include <QApplication>
 #include <QMessageBox>
 #include <QtQuick>
@@ -128,11 +128,10 @@ int main(int argc, char* argv[])
         qmlRegisterType<ScreenManager>("com.synergy.gui", 1, 0, "ScreenManager");
         qmlRegisterType<ProcessManager>("com.synergy.gui", 1, 0, "ProcessManager");
         qmlRegisterType<AccessibilityManager>("com.synergy.gui", 1, 0, "AccessibilityManager");
-        qmlRegisterType<CloudClient>("com.synergy.gui", 1, 0, "CloudClient");
         qmlRegisterType<ConnectivityTester>("com.synergy.gui", 1, 0, "ConnectivityTester");
-        qRegisterMetaType<Profile>();
-        qmlRegisterType<Profile>("com.synergy.gui", 1, 0, "Profile");
         qmlRegisterType<ProfileListModel>("com.synergy.gui", 1, 0, "ProfileListModel");
+        qmlRegisterSingletonType<CloudClient>("com.synergy.gui", 1, 0, "CloudClient", CloudClient::instance);
+        qmlRegisterSingletonType<ProfileManager>("com.synergy.gui", 1, 0, "ProfileManager", ProfileManager::instance);
         qmlRegisterSingletonType<AppConfig>("com.synergy.gui", 1, 0, "AppConfig", AppConfig::instance);
         qmlRegisterSingletonType<VersionManager>("com.synergy.gui", 1, 0, "VersionManager", VersionManager::instance);
         qmlRegisterSingletonType<VersionManager>("com.synergy.gui", 1, 0, "LogManager", LogManager::instance);

@@ -21,9 +21,14 @@ ScreenManager::ScreenManager() :
 {
     m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
     m_localHostname = QHostInfo::localHostName();
-    m_arrangementStrategy = new ScreenBBArrangement();
 
+    m_arrangementStrategy = new ScreenBBArrangement();
     m_screenListSnapshotManager= new ScreenListSnapshotManager();
+
+    m_cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
+
+    connect(m_cloudClient, SIGNAL(receivedScreens(QByteArray)), this,
+            SLOT(updateScreens(QByteArray)));
 
     connect(this, &ScreenManager::updateGroupConfig, this,
         &ScreenManager::onUpdateGroupConfig);
@@ -109,15 +114,6 @@ void ScreenManager::setViewHeight(int h)
 
     m_arrangementStrategy->setViewH(h);
     m_arrangementStrategy->checkAdjustment(m_screenListModel, true);
-}
-
-void ScreenManager::setCloudClient(CloudClient *cloudClient)
-{
-    if (cloudClient == NULL) return;
-
-    m_cloudClient = cloudClient;
-    connect(m_cloudClient, SIGNAL(receivedScreens(QByteArray)), this,
-            SLOT(updateScreens(QByteArray)));
 }
 
 void ScreenManager::saveSnapshot()

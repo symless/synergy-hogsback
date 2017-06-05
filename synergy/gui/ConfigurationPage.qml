@@ -16,7 +16,6 @@ Rectangle {
 
     ConnectivityTester {
         id: connectivityTester
-        cloudClient: applicationWindow.cloudClient
     }
 
     ProcessManager {
@@ -30,7 +29,6 @@ Rectangle {
         processManager: processManager
         //viewWidth: screenArrangementScrollView.width
         //viewHeight: screenArrangementScrollView.height
-        cloudClient: applicationWindow.cloudClient
     }
 
     Connections {
@@ -64,7 +62,8 @@ Rectangle {
 
         // add localhost as the initial screen
         Component.onCompleted: {
-            applicationWindow.cloudClient.switchGroup()
+            CloudClient.switchProfile()
+            CloudClient.userProfiles()
         }
 
         // version label
@@ -90,7 +89,80 @@ Rectangle {
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
                 anchors.verticalCenter: parent.verticalCenter
-                anchors.horizontalCenter: parent.horizontalCenter
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                source: "qrc:/res/image/synergy-icon.png"
+            }
+
+            Image {
+                id: profileButton
+                anchors.right: parent.right
+                anchors.rightMargin: 20
+                anchors.verticalCenter: parent.verticalCenter
+                source: "qrc:/res/image/profile-icon.svg"
+                sourceSize.width: 36
+                sourceSize.height: 28
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        profileMenu.visible = !profileMenu.visible;
+                        openProfileMenuAnimation.running = profileMenu.visible
+                        closeProfileMenuAnimation.running = !openProfileMenuAnimation.running
+                    }
+                }
+            }
+
+            ProfileMenu {
+                id: profileMenu
+                visible: false
+                x: profileButton.x - width + profileButton.width
+                y: profileButton.y + profileButton.height + 10
+
+                onProfileCreated: {
+                    CloudClient.switchProfile(name)
+                }
+
+                onVisibleChanged: {
+                    if (visible) {
+                        CloudClient.userProfiles()
+                        listModel = ProfileManager.listModel()
+                    }
+                }
+
+                ParallelAnimation {
+                    id: openProfileMenuAnimation
+                    ScaleAnimator {
+                        target: profileMenu
+                        from: 0
+                        to: 1
+                        duration: 400
+                    }
+                    OpacityAnimator {
+                        target: profileMenu;
+                        from: 0;
+                        to: 1;
+                        duration: 600
+                    }
+                    running: false;
+                }
+
+                ParallelAnimation {
+                    id: closeProfileMenuAnimation
+                    ScaleAnimator {
+                        target: profileMenu
+                        from: 1
+                        to: 0
+                        duration: 400
+                    }
+                    OpacityAnimator {
+                        target: profileMenu;
+                        from: 1;
+                        to: 0;
+                        duration: 600
+                    }
+                    running: false;
+                }
             }
         }
 
@@ -292,7 +364,7 @@ Rectangle {
                                     id: unsubScreenMouseArea
                                     anchors.fill: parent
                                     onPressed: {
-                                        //applicationWindow.cloudClient.unsubGroup()
+                                        CloudClient.unsubProfile()
                                     }
                                 }
                             }

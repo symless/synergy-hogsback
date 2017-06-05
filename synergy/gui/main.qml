@@ -12,7 +12,6 @@ ApplicationWindow {
     minimumHeight: dp(450)
     title: qsTr("Synergy")
     signal keyReceived(int key)
-    property alias cloudClient: cloudClient
 
     function dp(v) {
         return v * PixelPerPoint;
@@ -22,17 +21,13 @@ ApplicationWindow {
         return dp / PixelPerPoint;
     }
 
-    CloudClient {
-        id: cloudClient
-    }
-
     Component.onCompleted: {
         cloudClient.getLatestVersion()
         LogManager.setCloudClient(cloudClient)
     }
 
     Connections {
-        target: cloudClient
+        target: CloudClient
         onLoginOk: {
             AppConfig.save()
             stackView.push(stackView.nextPage())
@@ -40,14 +35,15 @@ ApplicationWindow {
     }
 
     Connections {
-        target: cloudClient
+        target: CloudClient
         onInvalidAuth: {
+            AppConfig.clearAuth()
             stackView.toPage("ActivationPage")
         }
     }
 
     onClosing: {
-        cloudClient.leaveGroup()
+        CloudClient.leaveGroup()
     }
 
     AccessibilityManager {
@@ -66,7 +62,7 @@ ApplicationWindow {
         function nextPage() {
             if (!accessibilityManager.processHasAccessibility()) {
                 return {item : Qt.resolvedUrl("AccessibilityPage.qml"), properties: { objectName: "AccessibilityPage"}}
-            } else if (cloudClient.verifyUser()) {
+            } else if (CloudClient.verifyUser()) {
                 return {item : Qt.resolvedUrl("ConfigurationPage.qml"), properties: { objectName: "ConfigurationPage"}}
             } else {
                 return {item : Qt.resolvedUrl("ActivationPage.qml"), properties: { objectName: "ActivationPage"}}
@@ -81,8 +77,7 @@ ApplicationWindow {
             if (stackView.currentItem) {
                 stackView.currentItem.forceActiveFocus()
                 if (stackView.currentItem.objectName == "ActivationPage") {
-                    AppConfig.clearAuth()
-                    cloudClient.getUserToken()
+                    CloudClient.getUserToken()
                 }
             }
         }

@@ -25,7 +25,6 @@ public:
     Q_PROPERTY(ProcessManager* processManager WRITE setProcessManager)
     Q_PROPERTY(int viewWidth WRITE setViewWidth)
     Q_PROPERTY(int viewHeight WRITE setViewHeight)
-    Q_PROPERTY(CloudClient* cloudClient WRITE setCloudClient)
 
     Q_INVOKABLE int getModelIndex(int x, int y);
     Q_INVOKABLE void moveModel(int index, int offsetX, int offsetY);
@@ -44,7 +43,6 @@ public:
     void setProcessManager(ProcessManager* processManager);
     void setViewWidth(int w);
     void setViewHeight(int h);
-    void setCloudClient(CloudClient* cloudClient);
     void saveSnapshot();
 
 signals:

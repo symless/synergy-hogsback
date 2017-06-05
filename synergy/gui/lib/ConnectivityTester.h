@@ -22,12 +22,8 @@ public:
     explicit ConnectivityTester(QObject* parent = 0);
     ~ConnectivityTester();
 
-    Q_PROPERTY(CloudClient* cloudClient WRITE setCloudClient)
-
-    void setCloudClient(CloudClient* cloudClient);
     QStringList getSuccessfulResults(int screenId) const;
 signals:
-    void cloudClientSet();
     void startTesting();
 
 private slots:

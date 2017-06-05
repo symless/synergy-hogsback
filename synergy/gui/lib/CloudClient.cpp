@@ -51,6 +51,18 @@ CloudClient::~CloudClient()
     syncConfig();
 }
 
+QObject*
+CloudClient::instance (QQmlEngine* engine, QJSEngine* scriptEngine)
+{
+    Q_UNUSED(engine)
+    Q_UNUSED(scriptEngine)
+
+    static CloudClient s_instance;
+    QQmlEngine::setObjectOwnership(&s_instance, QQmlEngine::CppOwnership);
+
+    return &s_instance;
+}
+
 void CloudClient::login(QString email, QString password)
 {
     QUrl cloudUrl = QUrl(kLoginUrl);
@@ -86,6 +98,7 @@ bool CloudClient::verifyUser()
 {
     if (!m_appConfig->userToken().isEmpty() &&
         m_appConfig->userId() != -1) {
+
         return true;
     }
 
@@ -182,14 +195,17 @@ void CloudClient::onUserGroupsFinished(QNetworkReply *reply)
         QJsonObject obj = doc.object();
 
         QJsonArray groups = obj["profiles"].toArray();
+        QMap<QString, int> profileMap;
 
         foreach (QJsonValue const& v, groups) {
             QJsonObject obj = v.toObject();
             int groupId = obj["id"].toInt();
             QString groupName = obj["name"].toString();
-
             LogManager::debug(QString("group ID: %1 name: %2").arg(groupId).arg(groupName));
+            profileMap[groupName] = groupId;
         }
+
+        emit receivedGroups(profileMap);
     }
 }
 
@@ -328,7 +344,7 @@ void CloudClient::onSwitchGroupFinished(QNetworkReply* reply)
 void CloudClient::getScreens()
 {
     if (m_groupId < 0) {
-        LogManager::debug("retry get screens in 3 secs");
+        LogManager::debug("retry get screens in 1 second");
         return;
     }
 

@@ -6,22 +6,10 @@ Item {
     width: parent.width
     property int profileId;
     property string profileName;
-    property bool clicked: false;
-    property bool enable: true;
-    property string target;
+    property bool editFocus: false;
     signal buttonClicked;
-
-    function buttonEntered() {
-        profileButton.state = "hovered";
-    }
-
-    function buttonExited() {
-        if (clicked == false) {
-            profileButton.state = "normal";
-        } else {
-            profileButton.state = "clicked"
-        }
-    }
+    signal editCancelled;
+    signal editCompleted;
 
     Rectangle {
         id: profileButton;
@@ -33,6 +21,7 @@ Item {
             anchors.leftMargin: 10
             anchors.rightMargin: 10
             color: "transparent"
+            clip: true
 
             Image {
                 id: profileIcon
@@ -46,9 +35,10 @@ Item {
                 }
             }
 
-            TextEdit {
+            TextInput  {
                 id: buttonText
                 text: qsTr(profileName)
+                z: 100
                 anchors {
                     verticalCenter: parent.verticalCenter;
                     left: profileIcon.right;
@@ -58,34 +48,32 @@ Item {
                     family: "Raleway"
                     pointSize: 11.5
                 }
+                focus: editFocus
+                onEditingFinished: {
+                    if (text == "") {
+                        editCancelled()
+                    } else {
+                        profileName = text
+                        editCompleted()
+                    }
 
-                z: 100
+                }
             }
         }
 
         MouseArea {
-            hoverEnabled: enable
-            enabled: enable
+            hoverEnabled: true
             anchors.fill: parent
-
-            onClicked: {
-                profileButtonItem.clicked = true;
-                buttonClicked();
-            }
-            onEntered: buttonEntered();
-            onExited: buttonExited();
+            onClicked: { buttonClicked(); }
         }
 
         states: [
             State {
-                name: "clicked";
-            },
-            State {
-                name: "hovered";
+                name: "active";
                 PropertyChanges { target: profileButton; color: "#CBCBCB"; }
             },
             State {
-                name: "normal";
+                name: "inactive";
             }
         ]
     }

@@ -28,6 +28,10 @@ set (GUI_LIB_SOURCES
     ScreenListSnapshotManager.cpp
     ScreenManager.cpp
     TrialValidator.cpp
+    Profile.cpp
+    ProfileListModel.cpp
+    ProfileManager.cpp
+    ServerInfo.cpp
     TestDelegatee.cpp
     VersionManager.cpp
     ${GUI_LIB_MACOS_SOURCES}
