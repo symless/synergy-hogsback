@@ -146,6 +146,15 @@ Rectangle {
 
                 menu: Menu {
                     MenuItem {
+                        text: "Copy"
+                        shortcut: "Ctrl+C"
+                        onTriggered: {
+                            logConsoleTextArea.selectAll()
+                            logConsoleTextArea.copy()
+                        }
+                    }
+
+                    MenuItem {
                         text: "&Send log"
                         shortcut: "Alt+S"
                         onTriggered: {
