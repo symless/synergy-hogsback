@@ -225,8 +225,8 @@ void ScreenManager::updateScreens(QByteArray reply)
 
                 Screen screen(screenName);
                 screen.setId(obj["id"].toInt());
-                screen.setPosX(obj["posX"].toInt());
-                screen.setPosY(obj["posY"].toInt());
+                screen.setPosX(obj["x_pos"].toInt());
+                screen.setPosY(obj["y_pos"].toInt());
                 screen.setStatus(obj["status"].toString());
                 if (!obj["active"].toBool()) {
                     screen.setStatus(kInactive);
