@@ -3,8 +3,8 @@
 ProfileManager::ProfileManager()
 {
     m_cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
-    connect (m_cloudClient, &CloudClient::receivedGroups, this,
-             &ProfileManager::updateGroups);
+    connect (m_cloudClient, &CloudClient::receivedProfiles, this,
+             &ProfileManager::updateProfiles);
 }
 
 QObject*
@@ -20,7 +20,7 @@ ProfileManager::instance (QQmlEngine* engine, QJSEngine* scriptEngine)
 }
 
 void
-ProfileManager::updateGroups (QMap<QString, int> groupMap)
+ProfileManager::updateProfiles (QMap<QString, int> profileMap)
 {
-    m_listModel.loadFromMap (groupMap);
+    m_listModel.loadFromMap (profileMap);
 }

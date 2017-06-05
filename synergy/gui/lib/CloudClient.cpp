@@ -24,13 +24,13 @@
 #define SYNERGY_CLOUD_URI "https://v1.api.cloud.symless.com"
 #endif
 
-static const char kUserGroupsUrl[] = SYNERGY_CLOUD_URI "/user/profiles";
-static const char kSwitchGroupUrl[] = SYNERGY_CLOUD_URI "/profile/switch";
-static const char kUnsubGroupUrl[] = SYNERGY_CLOUD_URI "/profile/unsub";
+static const char kUserProfilesUrl[] = SYNERGY_CLOUD_URI "/user/profiles";
+static const char kSwitchProfileUrl[] = SYNERGY_CLOUD_URI "/profile/switch";
+static const char kUnsubProfileUrl[] = SYNERGY_CLOUD_URI "/profile/unsub";
 static const char kLoginUrl[] = SYNERGY_CLOUD_URI "/login";
 static const char kIdentifyUrl[] = SYNERGY_CLOUD_URI "/user/identify";
-static const char kGroupScreensUrl[] = SYNERGY_CLOUD_URI "/profile/%1/screens";
-static const char kUpdateGroupConfigUrl[] = SYNERGY_CLOUD_URI "/profile/update";
+static const char kProfileScreensUrl[] = SYNERGY_CLOUD_URI "/profile/%1/screens";
+static const char kUpdateProfileConfigUrl[] = SYNERGY_CLOUD_URI "/profile/update";
 static const char kReportUrl[] = SYNERGY_CLOUD_URI "/report";
 static const char kClaimServerUrl[] = SYNERGY_CLOUD_URI "/profile/server/claim";
 static const char kUpdateScreenUrl[] = SYNERGY_CLOUD_URI "/screen/update";
@@ -42,7 +42,7 @@ CloudClient::CloudClient(QObject* parent) : QObject(parent)
 {
     m_networkManager = new QNetworkAccessManager(this);
     m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
-    m_groupId = m_appConfig->groupId();
+    m_profileId = m_appConfig->profileId();
     m_screenId = m_appConfig->screenId();
 }
 
@@ -147,34 +147,34 @@ void CloudClient::getUserId(bool initialCall)
                 this, &CloudClient::onReplyError);
 }
 
-void CloudClient::unsubGroup()
+void CloudClient::unsubProfile()
 {
-    static const QUrl unsubGroupUrl = QUrl(kUnsubGroupUrl);
-    QNetworkRequest req (unsubGroupUrl);
+    static const QUrl unsubProfileUrl = QUrl(kUnsubProfileUrl);
+    QNetworkRequest req (unsubProfileUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
     QJsonObject jsonObject;
     jsonObject.insert("screen_id", qint64(m_screenId));
-    jsonObject.insert("group_id", qint64(m_groupId));
+    jsonObject.insert("profile_id", qint64(m_profileId));
     QJsonDocument doc (jsonObject);
 
     auto reply = m_networkManager->post(req, doc.toJson());
 
     connect (reply, &QNetworkReply::finished, [this, reply](){
-        onUnsubGroupFinished (reply);
+        onUnsubProfileFinished (reply);
     });
 
 }
 
-void CloudClient::onUpdateGroupConfigFinished(QNetworkReply *reply)
+void CloudClient::onUpdateProfileConfigFinished(QNetworkReply *reply)
 {
     if (replyHasError(reply)) {
         return;
     }
 }
 
-void CloudClient::onUserGroupsFinished(QNetworkReply *reply)
+void CloudClient::onUserProfilesFinished(QNetworkReply *reply)
 {
     if (replyHasError(reply)) {
         return;
@@ -194,28 +194,28 @@ void CloudClient::onUserGroupsFinished(QNetworkReply *reply)
     if (doc.isObject()) {
         QJsonObject obj = doc.object();
 
-        QJsonArray groups = obj["profiles"].toArray();
+        QJsonArray profiles = obj["profiles"].toArray();
         QMap<QString, int> profileMap;
 
-        foreach (QJsonValue const& v, groups) {
+        foreach (QJsonValue const& v, profiles) {
             QJsonObject obj = v.toObject();
-            int groupId = obj["id"].toInt();
-            QString groupName = obj["name"].toString();
-            LogManager::debug(QString("group ID: %1 name: %2").arg(groupId).arg(groupName));
-            profileMap[groupName] = groupId;
+            int profileId = obj["id"].toInt();
+            QString profileName = obj["name"].toString();
+            LogManager::debug(QString("Profile ID: %1 name: %2").arg(profileId).arg(profileName));
+            profileMap[profileName] = profileId;
         }
 
-        emit receivedGroups(profileMap);
+        emit receivedProfiles(profileMap);
     }
 }
 
-void CloudClient::onUnsubGroupFinished(QNetworkReply *reply)
+void CloudClient::onUnsubProfileFinished(QNetworkReply *reply)
 {
     if (replyHasError(reply)) {
         return;
     }
 
-    m_groupId = -1;
+    m_profileId = -1;
     syncConfig();
 }
 
@@ -274,10 +274,10 @@ void CloudClient::onUploadProgress(qint64 done, qint64 total)
     // TODO: Show progress in console
 }
 
-void CloudClient::switchGroup(QString groupName)
+void CloudClient::switchProfile(QString profileName)
 {
-    static const QUrl switchGroupUrl = QUrl(kSwitchGroupUrl);
-    QNetworkRequest req (switchGroupUrl);
+    static const QUrl switchProfileUrl = QUrl(kSwitchProfileUrl);
+    QNetworkRequest req (switchProfileUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -296,20 +296,20 @@ void CloudClient::switchGroup(QString groupName)
     screenObject.insert("ipList", ipList.join(","));
     screenObject.insert("status", "Disconnected");
 
-    QJsonObject groupObject;
-    groupObject.insert ("name", groupName);
+    QJsonObject profileObject;
+    profileObject.insert ("name", profileName);
     QJsonObject jsonObject;
     jsonObject.insert("screen", screenObject);
-    jsonObject.insert("profile", groupObject);
+    jsonObject.insert("profile", profileObject);
     QJsonDocument doc(jsonObject);
 
     auto reply = m_networkManager->post(req, doc.toJson());
     connect (reply, &QNetworkReply::finished, [this, reply]() {
-       this->onSwitchGroupFinished (reply);
+       this->onSwitchProfileFinished (reply);
     });
 }
 
-void CloudClient::onSwitchGroupFinished(QNetworkReply* reply)
+void CloudClient::onSwitchProfileFinished(QNetworkReply* reply)
 {
     reply->deleteLater();
     if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200) {
@@ -323,18 +323,18 @@ void CloudClient::onSwitchGroupFinished(QNetworkReply* reply)
 
     auto object = doc.object();
     auto screen = object["screen_id"];
-    auto group = object["profile_id"];
-    if (!screen.isDouble() || !group.isDouble()) {
+    auto profile = object["profile_id"];
+    if (!screen.isDouble() || !profile.isDouble()) {
         return;
     }
 
-    int64_t originalGroupId = m_groupId;
+    int64_t originalProfileId = m_profileId;
 
     m_screenId = screen.toInt();
-    m_groupId = group.toInt();
+    m_profileId = profile.toInt();
 
     // HACK: Remove this hack after we have profile finished
-    if (m_groupId != originalGroupId) {
+    if (m_profileId != originalProfileId) {
         claimServer();
     }
 
@@ -343,13 +343,13 @@ void CloudClient::onSwitchGroupFinished(QNetworkReply* reply)
 
 void CloudClient::getScreens()
 {
-    if (m_groupId < 0) {
+    if (m_profileId < 0) {
         LogManager::debug("retry get screens in 1 second");
         return;
     }
 
-    QUrl groupScreensUrl = QUrl(QString(kGroupScreensUrl).arg(QString::number(m_groupId)));
-    QNetworkRequest req(groupScreensUrl);
+    QUrl profileScreensUrl = QUrl(QString(kProfileScreensUrl).arg(QString::number(m_profileId)));
+    QNetworkRequest req(profileScreensUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
 
     auto reply = m_networkManager->get(req);
@@ -358,20 +358,20 @@ void CloudClient::getScreens()
     });
 }
 
-void CloudClient::userGroups()
+void CloudClient::userProfiles()
 {
     if (m_appConfig->userToken().isEmpty()) {
         return;
     }
 
-    QUrl userGroupsUrl = QUrl(kUserGroupsUrl);
-    QNetworkRequest req(userGroupsUrl);
+    QUrl userProfilesUrl = QUrl(kUserProfilesUrl);
+    QNetworkRequest req(userProfilesUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
     auto reply = m_networkManager->get(req);
     connect (reply, &QNetworkReply::finished, [this, reply]() {
-        onUserGroupsFinished (reply);
+        onUserProfilesFinished (reply);
     });
 }
 
@@ -395,7 +395,7 @@ void CloudClient::claimServer()
 
     QJsonObject jsonObject;
     jsonObject.insert("screen_id", qint64(m_screenId));
-    jsonObject.insert("profile_id", qint64(m_groupId));
+    jsonObject.insert("profile_id", qint64(m_profileId));
     QJsonDocument doc(jsonObject);
 
     m_networkManager->post(req, doc.toJson());
@@ -474,16 +474,16 @@ void CloudClient::report(int destId, QString successfulIpList, QString failedIpL
     LogManager::debug(QString("report to cloud: destId %1 successfulIp %2 failedIp %3").arg(destId).arg(successfulIpList).arg(failedIpList));
 }
 
-void CloudClient::updateGroupConfig(QJsonDocument& doc)
+void CloudClient::updateProfileConfig(QJsonDocument& doc)
 {
-    QUrl reportUrl = QUrl(kUpdateGroupConfigUrl);
+    QUrl reportUrl = QUrl(kUpdateProfileConfigUrl);
     QNetworkRequest req(reportUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
     auto reply = m_networkManager->post(req, doc.toJson());
     connect (reply, &QNetworkReply::finished, [this, reply]{
-        onUpdateGroupConfigFinished (reply);
+        onUpdateProfileConfigFinished (reply);
     });
 }
 
@@ -579,7 +579,7 @@ void CloudClient::onRetryGetUserId()
 
 void CloudClient::syncConfig()
 {
-    m_appConfig->setGroupId(m_groupId);
+    m_appConfig->setProfileId(m_profileId);
     m_appConfig->setScreenId(m_screenId);
 }
 

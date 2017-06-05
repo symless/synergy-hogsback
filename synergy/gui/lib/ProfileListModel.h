@@ -31,7 +31,7 @@ public:
     Q_INVOKABLE int add();
     Q_INVOKABLE void pop();
 
-    void loadFromMap (QMap<QString, int> groupMap);
+    void loadFromMap (QMap<QString, int> profileMap);
 
 private:
     std::vector<Profile> m_profiles;

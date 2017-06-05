@@ -46,7 +46,7 @@ public:
     void saveSnapshot();
 
 signals:
-    void updateGroupConfig();
+    void updateProfileConfig();
     void newServer(int serverId);
     void localhostUnsubscribed();
 
@@ -56,7 +56,7 @@ private:
 
 private slots:
     void updateScreens(QByteArray reply);
-    void onUpdateGroupConfig();
+    void onUpdateProfileConfig();
     void onScreenStatusChanged(QPair<QString, ScreenStatus> r);
     void onLocalInputDetected();
 

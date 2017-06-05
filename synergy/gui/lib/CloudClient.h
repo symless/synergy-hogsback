@@ -25,15 +25,15 @@ public:
     Q_INVOKABLE void getUserToken();
     Q_INVOKABLE bool verifyUser();
     Q_INVOKABLE void getUserId(bool initialCall = true);
-    Q_INVOKABLE void switchGroup(QString groupName = "default");
-    Q_INVOKABLE void unsubGroup();
+    Q_INVOKABLE void switchProfile(QString profileName = "default");
+    Q_INVOKABLE void unsubProfile();
     Q_INVOKABLE void getScreens();
-    Q_INVOKABLE void userGroups();
+    Q_INVOKABLE void userProfiles();
     Q_INVOKABLE void getLatestVersion();
     Q_INVOKABLE QString serverHostname() const;
 
     void report(int destId, QString successfulIp, QString failedIp);
-    void updateGroupConfig(QJsonDocument& doc);
+    void updateProfileConfig(QJsonDocument& doc);
     void claimServer();
     void updateScreen(const Screen& screen);
     void uploadLogFile(QString filename);
@@ -44,7 +44,7 @@ signals:
     void loginOk();
     void loginFail(QString error);
     void receivedScreens(QByteArray reply);
-    void receivedGroups(QMap<QString, int>);
+    void receivedProfiles(QMap<QString, int>);
     void invalidAuth();
 
 private slots:
@@ -52,10 +52,10 @@ private slots:
     void onGetIdentifyFinished(QNetworkReply* reply);
     void onGetUserIdFinished(QNetworkReply* reply);
     void onGetScreensFinished(QNetworkReply* reply);
-    void onSwitchGroupFinished(QNetworkReply* reply);
-    void onUpdateGroupConfigFinished(QNetworkReply* reply);
-    void onUserGroupsFinished(QNetworkReply* reply);
-    void onUnsubGroupFinished(QNetworkReply* reply);
+    void onSwitchProfileFinished(QNetworkReply* reply);
+    void onUpdateProfileConfigFinished(QNetworkReply* reply);
+    void onUserProfilesFinished(QNetworkReply* reply);
+    void onUnsubProfileFinished(QNetworkReply* reply);
     void onGetLatestVersionFinished(QNetworkReply* reply);
     void onUploadLogFileFinished(QNetworkReply* reply);
     void onUploadProgress(qint64 done, qint64 total);
@@ -71,7 +71,7 @@ private:
     QNetworkAccessManager* m_networkManager;
     AppConfig* m_appConfig;
     QTimer m_elapsedTimer;
-    int64_t m_groupId = -1;
+    int64_t m_profileId = -1;
     int64_t m_screenId = -1;
 
 };

@@ -28,8 +28,8 @@ public:
     void setLocalIp(const QString& localIp);
     void setUserToken(const QString& token);
     void setUserId(int id);
-    int groupId() const;
-    void setGroupId(int groupId);
+    int profileId() const;
+    void setProfileId(int profileId);
     int screenId() const;
     void setScreenId(int screenId);
 
@@ -42,7 +42,7 @@ private:
     QString m_localIp;
     QString m_userToken;
     int m_userId;
-    int m_groupId;
+    int m_profileId;
     int m_screenId;
     bool m_dragAndDrop;
 };

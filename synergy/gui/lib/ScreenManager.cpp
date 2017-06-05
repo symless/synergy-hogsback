@@ -30,8 +30,8 @@ ScreenManager::ScreenManager() :
     connect(m_cloudClient, SIGNAL(receivedScreens(QByteArray)), this,
             SLOT(updateScreens(QByteArray)));
 
-    connect(this, &ScreenManager::updateGroupConfig, this,
-        &ScreenManager::onUpdateGroupConfig);
+    connect(this, &ScreenManager::updateProfileConfig, this,
+        &ScreenManager::onUpdateProfileConfig);
 }
 
 ScreenManager::~ScreenManager()
@@ -53,7 +53,7 @@ void ScreenManager::moveModel(int index, int offsetX, int offsetY)
 
     m_screenListModel->moveModel(index, offsetX, offsetY);
     m_arrangementStrategy->adjustModel(m_screenListModel, index);
-    emit updateGroupConfig();
+    emit updateProfileConfig();
 
     if (processMode() == kServerMode) {
         startCoreProcess();
@@ -195,14 +195,14 @@ void ScreenManager::updateScreens(QByteArray reply)
     if (!doc.isNull()) {
         if (doc.isObject()) {
             QJsonObject obj = doc.object();
-            auto const& groupObject = obj["group"].toObject();
+            auto const& profileObject = obj["profile"].toObject();
 
-            int const configVersion = groupObject["configVersion"].toInt();
+            int const configVersion = profileObject["configVersion"].toInt();
             if (m_configVersion > configVersion) {
                 return;
             }
             m_configVersion = configVersion;
-            serverId = groupObject["serverId"].toInt();
+            serverId = profileObject["serverId"].toInt();
             if (m_previousServerId != serverId) {
                 // delay emitting the signal until we update all the screens
                 newServerDetected = true;
@@ -235,7 +235,7 @@ void ScreenManager::updateScreens(QByteArray reply)
             }
 
             if (!latestScreenNameSet.contains(m_localHostname) &&
-                m_appConfig->groupId() != -1) {
+                m_appConfig->profileId() != -1) {
                 latestScreenNameSet.insert(m_localHostname);
                 updateLocalHost = true;
             }
@@ -262,7 +262,7 @@ void ScreenManager::updateScreens(QByteArray reply)
         screen.setId(m_appConfig->screenId());
         m_arrangementStrategy->addScreen(m_screenListModel, screen);
 
-        emit updateGroupConfig();
+        emit updateProfileConfig();
     }
 
     if (newServerDetected) {
@@ -275,11 +275,11 @@ void ScreenManager::updateScreens(QByteArray reply)
     }
 }
 
-void ScreenManager::onUpdateGroupConfig()
+void ScreenManager::onUpdateProfileConfig()
 {
-    QJsonObject groupObject;
-    groupObject.insert ("id", m_appConfig->groupId());
-    groupObject.insert ("name", "default");
+    QJsonObject profileObject;
+    profileObject.insert ("id", m_appConfig->profileId());
+    profileObject.insert ("name", "default");
 
     QJsonArray screenArray;
     ;
@@ -293,12 +293,12 @@ void ScreenManager::onUpdateGroupConfig()
     }
 
     QJsonObject jsonObject;
-    jsonObject.insert("profile", groupObject);
+    jsonObject.insert("profile", profileObject);
     jsonObject.insert("version", m_configVersion);
     jsonObject.insert("screens", screenArray);
     QJsonDocument doc(jsonObject);
 
-    m_cloudClient->updateGroupConfig(doc);
+    m_cloudClient->updateProfileConfig(doc);
     ++m_configVersion;
 }
 

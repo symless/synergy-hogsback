@@ -20,7 +20,7 @@ public:
     }
 
 public slots:
-    void updateGroups (QMap<QString, int>);
+    void updateProfiles (QMap<QString, int>);
 
 protected:
     ProfileManager();

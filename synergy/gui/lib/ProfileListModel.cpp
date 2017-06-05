@@ -54,13 +54,13 @@ ProfileListModel::pop()
 }
 
 void
-ProfileListModel::loadFromMap(QMap<QString, int> groupMap)
+ProfileListModel::loadFromMap(QMap<QString, int> profileMap)
 {
     beginRemoveRows(QModelIndex(), 0, rowCount() ? rowCount() - 1 : 0);
     m_profiles.clear();
     endRemoveRows();
-    beginInsertRows(QModelIndex(), 0, groupMap.size() ? groupMap.size() - 1 : 0);
-    for (auto& key: groupMap.keys()) {
+    beginInsertRows(QModelIndex(), 0, profileMap.size() ? profileMap.size() - 1 : 0);
+    for (auto& key: profileMap.keys()) {
         m_profiles.emplace_back (-1, key); /* TODO: actually insert profile id */
     }
     endInsertRows();

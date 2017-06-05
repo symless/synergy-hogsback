@@ -43,7 +43,7 @@ ApplicationWindow {
     }
 
     onClosing: {
-        CloudClient.leaveGroup()
+        CloudClient.leaveProfile()
     }
 
     AccessibilityManager {
