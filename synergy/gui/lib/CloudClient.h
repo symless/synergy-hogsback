@@ -24,8 +24,7 @@ public:
     Q_INVOKABLE void getUserToken();
     Q_INVOKABLE bool verifyUser();
     Q_INVOKABLE void getUserId(bool initialCall = true);
-    Q_INVOKABLE void joinGroup(QString groupName = "default");
-    Q_INVOKABLE void leaveGroup();
+    Q_INVOKABLE void switchGroup(QString groupName = "default");
     Q_INVOKABLE void unsubGroup();
     Q_INVOKABLE void getScreens();
     Q_INVOKABLE void userGroups();
@@ -49,7 +48,7 @@ private slots:
     void onGetIdentifyFinished(QNetworkReply* reply);
     void onGetUserIdFinished(QNetworkReply* reply);
     void onGetScreensFinished(QNetworkReply* reply);
-    void onJoinGroupFinished(QNetworkReply* reply);
+    void onSwitchGroupFinished(QNetworkReply* reply);
     void onUpdateGroupConfigFinished(QNetworkReply* reply);
     void onUserGroupsFinished(QNetworkReply* reply);
     void onUnsubGroupFinished(QNetworkReply* reply);

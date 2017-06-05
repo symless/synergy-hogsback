@@ -64,7 +64,7 @@ Rectangle {
 
         // add localhost as the initial screen
         Component.onCompleted: {
-            applicationWindow.cloudClient.joinGroup()
+            applicationWindow.cloudClient.switchGroup()
         }
 
         // version label

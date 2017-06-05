@@ -290,16 +290,16 @@ void ScreenManager::onUpdateGroupConfig()
     for (Screen& s : m_screenListModel->getScreenList()) {
         QJsonObject screenObject;
         screenObject.insert("id", s.id());
-        screenObject.insert("posX", s.posX());
-        screenObject.insert("posY", s.posY());
+        screenObject.insert("x_pos", s.posX());
+        screenObject.insert("y_pos", s.posY());
 
         screenArray.push_back(screenObject);
     }
 
     QJsonObject jsonObject;
-    jsonObject.insert("group", groupObject);
+    jsonObject.insert("profile", groupObject);
     jsonObject.insert("version", m_configVersion);
-    jsonObject.insert("screenRenderInfo", screenArray);
+    jsonObject.insert("screens", screenArray);
     QJsonDocument doc(jsonObject);
 
     m_cloudClient->updateGroupConfig(doc);
