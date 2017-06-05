@@ -89,19 +89,21 @@ Rectangle {
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
                 anchors.verticalCenter: parent.verticalCenter
-                fillMode: Image.PreserveAspectFit
+                anchors.horizontalCenter: parent.horizontalCenter
+                //fillMode: Image.PreserveAspectFit
                 smooth: true
-                source: "qrc:/res/image/synergy-icon.png"
+                //source: "qrc:/res/image/synergy-icon.png"
             }
 
             Image {
                 id: profileButton
                 anchors.right: parent.right
-                anchors.rightMargin: 20
+                anchors.rightMargin: dp(20)
                 anchors.verticalCenter: parent.verticalCenter
                 source: "qrc:/res/image/profile-icon.svg"
-                sourceSize.width: 36
-                sourceSize.height: 28
+                sourceSize.width: dp(36)
+                sourceSize.height: dp(28)
+                smooth: false
 
                 MouseArea {
                     anchors.fill: parent

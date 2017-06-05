@@ -44,6 +44,7 @@ add_executable (${PROJECT_NAME} WIN32
     ProfileMenuButton.qml
     Version.qml
     SynergyButton.qml
+    SynergyButtonStyle.qml
 )
 
 target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
@@ -88,7 +89,7 @@ endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     install (TARGETS ${PROJECT_NAME} DESTINATION ${SYNERGY_BUNDLE_BINARY_DIR})
-    install (PROGRAMS "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/macos/crashpad_handler" 
+    install (PROGRAMS "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/macos/crashpad_handler"
              DESTINATION  ${SYNERGY_BUNDLE_BINARY_DIR})
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     install (TARGETS ${PROJECT_NAME} DESTINATION bin)

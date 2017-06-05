@@ -9,16 +9,16 @@ Rectangle {
    property ProfileListModel listModel: ProfileManager.listModel()
    id: profileMenu
    color: "#4D4D4D"
-   width: 160
-   height: childrenRect.height + 2
+   width: dp(160)
+   height: childrenRect.height + dp(2)
 
    Rectangle {
        visible: true
        focus: true
-       width: parent.width - 2
+       width: parent.width - dp(2)
        height: childrenRect.height
        anchors {
-           margins: 1
+           margins: dp(1)
            centerIn: parent
        }
 
@@ -52,7 +52,7 @@ Rectangle {
 
            Rectangle {
                id: profileMenuOptions
-               height: 50
+               height: dp(50)
                width: parent.width
                color: "#4D4D4D"
 
@@ -60,11 +60,11 @@ Rectangle {
                     color: "white"
                     width: parent.width
                     anchors.bottom: parent.bottom
-                    height: parent.height - 1
+                    height: parent.height - dp(1)
 
-                    SynergyButton {
-                       buttonText: "New Profile"
-                       anchors.margins: 10
+                    Button {
+                       text: "New Profile"
+                       anchors.margins: dp(10)
                        anchors.fill: parent
                        style: SynergyButtonStyle {}
                        activeFocusOnPress: true

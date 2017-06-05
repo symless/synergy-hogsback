@@ -2,7 +2,7 @@ import QtQuick 2.5
 
 Item {
     id: profileButtonItem
-    height: 32
+    height: dp(32)
     width: parent.width
     property int profileId;
     property string profileName;
@@ -18,20 +18,21 @@ Item {
 
         Rectangle {
             anchors.fill: parent
-            anchors.leftMargin: 10
-            anchors.rightMargin: 10
+            anchors.leftMargin: dp(10)
+            anchors.rightMargin: dp(10)
             color: "transparent"
             clip: true
 
             Image {
                 id: profileIcon
                 source: "qrc:/res/image/profile-icon.svg"
-                sourceSize.width: 24
-                sourceSize.height: 16
+                sourceSize.width: dp(24)
+                sourceSize.height: dp(16)
+                smooth: false
                 anchors {
                     verticalCenter: parent.verticalCenter;
                     left: parent.left
-                    leftMargin: 5
+                    leftMargin: dp(5)
                 }
             }
 
@@ -42,7 +43,7 @@ Item {
                 anchors {
                     verticalCenter: parent.verticalCenter;
                     left: profileIcon.right;
-                    leftMargin: 10
+                    leftMargin: dp(10)
                 }
                 font {
                     family: "Raleway"
