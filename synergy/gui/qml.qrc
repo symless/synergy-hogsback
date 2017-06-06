@@ -3,29 +3,29 @@
         <file>res/image/screen-inactive.png</file>
         <file>res/image/screen-active.png</file>
         <file>main.qml</file>
-        <file>ConfigurationPage.qml</file>
-        <file>CustomBorder.qml</file>
-        <file>CustomCheckBox.qml</file>
-        <file>ActivationPage.qml</file>
         <file>res/image/google.png</file>
         <file>res/image/synergy-logo.png</file>
-        <file>Version.qml</file>
         <file>res/image/screen-edit.png</file>
         <file>res/image/edit.png</file>
         <file>res/image/unsub.png</file>
-        <file>AccessibilityPage.qml</file>
         <file>res/image/accessibility-tutorial.gif</file>
-        <file>ProfilePage.qml</file>
         <file>res/image/profile-icon.svg</file>
-        <file>ProfileMenuButton.qml</file>
-        <file>ProfileMenu.qml</file>
-        <file>BodyText.qml</file>
-        <file>HeaderText.qml</file>
-        <file>LogoText.qml</file>
-        <file>SynergyButton.qml</file>
         <file alias="Raleway.otf">res/font/Raleway.otf</file>
         <file alias="Museo.otf">res/font/Museo.otf</file>
         <file alias="AlternateGotNo3D.otf">res/font/AlternateGotNo3D.otf</file>
-        <file>SynergyButtonStyle.qml</file>
+        <file alias="BodyText.qml">res/component/BodyText.qml</file>
+        <file alias="CustomBorder.qml">res/component/CustomBorder.qml</file>
+        <file alias="CustomCheckBox.qml">res/component/CustomCheckBox.qml</file>
+        <file alias="HeaderText.qml">res/component/HeaderText.qml</file>
+        <file alias="LogoText.qml">res/component/LogoText.qml</file>
+        <file alias="ProfileMenu.qml">res/component/ProfileMenu.qml</file>
+        <file alias="ProfileMenuButton.qml">res/component/ProfileMenuButton.qml</file>
+        <file alias="SynergyButton.qml">res/component/SynergyButton.qml</file>
+        <file alias="SynergyButtonStyle.qml">res/component/SynergyButtonStyle.qml</file>
+        <file alias="Version.qml">res/component/Version.qml</file>
+        <file alias="AccessibilityPage.qml">res/view/AccessibilityPage.qml</file>
+        <file alias="ActivationPage.qml">res/view/ActivationPage.qml</file>
+        <file alias="ConfigurationPage.qml">res/view/ConfigurationPage.qml</file>
+        <file alias="ProfilePage.qml">res/view/ProfilePage.qml</file>
     </qresource>
 </RCC>

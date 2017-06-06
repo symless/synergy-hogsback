@@ -31,20 +31,20 @@ add_executable (${PROJECT_NAME} WIN32
     qml.qrc
     ${icon_resources}
     main.qml
-    ActivationPage.qml
-    AccessibilityPage.qml
-    ConfigurationPage.qml
-    CustomBorder.qml
-    CustomCheckBox.qml
-    BodyText.qml
-    HeaderText.qml
-    LogoText.qml
-    ProfilePage.qml
-    ProfileMenu.qml
-    ProfileMenuButton.qml
-    Version.qml
-    SynergyButton.qml
-    SynergyButtonStyle.qml
+    res/view/ActivationPage.qml
+    res/view/AccessibilityPage.qml
+    res/view/ConfigurationPage.qml
+    res/component/CustomBorder.qml
+    res/component/CustomCheckBox.qml
+    res/component/BodyText.qml
+    res/component/HeaderText.qml
+    res/component/LogoText.qml
+    res/view/ProfilePage.qml
+    res/component/ProfileMenu.qml
+    res/component/ProfileMenuButton.qml
+    res/component/Version.qml
+    res/component/SynergyButton.qml
+    res/component/SynergyButtonStyle.qml
 )
 
 target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
