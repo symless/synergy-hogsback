@@ -202,7 +202,7 @@ void ScreenManager::updateScreens(QByteArray reply)
                 return;
             }
             m_configVersion = configVersion;
-            serverId = profileObject["serverId"].toInt();
+            serverId = profileObject["server"].toInt();
             if (m_previousServerId != serverId) {
                 // delay emitting the signal until we update all the screens
                 newServerDetected = true;
