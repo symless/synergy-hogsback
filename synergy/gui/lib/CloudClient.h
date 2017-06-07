@@ -26,7 +26,7 @@ public:
     Q_INVOKABLE bool verifyUser();
     Q_INVOKABLE void getUserId(bool initialCall = true);
     Q_INVOKABLE void switchProfile(QString profileName = "default");
-    Q_INVOKABLE void unsubProfile();
+    Q_INVOKABLE void unsubProfile(int screenId);
     Q_INVOKABLE void getScreens();
     Q_INVOKABLE void userProfiles();
     Q_INVOKABLE void getLatestVersion();

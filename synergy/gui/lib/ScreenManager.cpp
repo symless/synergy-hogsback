@@ -156,17 +156,27 @@ void ScreenManager::unlockScreen(int index)
 
 bool ScreenManager::removeScreen(QString name, bool notify)
 {
-    if (m_screenListModel->findScreen(name) == -1) {
+    int index = m_screenListModel->findScreen(name);
+    if (index == -1) {
         LogManager::debug(QString("screen doesn't exist: %1")
                     .arg(name));
         return false;
+    }
+
+    if (notify) {
+        // get screen id
+        const Screen& s = m_screenListModel->getScreen(index);
+
+        // notify cloud
+        if (s.id() != -1) {
+            m_cloudClient->unsubProfile(s.id());
+        }
     }
 
     Screen screen(name);
     bool result = m_arrangementStrategy->removeScreen(m_screenListModel,
                                             screen);
 
-    // TODO: need to do unsubscribe from cloud client
     return result;
 }
 

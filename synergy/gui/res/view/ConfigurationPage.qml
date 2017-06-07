@@ -298,7 +298,6 @@ Rectangle {
                                                 op(screenIcon.x - beginDrag.x),
                                                 op(screenIcon.y - beginDrag.y))
                                 screenManager.unlockScreen(modelIndex)
-                                modelIndex = -1
                             }
 
                             onClicked: {
@@ -366,7 +365,7 @@ Rectangle {
                                     id: unsubScreenMouseArea
                                     anchors.fill: parent
                                     onPressed: {
-                                        CloudClient.unsubProfile()
+                                        screenManager.removeScreen(name, true)
                                     }
                                 }
                             }

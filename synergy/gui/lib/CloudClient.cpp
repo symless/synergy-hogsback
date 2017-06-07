@@ -147,15 +147,20 @@ void CloudClient::getUserId(bool initialCall)
                 this, &CloudClient::onReplyError);
 }
 
-void CloudClient::unsubProfile()
+void CloudClient::unsubProfile(int screenId)
 {
+    if (screenId == -1) {
+        LogManager::debug(QString("can not unsub an unknown screen"));
+        return;
+    }
+
     static const QUrl unsubProfileUrl = QUrl(kUnsubProfileUrl);
     QNetworkRequest req (unsubProfileUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
     QJsonObject jsonObject;
-    jsonObject.insert("screen_id", qint64(m_screenId));
+    jsonObject.insert("screen_id", qint64(screenId));
     jsonObject.insert("profile_id", qint64(m_profileId));
     QJsonDocument doc (jsonObject);
 
