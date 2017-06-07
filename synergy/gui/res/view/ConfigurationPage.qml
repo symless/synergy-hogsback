@@ -298,6 +298,7 @@ Rectangle {
                                                 op(screenIcon.x - beginDrag.x),
                                                 op(screenIcon.y - beginDrag.y))
                                 screenManager.unlockScreen(modelIndex)
+                                modelIndex = -1
                             }
 
                             onClicked: {
