@@ -93,7 +93,7 @@ Rectangle {
                         Image {
                             id: addNewProfile
                             parent: newProfileButton
-                            width: dp(25)
+                            width: dp(22)
                             height: width
                             anchors.left: parent.left
                             anchors.leftMargin: dp(4)
