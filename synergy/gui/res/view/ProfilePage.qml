@@ -48,25 +48,57 @@ Rectangle {
             }
 
             Rectangle {
-                id: profileArea
-                width: parent.width * 0.618
-                height: parent.height * 0.618
+                id: curtain
+                anchors.top: profilePageBackgroundSeparator.bottom
+                anchors.bottom: parent.bottom
+                width: parent.width
                 color: "black"
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
 
-                Text {
+                HeaderText {
                     id: hint
-                    z: 1
-                    color: "black"
-                    font.family: "Tahoma"
-                    font.bold: false
+                    color: "white"
                     horizontalAlignment: Text.AlignHCenter
-                    anchors.top: profileArea.bottom
-                    anchors.topMargin: 10
+                    anchors.top: curtain.top
+                    anchors.topMargin: (curtain.height - profileArea.height) / 4 - dp(7)
                     anchors.horizontalCenter: profileArea.horizontalCenter
-                    font.pixelSize: 10
-                    text: "This is the profile page"
+                    text: "Synergy doesn't know where you are\nPlease click on a profile below to join or create a new profile"
+                }
+
+                Rectangle {
+                    id: profileArea
+                    width: parent.width * 0.75
+                    height: parent.height * 0.618
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: "white"
+
+                    Rectangle {
+                        id: profileList
+                        width: dp(120)
+                        height: profileArea.height - newProfileButton.height
+                        anchors.left: profileArea.left
+                        anchors.top: profileArea.top
+                        color: "green"
+                    }
+
+                    Rectangle {
+                        id: newProfileButton
+                        width: profileList.width
+                        height: dp(25)
+                        anchors.left: profileArea.left
+                        anchors.bottom: parent.bottom
+                        color: "blue"
+                    }
+
+                    Rectangle {
+                        id: preview
+                        anchors.left: profileList.right
+                        anchors.right: profileArea.right
+                        anchors.top: profileArea.top
+                        anchors.bottom: profileArea.bottom
+
+                        color: "red"
+                    }
                 }
             }
         }
