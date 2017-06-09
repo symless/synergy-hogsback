@@ -87,7 +87,35 @@ Rectangle {
                         height: dp(25)
                         anchors.left: profileArea.left
                         anchors.bottom: parent.bottom
-                        color: "blue"
+
+                        Image {
+                            id: addNewProfile
+                            parent: newProfileButton
+                            width: dp(25)
+                            height: width
+                            anchors.left: parent.left
+                            anchors.leftMargin: dp(4)
+                            anchors.verticalCenter: parent.verticalCenter
+                            fillMode: Image.PreserveAspectFit
+                            smooth: true
+                            source: "qrc:/res/image/unsub.png"
+
+                            MouseArea {
+                                id: addNewProfileMouseArea
+                                anchors.fill: parent
+                                onPressed: {
+
+                                }
+                            }
+                        }
+
+                        HeaderText {
+                            id: addNewProfileText
+                            anchors.left: addNewProfile.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.leftMargin: dp(4)
+                            text: "New Profile"
+                        }
                     }
 
                     Rectangle {
