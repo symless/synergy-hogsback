@@ -125,7 +125,30 @@ Rectangle {
                         anchors.top: profileArea.top
                         anchors.bottom: profileArea.bottom
 
-                        color: "red"
+                        Rectangle {
+                            id: profilePreviewBackgroundHeader
+                            anchors.top: parent.top
+                            width: parent.width
+                            height: dp(36)
+                            color: "white"
+
+                        }
+
+                        Rectangle {
+                            id: profilePreviewBackgroundSeparator
+                            anchors.top: profilePreviewBackgroundHeader.bottom
+                            width: parent.width
+                            height: dp(3)
+                            color:"#96C13D"
+                        }
+
+                        Rectangle {
+                            id: profilePreviewBackground
+                            anchors.top: profilePreviewBackgroundSeparator.bottom
+                            width: parent.width
+                            anchors.bottom: parent.bottom
+                            color:"#3F95B8"
+                        }
                     }
                 }
             }
