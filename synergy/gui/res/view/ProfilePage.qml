@@ -52,7 +52,7 @@ Rectangle {
                 anchors.top: profilePageBackgroundSeparator.bottom
                 anchors.bottom: parent.bottom
                 width: parent.width
-                color: "black"
+                color: "white"
 
                 HeaderText {
                     id: hint
@@ -71,14 +71,15 @@ Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
                     color: "white"
+                    border.width: 1
 
                     Rectangle {
                         id: profileList
                         width: dp(120)
-                        height: profileArea.height - newProfileButton.height
+                        height: profileArea.height - newProfileButton.height + 1
                         anchors.left: profileArea.left
                         anchors.top: profileArea.top
-                        color: "green"
+                        border.width: 1
                     }
 
                     Rectangle {
@@ -87,6 +88,7 @@ Rectangle {
                         height: dp(25)
                         anchors.left: profileArea.left
                         anchors.bottom: parent.bottom
+                        border.width: 1
 
                         Image {
                             id: addNewProfile
@@ -119,35 +121,42 @@ Rectangle {
                     }
 
                     Rectangle {
-                        id: preview
+                        id: previewBorder
                         anchors.left: profileList.right
                         anchors.right: profileArea.right
                         anchors.top: profileArea.top
                         anchors.bottom: profileArea.bottom
+                        border.width: 1
 
                         Rectangle {
-                            id: profilePreviewBackgroundHeader
-                            anchors.top: parent.top
-                            width: parent.width
-                            height: dp(36)
-                            color: "white"
+                            id: preview
+                            anchors.fill: parent
+                            anchors.topMargin: 1
+                            anchors.rightMargin: 1
 
-                        }
+                            Rectangle {
+                                id: profilePreviewBackgroundHeader
+                                anchors.top: parent.top
+                                width: parent.width
+                                height: dp(36)
+                                color: "white"
+                            }
 
-                        Rectangle {
-                            id: profilePreviewBackgroundSeparator
-                            anchors.top: profilePreviewBackgroundHeader.bottom
-                            width: parent.width
-                            height: dp(3)
-                            color:"#96C13D"
-                        }
+                            Rectangle {
+                                id: profilePreviewBackgroundSeparator
+                                anchors.top: profilePreviewBackgroundHeader.bottom
+                                width: parent.width
+                                height: dp(3)
+                                color:"#96C13D"
+                            }
 
-                        Rectangle {
-                            id: profilePreviewBackground
-                            anchors.top: profilePreviewBackgroundSeparator.bottom
-                            width: parent.width
-                            anchors.bottom: parent.bottom
-                            color:"#3F95B8"
+                            Rectangle {
+                                id: profilePreviewBackground
+                                anchors.top: profilePreviewBackgroundSeparator.bottom
+                                width: parent.width
+                                anchors.bottom: parent.bottom
+                                color:"#3F95B8"
+                            }
                         }
                     }
                 }
