@@ -80,6 +80,36 @@ Rectangle {
                         anchors.left: profileArea.left
                         anchors.top: profileArea.top
                         border.width: 1
+
+                        Rectangle {
+                            anchors.fill: parent
+                            anchors.margins: 1
+
+                            Column {
+                                id: profileListColumn
+                                anchors.fill: parent
+                                property int editIndex: -1;
+
+                                Repeater {
+                                    id: profileListView
+                                    model: ProfileManager.listModel()
+                                    delegate: ProfileMenuButton {
+                                        profileName: profName
+                                        profileId: profId
+                                        editFocus: profileListColumn.editIndex == index
+
+                                        onEditCompleted: {
+                                            profileListColumn.editIndex = -1
+                                            profileCreated (profileName)
+                                        }
+                                        onEditCancelled: {
+                                            profileListColumn.editIndex = -1
+                                            profileMenu.listModel.pop()
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     Rectangle {
