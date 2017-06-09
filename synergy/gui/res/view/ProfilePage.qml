@@ -20,19 +20,19 @@ Rectangle {
 
             // background header
             Rectangle {
-                id: activationPageBackgroundHeader
+                id: profilePageBackgroundHeader
                 anchors.top: parent.top
                 width: parent.width
-                height: 94
+                height: dp(65)
                 color:"white"
 
                 Image {
                     id: logo
                     fillMode :Image.PreserveAspectFit
                     anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 15
+                    anchors.bottomMargin: dp(10)
                     anchors.top: parent.top
-                    anchors.topMargin: 15
+                    anchors.topMargin: dp(10)
                     anchors.horizontalCenter: parent.horizontalCenter
                     source: "res/image/synergy-logo.png"
                 }
@@ -40,10 +40,10 @@ Rectangle {
 
             // separator
             Rectangle {
-                id: activationPageBackgroundSeparator
-                anchors.top: activationPageBackgroundHeader.bottom
+                id: profilePageBackgroundSeparator
+                anchors.top: profilePageBackgroundHeader.bottom
                 width: parent.width
-                height: 7
+                height: dp(5)
                 color:"#96C13D"
             }
 
