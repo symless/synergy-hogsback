@@ -244,7 +244,8 @@ void ScreenManager::updateScreens(QByteArray reply)
                 latestScreenList.push_back(screen);
             }
 
-            if (!latestScreenNameSet.contains(m_localHostname) &&
+            if (!m_screenNameSet.contains(m_localHostname) &&
+                !latestScreenNameSet.contains(m_localHostname) &&
                 m_appConfig->profileId() != -1) {
                 latestScreenNameSet.insert(m_localHostname);
                 updateLocalHost = true;
