@@ -219,9 +219,6 @@ void CloudClient::onUnsubProfileFinished(QNetworkReply *reply)
     if (replyHasError(reply)) {
         return;
     }
-
-    m_profileId = -1;
-    syncConfig();
 }
 
 void CloudClient::onGetLatestVersionFinished(QNetworkReply *reply)
