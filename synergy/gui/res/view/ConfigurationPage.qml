@@ -101,8 +101,8 @@ Rectangle {
                 anchors.rightMargin: dp(20)
                 anchors.verticalCenter: parent.verticalCenter
                 source: "qrc:/res/image/profile-icon.svg"
-                sourceSize.width: dp(36)
-                sourceSize.height: dp(28)
+                sourceSize.width: dp(36) * 0.9
+                sourceSize.height: dp(28) * 0.9
                 smooth: false
 
                 MouseArea {
@@ -146,6 +146,7 @@ Rectangle {
                         to: 1;
                         duration: 600
                     }
+
                     running: false;
                 }
 

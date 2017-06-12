@@ -9,16 +9,16 @@ Rectangle {
     property ProfileListModel listModel: ProfileManager.listModel()
     id: profileMenu
     color: "#4D4D4D"
-    width: dp(160)
-    height: childrenRect.height + dp(2)
+    width: dp(125)
+    height: childrenRect.height + 2
 
     Rectangle {
         visible: true
         focus: true
-        width: parent.width - dp(2)
+        width: parent.width - 2
         height: childrenRect.height
         anchors {
-           margins: dp(1)
+           margins: 1
            centerIn: parent
         }
 
@@ -52,7 +52,7 @@ Rectangle {
 
             Rectangle {
                 id: profileMenuOptions
-                height: dp(50)
+                height: dp(40)
                 width: parent.width
                 color: "#4D4D4D"
 
@@ -60,7 +60,7 @@ Rectangle {
                     color: "white"
                     width: parent.width
                     anchors.bottom: parent.bottom
-                    height: parent.height - dp(1)
+                    height: parent.height - 1
 
                     Button {
                         text: "New Profile"

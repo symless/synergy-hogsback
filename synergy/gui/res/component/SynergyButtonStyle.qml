@@ -11,15 +11,15 @@ ButtonStyle {
            text: control.text
            font {
                family: "AlternateGotNo3D"
-               pointSize: 12
-               bold: true
+               pixelSize: dp(10)
+               bold: false
            }
        }
    }
 
    background: Rectangle {
-        implicitWidth: 100
-        implicitHeight: 25
+        implicitWidth: dp(100)
+        implicitHeight: dp(25)
         color: "#4D4D4D"
    }
 }
