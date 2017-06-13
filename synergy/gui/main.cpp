@@ -19,6 +19,8 @@
 #include <QtQuick>
 #include <QQmlApplicationEngine>
 #include <stdexcept>
+#include <fstream>
+#include <iostream>
 
 #if (defined(Q_OS_WIN) || defined (Q_OS_DARWIN)) && !defined (QT_DEBUG)
 // TODO: Somehow get these in to a half decent <crashpad/...> form
@@ -92,6 +94,21 @@ startCrashHandler()
     return true;
 }
 
+#ifdef Q_OS_OSX
+static void
+checkService() {
+#define SYNERGY_DAEMON_DIR "/Library/LaunchDaemons/"
+    std::ifstream ifs;
+    ifs.open (SYNERGY_DAEMON_DIR "com.symless.synergy.v2.PreLoginAgent.plist", std::ios::in);
+    if (ifs.is_open()) {
+        std::cerr << "Service is installed" << std::endl;
+        return;
+    }
+    std::cerr << "Service is not installed" << std::endl;
+#undef SYNERGY_DAEMON_DIR
+}
+#endif
+
 int main(int argc, char* argv[])
 {
 #ifdef Q_OS_DARWIN
@@ -107,6 +124,7 @@ int main(int argc, char* argv[])
      * depends on file paths that are unavailable until then */
     QApplication app(argc, argv);
     startCrashHandler();
+    checkService();
 
     TrialValidator trialValidator;
     if (!trialValidator.isValid()) {
