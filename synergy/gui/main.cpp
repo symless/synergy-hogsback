@@ -94,9 +94,9 @@ startCrashHandler()
     return true;
 }
 
-#ifdef Q_OS_OSX
 static void
 checkService() {
+#ifdef Q_OS_OSX
 #define SYNERGY_DAEMON_DIR "/Library/LaunchDaemons/"
     std::ifstream ifs;
     ifs.open (SYNERGY_DAEMON_DIR "com.symless.synergy.v2.PreLoginAgent.plist", std::ios::in);
@@ -106,8 +106,8 @@ checkService() {
     }
     std::cerr << "Service is not installed" << std::endl;
 #undef SYNERGY_DAEMON_DIR
-}
 #endif
+}
 
 int main(int argc, char* argv[])
 {
