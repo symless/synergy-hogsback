@@ -37,3 +37,7 @@ if (WIN32)
     target_link_libraries (${PROJECT_NAME} ws2_32 rpcrt4 iphlpapi)
     target_link_libraries (lsif iphlpapi)
 endif()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    add_subdirectory (PreLoginAgent)
+endif()
