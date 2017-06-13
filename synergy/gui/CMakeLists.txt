@@ -12,6 +12,9 @@ if (APPLE)
     find_library (ApplicationServices_LIBRARY ApplicationServices)
     find_library (Foundation_LIBRARY Foundation)
     find_library (AppKit_LIBRARY AppKit)
+
+    find_library (ServiceManagement_LIBRARY ServiceManagement)
+    find_library (Security_LIBRARY REQUIRED Security)
 endif()
 
 add_subdirectory (lib)
@@ -20,26 +23,32 @@ add_subdirectory (tests)
 set(icon_resources)
 
 if (WIN32)
-set (icon_resources
-    res/icon/synergy.ico
-    res/synergy.rc
-)
+    set (SYNERGY_WIN_RESOURCES
+        res/icon/synergy.ico
+        res/synergy.rc
+    )
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set (SYNERGY_OSX_HELPER_SOURCES
+        helper.mm
+    )
 endif()
+
 
 add_executable (${PROJECT_NAME} WIN32
     main.cpp
     qml.qrc
-    ${icon_resources}
+    ${SYNERGY_WIN_RESOURCES}
+    ${SYNERGY_OSX_HELPER_SOURCES}
     main.qml
     res/view/ActivationPage.qml
     res/view/AccessibilityPage.qml
     res/view/ConfigurationPage.qml
+    res/view/ProfilePage.qml
     res/component/CustomBorder.qml
     res/component/CustomCheckBox.qml
     res/component/BodyText.qml
     res/component/HeaderText.qml
     res/component/LogoText.qml
-    res/view/ProfilePage.qml
     res/component/ProfileMenu.qml
     res/component/ProfileMenuButton.qml
     res/component/Version.qml
@@ -60,10 +69,11 @@ target_link_libraries (${PROJECT_NAME}
     ${SODIUM_LIBRARIES}
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
-    ${APP_SERVICES_LIBRARY}
     ${ApplicationServices_LIBRARY}
-    ${Foundation_LIBRARY}
     ${AppKit_LIBRARY}
+    ${Foundation_LIBRARY}
+    ${Security_LIBRARY}
+    ${ServiceManagement_LIBRARY}
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")

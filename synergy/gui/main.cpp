@@ -94,9 +94,9 @@ startCrashHandler()
     return true;
 }
 
+#ifdef Q_OS_OSX
 static void
 checkService() {
-#ifdef Q_OS_OSX
 #define SYNERGY_DAEMON_DIR "/Library/LaunchDaemons/"
     std::ifstream ifs;
     ifs.open (SYNERGY_DAEMON_DIR "com.symless.synergy.v2.PreLoginAgent.plist", std::ios::in);
@@ -106,10 +106,13 @@ checkService() {
     }
     std::cerr << "Service is not installed" << std::endl;
 #undef SYNERGY_DAEMON_DIR
-#endif
 }
 
-int main(int argc, char* argv[])
+extern void runHelper();
+#endif
+
+int
+main(int argc, char* argv[])
 {
 #ifdef Q_OS_DARWIN
     /* Workaround for QTBUG-40332
@@ -124,7 +127,11 @@ int main(int argc, char* argv[])
      * depends on file paths that are unavailable until then */
     QApplication app(argc, argv);
     startCrashHandler();
+
+#ifdef Q_OS_OSX
     checkService();
+    runHelper();
+#endif
 
     TrialValidator trialValidator;
     if (!trialValidator.isValid()) {
