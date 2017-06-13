@@ -14,7 +14,7 @@ if (APPLE)
     find_library (AppKit_LIBRARY AppKit)
 
     find_library (ServiceManagement_LIBRARY ServiceManagement)
-    find_library (Security_LIBRARY REQUIRED Security)
+    find_library (Security_LIBRARY Security)
 endif()
 
 add_subdirectory (lib)
