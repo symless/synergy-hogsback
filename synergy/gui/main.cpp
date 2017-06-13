@@ -19,6 +19,7 @@
 #include <QtQuick>
 #include <QQmlApplicationEngine>
 #include <stdexcept>
+#include <cstdlib>
 
 #if (defined(Q_OS_WIN) || defined (Q_OS_DARWIN)) && !defined (QT_DEBUG)
 // TODO: Somehow get these in to a half decent <crashpad/...> form
@@ -92,12 +93,15 @@ startCrashHandler()
     return true;
 }
 
-int main(int argc, char* argv[])
+int
+main (int argc, char* argv[])
 {
-#ifdef Q_OS_DARWIN
     /* Workaround for QTBUG-40332
      * "High ping when QNetworkAccessManager is instantiated" */
-    ::setenv ("QT_BEARER_POLL_TIMEOUT", "-1", 1);
+#if defined (Q_OS_WIN)
+    _putenv_s ("QT_BEARER_POLL_TIMEOUT", "-1");
+#else
+    setenv ("QT_BEARER_POLL_TIMEOUT", "-1", 1);
 #endif
     QCoreApplication::setOrganizationName ("Symless");
     QCoreApplication::setOrganizationDomain ("https://symless.com/");
