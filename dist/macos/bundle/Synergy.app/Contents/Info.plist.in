@@ -42,7 +42,7 @@
 	<key>SMPrivilegedExecutables</key>
 	<dict>
 		<key>com.symless.synergy.v2.ServiceHelper</key>
-		<string>identifier "com.symless.synergy.v2" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = "4HX897Y6GJ"</string>
+		<string>identifier "com.symless.synergy.v2.ServiceHelper" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = "4HX897Y6GJ"</string>
 	</dict>
 </dict>
 </plist>
