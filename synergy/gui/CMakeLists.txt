@@ -99,8 +99,6 @@ endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     add_subdirectory (helper)
-    target_link_libraries (${PROJECT_NAME} "-sectcreate __TEXT __info_plist ${CMAKE_CURRENT_SOURCE_DIR}/helper/Info.plist")
-    target_link_libraries (${PROJECT_NAME} "-sectcreate __TEXT __launchd_plist ${CMAKE_CURRENT_SOURCE_DIR}/helper/Launchd.plist")
 
     install (TARGETS ${PROJECT_NAME} DESTINATION ${SYNERGY_BUNDLE_BINARY_DIR})
     install (PROGRAMS "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/macos/crashpad_handler"
