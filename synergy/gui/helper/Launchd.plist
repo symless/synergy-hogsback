@@ -6,10 +6,9 @@
     <string>com.symless.synergy.v2.ServiceHelper</string>
     <key>RunAtLoad</key> 
     <true/>
-    <key>KeepAlive</key>
-    <dict>
-        <key>SuccessfulExit</key>
-        <false/>
-    </dict>
+    <key>LaunchOnlyOnce</key> 
+    <true/>
+    <key>OnDemand</key>
+    <false/>
 </dict>
 </plist>
