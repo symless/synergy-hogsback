@@ -4,5 +4,7 @@
 <dict>
     <key>Label</key>
     <string>com.symless.synergy.v2.ServiceHelper</string>
+    <key>RunAtLoad</key> 
+    <true/>
 </dict>
 </plist>
