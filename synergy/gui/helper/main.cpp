@@ -15,12 +15,13 @@ main (int, const char*[])
     versionFile.open ("/Applications/Synergy.app/Contents/Resources/Version.txt");
     if (versionFile.is_open()) {
         std::getline (versionFile, version);
+        versionFile.close();
     }
 
     auto t = time(NULL);
     testlog << fmt::format ("installed revision = {}, time = {} uid = {}, "
                             "euid = {}, pid = {}\n", ctime(&t), getuid(), geteuid(), getpid());
-    testlog.flush();
+    testlog.close();
     return EXIT_SUCCESS;
 }
 
