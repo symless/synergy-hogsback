@@ -5,23 +5,58 @@
 #include <fmt/format.h>
 #include <boost/filesystem.hpp>
 #include <string>
+#include <boost/process.hpp>
+
+std::string const kSharedConfigPath ("/Users/Shared/Synergy");
+std::string const kAppPath ("/Applications/Synergy.app");
+
+auto const kAppVersionFilePath = kAppPath + "/Contents/Resources/Version.txt";
+auto const kHelperPListPath = "/Library/LaunchDaemons/com.symless.synergy.v2.ServiceHelper.plist";
+auto const kHelperExecPath = "/Library/PrivilegedHelperTools/com.symless.synergy.v2.ServiceHelper";
 
 int
 main (int, const char*[])
-{    
-    std::ofstream testlog ("/Users/Andrew/test.txt");
-    std::ifstream versionFile;
-    std::string version ("none");
-    versionFile.open ("/Applications/Synergy.app/Contents/Resources/Version.txt");
-    if (versionFile.is_open()) {
-        std::getline (versionFile, version);
-        versionFile.close();
+{
+    try {
+        boost::filesystem::create_directory (kSharedConfigPath);
+
+        std::ofstream log (kSharedConfigPath + "/helper.log", std::ios::out | std::ios::app);
+        std::ifstream appVersionFile;
+        appVersionFile.open (kAppVersionFilePath, std::ios::in);
+
+        /* Test to see if Synergy is installed. If not, remove thyself. */
+        if (!appVersionFile.is_open()) {
+            /* First call launchctl to unload the helper */
+            boost::process::ipstream launchd_out;
+            boost::process::child launchd (fmt::format("launchctl unload {}", kHelperPListPath),
+                                           boost::process::std_out > launchd_out);
+            std::string line;
+            while (launchd_out && std::getline(launchd_out, line)) {
+                log.write (line.data(), line.size());
+            }
+            launchd.wait();
+
+            /* ... then remove the files */
+            boost::system::error_code ec;
+            boost::filesystem::remove (kHelperPListPath, ec);
+            boost::filesystem::remove (kHelperExecPath, ec);
+
+            return EXIT_SUCCESS;
+        }
+
+        std::string version;
+        std::getline (appVersionFile, version);
+        appVersionFile.close();
+
+        auto t = time(NULL);
+        auto ct = ctime(&t);
+        log << fmt::format ("[{}] installed helper revision = {}\n", ct, SYNERGY_REVISION);
+        log << fmt::format ("[{}] installed app revision = {}\n", ct, version);
+        log << fmt::format ("[{}] helper uid = {}, euid = {}, pid = {}\n", ct,
+                            getuid(), geteuid(), getpid());
+        log.close();
+        return EXIT_SUCCESS;
+    } catch (...) {
+        return EXIT_FAILURE;
     }
-
-    auto t = time(NULL);
-    testlog << fmt::format ("installed revision = {}, time = {} uid = {}, "
-                            "euid = {}, pid = {}\n", version, ctime(&t), getuid(), geteuid(), getpid());
-    testlog.close();
-    return EXIT_SUCCESS;
 }
-
