@@ -19,7 +19,7 @@
 #include <QtQuick>
 #include <QQmlApplicationEngine>
 #include <stdexcept>
-#include <fstream>
+#include <boost/filesystem.hpp>
 #include <iostream>
 
 #if (defined(Q_OS_WIN) || defined (Q_OS_DARWIN)) && !defined (QT_DEBUG)
@@ -95,28 +95,27 @@ startCrashHandler()
 }
 
 #ifdef Q_OS_OSX
+bool installServiceHelper();
+
 static void
 checkService() {
-#define SYNERGY_DAEMON_DIR "/Library/LaunchDaemons/"
-    std::ifstream ifs;
-    ifs.open (SYNERGY_DAEMON_DIR "com.symless.synergy.v2.PreLoginAgent.plist", std::ios::in);
-    if (ifs.is_open()) {
-        std::cerr << "Service is installed" << std::endl;
-        return;
+    if (!boost::filesystem::exists
+            ("/Library/LaunchDaemons/com.symless.synergy.v2.ServiceHelper.plist")) {
+        std::clog << "Service helper not installed, installing...\n";
+        if (!installServiceHelper()) {
+            std::clog << "Failed to install service helper" << "\n";
+            return;
+        }
+        std::clog << "Service helper installed\n";
     }
-    std::cerr << "Service is not installed" << std::endl;
-#undef SYNERGY_DAEMON_DIR
 }
-
-extern void runHelper();
 #endif
 
 int
 main(int argc, char* argv[])
 {
 #ifdef Q_OS_DARWIN
-    /* Workaround for QTBUG-40332
-     * "High ping when QNetworkAccessManager is instantiated" */
+    /* Workaround for QTBUG-40332 - "High ping when QNetworkAccessManager is instantiated" */
     ::setenv ("QT_BEARER_POLL_TIMEOUT", "-1", 1);
 #endif
     QCoreApplication::setOrganizationName ("Symless");
@@ -130,7 +129,6 @@ main(int argc, char* argv[])
 
 #ifdef Q_OS_OSX
     checkService();
-    runHelper();
 #endif
 
     TrialValidator trialValidator;

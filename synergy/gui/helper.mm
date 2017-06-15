@@ -3,7 +3,7 @@
 #import <Security/Authorization.h>
 
 BOOL
-blessHelperWithLabel (NSString* label, NSError** errorPtr, AuthorizationRef& authRef)
+blessHelperWithLabel (NSString* label, AuthorizationRef& authRef, NSError** errorPtr)
 {
     BOOL result = NO;
     NSError * error = nil;
@@ -16,49 +16,52 @@ blessHelperWithLabel (NSString* label, NSError** errorPtr, AuthorizationRef& aut
                                         kAuthorizationFlagExtendRights;
 
     /* Obtain the right to install our privileged helper tool (kSMRightBlessPrivilegedHelper). */
-    OSStatus status = AuthorizationCopyRights(authRef, &authRights, kAuthorizationEmptyEnvironment, flags, NULL);
+    OSStatus status = AuthorizationCopyRights(authRef, &authRights,
+                                              kAuthorizationEmptyEnvironment, flags, NULL);
     if (status != errAuthorizationSuccess) {
         error = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
     } else {
-        CFErrorRef cfError;
         /* This does all the work of verifying the helper tool against the application
          * and vice-versa. Once verification has passed, the embedded launchd.plist
          * is extracted and placed in /Library/LaunchDaemons and then loaded. The
          * executable is placed in /Library/PrivilegedHelperTools.
          */
-        result = (BOOL) SMJobBless(kSMDomainSystemLaunchd, (CFStringRef) label, authRef, &cfError);
+        CFErrorRef cfError;
+        result = (BOOL) SMJobBless (kSMDomainSystemLaunchd, (CFStringRef) label, authRef, &cfError);
         if (!result) {
             error = CFBridgingRelease(cfError);
         }
     }
     if (!result && (errorPtr != NULL)) {
-        assert(error != nil);
+        assert (error != nil);
         *errorPtr = error;
     }
 
     return result;
 }
 
-void
-runHelper() {
-    AuthorizationRef authRef;
-    NSError *error = nil;
+BOOL
+blessServiceHelper (AuthorizationRef& authRef, NSError** errorPtr) {
+    return blessHelperWithLabel (@"com.symless.synergy.v2.ServiceHelper", authRef, errorPtr);
+}
 
-    OSStatus status = AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &authRef);
+bool
+installServiceHelper() {
+    AuthorizationRef authRef = NULL;
+    NSError* error = nil;
+
+    OSStatus status = AuthorizationCreate (NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &authRef);
     if (status != errAuthorizationSuccess) {
-        /* AuthorizationCreate really shouldn't fail. */
-        assert(NO);
-        authRef = NULL;
+        /* AuthorizationCreate should never fail. */
+        assert (NO);
     }
 
-    if (!blessHelperWithLabel (@"com.symless.synergy.v2.ServiceHelper", &error, authRef)) {
-        NSLog (@"Something went wrong! %@ / %d", [error domain], (int) [error code]);
+    if (!blessServiceHelper (authRef, &error)) {
+        NSLog (@"Failed to bless helper %@ / %d", [error domain], (int) [error code]);
     } else {
-        /* At this point, the job is available. However, this is a very
-         * simple sample, and there is no IPC infrastructure set up to
-         * make it launch-on-demand. You would normally achieve this by
-         * using XPC (via a MachServices dictionary in your launchd.plist).
-         */
-        NSLog (@"Job is available!");
+        NSLog (@"Helper installed successfully");
+        return true;
     }
+
+    return false;
 }

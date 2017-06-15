@@ -1,19 +1,26 @@
-#include <syslog.h>
-#include <unistd.h>
-#include <cstdio>
 #include <cstdlib>
+#include <unistd.h>
 #include <fstream>
 #include <time.h>
+#include <fmt/format.h>
+#include <boost/filesystem.hpp>
+#include <string>
 
 int
 main (int, const char*[])
-{
-    std::ofstream ofs ("/Users/Andrew/test.txt");
+{    
+    std::ofstream testlog ("/Users/Andrew/test.txt", std::ios::out | std::ios::app);
+    std::ifstream versionFile;
+    std::string version ("none");
+    versionFile.open ("/Applications/Synergy.app/Contents/Resources/Version.txt");
+    if (versionFile.is_open()) {
+        std::getline (versionFile, version);
+    }
+
     auto t = time(NULL);
-    ofs << "test " << ctime(&t) << "\n";
-    ofs.close();
-    syslog (LOG_NOTICE, "Hello world! uid = %d, euid = %d, pid = %d\n", (int) getuid(), (int) geteuid(), (int) getpid());
-    sleep (10);
+    testlog << fmt::format ("installed revision = {}, time = {} uid = {}, "
+                            "euid = {}, pid = {}\n", ctime(&t), getuid(), geteuid(), getpid());
+    testlog.flush();
     return EXIT_SUCCESS;
 }
 

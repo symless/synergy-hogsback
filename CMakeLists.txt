@@ -85,7 +85,7 @@ endif()
 set (Boost_USE_STATIC_LIBS ON)
 set (Boost_USE_STATIC_RUNTIME OFF)
 set (Boost_USE_MULTITHREADED ON)
-find_package (Boost 1.55 REQUIRED COMPONENTS system date_time)
+find_package (Boost 1.55 REQUIRED COMPONENTS system date_time filesystem)
 
 #
 # CMake Dependencies
