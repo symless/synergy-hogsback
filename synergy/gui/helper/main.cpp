@@ -20,7 +20,7 @@ main (int, const char*[])
 
     auto t = time(NULL);
     testlog << fmt::format ("installed revision = {}, time = {} uid = {}, "
-                            "euid = {}, pid = {}\n", ctime(&t), getuid(), geteuid(), getpid());
+                            "euid = {}, pid = {}\n", version, ctime(&t), getuid(), geteuid(), getpid());
     testlog.close();
     return EXIT_SUCCESS;
 }
