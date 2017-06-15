@@ -27,14 +27,14 @@ main (int, const char*[])
         /* Test to see if Synergy is installed. If not, remove thyself. */
         if (!appVersionFile.is_open()) {
             /* First call launchctl to unload the helper */
-            boost::process::ipstream launchd_out;
+            /*boost::process::ipstream launchd_out;
             boost::process::child launchd (fmt::format("launchctl unload {}", kHelperPListPath),
                                            boost::process::std_out > launchd_out);
             std::string line;
             while (launchd_out && std::getline(launchd_out, line)) {
                 log.write (line.data(), line.size());
             }
-            launchd.wait();
+            launchd.wait();*/
 
             /* ... then remove the files */
             boost::system::error_code ec;
