@@ -9,7 +9,7 @@
 int
 main (int, const char*[])
 {    
-    std::ofstream testlog ("/Users/Andrew/test.txt", std::ios::out | std::ios::app);
+    std::ofstream testlog ("/Users/Andrew/test.txt");
     std::ifstream versionFile;
     std::string version ("none");
     versionFile.open ("/Applications/Synergy.app/Contents/Resources/Version.txt");
