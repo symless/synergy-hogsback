@@ -6,6 +6,7 @@
 #include <boost/filesystem.hpp>
 #include <string>
 #include <boost/process.hpp>
+#include <stdexcept>
 
 std::string const kSharedConfigPath ("/Users/Shared/Synergy");
 std::string const kAppPath ("/Applications/Synergy.app");
@@ -17,10 +18,9 @@ auto const kHelperExecPath = "/Library/PrivilegedHelperTools/com.symless.synergy
 int
 main (int, const char*[])
 {
+    boost::filesystem::create_directory (kSharedConfigPath);
+    std::ofstream log (kSharedConfigPath + "/helper.log", std::ios::out | std::ios::app);
     try {
-        boost::filesystem::create_directory (kSharedConfigPath);
-
-        std::ofstream log (kSharedConfigPath + "/helper.log", std::ios::out | std::ios::app);
         std::ifstream appVersionFile;
         appVersionFile.open (kAppVersionFilePath, std::ios::in);
 
@@ -56,7 +56,11 @@ main (int, const char*[])
                             getuid(), geteuid(), getpid());
         log.close();
         return EXIT_SUCCESS;
+    } catch (std::exception& ex) {
+        log << "Exception thrown: " << ex.what() << "\n";
     } catch (...) {
-        return EXIT_FAILURE;
+        log << "Unknown exception thrown\n";
     }
+    log.close();
+    return EXIT_FAILURE; 
 }
