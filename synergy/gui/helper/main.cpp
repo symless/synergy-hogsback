@@ -11,6 +11,7 @@
 std::string const kSharedConfigPath ("/Users/Shared/Synergy");
 std::string const kAppPath ("/Applications/Synergy.app");
 
+auto const kAppClientBinPath = kAppPath + "/Contents/MacOS/synergyc";
 auto const kAppVersionFilePath = kAppPath + "/Contents/Resources/Version.txt";
 auto const kHelperPListPath = "/Library/LaunchDaemons/com.symless.synergy.v2.ServiceHelper.plist";
 auto const kHelperExecPath = "/Library/PrivilegedHelperTools/com.symless.synergy.v2.ServiceHelper";
@@ -55,6 +56,16 @@ main (int, const char*[])
         log << fmt::format ("[{}] helper uid = {}, euid = {}, pid = {}\n", ct,
                             getuid(), geteuid(), getpid());
         log.close();
+
+        boost::process::ipstream synergyc_out;
+        boost::process::child synergyc (kAppClientBinPath, "-f", "192.168.1.93",
+                                       boost::process::std_out > synergyc_out);
+        std::string line;
+        while (synergyc_out && std::getline(synergyc_out, line)) {
+            log.write (line.data(), line.size());
+        }
+        synergyc.wait();
+
         return EXIT_SUCCESS;
     } catch (std::exception& ex) {
         log << "Exception thrown: " << ex.what() << "\n";
