@@ -7,6 +7,8 @@
 #include <string>
 #include <boost/process.hpp>
 #include <stdexcept>
+#include <cassert>
+#include <time.h>
 
 std::string const kSharedConfigPath ("/Users/Shared/Synergy");
 std::string const kAppPath ("/Applications/Synergy.app");
@@ -49,29 +51,41 @@ main (int, const char*[])
         std::getline (appVersionFile, version);
         appVersionFile.close();
 
-        auto t = time(NULL);
-        auto ct = ctime(&t);
+        time_t t;
+        time (&t);
+        std::array<char, 32> ct_buf;
+        auto ct = ctime_r (&t, ct_buf.data());
+        assert (ct == ct_buf.data());
+        std::replace (begin(ct_buf), end(ct_buf), '\n', '\0');
+
         log << fmt::format ("[{}] installed helper revision = {}\n", ct, SYNERGY_REVISION);
         log << fmt::format ("[{}] installed app revision = {}\n", ct, version);
         log << fmt::format ("[{}] helper uid = {}, euid = {}, pid = {}\n", ct,
                             getuid(), geteuid(), getpid());
-        log.close();
 
         boost::process::ipstream synergyc_out;
         boost::process::child synergyc (kAppClientBinPath, "-f", "192.168.1.93",
                                        boost::process::std_out > synergyc_out);
         std::string line;
         while (synergyc_out && std::getline(synergyc_out, line)) {
-            log.write (line.data(), line.size());
+            /* This should block and never spin */
+            if (!line.empty()) {
+                log << line << std::endl;
+                line.clear();
+            }
         }
-        synergyc.wait();
 
+        synergyc.wait();
+        log.close();
         return EXIT_SUCCESS;
-    } catch (std::exception& ex) {
+    }
+    catch (std::exception& ex) {
         log << "Exception thrown: " << ex.what() << "\n";
-    } catch (...) {
+    }
+    catch (...) {
         log << "Unknown exception thrown\n";
     }
+
     log.close();
     return EXIT_FAILURE; 
 }
