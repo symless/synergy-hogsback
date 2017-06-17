@@ -88,7 +88,7 @@ static void InstallHandleSIGTERMFromRunLoop(void)
             
             [[LogManager sharedManager] logWithFormat:@"Got SIGTERM"];
 
-            //[[NSApplication sharedApplication] terminate:nil];
+            [[NSApplication sharedApplication] terminate:nil];
         });
         
         dispatch_resume(sSignalSource);
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
     
     [[LogManager sharedManager] logWithFormat:@"Starting Cocoa application"];
 
-    //retVal = NSApplicationMain(argc, (const char **) argv);
+    retVal = NSApplicationMain(argc, (const char **) argv);
 
     [[LogManager sharedManager] logWithFormat:@"Cocoa application returned!?"];
     
