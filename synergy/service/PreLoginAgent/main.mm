@@ -156,7 +156,6 @@ main (int argc, char *argv[])
     boost::process::ipstream synergyc_out;
     boost::process::child synergyc (kAppClientExecPath, "-f", "--debug", "DEBUG2",
                                     "192.168.1.71",
-                                   boost::process::std_out > synergyc_out,
                                    boost::process::std_err > synergyc_out);
     std::string line;
     while (synergyc_out && std::getline(synergyc_out, line)) {
