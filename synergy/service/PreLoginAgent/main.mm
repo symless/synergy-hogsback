@@ -154,7 +154,8 @@ main (int argc, char *argv[])
     [[LogManager sharedManager] logWithFormat:@"Starting synergyc"];
 
     boost::process::ipstream synergyc_out;
-    boost::process::child synergyc (kAppClientExecPath, "-f", "192.168.1.71",
+    boost::process::child synergyc (kAppClientExecPath, "-f", "--debug", "DEBUG2",
+                                    "192.168.1.71",
                                    boost::process::std_out > synergyc_out);
     std::string line;
     while (synergyc_out && std::getline(synergyc_out, line)) {
