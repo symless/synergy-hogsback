@@ -46,6 +46,12 @@
 
 #import <Cocoa/Cocoa.h>
 #import "LogManager.h"
+#include <boost/process.hpp>
+#include <fstream>
+
+std::string const kSharedConfigPath ("/Users/Shared/Synergy");
+std::string const kAppPath ("/Applications/Synergy.app");
+auto const kAppClientExecPath = kAppPath + "/Contents/MacOS/synergyc";
 
 static void WaitForWindowServerSession(void)
     // This routine waits for the window server to register its per-session 
@@ -95,7 +101,14 @@ static void InstallHandleSIGTERMFromRunLoop(void)
     });
 }
 
-int main(int argc, char *argv[])
+static std::ofstream&
+log() {
+    static std::ofstream log_ (kSharedConfigPath + "/pla.log", std::ios::out | std::ios::app);
+    return log_;
+}
+
+int
+main (int argc, char *argv[])
 {
     int             retVal;
     NSTimeInterval  delay;
@@ -137,6 +150,23 @@ int main(int argc, char *argv[])
     // Go go gadget Cocoa!
     
     [[LogManager sharedManager] logWithFormat:@"Starting Cocoa application"];
+
+    [[LogManager sharedManager] logWithFormat:@"Starting synergyc"];
+
+    boost::process::ipstream synergyc_out;
+    boost::process::child synergyc (kAppClientExecPath, "-f", "192.168.1.71",
+                                   boost::process::std_out > synergyc_out);
+    std::string line;
+    while (synergyc_out && std::getline(synergyc_out, line)) {
+        // This should block and never spin
+        if (!line.empty()) {
+            log() << line << std::endl;
+            line.clear();
+        }
+    }
+
+    synergyc.wait();
+    log().close();
 
     retVal = NSApplicationMain(argc, (const char **) argv);
 

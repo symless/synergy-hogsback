@@ -8,6 +8,10 @@ add_executable (${PROJECT_NAME}
 )
 
 find_library (COCOA_LIBRARY Cocoa)
-target_link_libraries (${PROJECT_NAME} ${COCOA_LIBRARY})
 
+target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
+    ${Boost_INCLUDE_DIRS}
+)
+
+target_link_libraries (${PROJECT_NAME} ${COCOA_LIBRARY} Boost::system)
 install (TARGETS ${PROJECT_NAME} DESTINATION ${SYNERGY_BUNDLE_BINARY_DIR})

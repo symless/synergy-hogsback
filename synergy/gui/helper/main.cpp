@@ -103,19 +103,6 @@ main (int, const char*[])
             log() << fmt::format ("[{}] failed to install PreLoginAgent\n", ct);
         }
 
-        /*boost::process::ipstream synergyc_out;
-        boost::process::child synergyc (kAppClientExecPath, "-f", "192.168.1.93",
-                                       boost::process::std_out > synergyc_out);
-        std::string line;
-        while (synergyc_out && std::getline(synergyc_out, line)) {
-            // This should block and never spin
-            if (!line.empty()) {
-                log << line << std::endl;
-                line.clear();
-            }
-        }
-
-        synergyc.wait();*/
         log().close();
         return EXIT_SUCCESS;
     }
