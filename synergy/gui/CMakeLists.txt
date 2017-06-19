@@ -6,13 +6,12 @@ set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DQT_QML_DEBUG ")
 
-find_package (Qt5 COMPONENTS Core Widgets Quick Network)
+find_package (Qt5 COMPONENTS Core Widgets Quick Network Svg)
 
 if (APPLE)
     find_library (ApplicationServices_LIBRARY ApplicationServices)
     find_library (Foundation_LIBRARY Foundation)
     find_library (AppKit_LIBRARY AppKit)
-
     find_library (ServiceManagement_LIBRARY ServiceManagement)
     find_library (Security_LIBRARY Security)
 endif()
