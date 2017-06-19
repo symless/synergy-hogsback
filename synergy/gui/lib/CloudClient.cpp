@@ -24,16 +24,16 @@
 #define SYNERGY_CLOUD_URI "https://v1.api.cloud.symless.com"
 #endif
 
-static const char kUserProfilesUrl[] = SYNERGY_CLOUD_URI "/user/profiles";
-static const char kSwitchProfileUrl[] = SYNERGY_CLOUD_URI "/profile/switch";
-static const char kUnsubProfileUrl[] = SYNERGY_CLOUD_URI "/profile/unsub";
+static const char kUserProfilesUrl[] = SYNERGY_CLOUD_URI "/user/profiles"; // TODO: change to /user/%1/profiles
+static const char kSwitchProfileUrl[] = SYNERGY_CLOUD_URI "/profile/switch"; // TODO: change to POST to /user/%1/screens
+static const char kUnsubProfileUrl[] = SYNERGY_CLOUD_URI "/profile/unsub"; // TODO: change to DELETE /profile/%1/screen/%2
 static const char kLoginUrl[] = SYNERGY_CLOUD_URI "/login";
 static const char kIdentifyUrl[] = SYNERGY_CLOUD_URI "/user/identify";
 static const char kProfileScreensUrl[] = SYNERGY_CLOUD_URI "/profile/%1/screens";
-static const char kUpdateProfileConfigUrl[] = SYNERGY_CLOUD_URI "/profile/update";
-static const char kReportUrl[] = SYNERGY_CLOUD_URI "/report";
-static const char kClaimServerUrl[] = SYNERGY_CLOUD_URI "/profile/server/claim";
-static const char kUpdateScreenUrl[] = SYNERGY_CLOUD_URI "/screen/update";
+static const char kUpdateProfileConfigUrl[] = SYNERGY_CLOUD_URI "/profile/update"; // TODO: change to PUT to /profile/%1
+static const char kReportUrl[] = SYNERGY_CLOUD_URI "/report"; // TODO: change to POST to /user/connectivity-reports
+static const char kClaimServerUrl[] = SYNERGY_CLOUD_URI "/profile/server/claim"; // TODO: change to POST to /profile/%1/server
+static const char kUpdateScreenUrl[] = SYNERGY_CLOUD_URI "/screen/update"; // TODO: change to PUT to /screen/%1
 static const char kLatestVersionUrl[] = SYNERGY_CLOUD_URI "/version";
 static const char kLogUploadUrl[] = "https://symless.com/api/client/log";
 static const int kPollingTimeout = 60000; // 1 minute
