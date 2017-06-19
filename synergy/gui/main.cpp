@@ -22,6 +22,7 @@
 #include <boost/filesystem.hpp>
 #include <iostream>
 
+
 #if (defined(Q_OS_WIN) || defined (Q_OS_DARWIN)) && !defined (QT_DEBUG)
 // TODO: Somehow get these in to a half decent <crashpad/...> form
 #include <client/crashpad_client.h>
@@ -114,9 +115,12 @@ checkService() {
 int
 main(int argc, char* argv[])
 {
-#ifdef Q_OS_DARWIN
-    /* Workaround for QTBUG-40332 - "High ping when QNetworkAccessManager is instantiated" */
-    ::setenv ("QT_BEARER_POLL_TIMEOUT", "-1", 1);
+    /* Workaround for QTBUG-40332
+     * "High ping when QNetworkAccessManager is instantiated" */
+#if defined (Q_OS_WIN)
+    _putenv_s ("QT_BEARER_POLL_TIMEOUT", "-1");
+#else
+    setenv ("QT_BEARER_POLL_TIMEOUT", "-1", 1);
 #endif
     QCoreApplication::setOrganizationName ("Symless");
     QCoreApplication::setOrganizationDomain ("https://symless.com/");

@@ -207,7 +207,9 @@ void ConnectivityTester::onTestDelegateeDone(QMap<QString, bool> results)
 
         // update connectivity results
         m_screenSuccessfulResults[screenId] = successfulIpList;
+    }
 
+    for (int i = 0; i < m_testCaseBatchSize; i++) {
         m_pendingTestCases.pop_front();
     }
 
