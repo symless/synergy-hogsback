@@ -46,7 +46,6 @@ Item {
                     leftMargin: dp(10)
                 }
                 font {
-                    family: "Raleway"
                     pixelSize: dp(11.5)
                 }
                 focus: editFocus

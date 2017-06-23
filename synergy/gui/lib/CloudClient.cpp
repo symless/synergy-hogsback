@@ -82,8 +82,8 @@ void CloudClient::login(QString email, QString password)
 
 void CloudClient::getUserToken()
 {
-    // contact cloud if there is not a user token
-    if (m_appConfig->userToken().isEmpty()) {
+    if (m_appConfig->userToken().isEmpty() ||
+            (m_appConfig->userId() == -1)) {
         QUrl identifyUrl = QUrl(kIdentifyUrl);
         QNetworkRequest req(identifyUrl);
 

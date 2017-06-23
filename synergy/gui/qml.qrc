@@ -10,7 +10,6 @@
         <file>res/image/unsub.png</file>
         <file>res/image/accessibility-tutorial.gif</file>
         <file>res/image/profile-icon.svg</file>
-        <file alias="Raleway.otf">res/font/Raleway.otf</file>
         <file alias="Museo.otf">res/font/Museo.otf</file>
         <file alias="AlternateGotNo3D.otf">res/font/AlternateGotNo3D.otf</file>
         <file alias="BodyText.qml">res/component/BodyText.qml</file>
@@ -27,5 +26,6 @@
         <file alias="ActivationPage.qml">res/view/ActivationPage.qml</file>
         <file alias="ConfigurationPage.qml">res/view/ConfigurationPage.qml</file>
         <file alias="ProfilePage.qml">res/view/ProfilePage.qml</file>
+        <file>res/image/symless-signin-button.svg</file>
     </qresource>
 </RCC>
