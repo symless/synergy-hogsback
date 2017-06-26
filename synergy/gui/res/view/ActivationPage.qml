@@ -109,7 +109,7 @@ Rectangle {
                 id: hint
                 z: 1
                 color: "white"
-                text: "Welcome to Synergy 2.0\nPlease sign-in to your Symless account to get started."
+                text: ""
                 horizontalAlignment: Text.AlignHCenter
                 anchors.top: signInArea.bottom
                 anchors.horizontalCenter: signInArea.horizontalCenter
@@ -121,7 +121,7 @@ Rectangle {
                     hint.text = error
                 }
                 onInvalidAuth: {
-                    hint.text = "Apologies, but there was a problem.\nPlease sign-in again."
+                    hint.text = "Oops! There was a problem.\nPlease try again."
                 }
             }
         }
