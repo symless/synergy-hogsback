@@ -95,7 +95,7 @@ Rectangle {
                 //source: "qrc:/res/image/synergy-icon.png"
             }
 
-            Image {
+            /*Image {
                 id: profileButton
                 anchors.right: parent.right
                 anchors.rightMargin: dp(20)
@@ -167,6 +167,7 @@ Rectangle {
                     running: false;
                 }
             }
+            */
         }
 
         // separator
@@ -376,7 +377,7 @@ Rectangle {
                                     id: unsubScreenMouseArea
                                     anchors.fill: parent
                                     onPressed: {
-                                        screenManager.removeScreen(name, true)
+                                        //screenManager.removeScreen(name, true)
                                     }
                                 }
                             }
