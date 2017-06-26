@@ -132,7 +132,7 @@ main(int argc, char* argv[])
     startCrashHandler();
 
 #ifdef Q_OS_OSX
-    checkService();
+    //checkService();
 #endif
 
     TrialValidator trialValidator;
