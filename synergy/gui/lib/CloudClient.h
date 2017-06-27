@@ -30,6 +30,7 @@ public:
     Q_INVOKABLE void getScreens();
     Q_INVOKABLE void userProfiles();
     Q_INVOKABLE void getLatestVersion();
+    Q_INVOKABLE void goOffline();
     Q_INVOKABLE QString serverHostname() const;
 
     void report(int destId, QString successfulIp, QString failedIp);

@@ -43,7 +43,7 @@ ApplicationWindow {
     }
 
     onClosing: {
-        CloudClient.leaveProfile()
+        CloudClient.goOffline()
     }
 
     AccessibilityManager {

@@ -406,8 +406,8 @@ void CloudClient::claimServer()
 
 void CloudClient::updateScreen(const Screen& screen)
 {
-    QUrl claimUrl = QUrl(kUpdateScreenUrl);
-    QNetworkRequest req(claimUrl);
+    QUrl updateScreenUrl = QUrl(kUpdateScreenUrl);
+    QNetworkRequest req(updateScreenUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -419,6 +419,28 @@ void CloudClient::updateScreen(const Screen& screen)
     QJsonDocument doc(screenObject);
 
     m_networkManager->post(req, doc.toJson());
+}
+
+void CloudClient::goOffline()
+{
+    if (m_screenId == -1) {
+        return;
+    }
+
+    QUrl updateScreenUrl = QUrl(kUpdateScreenUrl);
+    QNetworkRequest req(updateScreenUrl);
+    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
+
+    QJsonObject screenObject;
+    screenObject.insert("id", qint64(m_screenId));
+    screenObject.insert("status", "inactive");
+
+    QJsonDocument doc(screenObject);
+    QEventLoop loop;
+    auto reply = m_networkManager->post(req, doc.toJson());
+    connect (reply, SIGNAL(finished()), &loop, SLOT(quit()));
+	loop.exec();
 }
 
 void CloudClient::uploadLogFile(QString filename)
