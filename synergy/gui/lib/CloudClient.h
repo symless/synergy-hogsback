@@ -32,6 +32,7 @@ public:
     Q_INVOKABLE void getLatestVersion();
     Q_INVOKABLE void goOffline();
     Q_INVOKABLE QString serverHostname() const;
+    Q_INVOKABLE QString loginClientId();
 
     void report(int destId, QString successfulIp, QString failedIp);
     void updateProfileConfig(QJsonDocument& doc);

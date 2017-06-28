@@ -80,7 +80,7 @@ Rectangle {
                             if (AppConfig.userToken()) {
                                 var url = "https://symless.com/oauth/authorize?"
                                 url += "client_id="
-                                url += "4"
+                                url += CloudClient.loginClientId()
                                 url += "&redirect_uri=" + CloudClient.serverHostname()
                                 url += "/login/with-symless"
                                 url += "&response_type=code"

@@ -20,8 +20,10 @@
 
 #ifdef SYNERGY_DEVELOPER_MODE
 #define SYNERGY_CLOUD_URI "https://alpha1.cloud.symless.com"
+#define SYMLESS_LOGIN_CLIENT_ID "4"
 #else
 #define SYNERGY_CLOUD_URI "https://v1.api.cloud.symless.com"
+#define SYMLESS_LOGIN_CLIENT_ID "3"
 #endif
 
 static const char kUserProfilesUrl[] = SYNERGY_CLOUD_URI "/user/profiles"; // TODO: change to /user/%1/profiles
@@ -641,4 +643,9 @@ bool CloudClient::replyHasError(QNetworkReply* reply)
 QString
 CloudClient::serverHostname() const {
     return SYNERGY_CLOUD_URI;
+}
+
+QString CloudClient::loginClientId()
+{
+    return SYMLESS_LOGIN_CLIENT_ID;
 }
