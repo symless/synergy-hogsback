@@ -28,7 +28,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.bottom: parent.bottom
         color: textColor
-        text: "Alpha testing only, do not redistribute"
+        text: "For testing only, do not redistribute"
         onLinkActivated: Qt.openUrlExternally(link)
 
         MouseArea {
