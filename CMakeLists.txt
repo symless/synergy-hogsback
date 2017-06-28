@@ -11,7 +11,7 @@ set (CMAKE_XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT "dwarf-with-dsym")
 #
 # Synergy Options
 #
-option (SYNERGY_DEVELOPER_MODE "Synergy: Turn on secret developer features" ON)
+option (SYNERGY_DEVELOPER_MODE "Synergy: Turn on secret developer features" OFF)
 
 #
 # Synergy Version
