@@ -88,7 +88,7 @@ Rectangle {
                                 Qt.openUrlExternally(url)
                                 CloudClient.getUserId()
                             } else {
-                                hint.text = "Couldn't connect to the Synergy Cloud.\nPlease check your Internet connection and then try again."
+                                hint.text = "Couldn't connect to Synergy Cloud.\nPlease check your Internet connection and then try again."
                                 CloudClient.getUserToken()
                             }
                         }
