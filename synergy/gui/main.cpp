@@ -78,7 +78,7 @@ startCrashHandler()
 
     rc = client.StartHandler (handler, db, db, url, annotations, arguments,
         true, /* restartable */
-        true  /* asynchronous_start */
+        false  /* asynchronous_start */
     );
     if (!rc) {
         return false;
