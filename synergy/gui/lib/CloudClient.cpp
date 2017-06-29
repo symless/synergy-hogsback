@@ -110,7 +110,7 @@ bool CloudClient::verifyUser()
 void CloudClient::getUserId(bool initialCall)
 {
     if (initialCall) {
-        // if user click login as google again while trying to poll the
+        // if user click login as Symless again while trying to poll the
         // user Id, we only need to restart the time and skip creating
         // a new poll as the last one probably is not finished yet
         bool skip = false;
@@ -126,7 +126,7 @@ void CloudClient::getUserId(bool initialCall)
     }
     else {
         if (m_elapsedTimer.remainingTime() <= 0) {
-            emit loginFail("Failed to use Google to login. Please try again.");
+            emit loginFail("Login failed. Please try again.");
             return;
         }
     }
