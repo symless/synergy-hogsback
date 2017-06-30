@@ -311,19 +311,6 @@ Rectangle {
                                 screenManager.unlockScreen(modelIndex)
                                 modelIndex = -1
                             }
-
-                            onClicked: {
-                                // right click activate and deactivate edit mode
-                                if(mouse.button === Qt.RightButton) {
-                                    screenIcon.editMode = !screenIcon.editMode;
-                                    if (screenIcon.editMode === false) {
-                                        screenImage.source = statusImage
-                                    }
-                                    else {
-                                        screenImage.source = "qrc:/res/image/screen-edit.png"
-                                    }
-                                }
-                            }
                         }
 
                         // selected border
