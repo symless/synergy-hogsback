@@ -5,7 +5,7 @@
 	<key>Label</key>
         <string>com.symless.synergy.v2.PreLoginAgent</string>
 	<key>LimitLoadToSessionType</key>
-	<string>LoginWindow</string>
+	<string>Aqua</string>
 	<key>KeepAlive</key>
 	<true/>
         <key>Program</key>
