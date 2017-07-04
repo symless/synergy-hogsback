@@ -38,11 +38,14 @@ main (int argc, char *argv[])
     initLogging();
     initPlatformService();
     loadConfig();
+
     SessionManager sessionManager;
     ProcessManager processManager;
 
     // connect all signals
     // user changed -> updateGlobalConfig -> restart core
+
+    sessionManager.sessionChanged.connect([](int x) {});
 
     std::thread ioThread(ioLoop);
 
