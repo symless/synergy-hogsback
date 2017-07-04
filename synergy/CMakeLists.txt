@@ -11,3 +11,5 @@ add_subdirectory (core)
 add_subdirectory (gui)
 
 add_subdirectory (service)
+
+add_subdirectory (common)
