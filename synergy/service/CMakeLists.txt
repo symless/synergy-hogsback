@@ -12,12 +12,15 @@ add_executable (${PROJECT_NAME} ${SERVICE_SOURCES})
 target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
     ${fmt_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
-    ../common
+)
+
+target_compile_definitions (${PROJECT_NAME}
+    PRIVATE -DBOOST_COROUTINES_NO_DEPRECATION_WARNING
 )
 
 target_link_libraries (${PROJECT_NAME}
-    commonlib
     fmt
+    commonlib
     ${Boost_LIBRARIES}
 )
 
