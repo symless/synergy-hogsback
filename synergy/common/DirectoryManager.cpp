@@ -17,8 +17,6 @@ DirectoryManager* DirectoryManager::instance()
 #else
         s_instances = new OSXDirectoryManager();
 #endif
-
-        return s_instances;
     }
 
     return s_instances;
