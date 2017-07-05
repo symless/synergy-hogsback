@@ -6,7 +6,16 @@
 class  DirectoryManager
 {
 public:
-    static std::string globalDir();
+    static DirectoryManager* instance();
+
+    virtual std::string systemAppDir() = 0;
+
+protected:
+    DirectoryManager();
+     ~DirectoryManager();
+
+private:
+    static DirectoryManager* s_instances;
 };
 
 #endif // COMMONDIRECTORYMANAGER_H

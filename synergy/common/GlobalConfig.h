@@ -6,7 +6,7 @@
 class  GlobalConfig
 {
 public:
-    static std::string globalDir();
+    std::string filename();
 };
 
 #endif // COMMONGLOBALCONFIG_H
