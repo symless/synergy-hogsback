@@ -1,5 +1,7 @@
 #include "DirectoryManager.h"
 
+#include <cstdlib>
+
 #if SYSAPI_WIN32
 #include "MSWindowsDirectoryManager.h"
 #elif WINAPI_XWINDOWS
