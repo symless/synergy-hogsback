@@ -5,6 +5,8 @@
 #include <boost/optional.hpp>
 #include <vector>
 #include <string>
+#include <boost/asio/strand.hpp>
+#include <mutex>
 
 namespace bp = boost::process;
 namespace bs = boost::system;
@@ -12,86 +14,96 @@ using boost::optional;
 
 class ProcessManagerImpl {
 public:
-    ProcessManagerImpl(asio::io_service& io):
-        outPipe(io), errorPipe(io) {
+    ProcessManagerImpl (asio::io_service& io)
+        : ioStrand (io), outPipe (io), errorPipe (io) {
     }
 
     void start (ProcessManager& manager);
 
-    // TODO: add locking
-    // TODO: put both pipes on the same asio strand & share the line buffer
-    bp::async_pipe outPipe;
-    asio::streambuf outBuf;
-    std::string outLine;
+    std::mutex mtx;
 
+    asio::io_service::strand ioStrand;
+    bp::async_pipe outPipe;
     bp::async_pipe errorPipe;
+    asio::streambuf outBuf;
     asio::streambuf errorBuf;
-    std::string errorLine;
+    std::string lineBuf;
 
     optional<bp::child> process;
     std::vector<std::string> command;
     bool awaitingExit = false;
 };
 
-template <typename Pipe, typename Buffer, typename Line> static
-void
-asyncReadLines (ProcessManager& manager,
-         Pipe& pipe, Buffer& buffer, Line& line,
-         bs::error_code const& ec, std::size_t bytes)
-{
+template <typename Strand, typename Pipe, typename Buffer, typename Line>
+static void
+asyncReadLines (ProcessManager& manager, Strand& strand, Pipe& pipe,
+                Buffer& buffer, Line& line, bs::error_code const& ec,
+                std::size_t bytes) {
     std::istream stream (&buffer);
     if (ec || !bytes || !std::getline (stream, line)) {
-        if (manager.awaitingExit()) {
-            manager.onUnexpectedExit();
+        if (manager.awaitingExit ()) {
+            manager.onUnexpectedExit ();
         } else {
-            manager.onExit();
+            manager.onExit ();
         }
         return;
     }
+
     manager.onOutput (line);
 
-    asio::async_read_until (pipe, buffer, '\n',
-        [&](boost::system::error_code const& ec, std::size_t bytes) {
-            return asyncReadLines (manager, pipe, buffer, line, ec, bytes);
-    });
+    asio::async_read_until (
+        pipe,
+        buffer,
+        '\n',
+        strand.wrap (
+            [&](boost::system::error_code const& ec, std::size_t bytes) {
+                return asyncReadLines (
+                    manager, strand, pipe, buffer, line, ec, bytes);
+            }));
 }
 
 void
-ProcessManagerImpl::start (ProcessManager& manager)
-{
-    process.emplace (command, bp::std_in.close (), bp::std_out > outPipe,
+ProcessManagerImpl::start (ProcessManager& manager) {
+    process.emplace (command,
+                     bp::std_in.close (),
+                     bp::std_out > outPipe,
                      bp::std_err > errorPipe);
-    outLine.clear();
-    errorLine.clear();
-    // TODO: clear buffers
+    lineBuf.clear ();
 
-    asio::async_read_until (outPipe, outBuf, '\n',
-        [&](boost::system::error_code const& ec, std::size_t bytes) {
-            return asyncReadLines (manager, outPipe, outBuf, outLine, ec, bytes);
-    });
+    asio::async_read_until (
+        outPipe,
+        outBuf,
+        '\n',
+        ioStrand.wrap (
+            [&](boost::system::error_code const& ec, std::size_t bytes) {
+                return asyncReadLines (
+                    manager, ioStrand, outPipe, outBuf, lineBuf, ec, bytes);
+            }));
 
-    asio::async_read_until (errorPipe, errorBuf, '\n',
-        [&](boost::system::error_code const& ec, std::size_t bytes) {
-            return asyncReadLines (manager, errorPipe, errorBuf, errorLine, ec, bytes);
-    });
+    asio::async_read_until (
+        errorPipe,
+        errorBuf,
+        '\n',
+        ioStrand.wrap (
+            [&](boost::system::error_code const& ec, std::size_t bytes) {
+                return asyncReadLines (
+                    manager, ioStrand, errorPipe, errorBuf, lineBuf, ec, bytes);
+            }));
 }
 
-ProcessManager::ProcessManager
-(std::shared_ptr<asio::io_service> io):
-    m_io (move (io)),
-    m_impl (std::make_unique<ProcessManagerImpl>(*m_io))
-{
+ProcessManager::ProcessManager (std::shared_ptr<asio::io_service> io)
+    : m_io (move (io)), m_impl (std::make_unique<ProcessManagerImpl> (*m_io)) {
 }
 
-ProcessManager::~ProcessManager() noexcept
-{}
+ProcessManager::~ProcessManager () noexcept {
+}
 
 void
-ProcessManager::start
-(std::vector<std::string> command)
-{
+ProcessManager::start (std::vector<std::string> command) {
+    std::unique_lock<std::mutex> lock (m_impl->mtx);
     if (m_impl->process) {
-        throw std::logic_error ("ProcessManager::start() called while process is running");
+        throw std::logic_error (
+            "ProcessManager::start() called while process is running");
     }
 
     m_impl->command = move (command);
@@ -99,7 +111,7 @@ ProcessManager::start
 }
 
 bool
-ProcessManager::awaitingExit() const noexcept
-{
-    return m_impl->awaitingExit; // note: not thread safe
+ProcessManager::awaitingExit () const noexcept {
+    std::unique_lock<std::mutex> lock (m_impl->mtx);
+    return m_impl->awaitingExit;
 }
