@@ -15,7 +15,6 @@ class ProcessManager final
 public:
     explicit ProcessManager (std::shared_ptr<asio::io_service> io
                                 = std::make_shared<asio::io_service>());
-
     ~ProcessManager() noexcept;
     ProcessManager (ProcessManager const&) = delete;
     ProcessManager& operator= (ProcessManager const&) = delete;
@@ -23,13 +22,16 @@ public:
     void start (std::vector<std::string> command);
     bool awaitingExit() const noexcept;
 
+    void run() { m_io->run(); }
+    auto ioService() const noexcept { return m_io; }
+
 public:
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
 
-    signal<void()> onUnexpectedExit;
     signal<void()> onExit;
-    signal<void(std::string, bool)> onOutput;
+    signal<void()> onUnexpectedExit;
+    signal<void(std::string)> onOutput;
 
 private:
     std::shared_ptr<asio::io_service> m_io;

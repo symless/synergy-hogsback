@@ -19,10 +19,10 @@ public:
     void start (ProcessManager& manager);
 
     // TODO: add locking
-
+    // TODO: put both pipes on the same asio strand & share the line buffer
     bp::async_pipe outPipe;
     asio::streambuf outBuf;
-    std::string line;
+    std::string outLine;
 
     bp::async_pipe errorPipe;
     asio::streambuf errorBuf;
@@ -48,7 +48,7 @@ asyncReadLines (ProcessManager& manager,
         }
         return;
     }
-    manager.onOutput (line, false);
+    manager.onOutput (line);
 
     asio::async_read_until (pipe, buffer, '\n',
         [&](boost::system::error_code const& ec, std::size_t bytes) {
@@ -61,15 +61,18 @@ ProcessManagerImpl::start (ProcessManager& manager)
 {
     process.emplace (command, bp::std_in.close (), bp::std_out > outPipe,
                      bp::std_err > errorPipe);
+    outLine.clear();
+    errorLine.clear();
+    // TODO: clear buffers
 
     asio::async_read_until (outPipe, outBuf, '\n',
         [&](boost::system::error_code const& ec, std::size_t bytes) {
-            return asyncReadLines (manager, outPipe, outBuf, line, ec, bytes);
+            return asyncReadLines (manager, outPipe, outBuf, outLine, ec, bytes);
     });
 
     asio::async_read_until (errorPipe, errorBuf, '\n',
         [&](boost::system::error_code const& ec, std::size_t bytes) {
-            return asyncReadLines (manager, outPipe, outBuf, line, ec, bytes);
+            return asyncReadLines (manager, errorPipe, errorBuf, errorLine, ec, bytes);
     });
 }
 
