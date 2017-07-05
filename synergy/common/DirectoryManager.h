@@ -11,8 +11,8 @@ public:
     virtual std::string systemAppDir() = 0;
 
 protected:
-    DirectoryManager();
-     ~DirectoryManager();
+    DirectoryManager() {};
+     ~DirectoryManager() {};
 
 private:
     static DirectoryManager* s_instances;

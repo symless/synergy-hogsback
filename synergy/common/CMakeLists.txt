@@ -9,6 +9,7 @@ elseif (UNIX)
 endif()
 
 set (COMMON_LIB_SOURCES
+    ConfigParser.cpp
     GlobalConfig.cpp
     UserConfig.cpp
     DirectoryManager.cpp
@@ -17,6 +18,7 @@ set (COMMON_LIB_SOURCES
 
 include_directories (
     ${Boost_INCLUDE_DIRS}
+    ../../third_party/cpptoml/include
 )
 
 add_library (commonlib ${COMMON_LIB_SOURCES})
