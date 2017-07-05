@@ -20,6 +20,14 @@ struct value_extractor<T> {
     }
 };
 
+template <typename... Types>
+struct value_extractor<boost::detail::variant::void_, Types...> {
+	bool
+	operator() (cpptoml::base const& base, ConfigParser::value_type& value) const {
+		return false;
+	}
+};
+
 template <typename T, typename... Types>
 struct value_extractor {
     bool
