@@ -5,10 +5,13 @@
 
 #include <string>
 
-class MSWindowsDirectoryManager : public DirectoryManager
+class MSWindowsDirectoryManager final : public DirectoryManager
 {
 public:
+    std::string userDir();
     std::string systemAppDir();
+    std::string installedDir();
+    std::string profileDir();
 };
 
 #endif // COMMONMSWINDOWSDIRECTORYMANAGER_H

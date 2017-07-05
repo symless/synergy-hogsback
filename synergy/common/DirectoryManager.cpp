@@ -9,7 +9,8 @@
 #endif
 DirectoryManager* DirectoryManager::s_instances = NULL;
 
-DirectoryManager* DirectoryManager::instance()
+DirectoryManager*
+DirectoryManager::instance()
 {
     if (s_instances == NULL) {
 #if SYSAPI_WIN32
@@ -17,9 +18,19 @@ DirectoryManager* DirectoryManager::instance()
 #else
         s_instances = new OSXDirectoryManager();
 #endif
-
-        return s_instances;
     }
 
     return s_instances;
+}
+
+std::string
+DirectoryManager::userDir()
+{
+    const char* userDir = getenv("HOME");
+
+    if (userDir) {
+        return userDir;
+    }
+
+    return "/";
 }

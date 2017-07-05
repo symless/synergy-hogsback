@@ -5,10 +5,12 @@
 
 #include <string>
 
-class OSXDirectoryManager : public DirectoryManager
+class OSXDirectoryManager final : public DirectoryManager
 {
 public:
     std::string systemAppDir();
+    std::string installedDir();
+    std::string profileDir();
 };
 
 #endif // COMMONDOSXIRECTORYMANAGER_H
