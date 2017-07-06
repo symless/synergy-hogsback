@@ -10,7 +10,7 @@ main (int argc, char* argv[]) {
         std::cout << line << std::endl;
     });
 
-    processManager.start ({DirectoryManager::instance()->installedDir().append("/synergyc.exe"), "-f", "--debug", "DEBUG2", "192.168.3.30"});
+    processManager.start ({DirectoryManager::instance()->installedDir().append("/synergyc"), "-f", "--debug", "DEBUG2", "192.168.3.30"});
     processManager.run();
 
     return 0;
