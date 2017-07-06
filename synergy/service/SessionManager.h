@@ -15,12 +15,12 @@ private:
 
     void loop() {
         while (true) {
-            sleep(1);
-            auto sessionId = getSessionId();
-            if (m_currentSessionId != sessionId) {
-                m_currentSessionId = sessionId;
-                sessionChanged (m_currentSessionId);
-            }
+//            sleep(1);
+//            auto sessionId = getSessionId();
+//            if (m_currentSessionId != sessionId) {
+//                m_currentSessionId = sessionId;
+//                sessionChanged (m_currentSessionId);
+//            }
         }
     }
 };
