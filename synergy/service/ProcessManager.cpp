@@ -91,8 +91,14 @@ ProcessManagerImpl::start (ProcessManager& manager) {
             }));
 }
 
+template <typename T, typename... Args> static inline
+std::unique_ptr<T>
+make_unique (Args&&... args) {
+    return std::unique_ptr<T>(new T (std::forward<Args>(args)...));
+}
+
 ProcessManager::ProcessManager (std::shared_ptr<asio::io_service> io)
-    : m_io (move (io)), m_impl (std::make_unique<ProcessManagerImpl> (*m_io)) {
+    : m_io (move (io)), m_impl (make_unique<ProcessManagerImpl> (*m_io)) {
 }
 
 ProcessManager::~ProcessManager () noexcept {
