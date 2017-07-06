@@ -1,3 +1,4 @@
+#include "synergy/common/DirectoryManager.h"
 #include <synergy/service/ProcessManager.h>
 #include <iostream>
 
@@ -9,7 +10,7 @@ main (int argc, char* argv[]) {
         std::cout << line << std::endl;
     });
 
-    processManager.start ({"synergyc", "-f", "--debug", "DEBUG2", "192.168.3.30"});
+    processManager.start ({DirectoryManager::instance()->installedDir().append("/synergyc.exe"), "-f", "--debug", "DEBUG2", "192.168.3.30"});
     processManager.run();
 
     return 0;
