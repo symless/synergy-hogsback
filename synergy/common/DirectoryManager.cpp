@@ -2,23 +2,26 @@
 
 #include <cstdlib>
 
-#if SYSAPI_WIN32
+#ifdef _WIN32
 #include "MSWindowsDirectoryManager.h"
-#elif WINAPI_XWINDOWS
-#include "XWindowsDirectoryManager.h"
-#else
+#elif __APPLE__
 #include "OSXDirectoryManager.h"
+#else
+#include "XWindowsDirectoryManager.h"
 #endif
+
 DirectoryManager* DirectoryManager::s_instances = NULL;
 
 DirectoryManager*
 DirectoryManager::instance()
 {
     if (s_instances == NULL) {
-#if SYSAPI_WIN32
-#elif WINAPI_XWINDOWS
-#else
+#ifdef _WIN32
+        s_instances = new MSWindowsDirectoryManager();
+#elif __APPLE__
         s_instances = new OSXDirectoryManager();
+#else
+        s_instances = new XWindowsDirectoryManager();
 #endif
     }
 
