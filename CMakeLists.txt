@@ -73,6 +73,19 @@ include_directories (BEFORE SYSTEM third_party/libzmq/include)
 include_directories (BEFORE SYSTEM third_party/cppzmq)
 
 #
+# Msgpack
+#
+set (Msgpack_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/msgpack-c/include")
+add_definitions (-DMSGPACK_DEFAULT_API_VERSION=1)
+include_directories (${Msgpack_INCLUDE_DIR})
+
+#
+# Websocket++
+#
+set (Websocketpp_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/websocketpp")
+include_directories (${Websocketpp_INCLUDE_DIR})
+
+#
 # Google Breakpad
 #
 if (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
