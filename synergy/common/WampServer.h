@@ -6,7 +6,8 @@
 class WampServer
 {
 public:
-    WampServer(std::string ip, int port, bool debug = false);
+    WampServer();
+    void start(std::string ip, int port, bool debug = false);
 
 private:
     boost::asio::io_service m_ioService;

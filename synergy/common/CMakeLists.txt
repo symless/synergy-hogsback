@@ -49,3 +49,4 @@ include_directories (
 )
 
 add_library (commonlib ${COMMON_LIB_SOURCES})
+target_link_libraries(commonlib bonefish)

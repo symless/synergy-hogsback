@@ -1,5 +1,14 @@
 #include "WampRouter.h"
 
+#include <bonefish/serialization/wamp_serializers.hpp>
+#include <bonefish/serialization/json_serializer.hpp>
+#include <bonefish/serialization/msgpack_serializer.hpp>
+#include <bonefish/router/wamp_router.hpp>
+#include <bonefish/router/wamp_routers.hpp>
+#include <bonefish/rawsocket/rawsocket_server.hpp>
+#include <bonefish/rawsocket/tcp_listener.hpp>
+#include <bonefish/trace/trace.hpp>
+#include <bonefish/websocket/websocket_server.hpp>
 #include <boost/asio/ip/address.hpp>
 #include <boost/bind.hpp>
 #include <signal.h>
@@ -74,12 +83,6 @@ WampRouter::shutdown()
     if (m_work.get()) {
         m_io_service.dispatch(boost::bind(&WampRouter::shutdown_handler, this));
     }
-}
-
-boost::asio::io_service&
-WampRouter::io_service()
-{
-    return m_io_service;
 }
 
 void

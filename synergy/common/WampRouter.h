@@ -2,15 +2,14 @@
 #define WAMPROUTER_H
 
 #include <boost/asio.hpp>
-#include <bonefish/serialization/wamp_serializers.hpp>
-#include <bonefish/serialization/json_serializer.hpp>
-#include <bonefish/serialization/msgpack_serializer.hpp>
-#include <bonefish/router/wamp_router.hpp>
-#include <bonefish/router/wamp_routers.hpp>
-#include <bonefish/rawsocket/rawsocket_server.hpp>
-#include <bonefish/rawsocket/tcp_listener.hpp>
-#include <bonefish/trace/trace.hpp>
-#include <bonefish/websocket/websocket_server.hpp>
+#include <boost/signals2.hpp>
+
+namespace bonefish {
+    class rawsocket_server;
+    class wamp_routers;
+    class wamp_serializers;
+    class websocket_server;
+}
 
 class WampRouter
 {
@@ -20,7 +19,8 @@ public:
 
     void run();
     void shutdown();
-    boost::asio::io_service& io_service();
+
+    boost::signals2::signal<void(bool)> ready;
 
 private:
     void shutdown_handler();

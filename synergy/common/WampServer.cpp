@@ -16,7 +16,11 @@
 namespace ip =  boost::asio::ip;
 using tcp = ip::tcp;
 
-WampServer::WampServer(std::string ip, int port, bool debug)
+WampServer::WampServer()
+{
+}
+
+void WampServer::start(std::string ip, int port, bool debug)
 {
     auto session = std::make_shared<autobahn::wamp_session>(m_ioService, debug);
     auto transport = std::make_shared<autobahn::wamp_tcp_transport>
