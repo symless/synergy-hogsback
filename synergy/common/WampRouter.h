@@ -15,7 +15,7 @@
 class WampRouter
 {
 public:
-    WampRouter();
+    WampRouter(std::string ip, int port);
     ~WampRouter();
 
     void run();

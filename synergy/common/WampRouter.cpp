@@ -7,7 +7,7 @@
 
 using namespace bonefish;
 
-WampRouter::WampRouter()
+WampRouter::WampRouter(std::string ip, int port)
     : m_io_service()
     , m_work()
 #if defined(SIGQUIT)
@@ -41,7 +41,7 @@ WampRouter::WampRouter()
     m_rawsocket_server = std::make_shared<rawsocket_server>(m_routers, m_serializers);
 
     auto listener = std::make_shared<tcp_listener>(
-            m_io_service, boost::asio::ip::address(), 24888);
+            m_io_service, boost::asio::ip::address_v4::from_string(ip), port);
     m_rawsocket_server->attach_listener(std::static_pointer_cast<rawsocket_listener>(listener));
 }
 

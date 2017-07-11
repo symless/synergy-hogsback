@@ -21,7 +21,7 @@ WampServer::WampServer(std::string ip, int port, bool debug)
     auto session = std::make_shared<autobahn::wamp_session>(m_ioService, debug);
     auto transport = std::make_shared<autobahn::wamp_tcp_transport>
                         (m_ioService, tcp::endpoint
-                            (ip::address_v4::from_string("127.0.0.1"), 24888), debug);
+                            (ip::address_v4::from_string(ip), port), debug);
 
     boost::future<void> connect_future;
     boost::future<void> start_future;
