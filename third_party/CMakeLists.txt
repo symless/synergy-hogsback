@@ -34,3 +34,13 @@ set (WITH_OPENPGM OFF CACHE BOOL "ZeroMQ: Build with support for OpenPGM" FORCE)
 
 add_subdirectory (libzmq EXCLUDE_FROM_ALL)
 add_subdirectory (norm EXCLUDE_FROM_ALL)
+
+#
+# Bonefish (WAMP router)
+#
+add_subdirectory (bonefish EXCLUDE_FROM_ALL)
+
+#
+# Msgpack
+#
+add_subdirectory (msgpack-c EXCLUDE_FROM_ALL)
