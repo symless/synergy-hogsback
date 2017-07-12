@@ -25,4 +25,7 @@ target_link_libraries (gui-tests guilib
     ${ApplicationServices_LIBRARY}
     ${Foundation_LIBRARY}
     ${AppKit_LIBRARY}
+    commonlib
+    ${Boost_LIBRARIES}
+    ${CMAKE_THREAD_LIBS_INIT}
 )
