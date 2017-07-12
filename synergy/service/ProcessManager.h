@@ -13,8 +13,7 @@ class ProcessManagerImpl;
 class ProcessManager final
 {
 public:
-    explicit ProcessManager (std::shared_ptr<asio::io_service> io
-                                = std::make_shared<asio::io_service>());
+    explicit ProcessManager (asio::io_service& io);
     ~ProcessManager() noexcept;
     ProcessManager (ProcessManager const&) = delete;
     ProcessManager& operator= (ProcessManager const&) = delete;
@@ -22,8 +21,7 @@ public:
     void start (std::vector<std::string> command);
     bool awaitingExit() const noexcept;
 
-    void run() { m_io->run(); }
-    auto ioService() const noexcept { return m_io; }
+    auto& ioService() const noexcept { return m_mainIoService; }
 
 public:
     template <typename... Args>
@@ -34,7 +32,7 @@ public:
     signal<void(std::string)> onOutput;
 
 private:
-    std::shared_ptr<asio::io_service> m_io;
+    asio::io_service& m_mainIoService;
     std::unique_ptr<ProcessManagerImpl> m_impl;
 };
 

@@ -20,7 +20,7 @@ public:
     void run();
     void shutdown();
 
-    boost::signals2::signal<void(bool)> ready;
+    boost::signals2::signal<void()> ready;
 
 private:
     void shutdown_handler();

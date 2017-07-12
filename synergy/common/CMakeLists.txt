@@ -13,6 +13,7 @@ set (COMMON_LIB_SOURCES
     GlobalConfig.cpp
     UserConfig.cpp
     DirectoryManager.cpp
+    RpcManager.cpp
     WampServer.cpp
     WampClient.cpp
     WampRouter.cpp

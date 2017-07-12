@@ -97,8 +97,8 @@ make_unique (Args&&... args) {
     return std::unique_ptr<T>(new T (std::forward<Args>(args)...));
 }
 
-ProcessManager::ProcessManager (std::shared_ptr<asio::io_service> io)
-    : m_io (move (io)), m_impl (make_unique<ProcessManagerImpl> (*m_io)) {
+ProcessManager::ProcessManager (asio::io_service &io)
+    : m_mainIoService (io), m_impl (make_unique<ProcessManagerImpl> (m_mainIoService)) {
 }
 
 ProcessManager::~ProcessManager () noexcept {

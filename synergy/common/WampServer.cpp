@@ -20,11 +20,11 @@ WampServer::WampServer()
 {
 }
 
-void WampServer::start(std::string ip, int port, bool debug)
+void WampServer::start(boost::asio::io_service& io, std::string ip, int port, bool debug)
 {
-    auto session = std::make_shared<autobahn::wamp_session>(m_ioService, debug);
+    auto session = std::make_shared<autobahn::wamp_session>(io, debug);
     auto transport = std::make_shared<autobahn::wamp_tcp_transport>
-                        (m_ioService, tcp::endpoint
+                        (io, tcp::endpoint
                             (ip::address_v4::from_string(ip), port), debug);
 
     boost::future<void> connect_future;
@@ -47,7 +47,7 @@ void WampServer::start(std::string ip, int port, bool debug)
             started.get();
         } catch (const std::exception& e) {
             std::cerr << e.what() << std::endl;
-            m_ioService.stop();
+            io.stop();
             return;
         }
 
@@ -58,35 +58,21 @@ void WampServer::start(std::string ip, int port, bool debug)
                 std::cerr << "joined realm: " << joined.get() << std::endl;
             } catch (const std::exception& e) {
                 std::cerr << e.what() << std::endl;
-                m_ioService.stop();
+                io.stop();
                 return;
             }
 
-//            provide_future_add = session->provide("com.examples.calculator.add2", &add2).then(
-//                [&](boost::future<autobahn::wamp_registration> registration) {
-//                try {
-//                    std::cerr << "registered procedure:" << registration.get().id() << std::endl;
-//                } catch (const std::exception& e) {
-//                    std::cerr << e.what() << std::endl;
-//                    io.stop();
-//                    return;
-//                }
-//            });
-
-            provide_future_add = session->provide ("add", [](autobahn::wamp_invocation invocation) {
-               auto a = invocation->argument<uint64_t>(0);
-               auto b = invocation->argument<uint64_t>(1);
-
-               std::cerr << "Procedure add invoked: " << a << ", " << b << std::endl;
-
-               invocation->result(std::make_tuple(a + b));
+            provide_future_add = session->provide ("startCore", [this](autobahn::wamp_invocation invocation) {
+               auto args = invocation->arguments<std::vector<std::string>>();
+               startCore(args);
+               invocation->empty_result();
             }).then(
                 [&](boost::future<autobahn::wamp_registration> registration) {
                 try {
                     std::cerr << "registered procedure:" << registration.get().id() << std::endl;
                 } catch (const std::exception& e) {
                     std::cerr << e.what() << std::endl;
-                    m_ioService.stop();
+                    io.stop();
                     return;
                 }
             });
@@ -95,5 +81,5 @@ void WampServer::start(std::string ip, int port, bool debug)
         });
     });
 
-    m_ioService.run();
+    io.run();
 }

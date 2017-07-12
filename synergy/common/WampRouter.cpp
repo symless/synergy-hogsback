@@ -74,6 +74,7 @@ WampRouter::run()
         m_websocket_server->start(boost::asio::ip::address(), m_websocket_port);
     }
 
+    ready();
     m_io_service.run();
 }
 
