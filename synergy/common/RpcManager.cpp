@@ -16,7 +16,6 @@ RpcManager::RpcManager(boost::asio::io_service& ioService) :
 RpcManager::~RpcManager()
 {
     m_routerThread.join();
-
 }
 
 void RpcManager::initRouterAndServer()

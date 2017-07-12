@@ -43,4 +43,6 @@ if (SYNERGY_DEVELOPER_MODE)
     target_compile_definitions(guilib PRIVATE -DSYNERGY_DEVELOPER_MODE=1)
 endif()
 
+target_link_libraries(guilib commonlib)
+
 qt5_use_modules (guilib Core Widgets Quick Network Svg)

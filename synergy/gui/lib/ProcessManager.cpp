@@ -18,9 +18,19 @@ ProcessManager::ProcessManager() :
     m_process(NULL),
     m_processMode(kClientMode),
     m_active(true),
-    m_serverIp()
+    m_serverIp(),
+    m_ioService(),
+    m_rpcClient(m_ioService)
 {
     m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
+
+    // TODO: this is so hacky
+    m_routerThread = std::thread([this] () { m_rpcClient.run("127.0.0.1", 24888); });
+}
+
+ProcessManager::~ProcessManager()
+{
+    m_routerThread.join();
 }
 
 int ProcessManager::processMode()
@@ -59,7 +69,22 @@ void ProcessManager::start()
         return;
     }
 
-    startProcess();
+    ProcessCommand processCommand;
+    QString command = processCommand.command(
+                            m_processMode == kServerMode);
+    if (m_processMode == kClientMode) {
+        processCommand.setServerIp(m_serverIp);
+    }
+    QStringList args = processCommand.arguments(
+                            m_processMode == kServerMode);
+    std::vector<std::string> cmd;
+    cmd.push_back(command.toStdString());
+    for (auto& arg :args) {
+        cmd.push_back(arg.toStdString());
+    }
+    m_ioService.post([this, cmd] () { m_rpcClient.startCore(cmd); });
+
+    // startProcess();
 }
 
 

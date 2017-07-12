@@ -3,9 +3,13 @@
 
 #include "LibMacro.h"
 #include "ScreenStatus.h"
+#include "synergy/common/WampClient.h"
 
+#include <boost/asio.hpp>
 #include <QQuickItem>
 #include <QProcess>
+#include <thread>
+
 
 class ScreenListModel;
 class AppConfig;
@@ -19,6 +23,7 @@ public:
     Q_PROPERTY(ConnectivityTester* connectivityTester READ connectivityTester WRITE setConnectivityTester)
 
     ProcessManager();
+    ~ProcessManager();
     Q_INVOKABLE void start();
     int processMode();
     void setProcessMode(int mode);
@@ -53,6 +58,10 @@ private:
     int m_processMode;
     bool m_active;
     QString m_serverIp;
+
+    std::thread m_routerThread;
+    boost::asio::io_service m_ioService;
+    WampClient m_rpcClient;
 };
 
 #endif // PROCESSMANAGER_H
