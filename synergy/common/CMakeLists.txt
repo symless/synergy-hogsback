@@ -42,6 +42,7 @@ include_directories (
     ${Bonefish_INCLUDE_DIR}
     ${Websocketpp_INCLUDE_DIR}
     ${Cpptoml_INCLUDE_DIR}
+    ${OPENSSL_INCLUDE_DIR}
 )
 
 add_library (commonlib ${COMMON_LIB_SOURCES})
