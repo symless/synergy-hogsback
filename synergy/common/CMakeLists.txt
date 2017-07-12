@@ -29,7 +29,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     include_directories (BEFORE SYSTEM "$ENV{OPENSSL_ROOT_DIR}/include")
 endif()
 
-find_package (OpenSSL)
+find_package (OpenSSL REQUIRED)
 
 set (Autobahn_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/autobahn-cpp")
 set (Bonefish_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/bonefish/src")
