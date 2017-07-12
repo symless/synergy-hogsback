@@ -22,6 +22,7 @@ target_link_libraries (${PROJECT_NAME}
     fmt
     commonlib
     ${Boost_LIBRARIES}
+    ${CMAKE_THREAD_LIBS_INIT}
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
