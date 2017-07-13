@@ -11,6 +11,7 @@
 #include "AppConfig.h"
 #include "Hostname.h"
 #include "Common.h"
+#include <synergy/common/RpcClient.h>
 #include <DirectoryManager.h>
 #include <ProfileListModel.h>
 #include <ProfileManager.h>
@@ -21,7 +22,9 @@
 #include <stdexcept>
 #include <boost/filesystem.hpp>
 #include <iostream>
+#include <boost/asio.hpp>
 
+namespace asio = boost::asio;
 
 #if (defined(Q_OS_WIN) || defined (Q_OS_DARWIN)) && !defined (QT_DEBUG)
 // TODO: Somehow get these in to a half decent <crashpad/...> form
@@ -138,16 +141,26 @@ main(int argc, char* argv[])
     TrialValidator trialValidator;
     if (!trialValidator.isValid()) {
         QMessageBox msgBox;
-        msgBox.setText("This version is not supported anymore. Please <a href='https://www.symless.com'>download</a> the latest build.");
+        msgBox.setText("This version is not supported anymore. "
+                       "Please <a href='https://www.symless.com'>download</a> the latest build.");
         msgBox.exec();
         return 0;
     }
 
     FontManager::loadAll();
 
-    qreal dpi = QGuiApplication::primaryScreen()->physicalDotsPerInch();
-    // 72 points = 1 inch
-    qreal pixelPerPoint = dpi / 72;
+    asio::io_service ioService;
+    auto rpcWork = std::make_shared<asio::io_service::work> (ioService);
+
+    QObject::connect (&app, &QCoreApplication::aboutToQuit, [rpcWork]() mutable {
+        rpcWork.reset();
+    });
+
+    RpcClient rpcClient (ioService);
+    std::thread rpcThread ([&]{
+        rpcClient.start ("127.0.0.1", 24888);
+        ioService.run ();
+    });
 
     try {
         qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");
@@ -168,9 +181,14 @@ main(int argc, char* argv[])
         LogManager::setQmlContext(engine.rootContext());
         LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
 
+        qreal dpi = QGuiApplication::primaryScreen()->physicalDotsPerInch();
+        qreal pixelPerPoint = dpi / 72; // 72 points = 1 inch
         engine.rootContext()->setContextProperty("PixelPerPoint", pixelPerPoint);
         engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-        return app.exec();
+
+        auto ret = app.exec();
+        rpcThread.join();
+        return ret;
     }
     catch (std::runtime_error& e) {
         LogManager::error(QString("exception caught: ").arg(e.what()));

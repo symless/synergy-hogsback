@@ -10,10 +10,10 @@
 #include <QProcess>
 #include <thread>
 
-
 class ScreenListModel;
 class AppConfig;
 class ConnectivityTester;
+class RpcClient;
 
 class LIB_SPEC ProcessManager : public QQuickItem
 {
@@ -22,7 +22,7 @@ class LIB_SPEC ProcessManager : public QQuickItem
 public:
     Q_PROPERTY(ConnectivityTester* connectivityTester READ connectivityTester WRITE setConnectivityTester)
 
-    ProcessManager();
+    ProcessManager(RpcClient& rpcClient);
     ~ProcessManager();
     Q_INVOKABLE void start();
     int processMode();
@@ -59,9 +59,8 @@ private:
     bool m_active;
     QString m_serverIp;
 
-    std::thread m_routerThread;
-    boost::asio::io_service m_ioService;
-    WampClient m_rpcClient;
+    boost::asio::io_service& m_ioService;
+    RpcClient& m_rpcClient;
 };
 
 #endif // PROCESSMANAGER_H
