@@ -3,6 +3,9 @@ cmake_minimum_required (VERSION 3.4)
 
 set (SERVICE_SOURCES
     main.cpp
+    Service.cpp
+    IServiceController.cpp
+    MSWindowsServiceController.cpp
     ProcessManager.cpp
     SessionManager.cpp
 )

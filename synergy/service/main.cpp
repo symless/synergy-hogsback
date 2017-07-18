@@ -1,12 +1,19 @@
+#include "Service.h"
+
 #include "synergy/common/RpcManager.h"
 #include "synergy/common/WampRouter.h"
 #include "synergy/common/WampServer.h"
 #include "synergy/common/DirectoryManager.h"
 #include <synergy/service/ProcessManager.h>
+
 #include <iostream>
 
 int
 main (int argc, char* argv[]) {
+    Service service;
+    service.parseArg(argc, argv);
+    return service.run();
+
     boost::asio::io_service mainIoService;
 
     ProcessManager processManager(mainIoService);
