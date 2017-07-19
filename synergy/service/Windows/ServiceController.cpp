@@ -1,11 +1,12 @@
 #include "../ServiceController.h"
+#include "../ServiceWorker.h"
 
 #include <windows.h>
 #include <sstream>
 #include <string>
+#include <thread>
 #include <stdexcept>
 #include <assert.h>
-
 static char* kServiceProcessName = "synergy-service";
 static char* kServiceDisplayName = "Synergy";
 
@@ -21,6 +22,8 @@ public:
     void doRun();
     void manualInstall();
     void manualUninstall();
+
+    void setWorker(const std::shared_ptr<ServiceWorker> &worker);
 
 private:
     bool isDaemonInstalled(const char* name);
@@ -41,6 +44,8 @@ private:
 private:
     SERVICE_STATUS m_status;
     SERVICE_STATUS_HANDLE m_statusHandle;
+
+    std::shared_ptr<ServiceWorker> m_worker;
 
     static ServiceControllerImp* s_impInstance;
 };
@@ -253,7 +258,10 @@ void ServiceControllerImp::start(DWORD dwArgc, LPSTR *pszArgv)
     try {
         SetServiceStatus(SERVICE_START_PENDING);
 
-        // TODO: Use another thread to do the actual work
+        // do the actual work in another thread on Windows
+        std::thread workerThread([&, this](){
+            m_worker->start();
+        });
 
         SetServiceStatus(SERVICE_RUNNING);
     }
@@ -396,6 +404,11 @@ void ServiceControllerImp::serviceCtrlHandler(DWORD dwCtrl)
     }
 }
 
+void ServiceControllerImp::setWorker(const std::shared_ptr<ServiceWorker> &worker)
+{
+    m_worker = worker;
+}
+
 //
 // ServiceController for Windows
 //
@@ -405,6 +418,9 @@ ServiceController::ServiceController() :
     m_uninstall(false)
 {
     m_imp = std::make_unique<ServiceControllerImp>();
+    m_worker = std::make_shared<ServiceWorker>();
+
+    m_imp->setWorker(m_worker);
 }
 
 ServiceController::~ServiceController()

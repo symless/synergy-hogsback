@@ -5,6 +5,7 @@
 #include <string>
 
 class ServiceControllerImp;
+class ServiceWorker;
 
 class ServiceController
 {
@@ -42,6 +43,7 @@ public:
 
 protected:
     std::unique_ptr<ServiceControllerImp> m_imp;
+    std::shared_ptr<ServiceWorker> m_worker;
     bool m_install;
     bool m_uninstall;
 };

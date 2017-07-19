@@ -13,6 +13,7 @@ set (SERVICE_SOURCES
     main.cpp
     ProcessManager.cpp
     SessionManager.cpp
+    ServiceWorker.cpp
     ${platform_sources}
 )
 
