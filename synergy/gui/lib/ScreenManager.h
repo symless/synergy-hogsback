@@ -62,7 +62,7 @@ private slots:
 
 private:
     ScreenListModel* m_screenListModel;
-    ProcessManager* m_processManager;
+    ProcessManager* m_processManager = nullptr;
     IScreenArrangement* m_arrangementStrategy;
     ScreenListSnapshotManager* m_screenListSnapshotManager;
     AppConfig* m_appConfig;

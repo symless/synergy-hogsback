@@ -60,11 +60,28 @@ endif()
 # Non-CMake Dependencies
 #
 
+#
+# OpenSSL
+#
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    set (OPENSSL_ROOT "${CMAKE_SOURCE_DIR}/synergy/core/ext/openssl/windows")
+    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set (ENV{OPENSSL_ROOT_DIR} "${OPENSSL_ROOT}/x64")
+    else()
+        set (ENV{OPENSSL_ROOT_DIR} "${OPENSSL_ROOT}/x86")
+    endif()
+endif()
+
+find_package (OpenSSL REQUIRED)
+include_directories (${OPENSSL_INCLUDE_DIR})
+
+#
 # libsodium
 #
 find_package (Sodium REQUIRED)
 find_package (Threads REQUIRED)
 
+#
 # ZeroMQ
 #
 add_definitions (-DZMQ_STATIC)
@@ -98,8 +115,22 @@ endif()
 set (Boost_USE_STATIC_LIBS ON)
 set (Boost_USE_STATIC_RUNTIME OFF)
 set (Boost_USE_MULTITHREADED ON)
-find_package (Boost 1.55 REQUIRED COMPONENTS system date_time filesystem regex thread chrono)
+find_package (Boost 1.55 REQUIRED COMPONENTS system date_time filesystem regex
+                                             thread chrono)
 include_directories(${Boost_INCLUDE_DIRS})
+
+# Enable exerimental executor support for boost::future etc
+add_definitions (-DBOOST_THREAD_PROVIDES_EXECUTORS)
+
+#
+# Websocket++
+set (Websocketpp_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/websocketpp")
+include_directories(${Websocketpp_INCLUDE_DIR})
+
+#
+# Autobahn
+set (Autobahn_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/autobahn-cpp")
+include_directories(${Autobahn_INCLUDE_DIR})
 
 #
 # CMake Dependencies

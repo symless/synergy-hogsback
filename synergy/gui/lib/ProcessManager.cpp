@@ -6,6 +6,7 @@
 #include "LogManager.h"
 #include "ProcessMode.h"
 #include "AppConfig.h"
+#include <synergy/common/RpcClient.h>
 
 #include <QtNetwork>
 #include <QtGlobal>
@@ -14,23 +15,23 @@
 #include <unistd.h>
 #endif
 
-ProcessManager::ProcessManager() :
+ProcessManager::ProcessManager() {
+    /* QML registered types must be default constructible. This is a hack */
+    throw std::runtime_error ("Default constructed process manager used");
+}
+
+ProcessManager::ProcessManager(RpcClient& rpcClient) :
     m_process(NULL),
     m_processMode(kClientMode),
     m_active(true),
     m_serverIp(),
-    m_ioService(),
-    m_rpcClient(m_ioService)
+    m_rpcClient(std::shared_ptr<void>(), &rpcClient)
 {
     m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
-
-    // TODO: this is so hacky
-    m_routerThread = std::thread([this] () { m_rpcClient.run("127.0.0.1", 24888); });
 }
 
 ProcessManager::~ProcessManager()
 {
-    m_routerThread.join();
 }
 
 int ProcessManager::processMode()
@@ -82,8 +83,8 @@ void ProcessManager::start()
     for (auto& arg :args) {
         cmd.push_back(arg.toStdString());
     }
-    m_ioService.post([this, cmd] () { m_rpcClient.startCore(cmd); });
 
+    m_rpcClient->call<void> ("startCore", cmd);
     // startProcess();
 }
 
