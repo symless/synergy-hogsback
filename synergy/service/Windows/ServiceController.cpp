@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <sstream>
 #include <string>
+#include <stdexcept>
 #include <assert.h>
 
 static char* kServiceProcessName = "synergy-service";
@@ -78,11 +79,9 @@ void ServiceControllerImp::manualInstall()
         pathStrStream << path;
         pathStrStream << '"';
 
-        // TODO: throw with error message
         SC_HANDLE manager = OpenSCManager(NULL, NULL, GENERIC_WRITE);
         if (manager == NULL) {
-            // can't open service manager
-            throw;
+            throw std::runtime_error("can't open service manager for installing");
         }
 
         // create the service
@@ -106,15 +105,18 @@ void ServiceControllerImp::manualInstall()
             DWORD err = GetLastError();
             if (err != ERROR_SERVICE_EXISTS) {
                 CloseServiceHandle(manager);
-                throw;
+
+                std::ostringstream stream;
+                stream << err;
+                std::string errorMsg("can't create a service, error code: ");
+                errorMsg += stream.str();
+                throw std::runtime_error(errorMsg.c_str());
             }
         }
         else {
-            // done with service (but only try to close if not null)
             CloseServiceHandle(service);
         }
 
-        // done with manager
         CloseServiceHandle(manager);
     }
 
@@ -123,12 +125,10 @@ void ServiceControllerImp::manualInstall()
 
 void ServiceControllerImp::manualUninstall()
 {
-    // TODO: throw with error message
     // open service manager
     SC_HANDLE manager = OpenSCManager(NULL, NULL, GENERIC_WRITE);
     if (manager == NULL) {
-        // can't open service manager
-        throw;
+        throw std::runtime_error("can't open service manager for uninstalling");
     }
 
     SC_HANDLE service = OpenService(manager, kServiceDisplayName, SERVICE_STOP |
@@ -137,9 +137,13 @@ void ServiceControllerImp::manualUninstall()
         DWORD err = GetLastError();
         CloseServiceHandle(manager);
         if (err != ERROR_SERVICE_DOES_NOT_EXIST) {
-            throw;
+            std::ostringstream stream;
+            stream << err;
+            std::string errorMsg("can't uninstall a service, error code: ");
+            errorMsg += stream.str();
+            throw std::runtime_error(errorMsg.c_str());
         }
-        throw;
+        throw std::runtime_error("trying to uninstall a non-existent service");
     }
 
     // Try to stop the service
@@ -155,12 +159,18 @@ void ServiceControllerImp::manualUninstall()
         }
 
         if (ssSvcStatus.dwCurrentState != SERVICE_STOPPED) {
-            throw;
+            CloseServiceHandle(service);
+            CloseServiceHandle(manager);
+
+            throw std::runtime_error("can't stop a service");
         }
     }
 
     if (!DeleteService(service)) {
-        throw;
+        CloseServiceHandle(service);
+        CloseServiceHandle(manager);
+
+        throw std::runtime_error("can't delete a service");
     }
 
     // clean up
@@ -190,11 +200,10 @@ bool ServiceControllerImp::isDaemonInstalled(const char *name)
 
 void ServiceControllerImp::manualStart(const char *name)
 {
-    // TODO: throw with error message
     // open service manager
     SC_HANDLE manager = OpenSCManager(NULL, NULL, GENERIC_READ);
     if (manager == NULL) {
-        throw;
+        throw std::runtime_error("can't open service manager for starting a service");
     }
 
     // open the service
@@ -202,13 +211,19 @@ void ServiceControllerImp::manualStart(const char *name)
         manager, name, SERVICE_START);
 
     if (service == NULL) {
+        DWORD err = GetLastError();
         CloseServiceHandle(manager);
-        throw;
+
+        std::ostringstream stream;
+        stream << err;
+        std::string errorMsg("can't open a service, error code: ");
+        errorMsg += stream.str();
+        throw std::runtime_error(errorMsg.c_str());
     }
 
     // start the service
     if (!StartService(service, 0, NULL)) {
-        throw;
+        throw std::runtime_error("can't start a service");
     }
 }
 
