@@ -11,7 +11,14 @@ int
 main (int argc, char* argv[]) {
     ServiceController serviceontroller;
     serviceontroller.parseArg(argc, argv);
-    return serviceontroller.run();
+    try {
+        serviceontroller.run();
+    }
+    catch (...) {
+        return 1;
+    }
+
+    return 0;
 
     boost::asio::io_service mainIoService;
 
