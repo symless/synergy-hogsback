@@ -25,17 +25,21 @@ public:
 private:
     bool isDaemonInstalled(const char* name);
     void manualStart(const char* name);
+    void SetServiceStatus(DWORD currentState,
+            DWORD win32ExitCode = NO_ERROR,
+            DWORD waitHint = 0);
 
     void start(DWORD dwArgc, LPSTR *pszArgv);
-    void stop() {}
-    void pause() {}
-    void resume() {}
-    void shutdown() {}
+    void stop();
+    void pause();
+    void resume();
+    void shutdown();
 
     static void WINAPI serviceMain(DWORD dwArgc, LPSTR *pszArgv);
     static void WINAPI serviceCtrlHandler(DWORD dwCtrl);
 
 private:
+    SERVICE_STATUS m_status;
     SERVICE_STATUS_HANDLE m_statusHandle;
 
     static ServiceControllerImp* s_impInstance;
@@ -227,9 +231,141 @@ void ServiceControllerImp::manualStart(const char *name)
     }
 }
 
+void ServiceControllerImp::SetServiceStatus(DWORD currentState, DWORD win32ExitCode, DWORD waitHint)
+{
+    static DWORD checkPoint = 1;
+
+    m_status.dwCurrentState = currentState;
+    m_status.dwWin32ExitCode = win32ExitCode;
+    m_status.dwWaitHint = waitHint;
+
+    m_status.dwCheckPoint =
+        ((currentState == SERVICE_RUNNING) ||
+        (currentState == SERVICE_STOPPED)) ?
+        0 : checkPoint++;
+
+    // Report the status of the service to the SCM.
+    ::SetServiceStatus(m_statusHandle, &m_status);
+}
+
 void ServiceControllerImp::start(DWORD dwArgc, LPSTR *pszArgv)
 {
-    // TODO: Use another thread to do the actual work
+    try {
+        SetServiceStatus(SERVICE_START_PENDING);
+
+        // TODO: Use another thread to do the actual work
+
+        SetServiceStatus(SERVICE_RUNNING);
+    }
+    catch (DWORD err) {
+        SetServiceStatus(SERVICE_STOPPED, err);
+
+        std::ostringstream stream;
+        stream << err;
+        std::string errorMsg("service failed to start, error code: ");
+        errorMsg += stream.str();
+        throw std::runtime_error(errorMsg.c_str());
+    }
+    catch (...) {
+        SetServiceStatus(SERVICE_STOPPED);
+
+        throw std::runtime_error("service failed to start");
+    }
+}
+
+void ServiceControllerImp::stop()
+{
+    DWORD originalState = m_status.dwCurrentState;
+    try {
+        SetServiceStatus(SERVICE_STOP_PENDING);
+
+        // TODO: Notify the worker to stop
+
+        SetServiceStatus(SERVICE_STOPPED);
+    }
+    catch (DWORD err) {
+        SetServiceStatus(originalState);
+
+        std::ostringstream stream;
+        stream << err;
+        std::string errorMsg("service failed to stop, error code: ");
+        errorMsg += stream.str();
+        throw std::runtime_error(errorMsg.c_str());
+    }
+    catch (...) {
+        SetServiceStatus(originalState);
+
+        throw std::runtime_error("service failed to stop");
+    }
+}
+
+void ServiceControllerImp::pause()
+{
+    try {
+        SetServiceStatus(SERVICE_PAUSE_PENDING);
+
+        // TODO: Notify the worker to pause
+
+        SetServiceStatus(SERVICE_PAUSED);
+    }
+    catch (DWORD err) {
+        SetServiceStatus(SERVICE_RUNNING, err);
+
+        std::ostringstream stream;
+        stream << err;
+        std::string errorMsg("service failed to pause, error code: ");
+        errorMsg += stream.str();
+        throw std::runtime_error(errorMsg.c_str());
+    }
+    catch (...) {
+        SetServiceStatus(SERVICE_RUNNING);
+
+        throw std::runtime_error("service failed to pause");
+    }
+}
+
+void ServiceControllerImp::resume()
+{
+    try {
+        SetServiceStatus(SERVICE_CONTINUE_PENDING);
+
+        // TODO: Notify the worker to resume
+
+        SetServiceStatus(SERVICE_RUNNING);
+    }
+    catch (DWORD err) {
+        SetServiceStatus(SERVICE_PAUSED, err);
+
+        std::ostringstream stream;
+        stream << err;
+        std::string errorMsg("service failed to resume, error code: ");
+        errorMsg += stream.str();
+        throw std::runtime_error(errorMsg.c_str());
+    }
+    catch (...) {
+        SetServiceStatus(SERVICE_PAUSED);
+
+        throw std::runtime_error("service failed to resume");
+    }
+}
+
+void ServiceControllerImp::shutdown()
+{
+    try {
+        // TODO: Notify the worker to shutdown
+
+        SetServiceStatus(SERVICE_STOPPED);
+    }
+    catch (DWORD err) {
+        std::ostringstream stream;
+        stream << err;
+        std::string errorMsg("service failed to shut down, error code: ");
+        errorMsg += stream.str();
+        throw std::runtime_error(errorMsg.c_str());
+    }
+    catch (...) {
+        throw std::runtime_error("service failed to shut down");
+    }
 }
 
 void ServiceControllerImp::serviceMain(DWORD dwArgc, LPSTR *pszArgv)
