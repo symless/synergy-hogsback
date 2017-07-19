@@ -15,13 +15,17 @@
 #include <unistd.h>
 #endif
 
+ProcessManager::ProcessManager() {
+    /* QML registered types must be default constructible. This is a hack */
+    throw std::runtime_error ("Default constructed process manager used");
+}
+
 ProcessManager::ProcessManager(RpcClient& rpcClient) :
     m_process(NULL),
     m_processMode(kClientMode),
     m_active(true),
     m_serverIp(),
-    m_ioService(rpcClient.getIoService()),
-    m_rpcClient(rpcClient)
+    m_rpcClient(std::shared_ptr<void>(), &rpcClient)
 {
     m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
 }
@@ -80,7 +84,7 @@ void ProcessManager::start()
         cmd.push_back(arg.toStdString());
     }
 
-    m_rpcClient.call<void> ("startCore", cmd);
+    m_rpcClient->call<void> ("startCore", cmd);
     // startProcess();
 }
 

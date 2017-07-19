@@ -12,6 +12,7 @@ ApplicationWindow {
     minimumHeight: dp(450)
     title: qsTr("Synergy")
     signal keyReceived(int key)
+    property ProcessManager processManager: rpcProcessManager
 
     function dp(v) {
         return v * PixelPerPoint;

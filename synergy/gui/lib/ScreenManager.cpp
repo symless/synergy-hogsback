@@ -92,12 +92,12 @@ void ScreenManager::setProcessManager(ProcessManager* processManager)
 {
     m_processManager = processManager;
 
-    connect(this, &ScreenManager::newServer, m_processManager,
-        &ProcessManager::newServerDetected);
-    connect(m_processManager, &ProcessManager::screenStatusChanged, this,
-        &ScreenManager::onScreenStatusChanged);
-    connect(m_processManager, &ProcessManager::localInputDetected, this,
-            &ScreenManager::onLocalInputDetected);
+    connect(this, &ScreenManager::newServer,
+            m_processManager, &ProcessManager::newServerDetected);
+    connect(m_processManager, &ProcessManager::screenStatusChanged,
+            this, &ScreenManager::onScreenStatusChanged);
+    connect(m_processManager, &ProcessManager::localInputDetected,
+            this, &ScreenManager::onLocalInputDetected);
 }
 
 void ScreenManager::setViewWidth(int w)

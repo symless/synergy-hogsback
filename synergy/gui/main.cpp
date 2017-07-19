@@ -129,8 +129,8 @@ main(int argc, char* argv[])
     QCoreApplication::setOrganizationDomain ("https://symless.com/");
     QCoreApplication::setApplicationName ("Synergy");
 
-    /* This must be started after QApplication is constructed, because it
-     * depends on file paths that are unavailable until then */
+    /* The crash handler must be started after QApplication is constructed,
+     * because it depends on file paths that are unavailable until then. */
     QApplication app(argc, argv);
     startCrashHandler();
 
@@ -149,18 +149,20 @@ main(int argc, char* argv[])
 
     FontManager::loadAll();
 
-    asio::io_service ioService;
-    auto rpcWork = std::make_shared<asio::io_service::work> (ioService);
+    asio::io_service io;
+    QObject::connect (&app, &QCoreApplication::aboutToQuit,
+        [rpcWork = std::make_shared<asio::io_service::work> (io)]() mutable {
+            rpcWork.reset();
+        }
+    );
 
-    QObject::connect (&app, &QCoreApplication::aboutToQuit, [rpcWork]() mutable {
-        rpcWork.reset();
-    });
-
-    RpcClient rpcClient (ioService);
+    RpcClient rpcClient (io);
     std::thread rpcThread ([&]{
         rpcClient.start ("127.0.0.1", 24888);
-        ioService.run ();
+        io.run ();
     });
+
+    ProcessManager processManager (rpcClient);
 
     try {
         qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");
@@ -174,24 +176,29 @@ main(int argc, char* argv[])
         qmlRegisterSingletonType<ProfileManager>("com.synergy.gui", 1, 0, "ProfileManager", ProfileManager::instance);
         qmlRegisterSingletonType<AppConfig>("com.synergy.gui", 1, 0, "AppConfig", AppConfig::instance);
         qmlRegisterSingletonType<VersionManager>("com.synergy.gui", 1, 0, "VersionManager", VersionManager::instance);
-        qmlRegisterSingletonType<VersionManager>("com.synergy.gui", 1, 0, "LogManager", LogManager::instance);
+        qmlRegisterSingletonType<LogManager>("com.synergy.gui", 1, 0, "LogManager", LogManager::instance);
 
         QQmlApplicationEngine engine;
         LogManager::instance();
         LogManager::setQmlContext(engine.rootContext());
         LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
 
-        qreal dpi = QGuiApplication::primaryScreen()->physicalDotsPerInch();
-        qreal pixelPerPoint = dpi / 72; // 72 points = 1 inch
-        engine.rootContext()->setContextProperty("PixelPerPoint", pixelPerPoint);
-        engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+        engine.rootContext()->setContextProperty("PixelPerPoint",
+            QGuiApplication::primaryScreen()->physicalDotsPerInch() / 72);
 
-        auto ret = app.exec();
+        engine.rootContext()->setContextProperty
+            ("rpcProcessManager", static_cast<QObject*>(&processManager));
+
+        engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+        auto qtAppRet = app.exec();
+
+        /* The RPC thread should stop and join us when it runs out of work */
         rpcThread.join();
-        return ret;
+
+        return qtAppRet;
     }
     catch (std::runtime_error& e) {
         LogManager::error(QString("exception caught: ").arg(e.what()));
-        return 0;
+        return EXIT_FAILURE;
     }
 }

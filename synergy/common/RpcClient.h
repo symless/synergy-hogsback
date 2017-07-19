@@ -7,29 +7,28 @@
 
 class RpcClient {
 public:
-    template <typename... Args>
-    using Future = WampClient::Future<Args...>;
+    RpcClient (RpcClient const&) = delete;
+    RpcClient& operator= (RpcClient const&) = delete;
 
     template <typename... Args>
     RpcClient (Args&&... args): m_wampClient(std::forward<Args>(args)...) {}
 
-    RpcClient (RpcClient const&) = delete;
-    RpcClient& operator= (RpcClient const&) = delete;
-
     boost::asio::io_service&
-    getIoService() const noexcept {
-        return m_wampClient.getIoService();
+    get_io_service() noexcept {
+        return m_wampClient.get_io_service();
     }
 
     template <typename... Args>
-    void start (Args&&... args) {
+    decltype(auto)
+    start (Args&&... args) {
         return m_wampClient.start (std::forward<Args>(args)...);
     }
 
     template <typename R, typename... Args>
-    Future<R> call (char const* const func, Args&&... args) {
-        std::tuple<std::decay_t<Args>...> targs (std::forward<Args>(args)...);
-        return m_wampClient.call<R> (func, std::move (targs));
+    decltype(auto)
+    call (char const* const fun, Args&&... args) {
+        std::tuple<std::decay_t<Args>...> argsVal (std::forward<Args>(args)...);
+        return m_wampClient.call<R> (fun, std::move (argsVal));
     }
 
 private:

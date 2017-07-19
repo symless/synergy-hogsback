@@ -115,11 +115,15 @@ endif()
 set (Boost_USE_STATIC_LIBS ON)
 set (Boost_USE_STATIC_RUNTIME OFF)
 set (Boost_USE_MULTITHREADED ON)
-find_package (Boost 1.55 REQUIRED COMPONENTS system date_time filesystem regex thread chrono)
+find_package (Boost 1.55 REQUIRED COMPONENTS system date_time filesystem regex
+                                             thread chrono)
 include_directories(${Boost_INCLUDE_DIRS})
 
+# Enable exerimental executor support for boost::future etc
+add_definitions (-DBOOST_THREAD_PROVIDES_EXECUTORS)
+
 #
-# Websocketpp
+# Websocket++
 set (Websocketpp_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/websocketpp")
 include_directories(${Websocketpp_INCLUDE_DIR})
 

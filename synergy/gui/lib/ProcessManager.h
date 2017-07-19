@@ -9,6 +9,7 @@
 #include <QQuickItem>
 #include <QProcess>
 #include <thread>
+#include <memory>
 
 class ScreenListModel;
 class AppConfig;
@@ -22,6 +23,7 @@ class LIB_SPEC ProcessManager : public QQuickItem
 public:
     Q_PROPERTY(ConnectivityTester* connectivityTester READ connectivityTester WRITE setConnectivityTester)
 
+    ProcessManager();
     ProcessManager(RpcClient& rpcClient);
     ~ProcessManager();
     Q_INVOKABLE void start();
@@ -58,9 +60,7 @@ private:
     int m_processMode;
     bool m_active;
     QString m_serverIp;
-
-    boost::asio::io_service& m_ioService;
-    RpcClient& m_rpcClient;
+    std::shared_ptr<RpcClient> m_rpcClient;
 };
 
 #endif // PROCESSMANAGER_H
