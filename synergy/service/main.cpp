@@ -1,5 +1,4 @@
-#include "Service.h"
-
+#include "ServiceController.h"
 #include "synergy/common/RpcManager.h"
 #include "synergy/common/WampRouter.h"
 #include "synergy/common/WampServer.h"
@@ -10,9 +9,9 @@
 
 int
 main (int argc, char* argv[]) {
-    Service service;
-    service.parseArg(argc, argv);
-    return service.run();
+    ServiceController serviceontroller;
+    serviceontroller.parseArg(argc, argv);
+    return serviceontroller.run();
 
     boost::asio::io_service mainIoService;
 

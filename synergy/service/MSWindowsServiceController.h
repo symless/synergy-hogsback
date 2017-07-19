@@ -1,11 +1,11 @@
 #ifndef MSWINDOWSSERVICECONTROLLER_H
 #define MSWINDOWSSERVICECONTROLLER_H
 
-#include "IServiceController.h"
+#include "ServiceController.h"
 
 #include <windows.h>
 
-class MSWindowsServiceController : public IServiceController
+class MSWindowsServiceController : public ServiceController
 {
 public:
     MSWindowsServiceController();

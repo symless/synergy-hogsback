@@ -1,13 +1,19 @@
 project (synergyd CXX)
 cmake_minimum_required (VERSION 3.4)
 
+if (WIN32)
+    file(GLOB platform_sources "Windows/ServiceController.cpp")
+elseif (APPLE)
+    file(GLOB platform_sources "Mac/ServiceController.cpp")
+elseif (UNIX)
+    file(GLOB platform_sources "Linux/ServiceController.cpp")
+endif()
+
 set (SERVICE_SOURCES
     main.cpp
-    Service.cpp
-    IServiceController.cpp
-    MSWindowsServiceController.cpp
     ProcessManager.cpp
     SessionManager.cpp
+    ${platform_sources}
 )
 
 add_executable (${PROJECT_NAME} ${SERVICE_SOURCES})

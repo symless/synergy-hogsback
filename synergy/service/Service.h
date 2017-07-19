@@ -1,8 +1,8 @@
 #ifndef SERVICE_H
 #define SERVICE_H
 
-class IServiceController;
-class IServiceController;
+class ServiceController;
+class ServiceController;
 
 class Service
 {
@@ -14,7 +14,7 @@ public:
     void run();
 
 private:
-    IServiceController* m_controller;
+    ServiceController* m_controller;
 };
 
 #endif // SERVICE_H
