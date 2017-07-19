@@ -9,7 +9,7 @@ static char* kServiceProcessName = "synergy-service";
 static char* kServiceDisplayName = "Synergy";
 
 //
-// ServiceControllerImp
+// ServiceControllerImp for Windows
 //
 
 class ServiceControllerImp {
@@ -123,7 +123,49 @@ void ServiceControllerImp::manualInstall()
 
 void ServiceControllerImp::manualUninstall()
 {
+    // TODO: throw with error message
+    // open service manager
+    SC_HANDLE manager = OpenSCManager(NULL, NULL, GENERIC_WRITE);
+    if (manager == NULL) {
+        // can't open service manager
+        throw;
+    }
 
+    SC_HANDLE service = OpenService(manager, kServiceDisplayName, SERVICE_STOP |
+        SERVICE_QUERY_STATUS | DELETE);
+    if (service == NULL) {
+        DWORD err = GetLastError();
+        CloseServiceHandle(manager);
+        if (err != ERROR_SERVICE_DOES_NOT_EXIST) {
+            throw;
+        }
+        throw;
+    }
+
+    // Try to stop the service
+    SERVICE_STATUS ssSvcStatus = {};
+    if (ControlService(service, SERVICE_CONTROL_STOP, &ssSvcStatus)) {
+        Sleep(1000);
+
+        while (QueryServiceStatus(service, &ssSvcStatus)) {
+            if (ssSvcStatus.dwCurrentState == SERVICE_STOP_PENDING) {
+                Sleep(1000);
+            }
+            else break;
+        }
+
+        if (ssSvcStatus.dwCurrentState != SERVICE_STOPPED) {
+            throw;
+        }
+    }
+
+    if (!DeleteService(service)) {
+        throw;
+    }
+
+    // clean up
+    CloseServiceHandle(service);
+    CloseServiceHandle(manager);
 }
 
 bool ServiceControllerImp::isDaemonInstalled(const char *name)
@@ -148,12 +190,31 @@ bool ServiceControllerImp::isDaemonInstalled(const char *name)
 
 void ServiceControllerImp::manualStart(const char *name)
 {
+    // TODO: throw with error message
+    // open service manager
+    SC_HANDLE manager = OpenSCManager(NULL, NULL, GENERIC_READ);
+    if (manager == NULL) {
+        throw;
+    }
 
+    // open the service
+    SC_HANDLE service = OpenService(
+        manager, name, SERVICE_START);
+
+    if (service == NULL) {
+        CloseServiceHandle(manager);
+        throw;
+    }
+
+    // start the service
+    if (!StartService(service, 0, NULL)) {
+        throw;
+    }
 }
 
 void ServiceControllerImp::start(DWORD dwArgc, LPSTR *pszArgv)
 {
-
+    // TODO: Use another thread to do the actual work
 }
 
 void ServiceControllerImp::serviceMain(DWORD dwArgc, LPSTR *pszArgv)
@@ -185,7 +246,7 @@ void ServiceControllerImp::serviceCtrlHandler(DWORD dwCtrl)
 }
 
 //
-// ServiceController
+// ServiceController for Windows
 //
 
 ServiceController::ServiceController() :
