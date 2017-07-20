@@ -20,7 +20,7 @@ WampRouter::WampRouter(boost::asio::io_service &ioService, std::string ip, int p
     : m_ioService(ioService)
     , m_work()
 #if defined(SIGQUIT)
-    , m_termination_signals(m_io_service, SIGTERM, SIGINT, SIGQUIT)
+    , m_termination_signals(m_ioService, SIGTERM, SIGINT, SIGQUIT)
 #else
     , m_termination_signals(m_ioService, SIGTERM, SIGINT)
 #endif
