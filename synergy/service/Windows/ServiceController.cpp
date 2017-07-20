@@ -1,12 +1,11 @@
 #include "../ServiceController.h"
-#include "../ServiceWorker.h"
 
 #include <windows.h>
 #include <sstream>
 #include <string>
-#include <thread>
 #include <stdexcept>
 #include <assert.h>
+
 static char* kServiceProcessName = "synergy-service";
 static char* kServiceDisplayName = "Synergy";
 
@@ -415,10 +414,11 @@ void ServiceControllerImp::setWorker(const std::shared_ptr<ServiceWorker> &worke
 
 ServiceController::ServiceController() :
     m_install(false),
-    m_uninstall(false)
+    m_uninstall(false),
+    m_foreground(false)
 {
     m_imp = std::make_unique<ServiceControllerImp>();
-    m_worker = std::make_shared<ServiceWorker>();
+    m_worker = std::make_shared<ServiceWorker>(m_threadIoService);
 
     m_imp->setWorker(m_worker);
 }
