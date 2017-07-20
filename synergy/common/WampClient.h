@@ -15,7 +15,7 @@ template <typename R>
 struct WampCallHelper {
     static
     decltype(auto)
-    get_return_value (autobahn::wamp_call_result& result) {
+    get_return_value (autobahn::wamp_call_result const& result) {
         return result.argument<R>(0);
     }
 };
@@ -24,7 +24,7 @@ template <>
 struct WampCallHelper<void> {
     static
     void
-    get_return_value (autobahn::wamp_call_result&) {
+    get_return_value (autobahn::wamp_call_result const&) {
     }
 };
 

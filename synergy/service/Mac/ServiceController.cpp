@@ -1,6 +1,14 @@
 #include "../ServiceController.h"
 
 //
+//  ServiceControllerImp for Mac
+//
+
+class ServiceControllerImp {
+
+};
+
+//
 //  ServiceController for Mac
 //
 
