@@ -1,11 +1,14 @@
 #ifndef SERVICECONTROLLER_H
 #define SERVICECONTROLLER_H
 
+#include "synergy/service/ServiceWorker.h"
+#include "synergy/service/IOService.h"
+
+#include <thread>
 #include <memory>
 #include <string>
 
 class ServiceControllerImp;
-class ServiceWorker;
 
 class ServiceController
 {
@@ -22,6 +25,9 @@ public:
             else if (arg == "/uninstall" || arg == "--uninstall") {
                 m_uninstall = true;
             }
+            else if (arg == "/foreground" || arg == "--foreground") {
+                m_foreground = true;
+            }
         }
     }
 
@@ -32,6 +38,9 @@ public:
         else if (m_uninstall) {
             uninstall();
         }
+        else if (m_foreground) {
+            runForeground();
+        }
         else {
             doRun();
         }
@@ -40,12 +49,17 @@ public:
     void doRun();
     void install();
     void uninstall();
+    void runForeground() {
+        m_worker->start();
+    }
 
 protected:
     std::unique_ptr<ServiceControllerImp> m_imp;
     std::shared_ptr<ServiceWorker> m_worker;
     bool m_install;
     bool m_uninstall;
+    bool m_foreground;
+    boost::asio::io_service m_threadIoService;
 };
 
 #endif // SERVICECONTROLLER_H
