@@ -9,10 +9,10 @@
 
 int
 main (int argc, char* argv[]) {
-    ServiceController serviceontroller;
-    serviceontroller.parseArg(argc, argv);
+    ServiceController serviceController;
+    serviceController.parseArg(argc, argv);
     try {
-        serviceontroller.run();
+        serviceController.run();
     }
     catch (...) {
         return 1;
