@@ -3,7 +3,7 @@
 #include "WampRouter.h"
 
 #include <iostream>
-#include <autobahn/autobahn.hpp>
+#include <boost/thread/future.hpp>
 #include <bonefish/native/native_server.hpp>
 #include <bonefish/rawsocket/rawsocket_server.hpp>
 #include <bonefish/rawsocket/tcp_listener.hpp>
@@ -16,24 +16,19 @@
 namespace ip =  boost::asio::ip;
 using tcp = ip::tcp;
 
-WampServer::WampServer()
+WampServer::WampServer(boost::asio::io_service& io, std::string ip, int port, bool debug) :
+    m_executor(io)
 {
-}
-
-void WampServer::start(boost::asio::io_service& io, std::string ip, int port, bool debug)
-{
-    auto session = std::make_shared<autobahn::wamp_session>(io, debug);
-    auto transport = std::make_shared<autobahn::wamp_tcp_transport>
+    m_session = std::make_shared<autobahn::wamp_session>(io, debug);
+    m_transport = std::make_shared<autobahn::wamp_tcp_transport>
                         (io, tcp::endpoint
                             (ip::address_v4::from_string(ip), port), debug);
+    m_transport->attach (std::static_pointer_cast<autobahn::wamp_transport_handler>(m_session));
+}
 
-    boost::future<void> connect_future;
-    boost::future<void> start_future;
-    boost::future<void> join_future;
-    boost::future<void> provide_future_add;
-
-    transport->attach (std::static_pointer_cast<autobahn::wamp_transport_handler>(session));
-    connect_future = transport->connect().then ([&](boost::future<void> connected) {
+void WampServer::start()
+{
+    boost::future<void> connect_future = m_transport->connect().then (m_executor, [&](boost::future<void> connected) {
         try {
             connected.get();
         } catch (const std::exception& e) {
@@ -42,37 +37,38 @@ void WampServer::start(boost::asio::io_service& io, std::string ip, int port, bo
         }
         std::cout << "Connected!" << std::endl;
 
-        start_future = session->start().then([&](boost::future<void> started) {
+        boost::future<void> start_future = m_session->start().then(m_executor, [&](boost::future<void> started) {
         try {
             started.get();
         } catch (const std::exception& e) {
             std::cerr << e.what() << std::endl;
-            io.stop();
+            //io.stop();
             return;
         }
 
         std::cerr << "session started" << std::endl;
 
-        join_future = session->join("default").then([&](boost::future<uint64_t> joined) {
+        boost::future<void> join_future = m_session->join("default").then(m_executor, [&](boost::future<uint64_t> joined) {
             try {
                 std::cerr << "joined realm: " << joined.get() << std::endl;
             } catch (const std::exception& e) {
                 std::cerr << e.what() << std::endl;
-                io.stop();
+                //io.stop();
                 return;
             }
 
-            provide_future_add = session->provide ("startCore", [this](autobahn::wamp_invocation invocation) {
+            boost::future<void> provide_future_add = m_session->provide ("startCore", [this](autobahn::wamp_invocation invocation) {
                auto args = invocation->arguments<std::vector<std::string>>();
                startCore(args);
                invocation->empty_result();
             }).then(
+                m_executor,
                 [&](boost::future<autobahn::wamp_registration> registration) {
                 try {
                     std::cerr << "registered procedure:" << registration.get().id() << std::endl;
                 } catch (const std::exception& e) {
                     std::cerr << e.what() << std::endl;
-                    io.stop();
+                    //io.stop();
                     return;
                 }
             });
@@ -80,6 +76,4 @@ void WampServer::start(boost::asio::io_service& io, std::string ip, int port, bo
             });
         });
     });
-
-    io.run();
 }

@@ -2,6 +2,7 @@
 #define WAMPCLIENT_H
 
 #include <autobahn/autobahn.hpp>
+// NOTE: AsioExecutor has to be included after autobahn
 #include <synergy/common/AsioExecutor.h>
 #include <boost/asio.hpp>
 #include <boost/thread/future.hpp>
