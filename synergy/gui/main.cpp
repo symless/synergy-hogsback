@@ -163,6 +163,8 @@ main(int argc, char* argv[])
     });
 
     ProcessManager processManager (rpcClient);
+    ConnectivityTester tester;
+    processManager.setConnectivityTester(&tester);
 
     try {
         qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");
@@ -170,7 +172,6 @@ main(int argc, char* argv[])
         qmlRegisterType<ScreenManager>("com.synergy.gui", 1, 0, "ScreenManager");
         qmlRegisterType<ProcessManager>("com.synergy.gui", 1, 0, "ProcessManager");
         qmlRegisterType<AccessibilityManager>("com.synergy.gui", 1, 0, "AccessibilityManager");
-        qmlRegisterType<ConnectivityTester>("com.synergy.gui", 1, 0, "ConnectivityTester");
         qmlRegisterType<ProfileListModel>("com.synergy.gui", 1, 0, "ProfileListModel");
         qmlRegisterSingletonType<CloudClient>("com.synergy.gui", 1, 0, "CloudClient", CloudClient::instance);
         qmlRegisterSingletonType<ProfileManager>("com.synergy.gui", 1, 0, "ProfileManager", ProfileManager::instance);

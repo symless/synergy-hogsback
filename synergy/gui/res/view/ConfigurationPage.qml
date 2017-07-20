@@ -14,10 +14,6 @@ Rectangle {
         id: screenListModel
     }
 
-    ConnectivityTester {
-        id: connectivityTester
-    }
-
     ScreenManager {
         id: screenManager
         screenListModel: screenListModel
