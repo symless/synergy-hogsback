@@ -1,9 +1,4 @@
-#include "WampClient.h"
-
-#include <autobahn/autobahn.hpp>
-#include <boost/asio.hpp>
-#include <chrono>
-#include <string>
+#include <synergy/common/WampClient.h>
 
 WampClient::WampClient(boost::asio::io_service& io) :
     m_executor (io)
@@ -22,11 +17,13 @@ WampClient::start (std::string const ip, int const port, bool const debug)
     transport->attach(std::static_pointer_cast<autobahn::wamp_transport_handler>
                       (m_session));
 
-    return transport->connect().then ([&](boost::future<void> connected) {
+    return transport->connect().then (m_executor,
+                                      [&](boost::future<void> connected) {
         connected.get();
-        m_session->start().then ([&](boost::future<void> started) {
+        m_session->start().then (m_executor, [&](boost::future<void> started) {
             started.get();
-            m_session->join("default").then ([&](boost::future<uint64_t> joined) {
+            m_session->join("default").then
+                    (m_executor, [&](boost::future<uint64_t> joined) {
                 joined.get();
             });
         });

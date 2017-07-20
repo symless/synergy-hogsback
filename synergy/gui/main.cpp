@@ -183,8 +183,8 @@ main(int argc, char* argv[])
         LogManager::setQmlContext(engine.rootContext());
         LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
 
-        engine.rootContext()->setContextProperty("PixelPerPoint",
-            QGuiApplication::primaryScreen()->physicalDotsPerInch() / 72);
+        engine.rootContext()->setContextProperty
+            ("PixelPerPoint", QGuiApplication::primaryScreen()->physicalDotsPerInch() / 72);
 
         engine.rootContext()->setContextProperty
             ("rpcProcessManager", static_cast<QObject*>(&processManager));

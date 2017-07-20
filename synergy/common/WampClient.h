@@ -1,10 +1,10 @@
 #ifndef WAMPCLIENT_H
 #define WAMPCLIENT_H
 
-#include <boost/asio.hpp>
 #include <autobahn/autobahn.hpp>
+#include <synergy/common/AsioExecutor.h>
+#include <boost/asio.hpp>
 #include <boost/thread/future.hpp>
-#include <boost/thread/executor.hpp>
 #include <string>
 #include <stdexcept>
 
@@ -29,56 +29,6 @@ struct WampCallHelper<void> {
 
 } // namespace
 
-
-class AsioExecutor final {
-public:
-    explicit AsioExecutor (boost::asio::io_service& io) noexcept:
-        m_io_service(io) {}
-    auto& get_io_service() const noexcept { return m_io_service; }
-
-    bool
-    try_executing_one() {
-        return m_io_service.poll_one();
-    }
-
-    template <typename Work>
-    void
-    submit (Work&& work) {
-        if (closed()) {
-            throw std::runtime_error ("AsioExecutor has been closed");
-        }
-        /* Note: this allows work to run on the calling thread */
-        m_io_service.dispatch (std::forward<Work>(work));
-    }
-
-    void
-    close() {
-        /* Pretty sure this should never be called */
-        m_io_service.stop();
-    }
-
-    bool
-    closed() const noexcept {
-        return m_io_service.stopped();
-    }
-
-    template <typename Predicate>
-    bool
-    reschedule_until (Predicate pred) {
-        bool doneWork = false;
-        do {
-            if (m_io_service.run_one() != 0) {
-                doneWork = true;
-            }
-        } while (!pred() && !closed());
-        return doneWork;
-    }
-
-private:
-    boost::asio::io_service& m_io_service;
-};
-
-
 class WampClient
 {
 public:
@@ -88,7 +38,7 @@ public:
     explicit WampClient (boost::asio::io_service& io);
 
     boost::asio::io_service&
-    get_io_service ()
+    get_io_service () /* const */
     noexcept {
         return m_executor.underlying_executor().get_io_service();
     }
@@ -99,12 +49,14 @@ public:
     template <typename Result, typename Args>
     decltype(auto)
     call (char const* const fun, Args&& args) {
-        return m_session->call (fun, std::forward<Args>(args),
-                                m_default_call_options).then
-            (m_executor, [](boost::future<autobahn::wamp_call_result> result) {
-                return WampCallHelper<Result>::get_return_value (result.get());
-            }
-        );
+        auto& io = get_io_service();
+        io.post ([this, fun, args = std::forward<Args>(args)](){
+            m_session->call (fun, std::move(args), m_default_call_options).then
+                (m_executor, [](boost::future<autobahn::wamp_call_result> result) {
+                    return WampCallHelper<Result>::get_return_value (result.get());
+                }
+            );
+        });
     }
 
 private:
