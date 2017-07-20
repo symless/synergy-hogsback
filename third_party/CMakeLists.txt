@@ -4,7 +4,7 @@ cmake_minimum_required (VERSION 3.4)
 # We don't care about their issues.
 
 if (NOT DEFINED SYNERGY_SCAN_BUILD)
-	remove_definitions (${SYNERGY_WARNING_FLAGS})
+    remove_definitions (${SYNERGY_WARNING_FLAGS})
 endif()
 
 #

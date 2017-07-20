@@ -11,6 +11,7 @@
 #include "AppConfig.h"
 #include "Hostname.h"
 #include "Common.h"
+#include <synergy/common/RpcClient.h>
 #include <DirectoryManager.h>
 #include <ProfileListModel.h>
 #include <ProfileManager.h>
@@ -21,7 +22,9 @@
 #include <stdexcept>
 #include <boost/filesystem.hpp>
 #include <iostream>
+#include <boost/asio.hpp>
 
+namespace asio = boost::asio;
 
 #if (defined(Q_OS_WIN) || defined (Q_OS_DARWIN)) && !defined (QT_DEBUG)
 // TODO: Somehow get these in to a half decent <crashpad/...> form
@@ -126,8 +129,8 @@ main(int argc, char* argv[])
     QCoreApplication::setOrganizationDomain ("https://symless.com/");
     QCoreApplication::setApplicationName ("Synergy");
 
-    /* This must be started after QApplication is constructed, because it
-     * depends on file paths that are unavailable until then */
+    /* The crash handler must be started after QApplication is constructed,
+     * because it depends on file paths that are unavailable until then. */
     QApplication app(argc, argv);
     startCrashHandler();
 
@@ -138,16 +141,28 @@ main(int argc, char* argv[])
     TrialValidator trialValidator;
     if (!trialValidator.isValid()) {
         QMessageBox msgBox;
-        msgBox.setText("This version is not supported anymore. Please <a href='https://www.symless.com'>download</a> the latest build.");
+        msgBox.setText("This version is not supported anymore. "
+                       "Please <a href='https://www.symless.com'>download</a> the latest build.");
         msgBox.exec();
         return 0;
     }
 
     FontManager::loadAll();
 
-    qreal dpi = QGuiApplication::primaryScreen()->physicalDotsPerInch();
-    // 72 points = 1 inch
-    qreal pixelPerPoint = dpi / 72;
+    asio::io_service io;
+    QObject::connect (&app, &QCoreApplication::aboutToQuit,
+        [rpcWork = std::make_shared<asio::io_service::work> (io)]() mutable {
+            rpcWork.reset();
+        }
+    );
+
+    RpcClient rpcClient (io);
+    std::thread rpcThread ([&]{
+        rpcClient.start ("127.0.0.1", 24888);
+        io.run ();
+    });
+
+    ProcessManager processManager (rpcClient);
 
     try {
         qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");
@@ -161,19 +176,29 @@ main(int argc, char* argv[])
         qmlRegisterSingletonType<ProfileManager>("com.synergy.gui", 1, 0, "ProfileManager", ProfileManager::instance);
         qmlRegisterSingletonType<AppConfig>("com.synergy.gui", 1, 0, "AppConfig", AppConfig::instance);
         qmlRegisterSingletonType<VersionManager>("com.synergy.gui", 1, 0, "VersionManager", VersionManager::instance);
-        qmlRegisterSingletonType<VersionManager>("com.synergy.gui", 1, 0, "LogManager", LogManager::instance);
+        qmlRegisterSingletonType<LogManager>("com.synergy.gui", 1, 0, "LogManager", LogManager::instance);
 
         QQmlApplicationEngine engine;
         LogManager::instance();
         LogManager::setQmlContext(engine.rootContext());
         LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
 
-        engine.rootContext()->setContextProperty("PixelPerPoint", pixelPerPoint);
+        engine.rootContext()->setContextProperty
+            ("PixelPerPoint", QGuiApplication::primaryScreen()->physicalDotsPerInch() / 72);
+
+        engine.rootContext()->setContextProperty
+            ("rpcProcessManager", static_cast<QObject*>(&processManager));
+
         engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-        return app.exec();
+        auto qtAppRet = app.exec();
+
+        /* The RPC thread should stop and join us when it runs out of work */
+        rpcThread.join();
+
+        return qtAppRet;
     }
     catch (std::runtime_error& e) {
         LogManager::error(QString("exception caught: ").arg(e.what()));
-        return 0;
+        return EXIT_FAILURE;
     }
 }

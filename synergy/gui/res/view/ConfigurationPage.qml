@@ -18,15 +18,10 @@ Rectangle {
         id: connectivityTester
     }
 
-    ProcessManager {
-        id: processManager
-        connectivityTester: connectivityTester
-    }
-
     ScreenManager {
         id: screenManager
         screenListModel: screenListModel
-        processManager: processManager
+        processManager: applicationWindow.processManager
         //viewWidth: screenArrangementScrollView.width
         //viewHeight: screenArrangementScrollView.height
     }
