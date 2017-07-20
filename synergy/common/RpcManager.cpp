@@ -19,11 +19,11 @@ RpcManager::~RpcManager()
 
 void RpcManager::initRouterAndServer()
 {
-    m_server = std::make_shared<WampServer>();
+    m_server = std::make_shared<WampServer>(m_mainIoService, kLocalIpAddress, kWampDefaultPort);
     m_router = std::make_shared<WampRouter>(m_mainIoService, kLocalIpAddress, kWampDefaultPort);
     m_router->ready.connect([this]() {
         m_mainIoService.post([this] () {
-            m_server->start(m_mainIoService, kLocalIpAddress, kWampDefaultPort);
+            m_server->start();
         });
     });
 }
