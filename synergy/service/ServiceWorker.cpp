@@ -15,7 +15,8 @@ ServiceWorker::ServiceWorker(boost::asio::io_service &threadIoService) :
 
 ServiceWorker::~ServiceWorker()
 {
-
+    m_work.reset();
+    m_threadIoService.stop();
 }
 
 void ServiceWorker::start()

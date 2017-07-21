@@ -79,13 +79,13 @@ private:
     void shutdown();
 
 protected:
-    std::unique_ptr<ServiceControllerImp> m_imp;
-    std::shared_ptr<ServiceWorker> m_worker;
     bool m_install;
     bool m_uninstall;
     bool m_foreground;
     boost::asio::io_service m_threadIoService;
     boost::asio::signal_set m_terminationSignals;
+    std::unique_ptr<ServiceControllerImp> m_imp;
+    std::shared_ptr<ServiceWorker> m_worker;
 };
 
 #endif // SERVICECONTROLLER_H
