@@ -15,21 +15,20 @@ RpcManager::RpcManager(boost::asio::io_service& ioService) :
 
 RpcManager::~RpcManager()
 {
-    m_routerThread.join();
 }
 
 void RpcManager::initRouterAndServer()
 {
-    m_server = std::make_shared<WampServer>();
-    m_router = std::make_shared<WampRouter>(kLocalIpAddress, kWampDefaultPort);
+    m_server = std::make_shared<WampServer>(m_mainIoService, kLocalIpAddress, kWampDefaultPort);
+    m_router = std::make_shared<WampRouter>(m_mainIoService, kLocalIpAddress, kWampDefaultPort);
     m_router->ready.connect([this]() {
         m_mainIoService.post([this] () {
-            m_server->start(m_mainIoService, kLocalIpAddress, kWampDefaultPort);
+            m_server->start();
         });
     });
 }
 
 void RpcManager::startRouter()
 {
-    m_routerThread = std::thread([this] () { m_router->run(); });
+    m_router->run();
 }

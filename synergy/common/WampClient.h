@@ -2,6 +2,7 @@
 #define WAMPCLIENT_H
 
 #include <autobahn/autobahn.hpp>
+// NOTE: AsioExecutor has to be included after autobahn
 #include <synergy/common/AsioExecutor.h>
 #include <boost/asio.hpp>
 #include <boost/thread/future.hpp>
@@ -14,7 +15,6 @@ namespace {
 template <typename R>
 struct WampCallHelper {
     template <typename Result> static
-    decltype(auto)
     get_return_value (Result&& result) {
         return result.argument<R>(0);
     }
