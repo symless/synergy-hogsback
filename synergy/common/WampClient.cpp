@@ -6,7 +6,7 @@ WampClient::WampClient(boost::asio::io_service& io) :
     m_default_call_options.set_timeout (std::chrono::seconds(10));
 }
 
-WampClient::future_t<void>
+boost::future<void>
 WampClient::start (std::string const ip, int const port, bool const debug)
 {
     auto transport = std::make_shared<autobahn::wamp_tcp_transport>(
