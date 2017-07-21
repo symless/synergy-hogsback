@@ -21,14 +21,14 @@ ServiceWorker::~ServiceWorker()
 
 void ServiceWorker::start()
 {
-    if (m_processManager) {
+    if (!m_processManager) {
         m_processManager = std::make_unique<ProcessManager>(m_threadIoService);
         m_processManager->onOutput.connect([](std::string line) {
             std::cout << line << std::endl;
         });
     }
 
-    if (m_rpcManager) {
+    if (!m_rpcManager) {
         m_rpcManager = std::make_unique<RpcManager>(m_threadIoService);
         m_rpcManager->initRouterAndServer();
         m_rpcManager->startRouter();
