@@ -128,7 +128,8 @@ void ServiceControllerImp::manualInstall()
         CloseServiceHandle(manager);
     }
 
-    manualStart(kServiceDisplayName);
+    // TODO: should we start after install?
+    //manualStart(kServiceDisplayName);
 }
 
 void ServiceControllerImp::manualUninstall()
