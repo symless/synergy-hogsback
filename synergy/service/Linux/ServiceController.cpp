@@ -4,6 +4,10 @@
 // ServiceController for Linux
 //
 
+class ServiceControllerImp {
+
+};
+
 ServiceController::ServiceController() :
     m_install(false),
     m_uninstall(false)
