@@ -27,10 +27,10 @@ private:
 
     std::shared_ptr<bonefish::wamp_routers> m_routers;
     std::shared_ptr<bonefish::wamp_serializers> m_serializers;
-    std::shared_ptr<bonefish::rawsocket_server> m_rawsocket_server;
-    std::shared_ptr<bonefish::websocket_server> m_websocket_server;
+    std::shared_ptr<bonefish::rawsocket_server> m_rawsocketServer;
+    std::shared_ptr<bonefish::websocket_server> m_websocketServer;
 
-    std::uint16_t m_websocket_port;
+    std::uint16_t m_websocketPort;
 };
 
 #endif // WAMPROUTER_H

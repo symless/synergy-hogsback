@@ -20,9 +20,9 @@ WampRouter::WampRouter(boost::asio::io_service &ioService, std::string ip, int p
     m_ioService(ioService),
     m_routers(std::make_shared<wamp_routers>()),
     m_serializers(std::make_shared<wamp_serializers>()),
-    m_rawsocket_server(),
-    m_websocket_server(),
-    m_websocket_port(0)
+    m_rawsocketServer(),
+    m_websocketServer(),
+    m_websocketPort(0)
 {
     // Turn on bonefish tracing if requested. This may also turn on
     // lower level logging in third-party dependencies of bonefish
@@ -41,11 +41,11 @@ WampRouter::WampRouter(boost::asio::io_service &ioService, std::string ip, int p
 //                m_io_service, m_routers, m_serializers);
 //    }
 
-    m_rawsocket_server = std::make_shared<rawsocket_server>(m_routers, m_serializers);
+    m_rawsocketServer = std::make_shared<rawsocket_server>(m_routers, m_serializers);
 
     auto listener = std::make_shared<tcp_listener>(
             m_ioService, boost::asio::ip::address_v4::from_string(ip), port);
-    m_rawsocket_server->attach_listener(std::static_pointer_cast<rawsocket_listener>(listener));
+    m_rawsocketServer->attach_listener(std::static_pointer_cast<rawsocket_listener>(listener));
 }
 
 WampRouter::~WampRouter()
@@ -55,12 +55,12 @@ WampRouter::~WampRouter()
 void
 WampRouter::run()
 {
-    if (m_rawsocket_server) {
-        m_rawsocket_server->start();
+    if (m_rawsocketServer) {
+        m_rawsocketServer->start();
     }
 
-    if (m_websocket_server) {
-        m_websocket_server->start(boost::asio::ip::address(), m_websocket_port);
+    if (m_websocketServer) {
+        m_websocketServer->start(boost::asio::ip::address(), m_websocketPort);
     }
 
     ready();
@@ -69,11 +69,11 @@ WampRouter::run()
 void
 WampRouter::shutdown()
 {
-    if (m_websocket_server) {
-        m_websocket_server->shutdown();
+    if (m_websocketServer) {
+        m_websocketServer->shutdown();
     }
 
-    if (m_rawsocket_server) {
-        m_rawsocket_server->shutdown();
+    if (m_rawsocketServer) {
+        m_rawsocketServer->shutdown();
     }
 }
