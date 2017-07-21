@@ -1,7 +1,6 @@
 #ifndef SYNERGY_COMMON_ASIO_EXECUTOR_HPP
 #define SYNERGY_COMMON_ASIO_EXECUTOR_HPP
 
-#include <boost/thread/future.hpp>
 #include <boost/asio.hpp>
 
 class AsioExecutor final {

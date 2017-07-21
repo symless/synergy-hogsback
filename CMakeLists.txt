@@ -119,7 +119,10 @@ find_package (Boost 1.55 REQUIRED COMPONENTS system date_time filesystem regex
                                              thread chrono)
 include_directories(${Boost_INCLUDE_DIRS})
 
-# Enable exerimental executor support for boost::future etc
+# Enable the latest version of Boost Thread (default as of 1.64.0 is 2)
+add_definitions (-DBOOST_THREAD_VERSION=5)
+
+# Enable exerimental executor support for boost::future
 add_definitions (-DBOOST_THREAD_PROVIDES_EXECUTORS)
 
 #
