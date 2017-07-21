@@ -9,7 +9,7 @@
 
 ServiceWorker::ServiceWorker(boost::asio::io_service &threadIoService) :
     m_threadIoService(threadIoService),
-    m_work()
+    m_work(std::make_shared<boost::asio::io_service::work>(threadIoService))
 {
 }
 
