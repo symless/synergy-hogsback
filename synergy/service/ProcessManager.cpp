@@ -15,23 +15,23 @@ using boost::optional;
 class ProcessManagerImpl {
 public:
     ProcessManagerImpl (asio::io_service& io)
-        : ioStrand (io), outPipe (io), errorPipe (io) {
+        : m_ioStrand (io), m_outPipe (io), m_errorPipe (io) {
     }
 
     void start (ProcessManager& manager);
 
     std::mutex mtx;
 
-    asio::io_service::strand ioStrand;
-    bp::async_pipe outPipe;
-    bp::async_pipe errorPipe;
-    asio::streambuf outBuf;
-    asio::streambuf errorBuf;
-    std::string lineBuf;
+    asio::io_service::strand m_ioStrand;
+    bp::async_pipe m_outPipe;
+    bp::async_pipe m_errorPipe;
+    asio::streambuf m_outBuf;
+    asio::streambuf m_errorBuf;
+    std::string m_lineBuf;
 
-    optional<bp::child> process;
-    std::vector<std::string> command;
-    bool awaitingExit = false;
+    optional<bp::child> m_process;
+    std::vector<std::string> m_command;
+    bool m_awaitingExit = false;
 };
 
 template <typename Strand, typename Pipe, typename Buffer, typename Line>
@@ -64,30 +64,30 @@ asyncReadLines (ProcessManager& manager, Strand& strand, Pipe& pipe,
 
 void
 ProcessManagerImpl::start (ProcessManager& manager) {
-    process.emplace (command,
+    m_process.emplace (m_command,
                      bp::std_in.close (),
-                     bp::std_out > outPipe,
-                     bp::std_err > errorPipe);
-    lineBuf.clear ();
+                     bp::std_out > m_outPipe,
+                     bp::std_err > m_errorPipe);
+    m_lineBuf.clear ();
 
     asio::async_read_until (
-        outPipe,
-        outBuf,
+        m_outPipe,
+        m_outBuf,
         '\n',
-        ioStrand.wrap (
+        m_ioStrand.wrap (
             [&](boost::system::error_code const& ec, std::size_t bytes) {
                 return asyncReadLines (
-                    manager, ioStrand, outPipe, outBuf, lineBuf, ec, bytes);
+                    manager, m_ioStrand, m_outPipe, m_outBuf, m_lineBuf, ec, bytes);
             }));
 
     asio::async_read_until (
-        errorPipe,
-        errorBuf,
+        m_errorPipe,
+        m_errorBuf,
         '\n',
-        ioStrand.wrap (
+        m_ioStrand.wrap (
             [&](boost::system::error_code const& ec, std::size_t bytes) {
                 return asyncReadLines (
-                    manager, ioStrand, errorPipe, errorBuf, lineBuf, ec, bytes);
+                    manager, m_ioStrand, m_errorPipe, m_errorBuf, m_lineBuf, ec, bytes);
             }));
 }
 

@@ -1,10 +1,11 @@
 #ifndef SYNERGY_SERVICE_PROCESSMANAGER_H
 #define SYNERGY_SERVICE_PROCESSMANAGER_H
 
+#include "synergy/service/IOService.h"
+#include "synergy/common/Signals.h"
+
 #include <string>
 #include <memory>
-#include <synergy/service/IOService.h>
-#include <synergy/common/Signals.h>
 #include <vector>
 #include <string>
 

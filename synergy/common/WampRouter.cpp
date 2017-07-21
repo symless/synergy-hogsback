@@ -16,13 +16,13 @@
 
 using namespace bonefish;
 
-WampRouter::WampRouter(std::string ip, int port)
-    : m_io_service()
+WampRouter::WampRouter(boost::asio::io_service &ioService, std::string ip, int port)
+    : m_ioService(ioService)
     , m_work()
 #if defined(SIGQUIT)
-    , m_termination_signals(m_io_service, SIGTERM, SIGINT, SIGQUIT)
+    , m_termination_signals(m_ioService, SIGTERM, SIGINT, SIGQUIT)
 #else
-    , m_termination_signals(m_io_service, SIGTERM, SIGINT)
+    , m_termination_signals(m_ioService, SIGTERM, SIGINT)
 #endif
     , m_routers(std::make_shared<wamp_routers>())
     , m_serializers(std::make_shared<wamp_serializers>())
@@ -35,7 +35,7 @@ WampRouter::WampRouter(std::string ip, int port)
     // such as websocketpp.
     bonefish::trace::set_enabled(true);
 
-    auto router = std::make_shared<wamp_router>(m_io_service, "default");
+    auto router = std::make_shared<wamp_router>(m_ioService, "default");
     m_routers->add_router(router);
 
 //  m_serializers->add_serializer(std::make_shared<json_serializer>());
@@ -50,7 +50,7 @@ WampRouter::WampRouter(std::string ip, int port)
     m_rawsocket_server = std::make_shared<rawsocket_server>(m_routers, m_serializers);
 
     auto listener = std::make_shared<tcp_listener>(
-            m_io_service, boost::asio::ip::address_v4::from_string(ip), port);
+            m_ioService, boost::asio::ip::address_v4::from_string(ip), port);
     m_rawsocket_server->attach_listener(std::static_pointer_cast<rawsocket_listener>(listener));
 }
 
@@ -62,7 +62,6 @@ WampRouter::~WampRouter()
 void
 WampRouter::run()
 {
-    m_work.reset(new boost::asio::io_service::work(m_io_service));
     m_termination_signals.async_wait(
             boost::bind(&WampRouter::termination_signal_handler, this, _1, _2));
 
@@ -75,14 +74,13 @@ WampRouter::run()
     }
 
     ready();
-    m_io_service.run();
 }
 
 void
 WampRouter::shutdown()
 {
     if (m_work.get()) {
-        m_io_service.dispatch(boost::bind(&WampRouter::shutdown_handler, this));
+        m_ioService.dispatch(boost::bind(&WampRouter::shutdown_handler, this));
     }
 }
 
@@ -105,8 +103,8 @@ WampRouter::shutdown_handler()
         // result of shutting down. It is then safe to stop the io service
         // without leaving any potentially unexecuted handlers.
         m_work.reset();
-        m_io_service.poll();
-        m_io_service.stop();
+        m_ioService.poll();
+        m_ioService.stop();
     }
 }
 

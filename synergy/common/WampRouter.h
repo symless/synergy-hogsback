@@ -14,7 +14,7 @@ namespace bonefish {
 class WampRouter
 {
 public:
-    WampRouter(std::string ip, int port);
+    WampRouter(boost::asio::io_service& ioService, std::string ip, int port);
     ~WampRouter();
 
     void run();
@@ -28,7 +28,7 @@ private:
             const boost::system::error_code& error_code, int signal_number);
 
 private:
-    boost::asio::io_service m_io_service;
+    boost::asio::io_service& m_ioService;
     std::shared_ptr<boost::asio::io_service::work> m_work;
     boost::asio::signal_set m_termination_signals;
 
