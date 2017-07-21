@@ -107,17 +107,17 @@ ProcessManager::~ProcessManager () noexcept {
 void
 ProcessManager::start (std::vector<std::string> command) {
     std::unique_lock<std::mutex> lock (m_impl->mtx);
-    if (m_impl->process) {
+    if (m_impl->m_process) {
         throw std::logic_error (
             "ProcessManager::start() called while process is running");
     }
 
-    m_impl->command = move (command);
+    m_impl->m_command = move (command);
     m_impl->start (*this);
 }
 
 bool
 ProcessManager::awaitingExit () const noexcept {
     std::unique_lock<std::mutex> lock (m_impl->mtx);
-    return m_impl->awaitingExit;
+    return m_impl->m_awaitingExit;
 }
