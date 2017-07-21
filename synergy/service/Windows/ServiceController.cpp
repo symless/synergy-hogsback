@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <assert.h>
 
-static char* kServiceProcessName = "synergy-service";
+static char* kServiceProcessName = "synergyd";
 static char* kServiceDisplayName = "Synergy";
 
 //
@@ -53,7 +53,17 @@ ServiceControllerImp* ServiceControllerImp::s_impInstance = NULL;
 
 ServiceControllerImp::ServiceControllerImp()
 {
-
+    m_status.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
+    m_status.dwCurrentState = SERVICE_START_PENDING;
+    DWORD dwControlsAccepted = 0;
+    dwControlsAccepted |= SERVICE_ACCEPT_STOP;
+    dwControlsAccepted |= SERVICE_ACCEPT_SHUTDOWN;
+    dwControlsAccepted |= SERVICE_ACCEPT_PAUSE_CONTINUE;
+    m_status.dwControlsAccepted = dwControlsAccepted;
+    m_status.dwWin32ExitCode = NO_ERROR;
+    m_status.dwServiceSpecificExitCode = 0;
+    m_status.dwCheckPoint = 0;
+    m_status.dwWaitHint = 0;
 }
 
 ServiceControllerImp::~ServiceControllerImp()
@@ -77,7 +87,7 @@ void ServiceControllerImp::doRun()
 void ServiceControllerImp::manualInstall()
 {
     // install default daemon if not already installed.
-    if (!isDaemonInstalled(kServiceDisplayName)) {
+    if (!isDaemonInstalled(kServiceProcessName)) {
         char path[MAX_PATH];
         GetModuleFileName(NULL, path, MAX_PATH);
 
@@ -95,7 +105,7 @@ void ServiceControllerImp::manualInstall()
         // create the service
         SC_HANDLE service = CreateService(
             manager,
-            kServiceDisplayName,
+            kServiceProcessName,
             kServiceDisplayName,
             0,
             SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS,
@@ -140,7 +150,7 @@ void ServiceControllerImp::manualUninstall()
         throw std::runtime_error("can't open service manager for uninstalling");
     }
 
-    SC_HANDLE service = OpenService(manager, kServiceDisplayName, SERVICE_STOP |
+    SC_HANDLE service = OpenService(manager, kServiceProcessName, SERVICE_STOP |
         SERVICE_QUERY_STATUS | DELETE);
     if (service == NULL) {
         DWORD err = GetLastError();
@@ -257,11 +267,11 @@ void ServiceControllerImp::start(DWORD dwArgc, LPSTR *pszArgv)
 {
     try {
         SetServiceStatus(SERVICE_START_PENDING);
-
         // do the actual work in another thread on Windows
         std::thread workerThread([&, this](){
             m_worker->start();
         });
+        workerThread.detach();
 
         SetServiceStatus(SERVICE_RUNNING);
     }
