@@ -13,18 +13,18 @@ namespace {
 
 template <typename R>
 struct WampCallHelper {
-    static
+    template <typename Result> static
     decltype(auto)
-    get_return_value (autobahn::wamp_call_result& result) {
+    get_return_value (Result&& result) {
         return result.argument<R>(0);
     }
 };
 
 template <>
 struct WampCallHelper<void> {
-    static
+    template <typename Result> static
     void
-    get_return_value (autobahn::wamp_call_result&) {
+    get_return_value (Result&&) {
     }
 };
 
