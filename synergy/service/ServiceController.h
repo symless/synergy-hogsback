@@ -68,7 +68,7 @@ private:
         }
 
 #if defined(SIGQUIT)
-        if (signal_number == SIGINT || signal_number == SIGTERM || signal_number == SIGQUIT) {
+        if (signalNumber == SIGINT || signalNumber == SIGTERM || signalNumber == SIGQUIT) {
 #else
         if (signalNumber == SIGINT || signalNumber == SIGTERM) {
 #endif
