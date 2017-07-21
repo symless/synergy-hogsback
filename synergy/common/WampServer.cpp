@@ -58,8 +58,8 @@ void WampServer::start()
             }
 
             boost::future<void> provide_future_add = m_session->provide ("startCore", [this](autobahn::wamp_invocation invocation) {
-               auto args = invocation->arguments<std::vector<std::string>>();
-               startCore(args);
+               auto args = invocation->arguments<std::vector<std::vector<std::string>>>();
+               startCore(args[0]);
                invocation->empty_result();
             }).then(
                 m_executor,
