@@ -4,6 +4,8 @@
 #include "synergy/service/ServiceWorker.h"
 #include "synergy/service/IOService.h"
 
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
 #include <thread>
 #include <memory>
 #include <string>
@@ -53,6 +55,29 @@ public:
         m_worker->start();
     }
 
+private:
+    void setupTerminationSignals() {
+        m_terminationSignals.async_wait(
+            boost::bind(&ServiceController::terminationSignalHandler, this, _1, _2));
+    }
+
+    void terminationSignalHandler(
+            const boost::system::error_code& errorCode, int signalNumber) {
+        if (errorCode == boost::asio::error::operation_aborted) {
+            return;
+        }
+
+#if defined(SIGQUIT)
+        if (signal_number == SIGINT || signal_number == SIGTERM || signal_number == SIGQUIT) {
+#else
+        if (signalNumber == SIGINT || signalNumber == SIGTERM) {
+#endif
+            shutdown();
+        }
+    }
+
+    void shutdown();
+
 protected:
     std::unique_ptr<ServiceControllerImp> m_imp;
     std::shared_ptr<ServiceWorker> m_worker;
@@ -60,6 +85,7 @@ protected:
     bool m_uninstall;
     bool m_foreground;
     boost::asio::io_service m_threadIoService;
+    boost::asio::signal_set m_terminationSignals;
 };
 
 #endif // SERVICECONTROLLER_H

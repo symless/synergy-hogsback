@@ -359,7 +359,7 @@ void ServiceControllerImp::resume()
 void ServiceControllerImp::shutdown()
 {
     try {
-        // TODO: Notify the worker to shutdown
+        m_worker->shutdown();
 
         SetServiceStatus(SERVICE_STOPPED);
     }
@@ -415,7 +415,12 @@ void ServiceControllerImp::setWorker(const std::shared_ptr<ServiceWorker> &worke
 ServiceController::ServiceController() :
     m_install(false),
     m_uninstall(false),
-    m_foreground(false)
+    m_foreground(false),
+#if defined(SIGQUIT)
+    m_terminationSignals(m_threadIoService, SIGTERM, SIGINT, SIGQUIT)
+#else
+    m_terminationSignals(m_threadIoService, SIGTERM, SIGINT)
+#endif
 {
     m_imp = std::make_unique<ServiceControllerImp>();
     m_worker = std::make_shared<ServiceWorker>(m_threadIoService);
@@ -425,11 +430,13 @@ ServiceController::ServiceController() :
 
 ServiceController::~ServiceController()
 {
-
+    m_terminationSignals.cancel();
 }
 
 void ServiceController::doRun()
 {
+    setupTerminationSignals();
+
     m_imp->doRun();
 }
 
@@ -441,4 +448,9 @@ void ServiceController::install()
 void ServiceController::uninstall()
 {
     m_imp->manualUninstall();
+}
+
+void ServiceController::shutdown()
+{
+    m_worker->shutdown();
 }

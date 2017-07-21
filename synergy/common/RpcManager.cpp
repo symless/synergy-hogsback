@@ -32,3 +32,9 @@ void RpcManager::startRouter()
 {
     m_router->run();
 }
+
+void RpcManager::shutdown()
+{
+    m_server->shutdown();
+    m_router->shutdown();
+}

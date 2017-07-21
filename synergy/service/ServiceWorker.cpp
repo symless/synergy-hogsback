@@ -3,26 +3,47 @@
 #include "synergy/common/RpcManager.h"
 #include "synergy/common/WampRouter.h"
 #include "synergy/common/WampServer.h"
-#include <synergy/service/ProcessManager.h>
+#include "ProcessManager.h"
+#include <boost/asio.hpp>
 #include <iostream>
 
 ServiceWorker::ServiceWorker(boost::asio::io_service &threadIoService) :
-    m_threadIoService(threadIoService)
+    m_threadIoService(threadIoService),
+    m_work()
 {
+}
+
+ServiceWorker::~ServiceWorker()
+{
+
 }
 
 void ServiceWorker::start()
 {
-    ProcessManager processManager(m_threadIoService);
-    processManager.onOutput.connect([](std::string line) {
-        std::cout << line << std::endl;
-    });
+    if (m_processManager) {
+        m_processManager = std::make_unique<ProcessManager>(m_threadIoService);
+        m_processManager->onOutput.connect([](std::string line) {
+            std::cout << line << std::endl;
+        });
+    }
 
-    RpcManager rpcManager(m_threadIoService);
-    rpcManager.initRouterAndServer();
-    rpcManager.startRouter();
-    rpcManager.getServer()->startCore.connect([&processManager] (std::vector<std::string> cmd) { processManager.start(cmd); });
+    if (m_rpcManager) {
+        m_rpcManager = std::make_unique<RpcManager>(m_threadIoService);
+        m_rpcManager->initRouterAndServer();
+        m_rpcManager->startRouter();
+        m_rpcManager->getServer()->startCore.connect([this] (std::vector<std::string> cmd) { m_processManager->start(cmd); });
+    }
 
-    boost::asio::io_service::work work(m_threadIoService);
     m_threadIoService.run();
+}
+
+void ServiceWorker::shutdown()
+{
+    m_processManager->shutdown();
+    m_rpcManager->shutdown();
+
+    m_work.reset();
+    //finish processing all of the remaining completion handlers
+    m_threadIoService.poll();
+    m_threadIoService.stop();
 }

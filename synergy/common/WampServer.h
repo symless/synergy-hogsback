@@ -12,6 +12,7 @@ class WampServer
 public:
     WampServer(boost::asio::io_service& io, std::string ip, int port, bool debug = true);
     void start();
+    void shutdown();
 
     boost::signals2::signal<void(std::vector<std::string>)> startCore;
 

@@ -121,3 +121,8 @@ ProcessManager::awaitingExit () const noexcept {
     std::unique_lock<std::mutex> lock (m_impl->mtx);
     return m_impl->m_awaitingExit;
 }
+
+void ProcessManager::shutdown()
+{
+
+}

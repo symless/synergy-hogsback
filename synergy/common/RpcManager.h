@@ -15,6 +15,7 @@ public:
     void initRouterAndServer();
     void initClient();
     void startRouter();
+    void shutdown();
 
     auto getServer() { return m_server; }
 

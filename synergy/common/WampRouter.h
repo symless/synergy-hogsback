@@ -23,14 +23,7 @@ public:
     boost::signals2::signal<void()> ready;
 
 private:
-    void shutdown_handler();
-    void termination_signal_handler(
-            const boost::system::error_code& error_code, int signal_number);
-
-private:
     boost::asio::io_service& m_ioService;
-    std::shared_ptr<boost::asio::io_service::work> m_work;
-    boost::asio::signal_set m_termination_signals;
 
     std::shared_ptr<bonefish::wamp_routers> m_routers;
     std::shared_ptr<bonefish::wamp_serializers> m_serializers;

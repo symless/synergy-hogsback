@@ -75,5 +75,10 @@ void WampServer::start()
 
             });
         });
-    });
+});
+}
+
+void WampServer::shutdown()
+{
+
 }

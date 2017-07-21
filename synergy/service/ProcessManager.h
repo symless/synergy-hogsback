@@ -21,6 +21,7 @@ public:
 
     void start (std::vector<std::string> command);
     bool awaitingExit() const noexcept;
+    void shutdown();
 
     auto& ioService() const noexcept { return m_mainIoService; }
 
