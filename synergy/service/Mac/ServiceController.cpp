@@ -22,7 +22,7 @@ ServiceController::ServiceController() :
     m_terminationSignals(m_threadIoService, SIGTERM, SIGINT)
 #endif
 {
-    
+    m_worker = std::make_shared<ServiceWorker>(m_threadIoService);
 }
 
 ServiceController::~ServiceController()
