@@ -15,14 +15,14 @@ using boost::optional;
 class ProcessManagerImpl {
 public:
     ProcessManagerImpl (asio::io_service& io)
-        : m_ioStrand (io), m_outPipe (io), m_errorPipe (io) {
+        : m_strand (io), m_outPipe (io), m_errorPipe (io) {
     }
 
     void start (ProcessManager& manager);
 
     std::mutex mtx;
 
-    asio::io_service::strand m_ioStrand;
+    asio::io_service::strand m_strand;
     bp::async_pipe m_outPipe;
     bp::async_pipe m_errorPipe;
     asio::streambuf m_outBuf;
@@ -40,6 +40,7 @@ asyncReadLines (ProcessManager& manager, Strand& strand, Pipe& pipe,
                 Buffer& buffer, Line& line, bs::error_code const& ec,
                 std::size_t bytes) {
     std::istream stream (&buffer);
+
     if (ec || !bytes || !std::getline (stream, line)) {
         if (manager.awaitingExit ()) {
             manager.onUnexpectedExit ();
@@ -57,9 +58,10 @@ asyncReadLines (ProcessManager& manager, Strand& strand, Pipe& pipe,
         '\n',
         strand.wrap (
             [&](boost::system::error_code const& ec, std::size_t bytes) {
-                return asyncReadLines (
-                    manager, strand, pipe, buffer, line, ec, bytes);
-            }));
+                return asyncReadLines (manager, strand, pipe, buffer, line,
+                                       ec, bytes);
+        })
+    );
 }
 
 void
@@ -74,21 +76,23 @@ ProcessManagerImpl::start (ProcessManager& manager) {
         m_outPipe,
         m_outBuf,
         '\n',
-        m_ioStrand.wrap (
+        m_strand.wrap (
             [&](boost::system::error_code const& ec, std::size_t bytes) {
-                return asyncReadLines (
-                    manager, m_ioStrand, m_outPipe, m_outBuf, m_lineBuf, ec, bytes);
-            }));
+                return asyncReadLines (manager, m_strand, m_outPipe,
+                                       m_outBuf, m_lineBuf, ec, bytes);
+        })
+    );
 
     asio::async_read_until (
         m_errorPipe,
         m_errorBuf,
         '\n',
-        m_ioStrand.wrap (
+        m_strand.wrap (
             [&](boost::system::error_code const& ec, std::size_t bytes) {
-                return asyncReadLines (
-                    manager, m_ioStrand, m_errorPipe, m_errorBuf, m_lineBuf, ec, bytes);
-            }));
+                return asyncReadLines (manager, m_strand, m_errorPipe,
+                                       m_errorBuf, m_lineBuf, ec, bytes);
+        })
+    );
 }
 
 template <typename T, typename... Args> static inline
@@ -98,7 +102,8 @@ make_unique (Args&&... args) {
 }
 
 ProcessManager::ProcessManager (asio::io_service &io)
-    : m_mainIoService (io), m_impl (make_unique<ProcessManagerImpl> (m_mainIoService)) {
+    : m_ioService (io),
+      m_impl (make_unique<ProcessManagerImpl> (m_ioService)) {
 }
 
 ProcessManager::~ProcessManager () noexcept {
@@ -108,8 +113,7 @@ void
 ProcessManager::start (std::vector<std::string> command) {
     std::unique_lock<std::mutex> lock (m_impl->mtx);
     if (m_impl->m_process) {
-        throw std::logic_error (
-            "ProcessManager::start() called while process is running");
+        throw std::logic_error ("start() called while process is running");
     }
 
     m_impl->m_command = move (command);
@@ -122,7 +126,7 @@ ProcessManager::awaitingExit () const noexcept {
     return m_impl->m_awaitingExit;
 }
 
-void ProcessManager::shutdown()
+void
+ProcessManager::stop()
 {
-
 }

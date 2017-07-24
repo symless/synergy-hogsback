@@ -35,6 +35,8 @@ CentOS 7
 Tools:
     
     - CMake 3   (installed from the EPEL repository)
+    - Devtoolset 6
+                (from softwarecollections.org)
 
 Precompiled:
 
