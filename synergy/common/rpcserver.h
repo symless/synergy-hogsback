@@ -7,7 +7,6 @@
 #include <autobahn/autobahn.hpp>
 #include <boost/signals2.hpp>
 #include <boost/callable_traits.hpp>
-#include <boost/fusion/algorithm/iteration.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/fusion/functional/invocation/invoke.hpp>
 #include <boost/asio.hpp>
@@ -28,6 +27,8 @@ class WampCallee final {
 template <typename Fun> inline
 void
 WampCallee<Fun>::operator()(autobahn::wamp_invocation invocation) {
+    // Note: this doesn't work if the callable takes arguments by reference
+    // TODO: apply std::decay_t as a transformation
     boost::callable_traits::args_t<Fun> args;
     invocation->get_arguments (args);
     boost::fusion::invoke (impl_, args);

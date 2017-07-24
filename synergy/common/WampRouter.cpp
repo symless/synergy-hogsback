@@ -24,22 +24,13 @@ WampRouter::WampRouter(boost::asio::io_service &ioService, std::string ip, int p
     m_websocketServer(),
     m_websocketPort(0)
 {
-    // Turn on bonefish tracing if requested. This may also turn on
-    // lower level logging in third-party dependencies of bonefish
-    // such as websocketpp.
+    // Turn on bonefish tracing
     bonefish::trace::set_enabled(true);
 
     auto router = std::make_shared<wamp_router>(m_ioService, "default");
     m_routers->add_router(router);
 
-//  m_serializers->add_serializer(std::make_shared<json_serializer>());
-
     m_serializers->add_serializer(std::make_shared<msgpack_serializer>());
-
-//    if (m_websocket_server) {
-//        m_websocket_server = std::make_shared<websocket_server>(
-//                m_io_service, m_routers, m_serializers);
-//    }
 
     m_rawsocketServer = std::make_shared<rawsocket_server>(m_routers, m_serializers);
 
