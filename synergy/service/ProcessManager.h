@@ -21,9 +21,9 @@ public:
 
     void start (std::vector<std::string> command);
     bool awaitingExit() const noexcept;
-    void shutdown();
+    void stop();
 
-    auto& ioService() const noexcept { return m_mainIoService; }
+    auto& ioService() const noexcept { return m_ioService; }
 
 public:
     template <typename... Args>
@@ -34,7 +34,7 @@ public:
     signal<void(std::string)> onOutput;
 
 private:
-    asio::io_service& m_mainIoService;
+    asio::io_service& m_ioService;
     std::unique_ptr<ProcessManagerImpl> m_impl;
 };
 

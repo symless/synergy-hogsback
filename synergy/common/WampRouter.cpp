@@ -53,7 +53,7 @@ WampRouter::~WampRouter()
 }
 
 void
-WampRouter::run()
+WampRouter::start()
 {
     if (m_rawsocketServer) {
         m_rawsocketServer->start();
@@ -67,7 +67,7 @@ WampRouter::run()
 }
 
 void
-WampRouter::shutdown()
+WampRouter::stop()
 {
     if (m_websocketServer) {
         m_websocketServer->shutdown();

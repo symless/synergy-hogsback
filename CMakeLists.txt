@@ -117,7 +117,8 @@ set (Boost_USE_STATIC_RUNTIME OFF)
 set (Boost_USE_MULTITHREADED ON)
 find_package (Boost 1.55 REQUIRED COMPONENTS system date_time filesystem regex
                                              thread chrono)
-include_directories(${Boost_INCLUDE_DIRS})
+include_directories (BEFORE SYSTEM ${Boost_INCLUDE_DIRS})
+include_directories (BEFORE "${CMAKE_SOURCE_DIR}/third_party/callable_traits/include")
 
 # Enable the latest version of Boost Thread (default as of 1.64.0 is 2)
 add_definitions (-DBOOST_THREAD_VERSION=5)

@@ -84,7 +84,7 @@ void ProcessManager::start()
         cmd.push_back(arg.toStdString());
     }
 
-    m_rpcClient->call<void> ("startCore", cmd);
+    m_rpcClient->call<void> ("synergy.core.start", cmd);
     // startProcess();
 }
 

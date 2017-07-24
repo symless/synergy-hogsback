@@ -16,7 +16,8 @@ public:
     void shutdown();
 
 private:
-    boost::asio::io_service& m_threadIoService;
+    void provideCore();
+    boost::asio::io_service& m_ioService;
     std::shared_ptr<boost::asio::io_service::work> m_work;
     std::unique_ptr<ProcessManager> m_processManager;
     std::unique_ptr<RpcManager> m_rpcManager;

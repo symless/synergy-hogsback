@@ -14,10 +14,10 @@ set (COMMON_LIB_SOURCES
     UserConfig.cpp
     DirectoryManager.cpp
     RpcManager.cpp
-    WampServer.cpp
     WampClient.cpp
     WampRouter.cpp
     RpcClient.cpp
+    RpcServer.cpp
     ${platform_sources}
 )
 
