@@ -1,12 +1,15 @@
 [submodule "fmt"]
     path = third_party/fmt
     url = https://github.com/fmtlib/fmt.git
+    shallow = true
 [submodule "libzmq"]
     path = third_party/libzmq
     url = https://github.com/zeromq/libzmq.git
+    shallow = true
 [submodule "cppzmq"]
     path = third_party/cppzmq
     url = https://github.com/zeromq/cppzmq.git
+    shallow = true
 [submodule "synergy"]
     path = synergy/core
     url = https://github.com/symless/synergy.git
@@ -14,30 +17,39 @@
     path = third_party/libsodium
     url = https://github.com/jedisct1/libsodium.git
     branch = stable
+    shallow = true
 [submodule "catch"]
     path = third_party/catch
     url = https://github.com/philsquared/Catch.git
 [submodule "third_party/crashpad"]
 	path = third_party/crashpad
 	url = https://chromium.googlesource.com/crashpad/crashpad
+	shallow = true
 [submodule "third_party/mini_chromium"]
 	path = third_party/mini_chromium
 	url = https://chromium.googlesource.com/chromium/mini_chromium
+	shallow = true
 [submodule "third_party/cpptoml"]
 	path = third_party/cpptoml
 	url = https://github.com/skystrife/cpptoml.git
+	shallow = true
 [submodule "third_party/autobahn-cpp"]
 	path = third_party/autobahn-cpp
 	url = https://github.com/crossbario/autobahn-cpp.git
+	shallow = true
 [submodule "third_party/websocketpp"]
 	path = third_party/websocketpp
 	url = https://github.com/zaphoyd/websocketpp.git
+	shallow = true
 [submodule "third_party/msgpack-c"]
 	path = third_party/msgpack-c
 	url = https://github.com/msgpack/msgpack-c.git
+	shallow = true
 [submodule "third_party/bonefish"]
 	path = third_party/bonefish
 	url = https://github.com/symless/bonefish.git
+	shallow = true
 [submodule "third_party/callable_traits"]
 	path = third_party/callable_traits
 	url = https://github.com/badair/callable_traits.git
+	shallow = true
