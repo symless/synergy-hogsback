@@ -46,6 +46,8 @@ WampCallee<Fun>::operator()(autobahn::wamp_invocation invocation) {
 
     invocation->get_arguments (args);
     boost::fusion::invoke (m_fun, args);
+    /* TODO: actually return the result... */
+    invocation->empty_result ();
 }
 
 } // namespace
