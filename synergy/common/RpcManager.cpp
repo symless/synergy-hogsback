@@ -1,5 +1,5 @@
 #include "RpcManager.h"
-#include "RpcServer.h"
+
 #include "WampRouter.h"
 
 #include <iostream>

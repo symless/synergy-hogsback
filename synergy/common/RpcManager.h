@@ -1,6 +1,8 @@
 #ifndef RPCMANAGER_H
 #define RPCMANAGER_H
 
+#include "RpcServer.h"
+
 #include <boost/asio.hpp>
 #include <boost/signals2.hpp>
 

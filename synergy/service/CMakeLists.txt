@@ -3,10 +3,8 @@ cmake_minimum_required (VERSION 3.4)
 
 if (WIN32)
     file(GLOB platform_sources "Windows/ServiceController.cpp")
-elseif (APPLE)
-    file(GLOB platform_sources "Mac/ServiceController.cpp")
-elseif (UNIX)
-    file(GLOB platform_sources "Linux/ServiceController.cpp")
+else ()
+    file(GLOB platform_sources "Unix/ServiceController.cpp")
 endif()
 
 set (SERVICE_SOURCES

@@ -1,12 +1,16 @@
 #include "../ServiceController.h"
 
 //
-// ServiceController for Linux
+//  ServiceControllerImp for Mac
 //
 
 class ServiceControllerImp {
 
 };
+
+//
+//  ServiceController for Unix
+//
 
 ServiceController::ServiceController() :
     m_install(false),
@@ -20,6 +24,7 @@ ServiceController::ServiceController() :
 {
     m_worker = std::make_shared<ServiceWorker>(m_threadIoService);
 }
+
 ServiceController::~ServiceController()
 {
 
@@ -27,15 +32,21 @@ ServiceController::~ServiceController()
 
 void ServiceController::doRun()
 {
-
+    setupTerminationSignals();
+    m_worker->start();
 }
 
 void ServiceController::install()
 {
-
+    // there is no implementatioon for manual installing on Unix
 }
 
 void ServiceController::uninstall()
+{
+    // there is no implementatioon for manual uninstalling on Unix
+}
+
+void ServiceController::shutdown()
 {
 
 }
