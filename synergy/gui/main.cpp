@@ -11,7 +11,6 @@
 #include "AppConfig.h"
 #include "Hostname.h"
 #include "Common.h"
-#include <synergy/common/RpcClient.h>
 #include <DirectoryManager.h>
 #include <ProfileListModel.h>
 #include <ProfileManager.h>
@@ -23,6 +22,7 @@
 #include <boost/filesystem.hpp>
 #include <iostream>
 #include <boost/asio.hpp>
+#include <synergy/common/WampClient.h>
 
 namespace asio = boost::asio;
 
@@ -156,13 +156,13 @@ main(int argc, char* argv[])
         }
     );
 
-    RpcClient rpcClient (io);
+    WampClient wampClient (io);
     std::thread rpcThread ([&]{
-        rpcClient.start ("127.0.0.1", 24888);
+        wampClient.start ("127.0.0.1", 24888);
         io.run ();
     });
 
-    ProcessManager processManager (rpcClient);
+    ProcessManager processManager (wampClient);
     ConnectivityTester tester;
     processManager.setConnectivityTester(&tester);
 

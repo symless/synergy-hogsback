@@ -4,7 +4,7 @@
 //  ServiceControllerImp for Mac
 //
 
-class ServiceControllerImp {
+class ServiceControllerImpl {
 
 };
 

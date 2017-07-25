@@ -1,16 +1,14 @@
 #ifndef SERVICECONTROLLER_H
 #define SERVICECONTROLLER_H
 
-#include "synergy/service/ServiceWorker.h"
-#include "synergy/service/IOService.h"
-
+#include <synergy/service/ServiceWorker.h>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <thread>
 #include <memory>
 #include <string>
 
-class ServiceControllerImp;
+class ServiceControllerImpl;
 
 class ServiceController
 {
@@ -84,7 +82,7 @@ protected:
     bool m_foreground;
     boost::asio::io_service m_threadIoService;
     boost::asio::signal_set m_terminationSignals;
-    std::unique_ptr<ServiceControllerImp> m_imp;
+    std::unique_ptr<ServiceControllerImpl> m_imp;
     std::shared_ptr<ServiceWorker> m_worker;
 };
 

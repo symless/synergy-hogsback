@@ -13,10 +13,10 @@ static char* kServiceDisplayName = "Synergy";
 // ServiceControllerImp for Windows
 //
 
-class ServiceControllerImp {
+class ServiceControllerImpl {
 public:
-    ServiceControllerImp();
-    ~ServiceControllerImp();
+    ServiceControllerImpl();
+    ~ServiceControllerImpl();
 
     void doRun();
     void manualInstall();
@@ -46,12 +46,12 @@ private:
 
     std::shared_ptr<ServiceWorker> m_worker;
 
-    static ServiceControllerImp* s_impInstance;
+    static ServiceControllerImpl* s_impInstance;
 };
 
-ServiceControllerImp* ServiceControllerImp::s_impInstance = NULL;
+ServiceControllerImpl* ServiceControllerImpl::s_impInstance = NULL;
 
-ServiceControllerImp::ServiceControllerImp()
+ServiceControllerImpl::ServiceControllerImpl()
 {
     m_status.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
     m_status.dwCurrentState = SERVICE_START_PENDING;
@@ -66,17 +66,17 @@ ServiceControllerImp::ServiceControllerImp()
     m_status.dwWaitHint = 0;
 }
 
-ServiceControllerImp::~ServiceControllerImp()
+ServiceControllerImpl::~ServiceControllerImpl()
 {
 
 }
 
-void ServiceControllerImp::doRun()
+void ServiceControllerImpl::doRun()
 {
     s_impInstance = this;
 
     SERVICE_TABLE_ENTRY serviceTable[] = {
-        { kServiceProcessName, ServiceControllerImp::serviceMain },
+        { kServiceProcessName, ServiceControllerImpl::serviceMain },
         { NULL, NULL }
     };
 
@@ -84,7 +84,7 @@ void ServiceControllerImp::doRun()
     StartServiceCtrlDispatcher(serviceTable);
 }
 
-void ServiceControllerImp::manualInstall()
+void ServiceControllerImpl::manualInstall()
 {
     // install default daemon if not already installed.
     if (!isDaemonInstalled(kServiceProcessName)) {
@@ -142,7 +142,7 @@ void ServiceControllerImp::manualInstall()
     //manualStart(kServiceDisplayName);
 }
 
-void ServiceControllerImp::manualUninstall()
+void ServiceControllerImpl::manualUninstall()
 {
     // open service manager
     SC_HANDLE manager = OpenSCManager(NULL, NULL, GENERIC_WRITE);
@@ -197,7 +197,7 @@ void ServiceControllerImp::manualUninstall()
     CloseServiceHandle(manager);
 }
 
-bool ServiceControllerImp::isDaemonInstalled(const char *name)
+bool ServiceControllerImpl::isDaemonInstalled(const char *name)
 {
     // open service manager
     SC_HANDLE manager = OpenSCManager(NULL, NULL, GENERIC_READ);
@@ -217,7 +217,7 @@ bool ServiceControllerImp::isDaemonInstalled(const char *name)
     return (service != NULL);
 }
 
-void ServiceControllerImp::manualStart(const char *name)
+void ServiceControllerImpl::manualStart(const char *name)
 {
     // open service manager
     SC_HANDLE manager = OpenSCManager(NULL, NULL, GENERIC_READ);
@@ -246,7 +246,7 @@ void ServiceControllerImp::manualStart(const char *name)
     }
 }
 
-void ServiceControllerImp::SetServiceStatus(DWORD currentState, DWORD win32ExitCode, DWORD waitHint)
+void ServiceControllerImpl::SetServiceStatus(DWORD currentState, DWORD win32ExitCode, DWORD waitHint)
 {
     static DWORD checkPoint = 1;
 
@@ -263,7 +263,7 @@ void ServiceControllerImp::SetServiceStatus(DWORD currentState, DWORD win32ExitC
     ::SetServiceStatus(m_statusHandle, &m_status);
 }
 
-void ServiceControllerImp::start(DWORD dwArgc, LPSTR *pszArgv)
+void ServiceControllerImpl::start(DWORD dwArgc, LPSTR *pszArgv)
 {
     try {
         SetServiceStatus(SERVICE_START_PENDING);
@@ -291,7 +291,7 @@ void ServiceControllerImp::start(DWORD dwArgc, LPSTR *pszArgv)
     }
 }
 
-void ServiceControllerImp::stop()
+void ServiceControllerImpl::stop()
 {
     DWORD originalState = m_status.dwCurrentState;
     try {
@@ -317,7 +317,7 @@ void ServiceControllerImp::stop()
     }
 }
 
-void ServiceControllerImp::pause()
+void ServiceControllerImpl::pause()
 {
     try {
         SetServiceStatus(SERVICE_PAUSE_PENDING);
@@ -342,7 +342,7 @@ void ServiceControllerImp::pause()
     }
 }
 
-void ServiceControllerImp::resume()
+void ServiceControllerImpl::resume()
 {
     try {
         SetServiceStatus(SERVICE_CONTINUE_PENDING);
@@ -367,7 +367,7 @@ void ServiceControllerImp::resume()
     }
 }
 
-void ServiceControllerImp::shutdown()
+void ServiceControllerImpl::shutdown()
 {
     try {
         m_worker->shutdown();
@@ -386,13 +386,13 @@ void ServiceControllerImp::shutdown()
     }
 }
 
-void ServiceControllerImp::serviceMain(DWORD dwArgc, LPSTR *pszArgv)
+void ServiceControllerImpl::serviceMain(DWORD dwArgc, LPSTR *pszArgv)
 {
     assert(s_impInstance != NULL);
 
     // Register the handler function for the service
     s_impInstance->m_statusHandle = RegisterServiceCtrlHandler(
-        kServiceProcessName, ServiceControllerImp::serviceCtrlHandler);
+        kServiceProcessName, ServiceControllerImpl::serviceCtrlHandler);
     if (s_impInstance->m_statusHandle == NULL) {
         throw GetLastError();
     }
@@ -401,7 +401,7 @@ void ServiceControllerImp::serviceMain(DWORD dwArgc, LPSTR *pszArgv)
     s_impInstance->start(dwArgc, pszArgv);
 }
 
-void ServiceControllerImp::serviceCtrlHandler(DWORD dwCtrl)
+void ServiceControllerImpl::serviceCtrlHandler(DWORD dwCtrl)
 {
     switch (dwCtrl)
     {
@@ -414,7 +414,7 @@ void ServiceControllerImp::serviceCtrlHandler(DWORD dwCtrl)
     }
 }
 
-void ServiceControllerImp::setWorker(const std::shared_ptr<ServiceWorker> &worker)
+void ServiceControllerImpl::setWorker(const std::shared_ptr<ServiceWorker> &worker)
 {
     m_worker = worker;
 }
@@ -433,7 +433,7 @@ ServiceController::ServiceController() :
     m_terminationSignals(m_threadIoService, SIGTERM, SIGINT)
 #endif
 {
-    m_imp = std::make_unique<ServiceControllerImp>();
+    m_imp = std::make_unique<ServiceControllerImpl>();
     m_worker = std::make_shared<ServiceWorker>(m_threadIoService);
 
     m_imp->setWorker(m_worker);

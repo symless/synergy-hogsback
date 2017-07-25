@@ -14,7 +14,7 @@ using boost::optional;
 
 class ProcessManagerImpl {
 public:
-    ProcessManagerImpl (asio::io_service& io)
+    ProcessManagerImpl (boost::asio::io_service& io)
         : m_strand (io), m_outPipe (io), m_errorPipe (io) {
     }
 
@@ -22,11 +22,11 @@ public:
 
     std::mutex mtx;
 
-    asio::io_service::strand m_strand;
+    boost::asio::io_service::strand m_strand;
     bp::async_pipe m_outPipe;
     bp::async_pipe m_errorPipe;
-    asio::streambuf m_outBuf;
-    asio::streambuf m_errorBuf;
+    boost::asio::streambuf m_outBuf;
+    boost::asio::streambuf m_errorBuf;
     std::string m_lineBuf;
 
     optional<bp::child> m_process;
@@ -52,7 +52,7 @@ asyncReadLines (ProcessManager& manager, Strand& strand, Pipe& pipe,
 
     manager.onOutput (line);
 
-    asio::async_read_until (
+    boost::asio::async_read_until (
         pipe,
         buffer,
         '\n',
@@ -72,7 +72,7 @@ ProcessManagerImpl::start (ProcessManager& manager) {
                      bp::std_err > m_errorPipe);
     m_lineBuf.clear ();
 
-    asio::async_read_until (
+    boost::asio::async_read_until (
         m_outPipe,
         m_outBuf,
         '\n',
@@ -83,7 +83,7 @@ ProcessManagerImpl::start (ProcessManager& manager) {
         })
     );
 
-    asio::async_read_until (
+    boost::asio::async_read_until (
         m_errorPipe,
         m_errorBuf,
         '\n',
@@ -101,7 +101,7 @@ make_unique (Args&&... args) {
     return std::unique_ptr<T>(new T (std::forward<Args>(args)...));
 }
 
-ProcessManager::ProcessManager (asio::io_service &io)
+ProcessManager::ProcessManager (boost::asio::io_service &io)
     : m_ioService (io),
       m_impl (make_unique<ProcessManagerImpl> (m_ioService)) {
 }

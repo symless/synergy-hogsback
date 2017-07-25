@@ -1,8 +1,8 @@
 #ifndef SYNERGY_SERVICE_PROCESSMANAGER_H
 #define SYNERGY_SERVICE_PROCESSMANAGER_H
 
-#include "synergy/service/IOService.h"
-#include "synergy/common/Signals.h"
+#include <boost/asio.hpp>
+#include <boost/signals2.hpp>
 
 #include <string>
 #include <memory>
@@ -14,7 +14,7 @@ class ProcessManagerImpl;
 class ProcessManager final
 {
 public:
-    explicit ProcessManager (asio::io_service& io);
+    explicit ProcessManager (boost::asio::io_service& io);
     ~ProcessManager() noexcept;
     ProcessManager (ProcessManager const&) = delete;
     ProcessManager& operator= (ProcessManager const&) = delete;
@@ -34,7 +34,7 @@ public:
     signal<void(std::string)> onOutput;
 
 private:
-    asio::io_service& m_ioService;
+    boost::asio::io_service& m_ioService;
     std::unique_ptr<ProcessManagerImpl> m_impl;
 };
 

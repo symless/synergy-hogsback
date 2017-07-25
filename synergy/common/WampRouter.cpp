@@ -1,42 +1,30 @@
-#include "WampRouter.h"
-
+#include <synergy/common/WampRouter.h>
 #include <bonefish/serialization/wamp_serializers.hpp>
-#include <bonefish/serialization/json_serializer.hpp>
 #include <bonefish/serialization/msgpack_serializer.hpp>
 #include <bonefish/router/wamp_router.hpp>
 #include <bonefish/router/wamp_routers.hpp>
 #include <bonefish/rawsocket/rawsocket_server.hpp>
 #include <bonefish/rawsocket/tcp_listener.hpp>
 #include <bonefish/trace/trace.hpp>
-#include <bonefish/websocket/websocket_server.hpp>
 #include <boost/asio/ip/address.hpp>
-#include <boost/bind.hpp>
-#include <signal.h>
-#include <string.h>
 
-WampRouter::WampRouter(boost::asio::io_service &ioService, std::string ip, int port) :
+static bool const debug = true;
+
+WampRouter::WampRouter(boost::asio::io_service& ioService) :
     m_ioService(ioService),
     m_routers(std::make_shared<bonefish::wamp_routers>()),
-    m_serializers(std::make_shared<bonefish::wamp_serializers>()),
-    m_rawsocketServer(),
-    m_websocketServer(),
-    m_websocketPort(0)
+    m_serializers(std::make_shared<bonefish::wamp_serializers>())
 {
-    using namespace bonefish;
+    bonefish::trace::set_enabled(debug);
 
-    // Turn on bonefish tracing
-    bonefish::trace::set_enabled(true);
+    m_routers->add_router
+        (std::make_shared<bonefish::wamp_router>(m_ioService, "default"));
 
-    auto router = std::make_shared<wamp_router>(m_ioService, "default");
-    m_routers->add_router(router);
+    m_serializers->add_serializer
+        (std::make_shared<bonefish::msgpack_serializer>());
 
-    m_serializers->add_serializer(std::make_shared<msgpack_serializer>());
-
-    m_rawsocketServer = std::make_shared<rawsocket_server>(m_routers, m_serializers);
-
-    auto listener = std::make_shared<tcp_listener>(
-            m_ioService, boost::asio::ip::address_v4::from_string(ip), port);
-    m_rawsocketServer->attach_listener(std::static_pointer_cast<rawsocket_listener>(listener));
+    m_rawsocketServer = std::make_shared<bonefish::rawsocket_server>
+        (m_routers, m_serializers);
 }
 
 WampRouter::~WampRouter()
@@ -44,26 +32,20 @@ WampRouter::~WampRouter()
 }
 
 void
-WampRouter::start()
+WampRouter::start (std::string const& ip, int port)
 {
-    if (m_rawsocketServer) {
-        m_rawsocketServer->start();
-    }
-
-    if (m_websocketServer) {
-        m_websocketServer->start(boost::asio::ip::address(), m_websocketPort);
-    }
-
+    m_rawsocketServer->attach_listener
+        (std::static_pointer_cast<bonefish::rawsocket_listener>
+            (std::make_shared<bonefish::tcp_listener>
+                (m_ioService, boost::asio::ip::address_v4::from_string(ip),
+                    port)));
+    m_rawsocketServer->start();
     ready();
 }
 
 void
 WampRouter::stop()
 {
-    if (m_websocketServer) {
-        m_websocketServer->shutdown();
-    }
-
     if (m_rawsocketServer) {
         m_rawsocketServer->shutdown();
     }

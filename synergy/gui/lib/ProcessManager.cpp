@@ -6,7 +6,7 @@
 #include "LogManager.h"
 #include "ProcessMode.h"
 #include "AppConfig.h"
-#include <synergy/common/RpcClient.h>
+#include <synergy/common/WampClient.h>
 
 #include <QtNetwork>
 #include <QtGlobal>
@@ -20,12 +20,12 @@ ProcessManager::ProcessManager() {
     throw std::runtime_error ("Default constructed process manager used");
 }
 
-ProcessManager::ProcessManager(RpcClient& rpcClient) :
+ProcessManager::ProcessManager(WampClient& wampClient) :
     m_process(NULL),
     m_processMode(kClientMode),
     m_active(true),
     m_serverIp(),
-    m_rpcClient(std::shared_ptr<void>(), &rpcClient)
+    m_wampClient(std::shared_ptr<void>(), &wampClient)
 {
     m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
 }
@@ -84,7 +84,7 @@ void ProcessManager::start()
         cmd.push_back(arg.toStdString());
     }
 
-    m_rpcClient->call<void> ("synergy.core.start", cmd);
+    m_wampClient->call<void> ("synergy.core.start", cmd);
     // startProcess();
 }
 

@@ -15,9 +15,8 @@ set (COMMON_LIB_SOURCES
     DirectoryManager.cpp
     RpcManager.cpp
     WampClient.cpp
+    WampServer.cpp
     WampRouter.cpp
-    RpcClient.cpp
-    RpcServer.cpp
     ${platform_sources}
 )
 

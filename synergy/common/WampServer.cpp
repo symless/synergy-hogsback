@@ -1,25 +1,30 @@
-#include <synergy/common/RpcServer.h>
+#include <synergy/common/WampServer.h>
 
 namespace ip = boost::asio::ip;
 using ip::tcp;
 
-RpcServer::RpcServer
-(boost::asio::io_service& io, std::string ipAddress, int const port):
-    m_executor (io)
-{
-    bool const debug = true;
-    m_session = std::make_shared<autobahn::wamp_session>(io, debug);
+static bool const debug = true;
 
-    m_transport = std::make_shared<autobahn::wamp_tcp_transport>
-        (io, tcp::endpoint(ip::address_v4::from_string(ipAddress), port),
-         debug);
-    m_transport->attach
-        (std::static_pointer_cast<autobahn::wamp_transport_handler>(m_session));
+WampServer::WampServer (boost::asio::io_service& io):
+    m_executor (io),
+    m_session (std::make_shared<autobahn::wamp_session>(io, debug))
+{
 }
 
 void
-RpcServer::start()
+WampServer::start (std::string const& ip, int const port)
 {
+    if (m_transport) {
+        m_transport->disconnect().get();
+        m_transport->detach();
+        m_transport.reset();
+    }
+
+    m_transport = std::make_shared<autobahn::wamp_tcp_transport>
+        (ioService(), tcp::endpoint(ip::address_v4::from_string(ip), port), debug);
+    m_transport->attach
+        (std::static_pointer_cast<autobahn::wamp_transport_handler>(m_session));
+
     m_transport->connect().then (m_executor, [&](boost::future<void> connected) {
         connected.get();
         m_session->start().then(m_executor, [&](boost::future<void> started) {
