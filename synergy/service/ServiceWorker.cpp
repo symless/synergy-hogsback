@@ -36,9 +36,15 @@ ServiceWorker::start()
 void
 ServiceWorker::provideCore()
 {
-    m_rpcManager->server()->provide ("synergy.core.start",
+    auto server = m_rpcManager->server();
+
+    server->provide ("synergy.core.start",
                                      [this](std::vector<std::string>& cmd) {
         m_processManager->start (std::move (cmd));
+    });
+
+    m_processManager->onOutput.connect([server](std::string line) {
+        server->publish ("synergy.core.log", std::move(line));
     });
 }
 

@@ -33,6 +33,7 @@ WampClient::start (std::string const& ip, int const port)
             m_session->join("default").then
                     (m_executor, [&](boost::future<uint64_t> joined) {
                 joined.get();
+                ready();
             });
         });
     });

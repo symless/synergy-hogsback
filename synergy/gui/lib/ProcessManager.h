@@ -39,13 +39,14 @@ public:
 signals:
     void screenStatusChanged(QPair<QString, ScreenStatus>);
     void localInputDetected();
+    void logCoreOutput(QString);
 
 public slots:
      void newServerDetected(int serverId);
 
 private slots:
     void exit(int exitCode, QProcess::ExitStatus);
-    void logCoreOutput();
+    void onLogCoreOutput(QString text);
     void logCoreError();
 
 private:

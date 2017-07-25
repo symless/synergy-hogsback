@@ -9,8 +9,19 @@
 #include <string>
 #include <memory>
 #include <stdexcept>
+#include <boost/callable_traits.hpp>
+#include <boost/fusion/adapted/std_tuple.hpp>
+#include <boost/fusion/functional/invocation/invoke.hpp>
+#include <boost/signals2.hpp>
 
 namespace {
+
+struct make_tuple {
+    template <typename... Args>
+    auto operator()(Args&&... args) const noexcept {
+        return std::make_tuple (std::forward<Args>(args)...);
+    }
+};
 
 template <typename R>
 struct WampCallHelper {
@@ -28,6 +39,26 @@ struct WampCallHelper<void> {
     get_return_value (Result&&) {
     }
 };
+
+template <typename Handler>
+class WampEventHandler final {
+    public:
+        WampEventHandler (Handler&& handler): m_handler(std::move(handler)) {}
+        WampEventHandler (Handler const& handler): m_handler(handler) {}
+        void operator()(autobahn::wamp_event const& event);
+    private:
+        Handler m_handler;
+};
+
+template <typename Handler>
+void
+WampEventHandler<Handler>::operator()(autobahn::wamp_event const& event) {
+    typename boost::fusion::result_of::invoke
+                <make_tuple, boost::callable_traits::args_t<Handler>>::type args;
+
+    event.get_arguments (args);
+    boost::fusion::invoke (m_handler, args);
+}
 
 } // namespace
 
@@ -66,6 +97,16 @@ public:
          * extension to unwrap that in to a future<Result> here */
         return task->get_future();
     }
+
+    template <typename Handler>
+    decltype(auto)
+    subscribe (char const* const topic, Handler&& handler) {
+        using handler_type = std::decay_t<Handler>;
+        return m_session->subscribe (topic,
+                    WampEventHandler<handler_type>(std::forward<Handler>(handler)));
+    }
+
+    boost::signals2::signal<void()> ready;
 
 private:
     boost::executors::executor_adaptor<AsioExecutor> m_executor;

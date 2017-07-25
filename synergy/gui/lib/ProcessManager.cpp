@@ -28,6 +28,14 @@ ProcessManager::ProcessManager(WampClient& wampClient) :
     m_wampClient(std::shared_ptr<void>(), &wampClient)
 {
     m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
+
+    connect (this, &ProcessManager::logCoreOutput, this, &ProcessManager::onLogCoreOutput, Qt::QueuedConnection);
+
+    wampClient.ready.connect([&]() {
+        wampClient.subscribe ("synergy.core.log", [this](std::string line) {
+            emit logCoreOutput(QString::fromStdString(line));
+        });
+    });
 }
 
 ProcessManager::~ProcessManager()
@@ -106,7 +114,7 @@ void ProcessManager::startProcess()
     connect(m_process, SIGNAL(finished(int, QProcess::ExitStatus)),
         this, SLOT(exit(int, QProcess::ExitStatus)));
     connect(m_process, SIGNAL(readyReadStandardOutput()),
-        this, SLOT(logCoreOutput()));
+        this, SLOT(onLogCoreOutput()));
     connect(m_process, SIGNAL(readyReadStandardError()),
         this, SLOT(logCoreError()));
 
@@ -188,42 +196,39 @@ void ProcessManager::exit(int exitCode, QProcess::ExitStatus)
     }
 }
 
-void ProcessManager::logCoreOutput()
+void ProcessManager::onLogCoreOutput(QString text)
 {
-    if (m_process) {
-        QString text(m_process->readAllStandardOutput());
-        foreach(QString line, text.split(QRegExp("\r|\n|\r\n"))) {
-            if (!line.isEmpty()) {
-                LogManager::raw("[Core] " + line);
+    foreach(QString line, text.split(QRegExp("\r|\n|\r\n"))) {
+        if (!line.isEmpty()) {
+            LogManager::raw("[Core] " + line);
 
-                // TODO: use proper IPC
-                // check key outputs
-                if (line.contains("started server, waiting for clients") ||
-                    line.contains("connected to server")) {
-                    QPair<QString, ScreenStatus> r;
-                    r.first = QHostInfo::localHostName();
+            // TODO: use proper IPC
+            // check key outputs
+            if (line.contains("started server, waiting for clients") ||
+                line.contains("connected to server")) {
+                QPair<QString, ScreenStatus> r;
+                r.first = QHostInfo::localHostName();
+                r.second = kConnected;
+                emit screenStatusChanged(r);
+            }
+            else if (line.contains("\" has connected")) {
+                QPair<QString, ScreenStatus> r;
+                QStringList result = line.split('"');
+                Q_ASSERT(result.size() == 3);
+
+                if (result.size() == 3) {
+                    r.first = result[1];
                     r.second = kConnected;
                     emit screenStatusChanged(r);
                 }
-                else if (line.contains("\" has connected")) {
-                    QPair<QString, ScreenStatus> r;
-                    QStringList result = line.split('"');
-                    Q_ASSERT(result.size() == 3);
-
-                    if (result.size() == 3) {
-                        r.first = result[1];
-                        r.second = kConnected;
-                        emit screenStatusChanged(r);
-                    }
-                }
-                else if (line.contains("connecting to")) {
-                    QPair<QString, ScreenStatus> r;
-                    r.first = QHostInfo::localHostName();
-                    r.second = kConnecting;
-                    emit screenStatusChanged(r);
-                } else if (line.contains("local input detected")) {
-                    emit localInputDetected();
-                }
+            }
+            else if (line.contains("connecting to")) {
+                QPair<QString, ScreenStatus> r;
+                r.first = QHostInfo::localHostName();
+                r.second = kConnecting;
+                emit screenStatusChanged(r);
+            } else if (line.contains("local input detected")) {
+                emit localInputDetected();
             }
         }
     }

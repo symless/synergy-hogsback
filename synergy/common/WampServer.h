@@ -74,6 +74,12 @@ public:
                                    WampCallee<fun_type>(std::forward<Fun>(fun)));
     }
 
+    template <typename... Args>
+    void
+    publish (char const* const topic, Args&&... args) {
+        m_session->publish (topic, std::make_tuple(std::forward<Args>(args)...));
+    }
+
 public:
     boost::signals2::signal<void()> ready;
 
