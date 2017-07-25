@@ -13,15 +13,6 @@ endif()
 add_subdirectory (fmt EXCLUDE_FROM_ALL)
 
 #
-# Flatbuffers
-#
-set (FLATBUFFERS_INSTALL OFF CACHE BOOL
-                         "Enable flatbuffers install targets." FORCE)
-set (FLATBUFFERS_BUILD_TESTS OFF CACHE BOOL
-                             "Enable flatbuffers tests and samples." FORCE)
-add_subdirectory (flatbuffers EXCLUDE_FROM_ALL)
-
-#
 # ZeroMQ
 #
 if (APPLE)
