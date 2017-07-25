@@ -14,24 +14,38 @@
 
 namespace {
 
+struct make_tuple {
+    template <typename... Args>
+    auto operator()(Args&&... args) const noexcept {
+        return std::make_tuple (std::forward<Args>(args)...);
+    }
+};
+
 template <typename Fun>
 class WampCallee final {
     public:
-        WampCallee (Fun&& fun): impl_(std::move(fun)) {}
-        WampCallee (Fun const& fun): impl_(fun) {}
+        WampCallee (Fun&& fun): m_fun(std::move(fun)) {}
+        WampCallee (Fun const& fun): m_fun(fun) {}
         void operator()(autobahn::wamp_invocation);
     private:
-        Fun impl_;
+        Fun m_fun;
 };
 
 template <typename Fun> inline
 void
 WampCallee<Fun>::operator()(autobahn::wamp_invocation invocation) {
-    // Note: this doesn't work if the callable takes arguments by reference
-    // TODO: apply std::decay_t as a transformation
-    boost::callable_traits::args_t<Fun> args;
+    /* Create a tuple of values based on the arguments that need to be passed
+     * to the function. callable_traits maintains references and qualifiers, so
+     * a tuple of these arguments can't be constructed directly. Instead we
+     * apply the transformation that would occur if we had called
+     * std::make_tuple with those arguments and create a new instance of the
+     * resulting tuple type.
+     */
+    typename boost::fusion::result_of::invoke
+                <make_tuple, boost::callable_traits::args_t<Fun>>::type args;
+
     invocation->get_arguments (args);
-    boost::fusion::invoke (impl_, args);
+    boost::fusion::invoke (m_fun, args);
 }
 
 } // namespace
