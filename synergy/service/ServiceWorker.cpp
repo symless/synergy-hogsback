@@ -36,8 +36,8 @@ void
 ServiceWorker::provideCore()
 {
     m_rpcManager->provide ("synergy.core.start",
-                           [this](std::vector<std::string> cmd) {
-        m_processManager->start(std::move (cmd));
+                           [this](std::vector<std::string>& cmd) {
+        m_processManager->start (std::move (cmd));
     });
 }
 

@@ -14,16 +14,16 @@
 #include <signal.h>
 #include <string.h>
 
-using namespace bonefish;
-
 WampRouter::WampRouter(boost::asio::io_service &ioService, std::string ip, int port) :
     m_ioService(ioService),
-    m_routers(std::make_shared<wamp_routers>()),
-    m_serializers(std::make_shared<wamp_serializers>()),
+    m_routers(std::make_shared<bonefish::wamp_routers>()),
+    m_serializers(std::make_shared<bonefish::wamp_serializers>()),
     m_rawsocketServer(),
     m_websocketServer(),
     m_websocketPort(0)
 {
+    using namespace bonefish;
+
     // Turn on bonefish tracing
     bonefish::trace::set_enabled(true);
 
