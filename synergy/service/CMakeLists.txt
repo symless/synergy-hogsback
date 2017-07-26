@@ -34,5 +34,5 @@ target_link_libraries (${PROJECT_NAME}
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    add_subdirectory (PreLoginAgent)
+    install (TARGETS ${PROJECT_NAME} DESTINATION ${SYNERGY_BUNDLE_BINARY_DIR})
 endif()

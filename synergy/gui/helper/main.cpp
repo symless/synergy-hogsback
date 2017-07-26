@@ -1,3 +1,5 @@
+#include "synergy/common/DirectoryManager.h"
+
 #include <cstdlib>
 #include <unistd.h>
 #include <fstream>
@@ -23,6 +25,10 @@ auto const kHelperExecPath = "/Library/PrivilegedHelperTools/com.symless.synergy
 std::string const kPreLoginAgentFilename = "com.symless.synergy.v2.PreLoginAgent.plist";
 auto const kPreLoginAgentPListPath = "/Library/LaunchAgents/" + kPreLoginAgentFilename;
 auto const kPreLoginAgentPListSourcePath = kAppResourcePath + "/" + kPreLoginAgentFilename;
+
+std::string const kServiceUserAgentFilename = "com.symless.synergy.v2.synergyd.plist";
+auto const kServiceUserAgentPListTargetPathPostfix = "/Library/LaunchAgents/" + kServiceUserAgentFilename;
+auto const kServiceUserAgentPListSourcePath = kAppResourcePath + "/" + kServiceUserAgentFilename;
 
 
 static std::ofstream&
@@ -51,6 +57,39 @@ installPreLoginAgent() {
     /* Load the PreLogin agent */
     boost::process::ipstream launchd_out;
     boost::process::child launchd (fmt::format ("launchctl load {}", kPreLoginAgentPListPath),
+                                   boost::process::std_out > launchd_out);
+    std::string line;
+    while (launchd_out && std::getline(launchd_out, line)) {
+        if (!line.empty()) {
+            log() << line << std::endl;
+            line.clear();
+        }
+    }
+    launchd.wait();
+    return (EXIT_SUCCESS == launchd.exit_code());
+}
+
+static bool
+installSynergyService()
+{
+    auto serviceUserAgentPListTargetPath = DirectoryManager::instance()->userDir() + kServiceUserAgentPListTargetPathPostfix;
+    if (boost::filesystem::exists (serviceUserAgentPListTargetPath)) {
+        return true;
+    }
+    if (!boost::filesystem::exists (kServiceUserAgentPListSourcePath)) {
+        return false;
+    }
+
+    boost::system::error_code ec;
+    boost::filesystem::copy_file
+        (kServiceUserAgentPListSourcePath, serviceUserAgentPListTargetPath, ec);
+    if (ec) {
+        return false;
+    }
+
+    /* Load the PreLogin agent */
+    boost::process::ipstream launchd_out;
+    boost::process::child launchd (fmt::format ("launchctl load {}", serviceUserAgentPListTargetPath),
                                    boost::process::std_out > launchd_out);
     std::string line;
     while (launchd_out && std::getline(launchd_out, line)) {
@@ -99,8 +138,12 @@ main (int, const char*[])
         log() << fmt::format ("[{}] helper uid = {}, euid = {}, pid = {}\n", ct,
                               getuid(), geteuid(), getpid());
 
-        if (!installPreLoginAgent()) {
-            log() << fmt::format ("[{}] failed to install PreLoginAgent\n", ct);
+//        if (!installPreLoginAgent()) {
+//            log() << fmt::format ("[{}] failed to install PreLoginAgent\n", ct);
+//        }
+
+        if (!installSynergyService()) {
+            log() << fmt::format ("[{}] failed to install synergy service\n", ct);
         }
 
         log().close();
