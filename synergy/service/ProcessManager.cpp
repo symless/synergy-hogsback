@@ -20,7 +20,7 @@ public:
 
     void start (ProcessManager& manager);
 
-    std::mutex mtx;
+    std::mutex m_mutex;
 
     boost::asio::io_service::strand m_strand;
     bp::async_pipe m_outPipe;
@@ -111,9 +111,13 @@ ProcessManager::~ProcessManager () noexcept {
 
 void
 ProcessManager::start (std::vector<std::string> command) {
-    std::unique_lock<std::mutex> lock (m_impl->mtx);
-    if (m_impl->m_process) {
-        throw std::logic_error ("start() called while process is running");
+    std::unique_lock<std::mutex> lock (m_impl->m_mutex);
+
+    auto& process = m_impl->m_process;
+    if (process) {
+        process->terminate();
+        process->join();
+        process = decltype(m_impl->m_process)();
     }
 
     m_impl->m_command = move (command);
@@ -122,7 +126,7 @@ ProcessManager::start (std::vector<std::string> command) {
 
 bool
 ProcessManager::awaitingExit () const noexcept {
-    std::unique_lock<std::mutex> lock (m_impl->mtx);
+    std::unique_lock<std::mutex> lock (m_impl->m_mutex);
     return m_impl->m_awaitingExit;
 }
 
