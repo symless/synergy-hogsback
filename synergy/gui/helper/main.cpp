@@ -27,7 +27,7 @@ auto const kPreLoginAgentPListPath = "/Library/LaunchAgents/" + kPreLoginAgentFi
 auto const kPreLoginAgentPListSourcePath = kAppResourcePath + "/" + kPreLoginAgentFilename;
 
 std::string const kServiceUserAgentFilename = "com.symless.synergy.v2.synergyd.plist";
-auto const kServiceUserAgentPListTargetPathPostfix = "/Library/LaunchAgents/" + kServiceUserAgentFilename;
+auto const kServiceUserAgentPListTargetPath = "/Library/LaunchAgents/" + kServiceUserAgentFilename;
 auto const kServiceUserAgentPListSourcePath = kAppResourcePath + "/" + kServiceUserAgentFilename;
 
 
@@ -72,8 +72,7 @@ installPreLoginAgent() {
 static bool
 installSynergyService()
 {
-    auto serviceUserAgentPListTargetPath = DirectoryManager::instance()->userDir() + kServiceUserAgentPListTargetPathPostfix;
-    if (boost::filesystem::exists (serviceUserAgentPListTargetPath)) {
+    if (boost::filesystem::exists (kServiceUserAgentPListTargetPath)) {
         return true;
     }
     if (!boost::filesystem::exists (kServiceUserAgentPListSourcePath)) {
@@ -82,14 +81,14 @@ installSynergyService()
 
     boost::system::error_code ec;
     boost::filesystem::copy_file
-        (kServiceUserAgentPListSourcePath, serviceUserAgentPListTargetPath, ec);
+        (kServiceUserAgentPListSourcePath, kServiceUserAgentPListTargetPath, ec);
     if (ec) {
         return false;
     }
 
     /* Load the PreLogin agent */
     boost::process::ipstream launchd_out;
-    boost::process::child launchd (fmt::format ("launchctl load {}", serviceUserAgentPListTargetPath),
+    boost::process::child launchd (fmt::format ("launchctl load {}", kServiceUserAgentPListTargetPath),
                                    boost::process::std_out > launchd_out);
     std::string line;
     while (launchd_out && std::getline(launchd_out, line)) {
