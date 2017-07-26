@@ -39,8 +39,11 @@ static void
 asyncReadLines (ProcessManager& manager, Strand& strand, Pipe& pipe,
                 Buffer& buffer, Line& line, bs::error_code const& ec,
                 std::size_t bytes) {
-    std::istream stream (&buffer);
+    if (ec == boost::asio::error::operation_aborted) {
+        return;
+    }
 
+    std::istream stream (&buffer);
     if (ec || !bytes || !std::getline (stream, line)) {
         if (manager.awaitingExit ()) {
             manager.onUnexpectedExit ();
@@ -115,9 +118,14 @@ ProcessManager::start (std::vector<std::string> command) {
 
     auto& process = m_impl->m_process;
     if (process) {
+        m_impl->m_awaitingExit = true;
+        m_impl->m_outPipe.cancel();
+        m_impl->m_errorPipe.cancel();
+
         process->terminate();
         process->join();
         process = decltype(m_impl->m_process)();
+        m_impl->m_awaitingExit = false;
     }
 
     m_impl->m_command = move (command);
