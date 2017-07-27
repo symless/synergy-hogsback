@@ -92,11 +92,11 @@ installSynergyService()
     /* Load the service agent */
     boost::process::ipstream launchd_out;
     boost::process::ipstream launchd_err;
-    boost::process::child launchd (fmt::format ("launchctl start {}", kServiceUserAgentPListTargetPath),
-                                   boost::process::std_out > launchd_out, boost::process::std_err > launchd_err);
+    std::string cmd = fmt::format ("launchctl start {}", kServiceUserAgentPListTargetPath);
+    boost::process::child launchd (cmd, boost::process::std_out > launchd_out, boost::process::std_err > launchd_err);
     std::string line;
     while ((launchd_out && std::getline(launchd_out, line)) ||
-           (launchd_out && std::getline(launchd_err, line))) {
+           (launchd_err && std::getline(launchd_err, line))) {
         if (!line.empty()) {
             log() << line << std::endl;
             line.clear();
@@ -105,7 +105,7 @@ installSynergyService()
     launchd.wait();
 
     if (EXIT_SUCCESS != launchd.exit_code()) {
-        log() << fmt::format ("launchctl start failed with error code: [{}]\n", launchd.exit_code());
+        log() << fmt::format ("{} failed with error code: [{}]\n", cmd, launchd.exit_code());
     }
     return (EXIT_SUCCESS == launchd.exit_code());
 }
