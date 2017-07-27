@@ -103,6 +103,10 @@ installSynergyService()
         }
     }
     launchd.wait();
+
+    if (EXIT_SUCCESS != launchd.exit_code()) {
+        log() << fmt::format ("launchctl start failed with error code: [{}]\n", launchd.exit_code());
+    }
     return (EXIT_SUCCESS == launchd.exit_code());
 }
 
