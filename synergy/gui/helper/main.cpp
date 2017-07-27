@@ -92,7 +92,7 @@ installSynergyService()
     /* Load the service agent */
     boost::process::ipstream launchd_out;
     boost::process::ipstream launchd_err;
-    boost::process::child launchd (fmt::format ("launchctl load {}", kServiceUserAgentPListTargetPath),
+    boost::process::child launchd (fmt::format ("launchctl start {}", kServiceUserAgentPListTargetPath),
                                    boost::process::std_out > launchd_out, boost::process::std_err > launchd_err);
     std::string line;
     while ((launchd_out && std::getline(launchd_out, line)) ||
