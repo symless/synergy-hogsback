@@ -73,9 +73,11 @@ static bool
 installSynergyService()
 {
     if (boost::filesystem::exists (kServiceUserAgentPListTargetPath)) {
+        log() << "service already installed\n";
         return true;
     }
     if (!boost::filesystem::exists (kServiceUserAgentPListSourcePath)) {
+        log() << "service source file doesn't exist\n";
         return false;
     }
 
@@ -83,15 +85,18 @@ installSynergyService()
     boost::filesystem::copy_file
         (kServiceUserAgentPListSourcePath, kServiceUserAgentPListTargetPath, ec);
     if (ec) {
+        log() << "failed to copy service file over\n";
         return false;
     }
 
-    /* Load the PreLogin agent */
+    /* Load the service agent */
     boost::process::ipstream launchd_out;
+    boost::process::ipstream launchd_err;
     boost::process::child launchd (fmt::format ("launchctl load {}", kServiceUserAgentPListTargetPath),
-                                   boost::process::std_out > launchd_out);
+                                   boost::process::std_out > launchd_out, boost::process::std_err > launchd_err);
     std::string line;
-    while (launchd_out && std::getline(launchd_out, line)) {
+    while ((launchd_out && std::getline(launchd_out, line)) ||
+           (launchd_out && std::getline(launchd_err, line))) {
         if (!line.empty()) {
             log() << line << std::endl;
             line.clear();
