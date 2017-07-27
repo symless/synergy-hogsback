@@ -149,6 +149,9 @@ main (int, const char*[])
         if (!installSynergyService()) {
             log() << fmt::format ("[{}] failed to install synergy service\n", ct);
         }
+        else {
+            log() << "install synergy service success\n";
+        }
 
         log().close();
         return EXIT_SUCCESS;
