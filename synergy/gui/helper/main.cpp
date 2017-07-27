@@ -56,7 +56,7 @@ installPreLoginAgent() {
 
     /* Load the PreLogin agent */
     boost::process::ipstream launchd_out;
-    boost::process::child launchd (fmt::format ("launchctl load {}", kPreLoginAgentPListPath),
+    boost::process::child launchd (fmt::format ("launchctl start {}", kPreLoginAgentPListPath),
                                    boost::process::std_out > launchd_out);
     std::string line;
     while (launchd_out && std::getline(launchd_out, line)) {
