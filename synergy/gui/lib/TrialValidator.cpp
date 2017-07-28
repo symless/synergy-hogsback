@@ -3,7 +3,7 @@
 #include <QDate>
 #include <QString>
 
-const int kTrialDays = 30;
+const int kTrialDays = 90;
 
 TrialValidator::TrialValidator()
 {
