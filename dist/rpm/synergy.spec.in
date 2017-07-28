@@ -29,7 +29,7 @@ systemctl start synergy.service
 %{_bindir}/syntool
 %attr(644,-,-) %{_datarootdir}/applications/synergy2.desktop
 %attr(644,-,-) %{_datarootdir}/icons/synergy.svg
-/lib/systemd/system/synergy.service
+%{_libdir}/systemd/system/synergy.service
 
 %changelog
 * Wed May 17 2017 Symless <engineering@symless.com>
