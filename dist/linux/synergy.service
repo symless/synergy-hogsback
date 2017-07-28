@@ -1,0 +1,13 @@
+[Unit]
+Description=Synergy Service
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=0
+SyslogLevel=err
+ExecStart=/usr/bin/synergyd
+
+[Install]
+WantedBy=multi-user.target
