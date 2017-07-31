@@ -159,8 +159,10 @@ main(int argc, char* argv[])
         LogManager::setQmlContext(engine.rootContext());
         LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
 
+#ifndef SYNERGY_DEVELOPER_MODE
         CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
         cloudClient->checkUpdate();
+#endif
 
         engine.rootContext()->setContextProperty("PixelPerPoint", pixelPerPoint);
         engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
