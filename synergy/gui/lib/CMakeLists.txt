@@ -27,7 +27,6 @@ set (GUI_LIB_SOURCES
     ScreenListModel.cpp
     ScreenListSnapshotManager.cpp
     ScreenManager.cpp
-    TrialValidator.cpp
     Profile.cpp
     ProfileListModel.cpp
     ProfileManager.cpp
