@@ -141,8 +141,8 @@ main(int argc, char* argv[])
     TrialValidator trialValidator;
     if (!trialValidator.isValid()) {
         QMessageBox msgBox;
-        msgBox.setText("This version is not supported anymore. "
-                       "Please <a href='https://www.symless.com'>download</a> the latest build.");
+        msgBox.setText("This version of Synergy is not supported anymore. "
+                       "Please <a href='https://symless.com/synergy/downloads'>download</a> the latest version.");
         msgBox.exec();
         return 0;
     }
