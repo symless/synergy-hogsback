@@ -29,7 +29,7 @@ public:
     Q_INVOKABLE void unsubProfile(int screenId);
     Q_INVOKABLE void getScreens();
     Q_INVOKABLE void userProfiles();
-    Q_INVOKABLE void getLatestVersion();
+    Q_INVOKABLE void checkUpdate();
     Q_INVOKABLE void goOffline();
     Q_INVOKABLE QString serverHostname() const;
     Q_INVOKABLE QString loginClientId();
@@ -58,7 +58,7 @@ private slots:
     void onUpdateProfileConfigFinished(QNetworkReply* reply);
     void onUserProfilesFinished(QNetworkReply* reply);
     void onUnsubProfileFinished(QNetworkReply* reply);
-    void onGetLatestVersionFinished(QNetworkReply* reply);
+    void onCheckUpdateFinished(QNetworkReply* reply);
     void onUploadLogFileFinished(QNetworkReply* reply);
     void onUploadProgress(qint64 done, qint64 total);
     void onReplyError(QNetworkReply::NetworkError code);
