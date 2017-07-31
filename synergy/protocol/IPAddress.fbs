@@ -1,9 +1,0 @@
-table IPv4 {
-	address: string;
-}
-
-table IPv6 {
-	address: string;
-}
-
-union IPAddress { IPv4, IPv6 }
