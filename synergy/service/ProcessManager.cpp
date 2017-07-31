@@ -39,17 +39,8 @@ static void
 asyncReadLines (ProcessManager& manager, Strand& strand, Pipe& pipe,
                 Buffer& buffer, Line& line, bs::error_code const& ec,
                 std::size_t bytes) {
-    if (ec == boost::asio::error::operation_aborted) {
-        return;
-    }
-
     std::istream stream (&buffer);
     if (ec || !bytes || !std::getline (stream, line)) {
-        if (manager.awaitingExit ()) {
-            manager.onUnexpectedExit ();
-        } else {
-            manager.onExit ();
-        }
         return;
     }
 
@@ -69,10 +60,21 @@ asyncReadLines (ProcessManager& manager, Strand& strand, Pipe& pipe,
 
 void
 ProcessManagerImpl::start (ProcessManager& manager) {
-    m_process.emplace (m_command,
-                     bp::std_in.close (),
-                     bp::std_out > m_outPipe,
-                     bp::std_err > m_errorPipe);
+    m_process.emplace (
+        m_command,
+        bp::std_in.close (),
+        bp::std_out > m_outPipe,
+        bp::std_err > m_errorPipe,
+        bp::on_exit = [&manager](int exit, std::error_code const& ec){
+            if (manager.awaitingExit()) {
+                manager.onExit();
+            } else {
+                manager.onUnexpectedExit();
+            }
+        },
+        m_strand.get_io_service()
+    );
+
     m_lineBuf.clear ();
 
     boost::asio::async_read_until (
@@ -119,16 +121,24 @@ ProcessManager::start (std::vector<std::string> command) {
     auto& process = m_impl->m_process;
     if (process) {
         m_impl->m_awaitingExit = true;
+
+        onExit.connect_extended (
+            [this, &process, command = std::move(command)](auto& connection) {
+                connection.disconnect();
+                process->join();
+                process = decltype(m_impl->m_process)();
+                m_impl->m_awaitingExit = false;
+                this->start (std::move(command));
+            }
+        );
+
         m_impl->m_outPipe.cancel();
         m_impl->m_errorPipe.cancel();
-
         process->terminate();
-        process->join();
-        process = decltype(m_impl->m_process)();
-        m_impl->m_awaitingExit = false;
+        return;
     }
 
-    m_impl->m_command = move (command);
+    m_impl->m_command = std::move (command);
     m_impl->start (*this);
 }
 
