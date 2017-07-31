@@ -34,7 +34,7 @@ DirectoryManager::profileDir() const
 QString
 DirectoryManager::crashDumpDir() const
 {
-    QDir dir (profileDir() + "/dumps/");
+    QDir dir(profileDir() + "/dumps/");
     if (!dir.exists()) {
         dir.mkpath (dir.path());
     }
