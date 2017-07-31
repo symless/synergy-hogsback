@@ -2,7 +2,6 @@
 #include "CloudClient.h"
 #include "ScreenListModel.h"
 #include "ScreenManager.h"
-#include "TrialValidator.h"
 #include "FontManager.h"
 #include "LogManager.h"
 #include "ProcessManager.h"
@@ -138,15 +137,6 @@ main(int argc, char* argv[])
     checkService();
 #endif
 
-    TrialValidator trialValidator;
-    if (!trialValidator.isValid()) {
-        QMessageBox msgBox;
-        msgBox.setText("This version of Synergy is not supported anymore. "
-                       "Please <a href='https://symless.com/synergy/downloads'>download</a> the latest version.");
-        msgBox.exec();
-        return 0;
-    }
-
     FontManager::loadAll();
 
     asio::io_service io;
@@ -184,9 +174,11 @@ main(int argc, char* argv[])
         LogManager::setQmlContext(engine.rootContext());
         LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
 
+        CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
+        cloudClient->checkUpdate();
+
         engine.rootContext()->setContextProperty
             ("PixelPerPoint", QGuiApplication::primaryScreen()->physicalDotsPerInch() / 72);
-
         engine.rootContext()->setContextProperty
             ("rpcProcessManager", static_cast<QObject*>(&processManager));
 
@@ -199,7 +191,8 @@ main(int argc, char* argv[])
         return qtAppRet;
     }
     catch (std::runtime_error& e) {
-        LogManager::error(QString("exception caught: ").arg(e.what()));
+        LogManager::setQmlContext(NULL);
+        LogManager::error(QString("exception caught: %1").arg(e.what()));
         return EXIT_FAILURE;
     }
 }
