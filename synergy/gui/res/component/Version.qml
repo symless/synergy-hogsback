@@ -28,7 +28,9 @@ Rectangle {
         anchors.left: parent.left
         anchors.bottom: parent.bottom
         color: textColor
-        text: "For testing only, do not redistribute"
+        text: VersionManager.latestVersion().length === 0 ?
+                "For testing only, do not redistribute" :
+                VersionManager.latestVersion() + " is available! Please <a href='https://symless.com/synergy/downloads'>download</a>"
         onLinkActivated: Qt.openUrlExternally(link)
 
         MouseArea {
@@ -41,7 +43,7 @@ Rectangle {
     Connections {
         target: VersionManager
         onNewVersionDetected: {
-            versionWarning.text = newVersion + " is available! Please <a href='https://www.symless.com'>update</a>"
+            versionWarning.text = newVersion + " is available! Please <a href='https://symless.com/synergy/downloads'>download</a>"
         }
     }
 }

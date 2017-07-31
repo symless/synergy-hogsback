@@ -22,7 +22,6 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
-        CloudClient.getLatestVersion()
         LogManager.setCloudClient(CloudClient)
     }
 

@@ -2,7 +2,6 @@
 #include "CloudClient.h"
 #include "ScreenListModel.h"
 #include "ScreenManager.h"
-#include "TrialValidator.h"
 #include "FontManager.h"
 #include "LogManager.h"
 #include "ProcessManager.h"
@@ -135,15 +134,6 @@ main(int argc, char* argv[])
     //checkService();
 #endif
 
-    TrialValidator trialValidator;
-    if (!trialValidator.isValid()) {
-        QMessageBox msgBox;
-        msgBox.setText("This version of Synergy is not supported anymore. "
-                       "Please <a href='https://symless.com/synergy/downloads'>download</a> the latest version.");
-        msgBox.exec();
-        return 0;
-    }
-
     FontManager::loadAll();
 
     qreal dpi = QGuiApplication::primaryScreen()->physicalDotsPerInch();
@@ -162,19 +152,23 @@ main(int argc, char* argv[])
         qmlRegisterSingletonType<ProfileManager>("com.synergy.gui", 1, 0, "ProfileManager", ProfileManager::instance);
         qmlRegisterSingletonType<AppConfig>("com.synergy.gui", 1, 0, "AppConfig", AppConfig::instance);
         qmlRegisterSingletonType<VersionManager>("com.synergy.gui", 1, 0, "VersionManager", VersionManager::instance);
-        qmlRegisterSingletonType<VersionManager>("com.synergy.gui", 1, 0, "LogManager", LogManager::instance);
+        qmlRegisterSingletonType<LogManager>("com.synergy.gui", 1, 0, "LogManager", LogManager::instance);
 
         QQmlApplicationEngine engine;
         LogManager::instance();
         LogManager::setQmlContext(engine.rootContext());
         LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
 
+        CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
+        cloudClient->checkUpdate();
+
         engine.rootContext()->setContextProperty("PixelPerPoint", pixelPerPoint);
         engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
         return app.exec();
     }
     catch (std::runtime_error& e) {
-        LogManager::error(QString("exception caught: ").arg(e.what()));
+        LogManager::setQmlContext(NULL);
+        LogManager::error(QString("exception caught: %1").arg(e.what()));
         return 0;
     }
 }
