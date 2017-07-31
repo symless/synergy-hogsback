@@ -161,7 +161,7 @@ main(int argc, char* argv[])
         qmlRegisterSingletonType<ProfileManager>("com.synergy.gui", 1, 0, "ProfileManager", ProfileManager::instance);
         qmlRegisterSingletonType<AppConfig>("com.synergy.gui", 1, 0, "AppConfig", AppConfig::instance);
         qmlRegisterSingletonType<VersionManager>("com.synergy.gui", 1, 0, "VersionManager", VersionManager::instance);
-        qmlRegisterSingletonType<VersionManager>("com.synergy.gui", 1, 0, "LogManager", LogManager::instance);
+        qmlRegisterSingletonType<LogManager>("com.synergy.gui", 1, 0, "LogManager", LogManager::instance);
 
         QQmlApplicationEngine engine;
         LogManager::instance();
