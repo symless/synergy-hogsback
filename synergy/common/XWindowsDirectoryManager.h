@@ -9,7 +9,7 @@ class XWindowsDirectoryManager final : public DirectoryManager
 {
 public:
     std::string systemAppDir();
-    std::string installedDir();
+    boost::filesystem::path installedDir() override;
     std::string profileDir();
 };
 
