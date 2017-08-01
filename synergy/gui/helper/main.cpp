@@ -27,7 +27,7 @@ auto const kPreLoginAgentPListPath = "/Library/LaunchAgents/" + kPreLoginAgentFi
 auto const kPreLoginAgentPListSourcePath = kAppResourcePath + "/" + kPreLoginAgentFilename;
 
 std::string const kServiceUserAgentFilename = "com.symless.synergy.v2.synergyd.plist";
-auto const kServiceUserAgentPListTargetPathPostfix = "/Library/LaunchAgents/" + kServiceUserAgentFilename;
+auto const kServiceUserAgentPListTargetPath = "/Library/LaunchAgents/" + kServiceUserAgentFilename;
 auto const kServiceUserAgentPListSourcePath = kAppResourcePath + "/" + kServiceUserAgentFilename;
 
 
@@ -56,7 +56,7 @@ installPreLoginAgent() {
 
     /* Load the PreLogin agent */
     boost::process::ipstream launchd_out;
-    boost::process::child launchd (fmt::format ("launchctl load {}", kPreLoginAgentPListPath),
+    boost::process::child launchd (fmt::format ("launchctl start {}", kPreLoginAgentPListPath),
                                    boost::process::std_out > launchd_out);
     std::string line;
     while (launchd_out && std::getline(launchd_out, line)) {
@@ -72,33 +72,41 @@ installPreLoginAgent() {
 static bool
 installSynergyService()
 {
-    auto serviceUserAgentPListTargetPath = DirectoryManager::instance()->userDir() + kServiceUserAgentPListTargetPathPostfix;
-    if (boost::filesystem::exists (serviceUserAgentPListTargetPath)) {
+    if (boost::filesystem::exists (kServiceUserAgentPListTargetPath)) {
+        log() << "service already installed\n";
         return true;
     }
     if (!boost::filesystem::exists (kServiceUserAgentPListSourcePath)) {
+        log() << "service source file doesn't exist\n";
         return false;
     }
 
     boost::system::error_code ec;
     boost::filesystem::copy_file
-        (kServiceUserAgentPListSourcePath, serviceUserAgentPListTargetPath, ec);
+        (kServiceUserAgentPListSourcePath, kServiceUserAgentPListTargetPath, ec);
     if (ec) {
+        log() << "failed to copy service file over\n";
         return false;
     }
 
-    /* Load the PreLogin agent */
+    /* Load the service agent */
     boost::process::ipstream launchd_out;
-    boost::process::child launchd (fmt::format ("launchctl load {}", serviceUserAgentPListTargetPath),
-                                   boost::process::std_out > launchd_out);
+    boost::process::ipstream launchd_err;
+    std::string cmd = fmt::format ("launchctl load {}", kServiceUserAgentPListTargetPath);
+    boost::process::child launchd (cmd, boost::process::std_out > launchd_out, boost::process::std_err > launchd_err);
     std::string line;
-    while (launchd_out && std::getline(launchd_out, line)) {
+    while ((launchd_out && std::getline(launchd_out, line)) ||
+           (launchd_err && std::getline(launchd_err, line))) {
         if (!line.empty()) {
             log() << line << std::endl;
             line.clear();
         }
     }
     launchd.wait();
+
+    if (EXIT_SUCCESS != launchd.exit_code()) {
+        log() << fmt::format ("{} failed with error code: [{}]\n", cmd, launchd.exit_code());
+    }
     return (EXIT_SUCCESS == launchd.exit_code());
 }
 
@@ -144,6 +152,9 @@ main (int, const char*[])
 
         if (!installSynergyService()) {
             log() << fmt::format ("[{}] failed to install synergy service\n", ct);
+        }
+        else {
+            log() << "install synergy service success\n";
         }
 
         log().close();

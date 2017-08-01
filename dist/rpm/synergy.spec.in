@@ -9,19 +9,28 @@ Packager: Symless <engineering@symless.com>
 License: GPLv2
 Release: @SYNERGY_BUILD_NUMBER@@SYNERGY_SNAPSHOT_INFO@%{?dist}
 Requires: qt5-qtquickcontrols qt5-qtsvg
+BuildRequires: systemd
 
 %description
 Synergy allows you to share one mouse and keyboard between multiple computers.
 Work seamlessly across Windows, macOS and Linux.
+
+%post
+systemctl daemon-reload
+systemctl enable synergy.service
+systemctl daemon-reload
+systemctl start synergy.service
 
 %files
 %defattr(755,root,root,-)
 %{_bindir}/synergy2
 %{_bindir}/synergyc
 %{_bindir}/synergys
+%{_bindir}/synergyd
 %{_bindir}/syntool
 %attr(644,-,-) %{_datarootdir}/applications/synergy2.desktop
 %attr(644,-,-) %{_datarootdir}/icons/synergy.svg
+%attr(644,-,-) %{_unitdir}/synergy.service
 
 %changelog
 * Wed May 17 2017 Symless <engineering@symless.com>
