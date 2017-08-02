@@ -5,9 +5,6 @@ int
 main (int argc, char* argv[]) {
     startCrashHandler();
 
-    char* volatile x = 0;
-    *x = 'a';
-
     ServiceController serviceController;
     serviceController.parseArg(argc, argv);
     try {
