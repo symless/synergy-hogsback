@@ -46,13 +46,18 @@ if (SYNERGY_CRASHPAD)
     elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         find_library (IOKit_LIBRARY IOKit)
         find_library (Security_LIBRARY Security)
+        find_library (Foundation_LIBRARY Foundation)
+        find_library (ApplicationServices_LIBRARY ApplicationServices)
+
         target_link_libraries (commonlib
             "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/macos/libcrashpad_client.a"
             "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/macos/libcrashpad_util.a"
             "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/macos/libbase.a"
             "/usr/lib/libbsm.0.dylib"
-            ${Security_LIBRARY}
             ${IOKit_LIBRARY}
+            ${Security_LIBRARY}
+            ${Foundation_LIBRARY}
+            ${ApplicationServices_LIBRARY}
         )
     endif()
 endif()

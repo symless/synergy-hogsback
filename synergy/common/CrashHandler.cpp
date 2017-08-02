@@ -14,12 +14,11 @@ startCrashHandler()
 {
     auto& directoryManager = *DirectoryManager::instance();
 
-#if defined(BOOST_OS_WINDOWS)
+#if (BOOST_OS_WINDOWS)
     auto dbPath = directoryManager.crashDumpDir().wstring();
     auto handlerPath = (directoryManager.installedDir()
                             / "crashpad_handler.exe").wstring();
-    std::wcerr << handlerPath << std::endl;
-#elif defined(BOOST_OS_MACOS)
+#elif (BOOST_OS_MACOS)
     auto dbPath = directoryManager.crashDumpDir().string();
     auto handlerPath = (directoryManager.installedDir()
                             / "crashpad_handler").string();
