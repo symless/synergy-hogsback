@@ -24,7 +24,7 @@ ProcessCommand::ProcessCommand(QObject* parent) :
 
 QString ProcessCommand::command(bool serverMode) const
 {
-    DirectoryManager directoryManager;
+    GUIDirectoryManager directoryManager;
     QString command(directoryManager.installedDir());
     command += '/';
 
@@ -40,12 +40,12 @@ QString ProcessCommand::command(bool serverMode) const
 
 QStringList ProcessCommand::arguments(bool serverMode) const
 {
-    DirectoryManager* directoryManager = NULL;
+    GUIDirectoryManager* directoryManager = NULL;
     if (m_directoryManager != NULL) {
         directoryManager = m_directoryManager;
     }
     else {
-        directoryManager = new DirectoryManager();
+        directoryManager = new GUIDirectoryManager();
     }
 
     AppConfig* appConfig =
@@ -112,7 +112,7 @@ void ProcessCommand::setServerIp(const QString ip)
     m_serverIp = ip;
 }
 
-void ProcessCommand::setDirectoryManager(DirectoryManager* dm)
+void ProcessCommand::setDirectoryManager(GUIDirectoryManager* dm)
 {
     m_directoryManager = dm;
 }

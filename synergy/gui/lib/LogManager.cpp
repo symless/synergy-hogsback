@@ -36,7 +36,7 @@ QObject* LogManager::instance(QQmlEngine* engine,
 
 LogManager::LogManager()
 {
-    DirectoryManager directoryManager;
+    GUIDirectoryManager directoryManager;
     s_file.setFileName(directoryManager.profileDir() + '/'+ kDefaultLogFile);
     s_file.open(QIODevice::WriteOnly | QIODevice::Append);
 }
@@ -185,7 +185,7 @@ QString LogManager::generateLogFilename()
 {
     // format: userID-timestamp.log
     // example: 1-2017-05-31T16-07-40.log
-    DirectoryManager directoryManager;
+    GUIDirectoryManager directoryManager;
     QString filePath = directoryManager.profileDir();
 
     AppConfig* appConfig =

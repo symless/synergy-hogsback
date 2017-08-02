@@ -20,7 +20,7 @@ QString CoreInterface::profileDir()
 
 QString CoreInterface::run(const QStringList& args, const QString& input)
 {
-	DirectoryManager directoryManager;
+	GUIDirectoryManager directoryManager;
 	QString program(
 		directoryManager.installedDir()
 		+ "/" + kCoreBinary);
