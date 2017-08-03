@@ -72,7 +72,7 @@ public:
         return m_executor.underlying_executor().get_io_service();
     }
 
-    boost::future<void>
+    void
     start (std::string const& ip, int port);
 
     template <typename Result, typename... Args>
@@ -109,10 +109,14 @@ public:
     boost::signals2::signal<void()> ready;
 
 private:
+    void connect();
+
+private:
     boost::executors::executor_adaptor<AsioExecutor> m_executor;
     std::shared_ptr<autobahn::wamp_session> m_session;
     std::shared_ptr<autobahn::wamp_transport> m_transport;
-    autobahn::wamp_call_options m_default_call_options;
+    autobahn::wamp_call_options m_default_call_options; // TODO: code style
+    boost::asio::deadline_timer m_retryTimer;
 };
 
 
