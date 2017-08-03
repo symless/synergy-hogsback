@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <windows.h>
+#include <TlHelp32.h>
 
 class ServiceController
 {
@@ -67,6 +68,9 @@ private:
     HANDLE getElevateTokenInSession(DWORD sessionId, LPSECURITY_ATTRIBUTES security);
     void startSynergydAsUser(HANDLE userToken, LPSECURITY_ATTRIBUTES sa);
     void writeEventErrorLogEntry(char* message);
+    bool findWinLogonInSession(PHANDLE process, DWORD sessionId);
+    bool nextProcessEntry(HANDLE snapshot, LPPROCESSENTRY32 entry);
+    HANDLE duplicateProcessToken(HANDLE process, LPSECURITY_ATTRIBUTES security);
 
     static void WINAPI serviceMain(DWORD dwArgc, LPSTR *pszArgv);
     static void WINAPI serviceCtrlHandler(DWORD dwCtrl);

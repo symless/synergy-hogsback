@@ -4,6 +4,7 @@
 #include <Userenv.h>
 #include <sstream>
 #include <string>
+#include <list>
 #include <stdexcept>
 #include <assert.h>
 
@@ -366,15 +367,13 @@ DWORD ServiceController::getActiveSession()
 HANDLE ServiceController::getElevateTokenInSession(DWORD sessionId, LPSECURITY_ATTRIBUTES security)
 {
     // TODO: get elevate token instead of normal token
-    HANDLE sourceToken;
-    WTSQueryUserToken(sessionId, &sourceToken);
 
-    HANDLE newToken;
-    DuplicateTokenEx(
-        sourceToken, TOKEN_ASSIGN_PRIMARY | TOKEN_ALL_ACCESS, security,
-        SecurityImpersonation, TokenPrimary, &newToken);
+    HANDLE process;
+    if (!findWinLogonInSession(&process, sessionId)) {
 
-    return newToken;
+    }
+
+    return duplicateProcessToken(process, security);
 }
 
 void ServiceController::startSynergydAsUser(HANDLE userToken, LPSECURITY_ATTRIBUTES sa)
@@ -434,4 +433,126 @@ void ServiceController::writeEventErrorLogEntry(char* message)
 
         DeregisterEventSource(hEventSource);
     }
+}
+
+bool
+ServiceController::findWinLogonInSession(PHANDLE process, DWORD sessionId)
+{
+    // TODO: refactor this code (from v1)
+    // first we need to take a snapshot of the running processes
+    HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (snapshot == INVALID_HANDLE_VALUE) {
+
+    }
+
+    PROCESSENTRY32 entry;
+    entry.dwSize = sizeof(PROCESSENTRY32);
+
+    // get the first process, and if we can't do that then it's
+    // unlikely we can go any further
+    BOOL gotEntry = Process32First(snapshot, &entry);
+    if (!gotEntry) {
+
+    }
+
+    // used to record process names for debug info
+    std::list<std::string> nameList;
+
+    // now just iterate until we can find winlogon.exe pid
+    DWORD pid = 0;
+    while(gotEntry) {
+
+        // make sure we're not checking the system process
+        if (entry.th32ProcessID != 0) {
+
+            DWORD processSessionId;
+            BOOL pidToSidRet = ProcessIdToSessionId(
+                entry.th32ProcessID, &processSessionId);
+
+            if (!pidToSidRet) {
+                // if we can not acquire session associated with a specified process,
+                // simply ignore it
+
+                gotEntry = nextProcessEntry(snapshot, &entry);
+                continue;
+            }
+            else {
+                // only pay attention to processes in the active session
+                if (processSessionId == sessionId) {
+
+                    // store the names so we can record them for debug
+                    nameList.push_back(entry.szExeFile);
+
+                    if (_stricmp(entry.szExeFile, "winlogon.exe") == 0) {
+                        pid = entry.th32ProcessID;
+                    }
+                }
+            }
+
+        }
+
+        // now move on to the next entry (if we're not at the end)
+        gotEntry = nextProcessEntry(snapshot, &entry);
+    }
+
+    std::string nameListJoin;
+    for(std::list<std::string>::iterator it = nameList.begin();
+        it != nameList.end(); it++) {
+            nameListJoin.append(*it);
+            nameListJoin.append(", ");
+    }
+
+    CloseHandle(snapshot);
+
+    if (pid) {
+        if (process != NULL) {
+            // now get the process, which we'll use to get the process token.
+            *process = OpenProcess(MAXIMUM_ALLOWED, FALSE, pid);
+        }
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+bool
+ServiceController::nextProcessEntry(HANDLE snapshot, LPPROCESSENTRY32 entry)
+{
+    BOOL gotEntry = Process32Next(snapshot, entry);
+    if (!gotEntry) {
+
+        DWORD err = GetLastError();
+        if (err != ERROR_NO_MORE_FILES) {
+
+            // only worry about error if it's not the end of the snapshot
+        }
+    }
+
+    return gotEntry;
+}
+
+
+HANDLE
+ServiceController::duplicateProcessToken(HANDLE process, LPSECURITY_ATTRIBUTES security)
+{
+    HANDLE sourceToken;
+
+    BOOL tokenRet = OpenProcessToken(
+        process,
+        TOKEN_ASSIGN_PRIMARY | TOKEN_ALL_ACCESS,
+        &sourceToken);
+
+    if (!tokenRet) {
+    }
+
+    HANDLE newToken;
+    BOOL duplicateRet = DuplicateTokenEx(
+        sourceToken, TOKEN_ASSIGN_PRIMARY | TOKEN_ALL_ACCESS, security,
+        SecurityImpersonation, TokenPrimary, &newToken);
+
+    if (!duplicateRet) {
+    }
+
+    return newToken;
 }
