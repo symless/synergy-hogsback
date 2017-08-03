@@ -1,57 +1,21 @@
-#include "../ServiceController.h"
+#include "ServiceController.h"
 
-#include <windows.h>
+#include <Wtsapi32.h>
+#include <Userenv.h>
 #include <sstream>
 #include <string>
 #include <stdexcept>
 #include <assert.h>
 
-static char* kServiceProcessName = "synergyd";
+static char* kServiceProcessName = "synergy-controller";
 static char* kServiceDisplayName = "Synergy";
 
-//
-// ServiceControllerImp for Windows
-//
+ServiceController* ServiceController::s_instance = nullptr;
 
-class ServiceControllerImpl {
-public:
-    ServiceControllerImpl();
-    ~ServiceControllerImpl();
-
-    void doRun();
-    void manualInstall();
-    void manualUninstall();
-
-    void setWorker(const std::shared_ptr<ServiceWorker> &worker);
-
-private:
-    bool isDaemonInstalled(const char* name);
-    void manualStart(const char* name);
-    void SetServiceStatus(DWORD currentState,
-            DWORD win32ExitCode = NO_ERROR,
-            DWORD waitHint = 0);
-
-    void start(DWORD dwArgc, LPSTR *pszArgv);
-    void stop();
-    void pause();
-    void resume();
-    void shutdown();
-
-    static void WINAPI serviceMain(DWORD dwArgc, LPSTR *pszArgv);
-    static void WINAPI serviceCtrlHandler(DWORD dwCtrl);
-
-private:
-    SERVICE_STATUS m_status;
-    SERVICE_STATUS_HANDLE m_statusHandle;
-
-    std::shared_ptr<ServiceWorker> m_worker;
-
-    static ServiceControllerImpl* s_impInstance;
-};
-
-ServiceControllerImpl* ServiceControllerImpl::s_impInstance = NULL;
-
-ServiceControllerImpl::ServiceControllerImpl()
+ServiceController::ServiceController() :
+    m_install(false),
+    m_uninstall(false),
+    m_foreground(false)
 {
     m_status.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
     m_status.dwCurrentState = SERVICE_START_PENDING;
@@ -66,17 +30,16 @@ ServiceControllerImpl::ServiceControllerImpl()
     m_status.dwWaitHint = 0;
 }
 
-ServiceControllerImpl::~ServiceControllerImpl()
+ServiceController::~ServiceController()
 {
-
 }
 
-void ServiceControllerImpl::doRun()
+void ServiceController::doRun()
 {
-    s_impInstance = this;
+    s_instance = this;
 
     SERVICE_TABLE_ENTRY serviceTable[] = {
-        { kServiceProcessName, ServiceControllerImpl::serviceMain },
+        { kServiceProcessName, ServiceController::serviceMain },
         { NULL, NULL }
     };
 
@@ -84,7 +47,7 @@ void ServiceControllerImpl::doRun()
     StartServiceCtrlDispatcher(serviceTable);
 }
 
-void ServiceControllerImpl::manualInstall()
+void ServiceController::install()
 {
     // install default daemon if not already installed.
     if (!isDaemonInstalled(kServiceProcessName)) {
@@ -137,12 +100,9 @@ void ServiceControllerImpl::manualInstall()
 
         CloseServiceHandle(manager);
     }
-
-    // TODO: should we start after install?
-    //manualStart(kServiceDisplayName);
 }
 
-void ServiceControllerImpl::manualUninstall()
+void ServiceController::uninstall()
 {
     // open service manager
     SC_HANDLE manager = OpenSCManager(NULL, NULL, GENERIC_WRITE);
@@ -197,81 +157,41 @@ void ServiceControllerImpl::manualUninstall()
     CloseServiceHandle(manager);
 }
 
-bool ServiceControllerImpl::isDaemonInstalled(const char *name)
+void ServiceController::serviceMain(DWORD dwArgc, LPSTR *pszArgv)
 {
-    // open service manager
-    SC_HANDLE manager = OpenSCManager(NULL, NULL, GENERIC_READ);
-    if (manager == NULL) {
-        return false;
+    assert(s_instance != NULL);
+
+    // Register the handler function for the service
+    s_instance->m_statusHandle = RegisterServiceCtrlHandler(
+        kServiceProcessName, ServiceController::serviceCtrlHandler);
+    if (s_instance->m_statusHandle == NULL) {
+        throw GetLastError();
     }
 
-    // open the service
-    SC_HANDLE service = OpenService(manager, name, GENERIC_READ);
-
-    // clean up
-    if (service != NULL) {
-        CloseServiceHandle(service);
-    }
-    CloseServiceHandle(manager);
-
-    return (service != NULL);
+    // Start the service.
+    s_instance->start(dwArgc, pszArgv);
 }
 
-void ServiceControllerImpl::manualStart(const char *name)
+void ServiceController::serviceCtrlHandler(DWORD dwCtrl)
 {
-    // open service manager
-    SC_HANDLE manager = OpenSCManager(NULL, NULL, GENERIC_READ);
-    if (manager == NULL) {
-        throw std::runtime_error("can't open service manager for starting a service");
-    }
-
-    // open the service
-    SC_HANDLE service = OpenService(
-        manager, name, SERVICE_START);
-
-    if (service == NULL) {
-        DWORD err = GetLastError();
-        CloseServiceHandle(manager);
-
-        std::ostringstream stream;
-        stream << err;
-        std::string errorMsg("can't open a service, error code: ");
-        errorMsg += stream.str();
-        throw std::runtime_error(errorMsg.c_str());
-    }
-
-    // start the service
-    if (!StartService(service, 0, NULL)) {
-        throw std::runtime_error("can't start a service");
+    switch (dwCtrl)
+    {
+    case SERVICE_CONTROL_STOP: s_instance->stop(); break;
+    case SERVICE_CONTROL_PAUSE: s_instance->pause(); break;
+    case SERVICE_CONTROL_CONTINUE: s_instance->resume(); break;
+    case SERVICE_CONTROL_SHUTDOWN: s_instance->shutdown(); break;
+    case SERVICE_CONTROL_INTERROGATE: break;
+    default: break;
     }
 }
 
-void ServiceControllerImpl::SetServiceStatus(DWORD currentState, DWORD win32ExitCode, DWORD waitHint)
-{
-    static DWORD checkPoint = 1;
 
-    m_status.dwCurrentState = currentState;
-    m_status.dwWin32ExitCode = win32ExitCode;
-    m_status.dwWaitHint = waitHint;
-
-    m_status.dwCheckPoint =
-        ((currentState == SERVICE_RUNNING) ||
-        (currentState == SERVICE_STOPPED)) ?
-        0 : checkPoint++;
-
-    // Report the status of the service to the SCM.
-    ::SetServiceStatus(m_statusHandle, &m_status);
-}
-
-void ServiceControllerImpl::start(DWORD dwArgc, LPSTR *pszArgv)
+void ServiceController::start(DWORD dwArgc, LPSTR *pszArgv)
 {
     try {
         SetServiceStatus(SERVICE_START_PENDING);
-        // do the actual work in another thread on Windows
-        std::thread workerThread([&, this](){
-            m_worker->start();
-        });
-        workerThread.detach();
+
+        startSynergyd();
 
         SetServiceStatus(SERVICE_RUNNING);
     }
@@ -291,7 +211,7 @@ void ServiceControllerImpl::start(DWORD dwArgc, LPSTR *pszArgv)
     }
 }
 
-void ServiceControllerImpl::stop()
+void ServiceController::stop()
 {
     DWORD originalState = m_status.dwCurrentState;
     try {
@@ -317,7 +237,7 @@ void ServiceControllerImpl::stop()
     }
 }
 
-void ServiceControllerImpl::pause()
+void ServiceController::pause()
 {
     try {
         SetServiceStatus(SERVICE_PAUSE_PENDING);
@@ -342,7 +262,7 @@ void ServiceControllerImpl::pause()
     }
 }
 
-void ServiceControllerImpl::resume()
+void ServiceController::resume()
 {
     try {
         SetServiceStatus(SERVICE_CONTINUE_PENDING);
@@ -367,10 +287,10 @@ void ServiceControllerImpl::resume()
     }
 }
 
-void ServiceControllerImpl::shutdown()
+void ServiceController::shutdown()
 {
     try {
-        m_worker->shutdown();
+       stopSynergyd();
 
         SetServiceStatus(SERVICE_STOPPED);
     }
@@ -386,82 +306,103 @@ void ServiceControllerImpl::shutdown()
     }
 }
 
-void ServiceControllerImpl::serviceMain(DWORD dwArgc, LPSTR *pszArgv)
-{
-    assert(s_impInstance != NULL);
 
-    // Register the handler function for the service
-    s_impInstance->m_statusHandle = RegisterServiceCtrlHandler(
-        kServiceProcessName, ServiceControllerImpl::serviceCtrlHandler);
-    if (s_impInstance->m_statusHandle == NULL) {
-        throw GetLastError();
+bool ServiceController::isDaemonInstalled(const char *name)
+{
+    // open service manager
+    SC_HANDLE manager = OpenSCManager(NULL, NULL, GENERIC_READ);
+    if (manager == NULL) {
+        return false;
     }
 
-    // Start the service.
-    s_impInstance->start(dwArgc, pszArgv);
-}
+    // open the service
+    SC_HANDLE service = OpenService(manager, name, GENERIC_READ);
 
-void ServiceControllerImpl::serviceCtrlHandler(DWORD dwCtrl)
-{
-    switch (dwCtrl)
-    {
-    case SERVICE_CONTROL_STOP: s_impInstance->stop(); break;
-    case SERVICE_CONTROL_PAUSE: s_impInstance->pause(); break;
-    case SERVICE_CONTROL_CONTINUE: s_impInstance->resume(); break;
-    case SERVICE_CONTROL_SHUTDOWN: s_impInstance->shutdown(); break;
-    case SERVICE_CONTROL_INTERROGATE: break;
-    default: break;
+    // clean up
+    if (service != NULL) {
+        CloseServiceHandle(service);
     }
+    CloseServiceHandle(manager);
+
+    return (service != NULL);
 }
 
-void ServiceControllerImpl::setWorker(const std::shared_ptr<ServiceWorker> &worker)
+void ServiceController::SetServiceStatus(DWORD currentState, DWORD win32ExitCode, DWORD waitHint)
 {
-    m_worker = worker;
+    static DWORD checkPoint = 1;
+
+    m_status.dwCurrentState = currentState;
+    m_status.dwWin32ExitCode = win32ExitCode;
+    m_status.dwWaitHint = waitHint;
+
+    m_status.dwCheckPoint =
+        ((currentState == SERVICE_RUNNING) ||
+        (currentState == SERVICE_STOPPED)) ?
+        0 : checkPoint++;
+
+    // Report the status of the service to the SCM.
+    ::SetServiceStatus(m_statusHandle, &m_status);
 }
 
-//
-// ServiceController for Windows
-//
-
-ServiceController::ServiceController() :
-    m_install(false),
-    m_uninstall(false),
-    m_foreground(false),
-#if defined(SIGQUIT)
-    m_terminationSignals(m_threadIoService, SIGTERM, SIGINT, SIGQUIT)
-#else
-    m_terminationSignals(m_threadIoService, SIGTERM, SIGINT)
-#endif
+void ServiceController::startSynergyd()
 {
-    m_imp = std::make_unique<ServiceControllerImpl>();
-    m_worker = std::make_shared<ServiceWorker>(m_threadIoService);
-
-    m_imp->setWorker(m_worker);
+    DWORD sessionId = getActiveSession();
+    SECURITY_ATTRIBUTES sa;
+    ZeroMemory(&sa, sizeof(SECURITY_ATTRIBUTES));
+    HANDLE token = getElevateTokenInSession(sessionId, &sa);
+    startSynergydAsUser(token, &sa);
 }
 
-ServiceController::~ServiceController()
+void ServiceController::stopSynergyd()
 {
-    m_terminationSignals.cancel();
+
 }
 
-void ServiceController::doRun()
+DWORD ServiceController::getActiveSession()
 {
-    setupTerminationSignals();
-
-    m_imp->doRun();
+    return WTSGetActiveConsoleSessionId();
 }
 
-void ServiceController::install()
+HANDLE ServiceController::getElevateTokenInSession(DWORD sessionId, LPSECURITY_ATTRIBUTES security)
 {
-    m_imp->manualInstall();
+    // TODO: get elevate token instead of normal token
+    HANDLE sourceToken;
+    WTSQueryUserToken(sessionId, &sourceToken);
+
+    HANDLE newToken;
+    DuplicateTokenEx(
+        sourceToken, TOKEN_ASSIGN_PRIMARY | TOKEN_ALL_ACCESS, security,
+        SecurityImpersonation, TokenPrimary, &newToken);
+
+    return newToken;
 }
 
-void ServiceController::uninstall()
+void ServiceController::startSynergydAsUser(HANDLE userToken, LPSECURITY_ATTRIBUTES sa)
 {
-    m_imp->manualUninstall();
-}
+    std::string command("C:\\Projects\\build-synergy-v2-Desktop_Qt_5_8_0_MSVC2015_64bit-Debug\\bin\\synergyd.exe");
+    PROCESS_INFORMATION processInfo;
+    ZeroMemory(&processInfo, sizeof(PROCESS_INFORMATION));
 
-void ServiceController::shutdown()
-{
-    m_worker->shutdown();
+    STARTUPINFO si;
+    ZeroMemory(&si, sizeof(STARTUPINFO));
+    si.cb = sizeof(STARTUPINFO);
+    si.lpDesktop = "winsta0\\Default";
+    si.dwFlags |= STARTF_USESTDHANDLES;
+
+    LPVOID environment;
+    CreateEnvironmentBlock(&environment, userToken, FALSE);
+
+    DWORD creationFlags =
+        NORMAL_PRIORITY_CLASS |
+        CREATE_NO_WINDOW |
+        CREATE_UNICODE_ENVIRONMENT;
+
+    // re-launch in current active user session
+    BOOL createRet = CreateProcessAsUser(
+        userToken, NULL, LPSTR(command.c_str()),
+        sa, NULL, TRUE, creationFlags,
+        environment, NULL, &si, &processInfo);
+
+    DestroyEnvironmentBlock(environment);
+    CloseHandle(userToken);
 }

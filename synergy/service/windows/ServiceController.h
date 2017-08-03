@@ -1,14 +1,9 @@
 #ifndef SERVICECONTROLLER_H
 #define SERVICECONTROLLER_H
 
-#include <synergy/service/ServiceWorker.h>
-#include <boost/asio.hpp>
-#include <boost/bind.hpp>
-#include <thread>
 #include <memory>
 #include <string>
-
-class ServiceControllerImpl;
+#include <windows.h>
 
 class ServiceController
 {
@@ -50,40 +45,39 @@ public:
     void install();
     void uninstall();
     void runForeground() {
-        m_worker->start();
+        startSynergyd();
     }
 
 private:
-    void setupTerminationSignals() {
-        m_terminationSignals.async_wait(
-            boost::bind(&ServiceController::terminationSignalHandler, this, _1, _2));
-    }
-
-    void terminationSignalHandler(
-            const boost::system::error_code& errorCode, int signalNumber) {
-        if (errorCode == boost::asio::error::operation_aborted) {
-            return;
-        }
-
-#if defined(SIGQUIT)
-        if (signalNumber == SIGINT || signalNumber == SIGTERM || signalNumber == SIGQUIT) {
-#else
-        if (signalNumber == SIGINT || signalNumber == SIGTERM) {
-#endif
-            shutdown();
-        }
-    }
-
+    void start(DWORD dwArgc, LPSTR *pszArgv);
+    void stop();
+    void pause();
+    void resume();
     void shutdown();
+
+    bool isDaemonInstalled(const char* name);
+    void SetServiceStatus(DWORD currentState,
+            DWORD win32ExitCode = NO_ERROR,
+            DWORD waitHint = 0);
+
+    void startSynergyd();
+    void stopSynergyd();
+
+    DWORD getActiveSession();
+    HANDLE getElevateTokenInSession(DWORD sessionId, LPSECURITY_ATTRIBUTES security);
+    void startSynergydAsUser(HANDLE userToken, LPSECURITY_ATTRIBUTES sa);
+
+    static void WINAPI serviceMain(DWORD dwArgc, LPSTR *pszArgv);
+    static void WINAPI serviceCtrlHandler(DWORD dwCtrl);
 
 protected:
     bool m_install;
     bool m_uninstall;
     bool m_foreground;
-    boost::asio::io_service m_threadIoService;
-    boost::asio::signal_set m_terminationSignals;
-    std::unique_ptr<ServiceControllerImpl> m_imp;
-    std::shared_ptr<ServiceWorker> m_worker;
+
+    SERVICE_STATUS m_status;
+    SERVICE_STATUS_HANDLE m_statusHandle;
+    static ServiceController* s_instance;
 };
 
 #endif // SERVICECONTROLLER_H

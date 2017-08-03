@@ -1,14 +1,17 @@
 #include <synergy/common/CrashHandler.h>
-#include "ServiceController.h"
+#include "ServiceWorker.h"
+
+#include <boost/asio/io_service.hpp>
 
 int
 main (int argc, char* argv[]) {
     startCrashHandler();
 
-    ServiceController serviceController;
-    serviceController.parseArg(argc, argv);
+    boost::asio::io_service ioService;
+    ServiceWorker serviceWorker(ioService);
+
     try {
-        serviceController.run();
+        serviceWorker.start();
     }
     catch (...) {
         return 1;

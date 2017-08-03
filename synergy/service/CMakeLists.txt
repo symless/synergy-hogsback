@@ -1,18 +1,11 @@
 project (synergyd CXX)
 cmake_minimum_required (VERSION 3.4)
 
-if (WIN32)
-    file(GLOB platform_sources "Windows/ServiceController.cpp")
-else ()
-    file(GLOB platform_sources "Unix/ServiceController.cpp")
-endif()
-
 set (SERVICE_SOURCES
     main.cpp
     ProcessManager.cpp
     SessionManager.cpp
     ServiceWorker.cpp
-    ${platform_sources}
 )
 
 add_executable (${PROJECT_NAME} ${SERVICE_SOURCES})
@@ -38,4 +31,8 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     install (TARGETS ${PROJECT_NAME} DESTINATION bin)
     install(FILES ${CMAKE_SOURCE_DIR}/debian/synergy.service DESTINATION lib/systemd/system)
+endif()
+
+if (WIN32)
+add_subdirectory (windows)
 endif()
