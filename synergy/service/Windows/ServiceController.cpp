@@ -379,7 +379,9 @@ HANDLE ServiceController::getElevateTokenInSession(DWORD sessionId, LPSECURITY_A
 
 void ServiceController::startSynergydAsUser(HANDLE userToken, LPSECURITY_ATTRIBUTES sa)
 {
+    // TODO: get installed dir for synergyd
     std::string command("C:\\Projects\\build-synergy-v2-Desktop_Qt_5_8_0_MSVC2015_64bit-Debug\\bin\\synergyd.exe");
+
     PROCESS_INFORMATION processInfo;
     ZeroMemory(&processInfo, sizeof(PROCESS_INFORMATION));
 
@@ -405,4 +407,31 @@ void ServiceController::startSynergydAsUser(HANDLE userToken, LPSECURITY_ATTRIBU
 
     DestroyEnvironmentBlock(environment);
     CloseHandle(userToken);
+}
+
+void ServiceController::writeEventErrorLogEntry(char* message)
+{
+    WORD type = EVENTLOG_ERROR_TYPE;
+
+    HANDLE hEventSource = NULL;
+    LPCSTR strings[2] = {NULL, NULL};
+
+    hEventSource = RegisterEventSource(NULL, kServiceProcessName);
+    if (hEventSource) {
+        strings[0] = kServiceProcessName;
+        strings[1] = message;
+
+        ReportEvent(hEventSource,  // Event log handle
+            type,                 // Event type
+            0,                     // Event category
+            0,                     // Event identifier
+            NULL,                  // No security identifier
+            2,                     // Size of lpszStrings array
+            0,                     // No binary data
+            strings,           // Array of strings
+            NULL                   // No binary data
+            );
+
+        DeregisterEventSource(hEventSource);
+    }
 }

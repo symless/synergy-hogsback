@@ -66,6 +66,7 @@ private:
     DWORD getActiveSession();
     HANDLE getElevateTokenInSession(DWORD sessionId, LPSECURITY_ATTRIBUTES security);
     void startSynergydAsUser(HANDLE userToken, LPSECURITY_ATTRIBUTES sa);
+    void writeEventErrorLogEntry(char* message);
 
     static void WINAPI serviceMain(DWORD dwArgc, LPSTR *pszArgv);
     static void WINAPI serviceCtrlHandler(DWORD dwCtrl);
