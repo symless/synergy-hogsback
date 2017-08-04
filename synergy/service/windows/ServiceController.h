@@ -31,7 +31,7 @@ private:
     void shutdown();
 
     bool isDaemonInstalled(const char* name);
-    void SetServiceStatus(DWORD currentState, DWORD win32ExitCode = NO_ERROR,
+    void setServiceStatus(DWORD currentState, DWORD win32ExitCode = NO_ERROR,
             DWORD waitHint = 0);
 
     void startSynergyd();

@@ -222,14 +222,14 @@ void ServiceController::serviceCtrlHandler(DWORD dwCtrl)
 void ServiceController::start(DWORD dwArgc, LPSTR *pszArgv)
 {
     try {
-        SetServiceStatus(SERVICE_START_PENDING);
+        setServiceStatus(SERVICE_START_PENDING);
 
         startSynergyd();
 
-        SetServiceStatus(SERVICE_RUNNING);
+        setServiceStatus(SERVICE_RUNNING);
     }
     catch (DWORD err) {
-        SetServiceStatus(SERVICE_STOPPED, err);
+        setServiceStatus(SERVICE_STOPPED, err);
 
         std::ostringstream stream;
         stream << err;
@@ -238,7 +238,7 @@ void ServiceController::start(DWORD dwArgc, LPSTR *pszArgv)
         throw std::runtime_error(errorMsg.c_str());
     }
     catch (...) {
-        SetServiceStatus(SERVICE_STOPPED);
+        setServiceStatus(SERVICE_STOPPED);
 
         throw std::runtime_error("service failed to start");
     }
@@ -248,14 +248,14 @@ void ServiceController::stop()
 {
     DWORD originalState = m_status.dwCurrentState;
     try {
-        SetServiceStatus(SERVICE_STOP_PENDING);
+        setServiceStatus(SERVICE_STOP_PENDING);
 
         // TODO: Notify the worker to stop
 
-        SetServiceStatus(SERVICE_STOPPED);
+        setServiceStatus(SERVICE_STOPPED);
     }
     catch (DWORD err) {
-        SetServiceStatus(originalState);
+        setServiceStatus(originalState);
 
         std::ostringstream stream;
         stream << err;
@@ -264,7 +264,7 @@ void ServiceController::stop()
         throw std::runtime_error(errorMsg.c_str());
     }
     catch (...) {
-        SetServiceStatus(originalState);
+        setServiceStatus(originalState);
 
         throw std::runtime_error("service failed to stop");
     }
@@ -273,14 +273,14 @@ void ServiceController::stop()
 void ServiceController::pause()
 {
     try {
-        SetServiceStatus(SERVICE_PAUSE_PENDING);
+        setServiceStatus(SERVICE_PAUSE_PENDING);
 
         // TODO: Notify the worker to pause
 
-        SetServiceStatus(SERVICE_PAUSED);
+        setServiceStatus(SERVICE_PAUSED);
     }
     catch (DWORD err) {
-        SetServiceStatus(SERVICE_RUNNING, err);
+        setServiceStatus(SERVICE_RUNNING, err);
 
         std::ostringstream stream;
         stream << err;
@@ -289,7 +289,7 @@ void ServiceController::pause()
         throw std::runtime_error(errorMsg.c_str());
     }
     catch (...) {
-        SetServiceStatus(SERVICE_RUNNING);
+        setServiceStatus(SERVICE_RUNNING);
 
         throw std::runtime_error("service failed to pause");
     }
@@ -298,14 +298,14 @@ void ServiceController::pause()
 void ServiceController::resume()
 {
     try {
-        SetServiceStatus(SERVICE_CONTINUE_PENDING);
+        setServiceStatus(SERVICE_CONTINUE_PENDING);
 
         // TODO: Notify the worker to resume
 
-        SetServiceStatus(SERVICE_RUNNING);
+        setServiceStatus(SERVICE_RUNNING);
     }
     catch (DWORD err) {
-        SetServiceStatus(SERVICE_PAUSED, err);
+        setServiceStatus(SERVICE_PAUSED, err);
 
         std::ostringstream stream;
         stream << err;
@@ -314,7 +314,7 @@ void ServiceController::resume()
         throw std::runtime_error(errorMsg.c_str());
     }
     catch (...) {
-        SetServiceStatus(SERVICE_PAUSED);
+        setServiceStatus(SERVICE_PAUSED);
 
         throw std::runtime_error("service failed to resume");
     }
@@ -323,9 +323,9 @@ void ServiceController::resume()
 void ServiceController::shutdown()
 {
     try {
-       stopSynergyd();
+        stopSynergyd();
 
-        SetServiceStatus(SERVICE_STOPPED);
+        setServiceStatus(SERVICE_STOPPED);
     }
     catch (DWORD err) {
         std::ostringstream stream;
@@ -360,7 +360,7 @@ bool ServiceController::isDaemonInstalled(const char *name)
     return (service != NULL);
 }
 
-void ServiceController::SetServiceStatus(DWORD currentState, DWORD win32ExitCode, DWORD waitHint)
+void ServiceController::setServiceStatus(DWORD currentState, DWORD win32ExitCode, DWORD waitHint)
 {
     static DWORD checkPoint = 1;
 
@@ -380,10 +380,10 @@ void ServiceController::SetServiceStatus(DWORD currentState, DWORD win32ExitCode
 void ServiceController::startSynergyd()
 {
     DWORD sessionId = getActiveSession();
-    SECURITY_ATTRIBUTES sa;
-    ZeroMemory(&sa, sizeof(SECURITY_ATTRIBUTES));
-    HANDLE token = getElevateTokenInSession(sessionId, &sa);
-    startSynergydAsUser(token, &sa);
+    SECURITY_ATTRIBUTES securityAttributes;
+    ZeroMemory(&securityAttributes, sizeof(SECURITY_ATTRIBUTES));
+    HANDLE token = getElevateTokenInSession(sessionId, &securityAttributes);
+    startSynergydAsUser(token, &securityAttributes);
 }
 
 void ServiceController::stopSynergyd()
@@ -444,15 +444,15 @@ void ServiceController::writeEventErrorLogEntry(char* message)
 {
     WORD type = EVENTLOG_ERROR_TYPE;
 
-    HANDLE hEventSource = NULL;
+    HANDLE eventSource = NULL;
     LPCSTR strings[2] = {NULL, NULL};
 
-    hEventSource = RegisterEventSource(NULL, kServiceProcessName);
-    if (hEventSource) {
+    eventSource = RegisterEventSource(NULL, kServiceProcessName);
+    if (eventSource) {
         strings[0] = kServiceProcessName;
         strings[1] = message;
 
-        ReportEvent(hEventSource,  // Event log handle
+        ReportEvent(eventSource,  // Event log handle
             type,                 // Event type
             0,                     // Event category
             0,                     // Event identifier
@@ -463,7 +463,7 @@ void ServiceController::writeEventErrorLogEntry(char* message)
             NULL                   // No binary data
             );
 
-        DeregisterEventSource(hEventSource);
+        DeregisterEventSource(eventSource);
     }
 }
 
@@ -563,7 +563,6 @@ ServiceController::nextProcessEntry(HANDLE snapshot, LPPROCESSENTRY32 entry)
 
     return gotEntry;
 }
-
 
 HANDLE
 ServiceController::duplicateProcessToken(HANDLE process, LPSECURITY_ATTRIBUTES security)
