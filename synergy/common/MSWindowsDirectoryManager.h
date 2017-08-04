@@ -10,7 +10,7 @@ class MSWindowsDirectoryManager final : public DirectoryManager
 public:
     std::string userDir();
     std::string systemAppDir();
-    std::string installedDir() override;
+    boost::filesystem::path installedDir() override;
     std::string profileDir();
     std::string pathSeparator();
 };

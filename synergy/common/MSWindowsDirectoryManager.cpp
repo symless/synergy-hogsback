@@ -56,7 +56,7 @@ MSWindowsDirectoryManager::systemAppDir()
     return "";
 }
 
-std::string
+boost::filesystem::path
 MSWindowsDirectoryManager::installedDir()
 {
     char fileNameBuffer[MAX_PATH];
