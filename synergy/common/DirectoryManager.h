@@ -4,6 +4,7 @@
 #include <string>
 #include <boost/filesystem.hpp>
 
+// TODO: use boost path for all pathes
 class  DirectoryManager
 {
 public:
