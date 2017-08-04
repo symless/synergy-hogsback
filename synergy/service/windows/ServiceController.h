@@ -40,8 +40,8 @@ private:
     DWORD getActiveSession();
     HANDLE getElevateTokenInSession(DWORD sessionId, LPSECURITY_ATTRIBUTES security);
     void startSynergydAsUser(HANDLE userToken, LPSECURITY_ATTRIBUTES sa);
-    void writeEventErrorLogEntry(char* message);
-    bool findWinLogonInSession(PHANDLE process, DWORD sessionId);
+    void writeEventErrorLogEntry(const char* message);
+    bool findProcessInSession(const char* processName, PHANDLE process, DWORD sessionId);
     bool nextProcessEntry(HANDLE snapshot, LPPROCESSENTRY32 entry);
     HANDLE duplicateProcessToken(HANDLE process, LPSECURITY_ATTRIBUTES security);
 

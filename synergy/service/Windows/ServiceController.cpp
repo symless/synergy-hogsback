@@ -10,6 +10,7 @@
 
 static char* kServiceProcessName = "synergy-controller";
 static char* kServiceDisplayName = "Synergy";
+static char* kWinLogon = "winlogon.exe";
 
 ServiceController* ServiceController::s_instance = nullptr;
 
@@ -401,7 +402,7 @@ HANDLE ServiceController::getElevateTokenInSession(DWORD sessionId, LPSECURITY_A
     // TODO: get elevate token instead of normal token
 
     HANDLE process;
-    if (!findWinLogonInSession(&process, sessionId)) {
+    if (!findProcessInSession(kWinLogon, &process, sessionId)) {
 
     }
 
@@ -440,7 +441,7 @@ void ServiceController::startSynergydAsUser(HANDLE userToken, LPSECURITY_ATTRIBU
     CloseHandle(userToken);
 }
 
-void ServiceController::writeEventErrorLogEntry(char* message)
+void ServiceController::writeEventErrorLogEntry(const char* message)
 {
     WORD type = EVENTLOG_ERROR_TYPE;
 
@@ -468,7 +469,7 @@ void ServiceController::writeEventErrorLogEntry(char* message)
 }
 
 bool
-ServiceController::findWinLogonInSession(PHANDLE process, DWORD sessionId)
+ServiceController::findProcessInSession(const char* processName, PHANDLE process, DWORD sessionId)
 {
     // TODO: refactor this code (from v1)
     // first we need to take a snapshot of the running processes
@@ -515,7 +516,7 @@ ServiceController::findWinLogonInSession(PHANDLE process, DWORD sessionId)
                     // store the names so we can record them for debug
                     nameList.push_back(entry.szExeFile);
 
-                    if (_stricmp(entry.szExeFile, "winlogon.exe") == 0) {
+                    if (_stricmp(entry.szExeFile, processName) == 0) {
                         pid = entry.th32ProcessID;
                     }
                 }
