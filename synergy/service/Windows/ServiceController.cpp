@@ -35,6 +35,38 @@ ServiceController::~ServiceController()
 {
 }
 
+void ServiceController::parseArg(int argc, char *argv[])
+{
+    for (int i = 1; i < argc; ++i) {
+        std::string arg(argv[i]);
+        if (arg == "/install" || arg == "--install") {
+            m_install = true;
+        }
+        else if (arg == "/uninstall" || arg == "--uninstall") {
+            m_uninstall = true;
+        }
+        else if (arg == "/foreground" || arg == "--foreground") {
+            m_foreground = true;
+        }
+    }
+}
+
+void ServiceController::run()
+{
+    if (m_install) {
+        install();
+    }
+    else if (m_uninstall) {
+        uninstall();
+    }
+    else if (m_foreground) {
+        runForeground();
+    }
+    else {
+        doRun();
+    }
+}
+
 void ServiceController::doRun()
 {
     s_instance = this;
