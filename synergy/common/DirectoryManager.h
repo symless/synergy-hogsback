@@ -11,8 +11,9 @@ public:
 
     virtual std::string userDir();
     virtual std::string systemAppDir() = 0;
-    virtual boost::filesystem::path installedDir() = 0;
+    virtual std::string installedDir() = 0;
     virtual std::string profileDir() = 0;
+    virtual std::string pathSeparator() = 0;
 
     virtual boost::filesystem::path
     crashDumpDir() {

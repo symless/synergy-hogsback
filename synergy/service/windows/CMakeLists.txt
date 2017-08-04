@@ -1,4 +1,4 @@
-project (synergy-controller CXX)
+project (synergy-service-controller CXX)
 cmake_minimum_required (VERSION 3.4)
 
 
@@ -10,5 +10,7 @@ set (LOADER_SOURCES
 add_executable (${PROJECT_NAME} ${LOADER_SOURCES})
 
 target_link_libraries (${PROJECT_NAME}
+    commonlib
     Wtsapi32 Userenv
+    ${Boost_LIBRARIES}
 )

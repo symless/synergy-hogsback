@@ -1,5 +1,7 @@
 #include "ServiceController.h"
 
+#include "synergy/common/DirectoryManager.h"
+
 #include <Wtsapi32.h>
 #include <Userenv.h>
 #include <sstream>
@@ -8,8 +10,9 @@
 #include <stdexcept>
 #include <assert.h>
 
-static char* kServiceProcessName = "synergy-controller";
-static char* kServiceDisplayName = "Synergy";
+static char* kServiceControllerName = "synergy-service-controller";
+static char* kServiceControllerDisplayName = "Synergy";
+static char* kServiceProcess = "synergyd.exe";
 static char* kWinLogon = "winlogon.exe";
 
 ServiceController* ServiceController::s_instance = nullptr;
@@ -73,7 +76,7 @@ void ServiceController::doRun()
     s_instance = this;
 
     SERVICE_TABLE_ENTRY serviceTable[] = {
-        { kServiceProcessName, ServiceController::serviceMain },
+        { kServiceControllerName, ServiceController::serviceMain },
         { NULL, NULL }
     };
 
@@ -84,7 +87,7 @@ void ServiceController::doRun()
 void ServiceController::install()
 {
     // install default daemon if not already installed.
-    if (!isDaemonInstalled(kServiceProcessName)) {
+    if (!isDaemonInstalled(kServiceControllerName)) {
         char path[MAX_PATH];
         GetModuleFileName(NULL, path, MAX_PATH);
 
@@ -102,8 +105,8 @@ void ServiceController::install()
         // create the service
         SC_HANDLE service = CreateService(
             manager,
-            kServiceProcessName,
-            kServiceDisplayName,
+            kServiceControllerName,
+            kServiceControllerDisplayName,
             0,
             SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS,
             SERVICE_AUTO_START,
@@ -144,7 +147,7 @@ void ServiceController::uninstall()
         throw std::runtime_error("can't open service manager for uninstalling");
     }
 
-    SC_HANDLE service = OpenService(manager, kServiceProcessName, SERVICE_STOP |
+    SC_HANDLE service = OpenService(manager, kServiceControllerName, SERVICE_STOP |
         SERVICE_QUERY_STATUS | DELETE);
     if (service == NULL) {
         DWORD err = GetLastError();
@@ -197,7 +200,7 @@ void ServiceController::serviceMain(DWORD dwArgc, LPSTR *pszArgv)
 
     // Register the handler function for the service
     s_instance->m_statusHandle = RegisterServiceCtrlHandler(
-        kServiceProcessName, ServiceController::serviceCtrlHandler);
+        kServiceControllerName, ServiceController::serviceCtrlHandler);
     if (s_instance->m_statusHandle == NULL) {
         throw GetLastError();
     }
@@ -399,8 +402,6 @@ DWORD ServiceController::getActiveSession()
 
 HANDLE ServiceController::getElevateTokenInSession(DWORD sessionId, LPSECURITY_ATTRIBUTES security)
 {
-    // TODO: get elevate token instead of normal token
-
     HANDLE process;
     if (!findProcessInSession(kWinLogon, &process, sessionId)) {
 
@@ -411,8 +412,8 @@ HANDLE ServiceController::getElevateTokenInSession(DWORD sessionId, LPSECURITY_A
 
 void ServiceController::startSynergydAsUser(HANDLE userToken, LPSECURITY_ATTRIBUTES sa)
 {
-    // TODO: get installed dir for synergyd
-    std::string command("C:\\Projects\\build-synergy-v2-Desktop_Qt_5_8_0_MSVC2015_64bit-Debug\\bin\\synergyd.exe");
+    std::string path = DirectoryManager::instance()->installedDir();
+    std::string command = path + DirectoryManager::instance()->pathSeparator() + kServiceProcess;
 
     PROCESS_INFORMATION processInfo;
     ZeroMemory(&processInfo, sizeof(PROCESS_INFORMATION));
@@ -448,9 +449,9 @@ void ServiceController::writeEventErrorLogEntry(const char* message)
     HANDLE eventSource = NULL;
     LPCSTR strings[2] = {NULL, NULL};
 
-    eventSource = RegisterEventSource(NULL, kServiceProcessName);
+    eventSource = RegisterEventSource(NULL, kServiceControllerName);
     if (eventSource) {
-        strings[0] = kServiceProcessName;
+        strings[0] = kServiceControllerName;
         strings[1] = message;
 
         ReportEvent(eventSource,  // Event log handle

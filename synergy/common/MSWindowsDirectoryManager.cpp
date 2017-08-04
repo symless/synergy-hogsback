@@ -56,12 +56,12 @@ MSWindowsDirectoryManager::systemAppDir()
     return "";
 }
 
-boost::filesystem::path
+std::string
 MSWindowsDirectoryManager::installedDir()
 {
     char fileNameBuffer[MAX_PATH];
     GetModuleFileName(NULL, fileNameBuffer, MAX_PATH);
-    return boost::filesystem::path (fileNameBuffer).parent_path();
+    return boost::filesystem::path (fileNameBuffer).parent_path().string();
 }
 
 std::string
@@ -79,4 +79,9 @@ MSWindowsDirectoryManager::profileDir()
     dir.append("\\Synergy");
 
     return dir;
+}
+
+std::string MSWindowsDirectoryManager::pathSeparator()
+{
+    return "\\";
 }
