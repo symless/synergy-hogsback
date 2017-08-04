@@ -99,7 +99,8 @@ void ServiceController::install()
 
         SC_HANDLE manager = OpenSCManager(NULL, NULL, GENERIC_WRITE);
         if (manager == NULL) {
-            throw std::runtime_error("can't open service manager for installing");
+            writeEventErrorLog("Failed to open service manager for installing");
+            throw;
         }
 
         // create the service
@@ -119,16 +120,17 @@ void ServiceController::install()
             NULL);
 
         if (service == NULL) {
-            // can't create service
             DWORD err = GetLastError();
             if (err != ERROR_SERVICE_EXISTS) {
                 CloseServiceHandle(manager);
 
                 std::ostringstream stream;
                 stream << err;
-                std::string errorMsg("can't create a service, error code: ");
+                std::string errorMsg("Failed to create the service, error code: ");
                 errorMsg += stream.str();
-                throw std::runtime_error(errorMsg.c_str());
+
+                writeEventErrorLog(errorMsg.c_str());
+                throw;
             }
         }
         else {
@@ -144,7 +146,8 @@ void ServiceController::uninstall()
     // open service manager
     SC_HANDLE manager = OpenSCManager(NULL, NULL, GENERIC_WRITE);
     if (manager == NULL) {
-        throw std::runtime_error("can't open service manager for uninstalling");
+        writeEventErrorLog("Failed to open service manager for uninstalling");
+        throw;
     }
 
     SC_HANDLE service = OpenService(manager, kServiceControllerName, SERVICE_STOP |
@@ -152,33 +155,38 @@ void ServiceController::uninstall()
     if (service == NULL) {
         DWORD err = GetLastError();
         CloseServiceHandle(manager);
+
         if (err != ERROR_SERVICE_DOES_NOT_EXIST) {
             std::ostringstream stream;
             stream << err;
-            std::string errorMsg("can't uninstall a service, error code: ");
+            std::string errorMsg("Failed to uninstall the service, error code: ");
             errorMsg += stream.str();
-            throw std::runtime_error(errorMsg.c_str());
+
+            writeEventErrorLog(errorMsg.c_str());
+            throw;
         }
-        throw std::runtime_error("trying to uninstall a non-existent service");
+        writeEventErrorLog("Service doesn't exist");
+        throw;
     }
 
     // Try to stop the service
-    SERVICE_STATUS ssSvcStatus = {};
-    if (ControlService(service, SERVICE_CONTROL_STOP, &ssSvcStatus)) {
+    SERVICE_STATUS serviceStatus = {};
+    if (ControlService(service, SERVICE_CONTROL_STOP, &serviceStatus)) {
         Sleep(1000);
 
-        while (QueryServiceStatus(service, &ssSvcStatus)) {
-            if (ssSvcStatus.dwCurrentState == SERVICE_STOP_PENDING) {
+        while (QueryServiceStatus(service, &serviceStatus)) {
+            if (serviceStatus.dwCurrentState == SERVICE_STOP_PENDING) {
                 Sleep(1000);
             }
             else break;
         }
 
-        if (ssSvcStatus.dwCurrentState != SERVICE_STOPPED) {
+        if (serviceStatus.dwCurrentState != SERVICE_STOPPED) {
             CloseServiceHandle(service);
             CloseServiceHandle(manager);
 
-            throw std::runtime_error("can't stop a service");
+            writeEventErrorLog("Failed to stop the service");
+            throw;
         }
     }
 
@@ -186,7 +194,8 @@ void ServiceController::uninstall()
         CloseServiceHandle(service);
         CloseServiceHandle(manager);
 
-        throw std::runtime_error("can't delete a service");
+        writeEventErrorLog("Failed to delete the service");
+        throw;
     }
 
     // clean up
@@ -202,7 +211,8 @@ void ServiceController::serviceMain(DWORD dwArgc, LPSTR *pszArgv)
     s_instance->m_statusHandle = RegisterServiceCtrlHandler(
         kServiceControllerName, ServiceController::serviceCtrlHandler);
     if (s_instance->m_statusHandle == NULL) {
-        throw GetLastError();
+        s_instance->writeEventErrorLog("Failed to register service control handler");
+        throw;
     }
 
     // Start the service.
@@ -213,12 +223,22 @@ void ServiceController::serviceCtrlHandler(DWORD dwCtrl)
 {
     switch (dwCtrl)
     {
-    case SERVICE_CONTROL_STOP: s_instance->stop(); break;
-    case SERVICE_CONTROL_PAUSE: s_instance->pause(); break;
-    case SERVICE_CONTROL_CONTINUE: s_instance->resume(); break;
-    case SERVICE_CONTROL_SHUTDOWN: s_instance->shutdown(); break;
-    case SERVICE_CONTROL_INTERROGATE: break;
-    default: break;
+    case SERVICE_CONTROL_STOP:
+        s_instance->stop();
+        break;
+    case SERVICE_CONTROL_PAUSE:
+        s_instance->pause();
+        break;
+    case SERVICE_CONTROL_CONTINUE:
+        s_instance->resume();
+        break;
+    case SERVICE_CONTROL_SHUTDOWN:
+        s_instance->shutdown();
+        break;
+    case SERVICE_CONTROL_INTERROGATE:
+        break;
+    default:
+        break;
     }
 }
 
@@ -228,7 +248,7 @@ void ServiceController::start(DWORD dwArgc, LPSTR *pszArgv)
     try {
         setServiceStatus(SERVICE_START_PENDING);
 
-        startSynergyd();
+        startSynergyService();
 
         setServiceStatus(SERVICE_RUNNING);
     }
@@ -237,14 +257,15 @@ void ServiceController::start(DWORD dwArgc, LPSTR *pszArgv)
 
         std::ostringstream stream;
         stream << err;
-        std::string errorMsg("service failed to start, error code: ");
+        std::string errorMsg("Failed to start the service, error code: ");
         errorMsg += stream.str();
-        throw std::runtime_error(errorMsg.c_str());
+
+        writeEventErrorLog(errorMsg.c_str());
     }
     catch (...) {
         setServiceStatus(SERVICE_STOPPED);
 
-        throw std::runtime_error("service failed to start");
+        writeEventErrorLog("Failed to start the service");
     }
 }
 
@@ -263,14 +284,15 @@ void ServiceController::stop()
 
         std::ostringstream stream;
         stream << err;
-        std::string errorMsg("service failed to stop, error code: ");
+        std::string errorMsg("Failed to stop the service, error code: ");
         errorMsg += stream.str();
-        throw std::runtime_error(errorMsg.c_str());
+
+        writeEventErrorLog(errorMsg.c_str());
     }
     catch (...) {
         setServiceStatus(originalState);
 
-        throw std::runtime_error("service failed to stop");
+        writeEventErrorLog("Failed to stop the service");
     }
 }
 
@@ -288,14 +310,15 @@ void ServiceController::pause()
 
         std::ostringstream stream;
         stream << err;
-        std::string errorMsg("service failed to pause, error code: ");
+        std::string errorMsg("Failed to pause the service, error code: ");
         errorMsg += stream.str();
-        throw std::runtime_error(errorMsg.c_str());
+
+        writeEventErrorLog(errorMsg.c_str());
     }
     catch (...) {
         setServiceStatus(SERVICE_RUNNING);
 
-        throw std::runtime_error("service failed to pause");
+        writeEventErrorLog("Failed to pause the service");
     }
 }
 
@@ -313,33 +336,35 @@ void ServiceController::resume()
 
         std::ostringstream stream;
         stream << err;
-        std::string errorMsg("service failed to resume, error code: ");
+        std::string errorMsg("Failed to resume the service, error code: ");
         errorMsg += stream.str();
-        throw std::runtime_error(errorMsg.c_str());
+
+        writeEventErrorLog(errorMsg.c_str());
     }
     catch (...) {
         setServiceStatus(SERVICE_PAUSED);
 
-        throw std::runtime_error("service failed to resume");
+        writeEventErrorLog("Failed to resume the service");
     }
 }
 
 void ServiceController::shutdown()
 {
     try {
-        stopSynergyd();
+        stopSynergyService();
 
         setServiceStatus(SERVICE_STOPPED);
     }
     catch (DWORD err) {
         std::ostringstream stream;
         stream << err;
-        std::string errorMsg("service failed to shut down, error code: ");
+        std::string errorMsg("Failed to shut down the service, error code: ");
         errorMsg += stream.str();
-        throw std::runtime_error(errorMsg.c_str());
+
+        writeEventErrorLog(errorMsg.c_str());
     }
     catch (...) {
-        throw std::runtime_error("service failed to shut down");
+        writeEventErrorLog("Failed to shut down the service");
     }
 }
 
@@ -381,16 +406,21 @@ void ServiceController::setServiceStatus(DWORD currentState, DWORD win32ExitCode
     ::SetServiceStatus(m_statusHandle, &m_status);
 }
 
-void ServiceController::startSynergyd()
+void ServiceController::startSynergyService()
 {
-    DWORD sessionId = getActiveSession();
-    SECURITY_ATTRIBUTES securityAttributes;
-    ZeroMemory(&securityAttributes, sizeof(SECURITY_ATTRIBUTES));
-    HANDLE token = getElevateTokenInSession(sessionId, &securityAttributes);
-    startSynergydAsUser(token, &securityAttributes);
+    try {
+        DWORD sessionId = getActiveSession();
+        SECURITY_ATTRIBUTES securityAttributes;
+        ZeroMemory(&securityAttributes, sizeof(SECURITY_ATTRIBUTES));
+        HANDLE token = getElevateTokenInSession(sessionId, &securityAttributes);
+        startSynergyServiceAsUser(token, &securityAttributes);
+    }
+    catch (std::runtime_error& e) {
+        writeEventErrorLog(e.what());
+    }
 }
 
-void ServiceController::stopSynergyd()
+void ServiceController::stopSynergyService()
 {
 
 }
@@ -404,13 +434,20 @@ HANDLE ServiceController::getElevateTokenInSession(DWORD sessionId, LPSECURITY_A
 {
     HANDLE process;
     if (!findProcessInSession(kWinLogon, &process, sessionId)) {
+        std::ostringstream stream;
+        stream << sessionId;
+        std::string errorMsg("Failed to find ");
+        errorMsg += kWinLogon;
+        errorMsg += " in session ";
+        errorMsg += stream.str();
 
+        throw std::runtime_error(errorMsg.c_str());
     }
 
     return duplicateProcessToken(process, security);
 }
 
-void ServiceController::startSynergydAsUser(HANDLE userToken, LPSECURITY_ATTRIBUTES sa)
+void ServiceController::startSynergyServiceAsUser(HANDLE userToken, LPSECURITY_ATTRIBUTES sa)
 {
     std::string path = DirectoryManager::instance()->installedDir();
     std::string command = path + DirectoryManager::instance()->pathSeparator() + kServiceProcess;
@@ -425,7 +462,10 @@ void ServiceController::startSynergydAsUser(HANDLE userToken, LPSECURITY_ATTRIBU
     si.dwFlags |= STARTF_USESTDHANDLES;
 
     LPVOID environment;
-    CreateEnvironmentBlock(&environment, userToken, FALSE);
+    BOOL createRet = CreateEnvironmentBlock(&environment, userToken, FALSE);
+    if (!createRet) {
+        throw std::runtime_error("Failed to create environment block");
+    }
 
     DWORD creationFlags =
         NORMAL_PRIORITY_CLASS |
@@ -433,16 +473,20 @@ void ServiceController::startSynergydAsUser(HANDLE userToken, LPSECURITY_ATTRIBU
         CREATE_UNICODE_ENVIRONMENT;
 
     // re-launch in current active user session
-    BOOL createRet = CreateProcessAsUser(
+    createRet = CreateProcessAsUser(
         userToken, NULL, LPSTR(command.c_str()),
         sa, NULL, TRUE, creationFlags,
         environment, NULL, &si, &processInfo);
+
+    if (!createRet) {
+        throw std::runtime_error("Failed to create the service in user session");
+    }
 
     DestroyEnvironmentBlock(environment);
     CloseHandle(userToken);
 }
 
-void ServiceController::writeEventErrorLogEntry(const char* message)
+void ServiceController::writeEventErrorLog(const char* message)
 {
     WORD type = EVENTLOG_ERROR_TYPE;
 
@@ -472,11 +516,10 @@ void ServiceController::writeEventErrorLogEntry(const char* message)
 bool
 ServiceController::findProcessInSession(const char* processName, PHANDLE process, DWORD sessionId)
 {
-    // TODO: refactor this code (from v1)
-    // first we need to take a snapshot of the running processes
+    // take a snapshot of the running processes
     HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (snapshot == INVALID_HANDLE_VALUE) {
-
+        return false;
     }
 
     PROCESSENTRY32 entry;
@@ -486,19 +529,13 @@ ServiceController::findProcessInSession(const char* processName, PHANDLE process
     // unlikely we can go any further
     BOOL gotEntry = Process32First(snapshot, &entry);
     if (!gotEntry) {
-
+        return false;
     }
 
-    // used to record process names for debug info
-    std::list<std::string> nameList;
-
-    // now just iterate until we can find winlogon.exe pid
     DWORD pid = 0;
-    while(gotEntry) {
-
+    while (gotEntry) {
         // make sure we're not checking the system process
         if (entry.th32ProcessID != 0) {
-
             DWORD processSessionId;
             BOOL pidToSidRet = ProcessIdToSessionId(
                 entry.th32ProcessID, &processSessionId);
@@ -511,14 +548,11 @@ ServiceController::findProcessInSession(const char* processName, PHANDLE process
                 continue;
             }
             else {
-                // only pay attention to processes in the active session
                 if (processSessionId == sessionId) {
-
-                    // store the names so we can record them for debug
-                    nameList.push_back(entry.szExeFile);
-
                     if (_stricmp(entry.szExeFile, processName) == 0) {
+                        // found the target process
                         pid = entry.th32ProcessID;
+                        break;
                     }
                 }
             }
@@ -529,18 +563,11 @@ ServiceController::findProcessInSession(const char* processName, PHANDLE process
         gotEntry = nextProcessEntry(snapshot, &entry);
     }
 
-    std::string nameListJoin;
-    for(std::list<std::string>::iterator it = nameList.begin();
-        it != nameList.end(); it++) {
-            nameListJoin.append(*it);
-            nameListJoin.append(", ");
-    }
-
     CloseHandle(snapshot);
 
     if (pid) {
         if (process != NULL) {
-            // now get the process, which we'll use to get the process token.
+            // now get the process
             *process = OpenProcess(MAXIMUM_ALLOWED, FALSE, pid);
         }
         return true;
@@ -553,17 +580,7 @@ ServiceController::findProcessInSession(const char* processName, PHANDLE process
 bool
 ServiceController::nextProcessEntry(HANDLE snapshot, LPPROCESSENTRY32 entry)
 {
-    BOOL gotEntry = Process32Next(snapshot, entry);
-    if (!gotEntry) {
-
-        DWORD err = GetLastError();
-        if (err != ERROR_NO_MORE_FILES) {
-
-            // only worry about error if it's not the end of the snapshot
-        }
-    }
-
-    return gotEntry;
+    return Process32Next(snapshot, entry) ? true : false;
 }
 
 HANDLE
@@ -577,6 +594,7 @@ ServiceController::duplicateProcessToken(HANDLE process, LPSECURITY_ATTRIBUTES s
         &sourceToken);
 
     if (!tokenRet) {
+        throw std::runtime_error("Failed to open process token");
     }
 
     HANDLE newToken;
@@ -585,6 +603,7 @@ ServiceController::duplicateProcessToken(HANDLE process, LPSECURITY_ATTRIBUTES s
         SecurityImpersonation, TokenPrimary, &newToken);
 
     if (!duplicateRet) {
+        throw std::runtime_error("Failed to duplicate process token");
     }
 
     return newToken;

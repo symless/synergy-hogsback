@@ -20,7 +20,7 @@ public:
     void install();
     void uninstall();
     void runForeground() {
-        startSynergyd();
+        startSynergyService();
     }
 
 private:
@@ -34,13 +34,13 @@ private:
     void setServiceStatus(DWORD currentState, DWORD win32ExitCode = NO_ERROR,
             DWORD waitHint = 0);
 
-    void startSynergyd();
-    void stopSynergyd();
+    void startSynergyService();
+    void stopSynergyService();
 
     DWORD getActiveSession();
     HANDLE getElevateTokenInSession(DWORD sessionId, LPSECURITY_ATTRIBUTES security);
-    void startSynergydAsUser(HANDLE userToken, LPSECURITY_ATTRIBUTES sa);
-    void writeEventErrorLogEntry(const char* message);
+    void startSynergyServiceAsUser(HANDLE userToken, LPSECURITY_ATTRIBUTES sa);
+    void writeEventErrorLog(const char* message);
     bool findProcessInSession(const char* processName, PHANDLE process, DWORD sessionId);
     bool nextProcessEntry(HANDLE snapshot, LPPROCESSENTRY32 entry);
     HANDLE duplicateProcessToken(HANDLE process, LPSECURITY_ATTRIBUTES security);
