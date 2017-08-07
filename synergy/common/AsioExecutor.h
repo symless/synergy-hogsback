@@ -20,8 +20,8 @@ public:
         if (closed()) {
             throw std::runtime_error ("I/O executor has been closed");
         }
-        /* Note: this allows work to run on the calling thread. */
-        m_io_service.dispatch (std::forward<Work>(work));
+        /* NOTE: this allows work to run on the calling thread. */
+        m_io_service.dispatch(std::forward<Work>(work));
     }
 
     void

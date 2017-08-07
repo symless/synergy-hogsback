@@ -8,7 +8,7 @@ WampClient::WampClient(boost::asio::io_service& io):
     m_session (std::make_shared<autobahn::wamp_session>(ioService(), debug)),
     m_retryTimer(io)
 {
-    m_default_call_options.set_timeout (std::chrono::seconds(10));
+    m_defaultCallOptions.set_timeout (std::chrono::seconds(10));
 }
 
 void

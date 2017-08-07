@@ -38,7 +38,7 @@ WampCallee<Fun>::operator()(autobahn::wamp_invocation invocation) {
      * to the function. callable_traits maintains references and qualifiers, so
      * a tuple of these arguments can't be constructed directly. Instead we
      * apply the transformation that would occur if we had called
-     * std::make_tuple with those arguments and create a new instance of the
+     * std::make_tuple() with those arguments and create a new instance of the
      * resulting tuple type.
      */
     typename boost::fusion::result_of::invoke
@@ -59,19 +59,19 @@ public:
     WampServer (boost::asio::io_service& io);
     WampServer (WampServer const&) = delete;
     WampServer& operator= (WampServer const&) = delete;
+    void start (std::string const& ip, int port);
 
     boost::asio::io_service&
-    ioService() /* const */ noexcept {
+    ioService() noexcept {
         return m_executor.underlying_executor().get_io_service();
     }
-
-    void start (std::string const& ip, int port);
 
     template <typename Fun> inline
     void
     provide (char const* const name, Fun&& fun) {
         using fun_type = std::decay_t<Fun>;
-        ioService().post ([this, name, callee = WampCallee<fun_type>(std::forward<Fun>(fun))]() mutable {
+        ioService().post ([this, name,
+                          callee = WampCallee<fun_type>(std::forward<Fun>(fun))]() mutable {
             m_session->provide (name, std::move(callee));
         });
     }
@@ -79,7 +79,8 @@ public:
     template <typename... Args>
     void
     publish (char const* const topic, Args&&... args) {
-        ioService().post ([this, topic, args_tup = std::make_tuple(std::forward<Args>(args)...)]() mutable {
+        ioService().post ([this, topic,
+                          args_tup = std::make_tuple(std::forward<Args>(args)...)]() mutable {
             m_session->publish (topic, std::move(args_tup));
         });
     }
