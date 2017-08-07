@@ -46,6 +46,7 @@ WampCallee<Fun>::operator()(autobahn::wamp_invocation invocation) {
 
     invocation->get_arguments (args);
     boost::fusion::invoke (m_fun, args);
+
     /* TODO: actually return the result... */
     invocation->empty_result ();
 }
@@ -67,17 +68,20 @@ public:
     void start (std::string const& ip, int port);
 
     template <typename Fun> inline
-    decltype(auto)
+    void
     provide (char const* const name, Fun&& fun) {
         using fun_type = std::decay_t<Fun>;
-        return m_session->provide (name,
-                                   WampCallee<fun_type>(std::forward<Fun>(fun)));
+        ioService().post ([this, name, callee = WampCallee<fun_type>(std::forward<Fun>(fun))]() mutable {
+            m_session->provide (name, std::move(callee));
+        });
     }
 
     template <typename... Args>
     void
     publish (char const* const topic, Args&&... args) {
-        m_session->publish (topic, std::make_tuple(std::forward<Args>(args)...));
+        ioService().post ([this, topic, args_tup = std::make_tuple(std::forward<Args>(args)...)]() mutable {
+            m_session->publish (topic, std::move(args_tup));
+        });
     }
 
 public:

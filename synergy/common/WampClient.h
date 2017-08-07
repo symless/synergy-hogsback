@@ -55,7 +55,6 @@ void
 WampEventHandler<Handler>::operator()(autobahn::wamp_event const& event) {
     typename boost::fusion::result_of::invoke
                 <make_tuple, boost::callable_traits::args_t<Handler>>::type args;
-
     event.get_arguments (args);
     boost::fusion::invoke (m_handler, args);
 }
@@ -81,8 +80,8 @@ public:
         /* Asio requires that handlers be copyable, but packaged_task isn't,
          * so we have to allocate */
         auto task = std::make_shared<boost::packaged_task<Result()>> (
-            [this, fun, args = std::make_tuple (std::forward<Args>(args)...)]() mutable {
-                return m_session->call (fun, std::move(args), m_default_call_options).then
+            [this, fun, args_tup = std::make_tuple (std::forward<Args>(args)...)]() mutable {
+                return m_session->call (fun, std::move(args_tup), m_default_call_options).then
                     (m_executor, [](boost::future<autobahn::wamp_call_result> result) {
                         return WampCallHelper<Result>::get_return_value (result.get());
                     }
@@ -93,17 +92,18 @@ public:
         ioService().post
             (boost::bind(&boost::packaged_task<Result()>::operator(), task));
 
-        /* Returns a future<future<Result>, so we actually depend on a Boost
-         * extension to unwrap that in to a future<Result> here */
+        /* Returns a future<future<Result>, which means we actually depend on a
+         * Boost extension which unwrap that in to a future<Result> */
         return task->get_future();
     }
 
     template <typename Handler>
-    decltype(auto)
+    void
     subscribe (char const* const topic, Handler&& handler) {
         using handler_type = std::decay_t<Handler>;
-        return m_session->subscribe (topic,
-                    WampEventHandler<handler_type>(std::forward<Handler>(handler)));
+        ioService().post([this, topic, eventHandler = WampEventHandler<handler_type>(std::forward<Handler>(handler))]() mutable {
+            m_session->subscribe (topic, std::move(eventHandler));
+        });
     }
 
     boost::signals2::signal<void()> ready;
