@@ -56,6 +56,8 @@ protected:
     SERVICE_STATUS m_status;
     SERVICE_STATUS_HANDLE m_statusHandle;
 
+    DWORD m_serviceGroupId;
+
     static ServiceController* s_instance;
 };
 

@@ -20,7 +20,8 @@ ServiceController* ServiceController::s_instance = nullptr;
 ServiceController::ServiceController() :
     m_install(false),
     m_uninstall(false),
-    m_foreground(false)
+    m_foreground(false),
+    m_serviceGroupId(0)
 {
     m_status.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
     m_status.dwCurrentState = SERVICE_START_PENDING;
@@ -275,7 +276,7 @@ void ServiceController::stop()
     try {
         setServiceStatus(SERVICE_STOP_PENDING);
 
-        // TODO: Notify the worker to stop
+        stopSynergyService();
 
         setServiceStatus(SERVICE_STOPPED);
     }
@@ -422,7 +423,25 @@ void ServiceController::startSynergyService()
 
 void ServiceController::stopSynergyService()
 {
+    if (m_serviceGroupId == 0) {
+        return;
+    }
 
+    HANDLE process;
+    const UINT kExitCode = 0;
+    const UINT shutdownTimeout = 3000;
+    if (findProcessInSession(kServiceProcess, &process, getActiveSession())) {
+        GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, m_serviceGroupId);
+        DWORD exitCode = WaitForSingleObject(process, shutdownTimeout);
+        if (exitCode != WAIT_OBJECT_0) {
+            // forcefully shutdown service after graceful shutdown times out
+            if (!TerminateProcess(process, kExitCode)) {
+                writeEventErrorLog("Failed to shutdown synergy service");
+            }
+        }
+    }
+
+    m_serviceGroupId = 0;
 }
 
 DWORD ServiceController::getActiveSession()
@@ -469,7 +488,8 @@ void ServiceController::startSynergyServiceAsUser(HANDLE userToken, LPSECURITY_A
     DWORD creationFlags =
         NORMAL_PRIORITY_CLASS |
         CREATE_NO_WINDOW |
-        CREATE_UNICODE_ENVIRONMENT;
+        CREATE_UNICODE_ENVIRONMENT |
+        CREATE_NEW_PROCESS_GROUP;
 
     // re-launch in current active user session
     createRet = CreateProcessAsUser(
@@ -480,6 +500,8 @@ void ServiceController::startSynergyServiceAsUser(HANDLE userToken, LPSECURITY_A
     if (!createRet) {
         throw std::runtime_error("Failed to create the service in user session");
     }
+
+    m_serviceGroupId = processInfo.dwProcessId;
 
     DestroyEnvironmentBlock(environment);
     CloseHandle(userToken);
