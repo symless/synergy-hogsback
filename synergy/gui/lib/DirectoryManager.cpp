@@ -8,18 +8,18 @@
 #include <QCoreApplication>
 #include <stdexcept>
 
-DirectoryManager::DirectoryManager()
+GUIDirectoryManager::GUIDirectoryManager()
 {
 
 }
 
-DirectoryManager::~DirectoryManager()
+GUIDirectoryManager::~GUIDirectoryManager()
 {
 
 }
 
 QString
-DirectoryManager::profileDir() const
+GUIDirectoryManager::profileDir() const
 {
     QString profileDir = QStandardPaths::standardLocations
                          (QStandardPaths::AppConfigLocation).first();
@@ -32,7 +32,7 @@ DirectoryManager::profileDir() const
 }
 
 QString
-DirectoryManager::crashDumpDir() const
+GUIDirectoryManager::crashDumpDir() const
 {
     QDir dir (profileDir() + "/dumps/");
     if (!dir.exists()) {
@@ -42,13 +42,13 @@ DirectoryManager::crashDumpDir() const
 }
 
 QString
-DirectoryManager::configFileDir() const
+GUIDirectoryManager::configFileDir() const
 {
     return profileDir();
 }
 
 QString
-DirectoryManager::installedDir() const
+GUIDirectoryManager::installedDir() const
 {
     return QCoreApplication::applicationDirPath();
 }

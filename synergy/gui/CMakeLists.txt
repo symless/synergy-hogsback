@@ -75,35 +75,11 @@ target_link_libraries (${PROJECT_NAME}
     ${ServiceManagement_LIBRARY}
 )
 
-if (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    if (WIN32)
-        target_link_libraries (${PROJECT_NAME} ws2_32 rpcrt4 iphlpapi)
-        target_link_libraries (${PROJECT_NAME}
-            "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/windows/crashpad_client.lib"
-            "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/windows/crashpad_util.lib"
-            "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/windows/base.lib")
-    elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-        find_library (IOKit_LIBRARY IOKit)
-        find_library (Security_LIBRARY Security)
-
-        target_link_libraries (${PROJECT_NAME}
-            "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/macos/libcrashpad_client.a"
-            "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/macos/libcrashpad_util.a"
-            "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/macos/libbase.a"
-            ${Security_LIBRARY}
-            ${IOKit_LIBRARY}
-            "/usr/lib/libbsm.0.dylib")
-    endif()
-endif()
-
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     add_subdirectory (helper)
-
     install (TARGETS ${PROJECT_NAME} DESTINATION ${SYNERGY_BUNDLE_BINARY_DIR})
     install (PROGRAMS "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/macos/crashpad_handler"
-             DESTINATION  ${SYNERGY_BUNDLE_BINARY_DIR})
-
+             DESTINATION ${SYNERGY_BUNDLE_BINARY_DIR})
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     install (TARGETS ${PROJECT_NAME} DESTINATION bin)
 endif()
-

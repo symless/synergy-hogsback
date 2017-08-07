@@ -7,7 +7,7 @@ OSXDirectoryManager::systemAppDir()
     return "/usr/local/share";
 }
 
-std::string
+boost::filesystem::path
 OSXDirectoryManager::installedDir()
 {
     return "/Applications/Synergy.app/Contents/MacOS";

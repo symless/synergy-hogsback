@@ -5,13 +5,13 @@
 
 #include <QObject>
 
-class LIB_SPEC DirectoryManager : QObject
+class LIB_SPEC GUIDirectoryManager : QObject
 {
 	Q_OBJECT
 
 public:
-	DirectoryManager();
-	virtual ~DirectoryManager();
+    GUIDirectoryManager();
+    virtual ~GUIDirectoryManager();
 
     virtual QString profileDir() const;
     virtual QString crashDumpDir() const;

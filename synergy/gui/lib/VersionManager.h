@@ -13,9 +13,13 @@ public:
     static QObject* instance(QQmlEngine* engine = NULL, QJSEngine* scriptEngine = NULL);
     ~VersionManager();
 
-    void setVersion(const QString v);
-    void checkUpdate(const QString& newVersion);
     Q_INVOKABLE QString buildVersion() const;
+    Q_INVOKABLE QString latestVersion() const;
+
+    void setVersion(const QString v);
+    void checkUpdate(QJsonDocument& updateReplyDoc);
+    QString currentVersion() const;
+
 protected:
     VersionManager();
 
@@ -24,6 +28,7 @@ signals:
 
 private:
     QString m_version;
+    QString m_latestVersion;
 };
 
 #endif // VERSIONMANAGER_H

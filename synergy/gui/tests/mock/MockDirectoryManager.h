@@ -3,7 +3,7 @@
 
 #include "DirectoryManager.h"
 
-class MockDirectoryManager : public DirectoryManager
+class MockDirectoryManager : public GUIDirectoryManager
 {
 public:
     MockDirectoryManager();

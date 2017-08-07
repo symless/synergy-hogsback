@@ -6,7 +6,7 @@
 
 #include <QObject>
 
-class DirectoryManager;
+class GUIDirectoryManager;
 
 class LIB_SPEC ProcessCommand : public QObject
 {
@@ -19,14 +19,14 @@ public:
 	QString command(bool serverMode) const;
 	QStringList arguments(bool serverMode) const;
 	void setServerIp(const QString ip);
-	void setDirectoryManager(DirectoryManager* dm);
+	void setDirectoryManager(GUIDirectoryManager* dm);
 
 private:
 	QString wrapCommand(QString command) const;
 
 private:
     QString m_serverIp;
-	DirectoryManager* m_directoryManager;
+	GUIDirectoryManager* m_directoryManager;
 };
 
 #endif // PROCESSCOMMAND_H

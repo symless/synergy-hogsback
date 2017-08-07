@@ -36,7 +36,7 @@ static const char kUpdateProfileConfigUrl[] = SYNERGY_CLOUD_URI "/profile/update
 static const char kReportUrl[] = SYNERGY_CLOUD_URI "/report"; // TODO: change to POST to /user/connectivity-reports
 static const char kClaimServerUrl[] = SYNERGY_CLOUD_URI "/profile/server/claim"; // TODO: change to POST to /profile/%1/server
 static const char kUpdateScreenUrl[] = SYNERGY_CLOUD_URI "/screen/update"; // TODO: change to PUT to /screen/%1
-static const char kLatestVersionUrl[] = SYNERGY_CLOUD_URI "/version";
+static const char kCheckUpdateUrl[] = SYNERGY_CLOUD_URI "/update";
 static const char kLogUploadUrl[] = "https://symless.com/api/client/log";
 static const int kPollingTimeout = 60000; // 1 minute
 
@@ -223,9 +223,10 @@ void CloudClient::onUnsubProfileFinished(QNetworkReply *reply)
     }
 }
 
-void CloudClient::onGetLatestVersionFinished(QNetworkReply *reply)
+void CloudClient::onCheckUpdateFinished(QNetworkReply *reply)
 {
     if (replyHasError(reply)) {
+        throw std::runtime_error(QString("failed to check update: %1").arg(reply->errorString()).toStdString());
         return;
     }
 
@@ -234,16 +235,8 @@ void CloudClient::onGetLatestVersionFinished(QNetworkReply *reply)
 
     QJsonDocument doc = QJsonDocument::fromJson(m_Data);
 
-    if (doc.isNull()) {
-        return;
-    }
-
-    if (doc.isObject()) {
-        QJsonObject obj = doc.object();
-        QString version = obj["latestVersion"].toString();
-        VersionManager* versionManager = qobject_cast<VersionManager*>(VersionManager::instance());
-        versionManager->checkUpdate(version);
-    }
+    VersionManager* versionManager = qobject_cast<VersionManager*>(VersionManager::instance());
+    versionManager->checkUpdate(doc);
 }
 
 void CloudClient::onUploadLogFileFinished(QNetworkReply *reply)
@@ -379,14 +372,22 @@ void CloudClient::userProfiles()
     });
 }
 
-void CloudClient::getLatestVersion()
+void CloudClient::checkUpdate()
 {
-    QUrl latestVersionUrl = QUrl(kLatestVersionUrl);
-    QNetworkRequest req(latestVersionUrl);
+    QUrl checkUpdateUrl = QUrl(kCheckUpdateUrl);
+    QNetworkRequest req(checkUpdateUrl);
+    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
-    auto reply = m_networkManager->get(req);
+    VersionManager* versionManager = qobject_cast<VersionManager*>(VersionManager::instance());
+    QString currentVersion = versionManager->currentVersion();
+    QJsonObject jsonObject;
+    jsonObject.insert("currentVersion", currentVersion);
+
+    QJsonDocument doc(jsonObject);
+
+    auto reply = m_networkManager->post(req, doc.toJson());
     connect (reply, &QNetworkReply::finished, [this, reply]() {
-        onGetLatestVersionFinished (reply);
+        onCheckUpdateFinished (reply);
     });
 }
 
@@ -612,6 +613,7 @@ void CloudClient::syncConfig()
 bool CloudClient::replyHasError(QNetworkReply* reply)
 {
     bool result = false;
+
     QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
 
     if (statusCode != 200) {

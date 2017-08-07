@@ -7,7 +7,7 @@ XWindowsDirectoryManager::systemAppDir()
     return "/etc/synergy";
 }
 
-std::string
+boost::filesystem::path
 XWindowsDirectoryManager::installedDir()
 {
     return "/usr/bin";

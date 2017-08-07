@@ -2,7 +2,6 @@
 #include "CloudClient.h"
 #include "ScreenListModel.h"
 #include "ScreenManager.h"
-#include "TrialValidator.h"
 #include "FontManager.h"
 #include "LogManager.h"
 #include "ProcessManager.h"
@@ -23,80 +22,13 @@
 #include <iostream>
 #include <boost/asio.hpp>
 #include <synergy/common/WampClient.h>
+#include <synergy/common/CrashHandler.h>
 
 namespace asio = boost::asio;
-
-#if (defined(Q_OS_WIN) || defined (Q_OS_DARWIN)) && !defined (QT_DEBUG)
-// TODO: Somehow get these in to a half decent <crashpad/...> form
-#include <client/crashpad_client.h>
-#include <client/crash_report_database.h>
-#include <client/settings.h>
-
-static auto const CRASHPAD_TOKEN =
-    "cc4db6ef2d4731b276b0a111979336443dc0372624effb79d8b29b26a200e1c6";
-#endif
 
 #ifdef Q_OS_DARWIN
 #include <cstdlib>
 #endif
-
-void openAccessibilityDialog();
-
-static bool
-startCrashHandler()
-{
-#if (defined(Q_OS_WIN) || defined (Q_OS_DARWIN)) && !defined (QT_DEBUG)
-    DirectoryManager directoryManager;
-
-#if defined(Q_OS_WIN)
-    auto db_path = directoryManager.crashDumpDir().toStdWString();
-    auto handler_path = QDir(directoryManager.installedDir()
-                         + "/crashpad_handler.exe").path().toStdWString();
-#elif defined(Q_OS_DARWIN)
-    auto db_path = directoryManager.crashDumpDir().toStdString();
-    auto handler_path = QDir(directoryManager.installedDir()
-                         + "/crashpad_handler").path().toStdString();
-#endif
-
-    using namespace crashpad;
-    base::FilePath db (db_path);
-    base::FilePath handler (handler_path);
-
-    /* Enable uploads */
-    {
-        auto crashReportDatabase = crashpad::CrashReportDatabase::Initialize(db);
-        crashReportDatabase->GetSettings()->SetUploadsEnabled(true);
-    }
-
-    CrashpadClient client;
-    bool rc = false;
-
-    std::string url("https://synergy.sp.backtrace.io:6098");
-    std::map<std::string, std::string> annotations;
-    annotations["token"] = CRASHPAD_TOKEN;
-    annotations["format"] = "minidump";
-
-    std::vector<std::string> arguments;
-    arguments.push_back ("--no-rate-limit");
-
-    rc = client.StartHandler (handler, db, db, url, annotations, arguments,
-        true, /* restartable */
-        false  /* asynchronous_start */
-    );
-    if (!rc) {
-        return false;
-    }
-
-#if defined(Q_OS_WIN)
-    /* Wait for Crashpad to initialize. */
-    rc = client.WaitForHandlerStart(INFINITE);
-    if (!rc) {
-        return false;
-    }
-#endif
-#endif
-    return true;
-}
 
 #ifdef Q_OS_OSX
 bool installServiceHelper();
@@ -138,15 +70,6 @@ main(int argc, char* argv[])
     checkService();
 #endif
 
-    TrialValidator trialValidator;
-    if (!trialValidator.isValid()) {
-        QMessageBox msgBox;
-        msgBox.setText("This version is not supported anymore. "
-                       "Please <a href='https://www.symless.com'>download</a> the latest build.");
-        msgBox.exec();
-        return 0;
-    }
-
     FontManager::loadAll();
 
     asio::io_service io;
@@ -184,9 +107,13 @@ main(int argc, char* argv[])
         LogManager::setQmlContext(engine.rootContext());
         LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
 
+#ifndef SYNERGY_DEVELOPER_MODE
+        CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
+        cloudClient->checkUpdate();
+#endif
+
         engine.rootContext()->setContextProperty
             ("PixelPerPoint", QGuiApplication::primaryScreen()->physicalDotsPerInch() / 72);
-
         engine.rootContext()->setContextProperty
             ("rpcProcessManager", static_cast<QObject*>(&processManager));
 
@@ -199,7 +126,8 @@ main(int argc, char* argv[])
         return qtAppRet;
     }
     catch (std::runtime_error& e) {
-        LogManager::error(QString("exception caught: ").arg(e.what()));
+        LogManager::setQmlContext(NULL);
+        LogManager::error(QString("exception caught: %1").arg(e.what()));
         return EXIT_FAILURE;
     }
 }

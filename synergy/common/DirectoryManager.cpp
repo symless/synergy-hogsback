@@ -37,5 +37,5 @@ DirectoryManager::userDir()
         return userDir;
     }
 
-    return "/";
+    throw;
 }

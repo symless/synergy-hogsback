@@ -105,11 +105,20 @@ include_directories (${Websocketpp_INCLUDE_DIR})
 #
 # Google Breakpad
 #
-if (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+if ((CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo") AND
+        ((${CMAKE_SYSTEM_NAME} MATCHES "Darwin") OR (${CMAKE_SYSTEM_NAME} MATCHES "Windows")))
+    set (SYNERGY_CRASHPAD ON)
+else()
+    set (SYNERGY_CRASHPAD OFF)
+endif()
+
+if (SYNERGY_CRASHPAD)
+    add_definitions (-DSYNERGY_CRASHPAD=1)
     include_directories (BEFORE SYSTEM "${CMAKE_SOURCE_DIR}/third_party/crashpad")
     include_directories (BEFORE SYSTEM "${CMAKE_SOURCE_DIR}/third_party/mini_chromium")
 endif()
 
+#
 # Boost
 #
 set (Boost_USE_STATIC_LIBS ON)

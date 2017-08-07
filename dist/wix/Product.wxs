@@ -97,7 +97,8 @@
                 <File Source="$(var.OpenSSLBinPath)/libeay32.dll"/>
                 <File Source="$(var.OpenSSLBinPath)/ssleay32.dll"/>
 
-                <File Source="$(var.BinPath)/synergyd.exe" KeyPath="yes" />
+                <File Source="$(var.BinPath)/synergyd.exe"/>
+                <File Source="$(var.BinPath)/synergy-service-controller.exe" KeyPath="yes" />
 
                 <ServiceInstall
                     Id="ServiceInstall" Name="Synergy" DisplayName="$(var.Name)"
