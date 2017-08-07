@@ -111,7 +111,8 @@ public:
         });
     }
 
-    boost::signals2::signal<void()> ready;
+    boost::signals2::signal<void()> connected;
+    boost::signals2::signal<void()> connectionRetry;
 
 private:
     void connect();
@@ -122,6 +123,7 @@ private:
     std::shared_ptr<autobahn::wamp_transport> m_transport;
     autobahn::wamp_call_options m_defaultCallOptions;
     boost::asio::deadline_timer m_retryTimer;
+    bool m_started = false;
 };
 
 

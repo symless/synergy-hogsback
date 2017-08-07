@@ -27,33 +27,37 @@ WampClient::start (std::string const& ip, int const port)
     m_transport->attach(std::static_pointer_cast<autobahn::wamp_transport_handler>
                       (m_session));
 
-    return connect();
+    m_started = true;
+    connect();
 }
 
 void
 WampClient::connect()
 {
     m_transport->connect().then(
-        m_executor, [&](boost::future<void> connected) {
+        m_executor, [&](boost::future<void> status) {
 
-        if (connected.has_exception()) {
+        if (status.has_exception()) {
+            if (!m_started) {
+                return;
+            }
             m_retryTimer.expires_from_now(boost::posix_time::milliseconds(500));
             m_retryTimer.async_wait([&](boost::system::error_code) {
-                // TODO: some sort of logging to the UI
+                connectionRetry();
                 connect();
             });
             return;
         }
 
-        // if not connected, throws exeception
-        connected.get();
+        // if not connected, throws exception
+        status.get();
 
         m_session->start().then (m_executor, [&](boost::future<void> started) {
             started.get();
             m_session->join("default").then
                     (m_executor, [&](boost::future<uint64_t> joined) {
                 joined.get();
-                ready();
+                connected();
             });
         });
     });

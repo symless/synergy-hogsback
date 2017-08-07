@@ -39,7 +39,7 @@ ServiceWorker::provideCore()
     auto server = m_rpcManager->server();
 
     server->provide ("synergy.core.start",
-                                     [this](std::vector<std::string>& cmd) {
+                     [this](std::vector<std::string>& cmd) {
         m_processManager->start (std::move (cmd));
     });
 

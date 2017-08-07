@@ -12,7 +12,9 @@ RpcManager::RpcManager(boost::asio::io_service& ioService) :
     m_server = std::make_shared<WampServer>(m_ioService);
 
     m_router->ready.connect ([this]() {
-        m_ioService.post([this] () { m_server->start(kLocalIpAddress, kWampDefaultPort); });
+        m_ioService.post([this] () {
+            m_server->start(kLocalIpAddress, kWampDefaultPort);
+        });
     });
 
     m_server->ready.connect ([this]() { ready(); });

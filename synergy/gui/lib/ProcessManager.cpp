@@ -31,7 +31,7 @@ ProcessManager::ProcessManager(WampClient& wampClient) :
 
     connect (this, &ProcessManager::logCoreOutput, this, &ProcessManager::onLogCoreOutput, Qt::QueuedConnection);
 
-    wampClient.ready.connect([&]() {
+    wampClient.connected.connect([&]() {
         wampClient.subscribe ("synergy.core.log", [this](std::string line) {
             emit logCoreOutput(QString::fromStdString(line));
         });
