@@ -50,7 +50,7 @@ ServiceWorker::provideCore()
 
 void ServiceWorker::shutdown()
 {
-    m_processManager->stop();
+    m_processManager->shutdown();
     m_rpcManager->stop();
 
     m_work.reset();

@@ -1,5 +1,6 @@
 #include <synergy/common/CrashHandler.h>
 #include "ServiceWorker.h"
+#include "TerminationSignalListener.h"
 
 #include <boost/asio/io_service.hpp>
 
@@ -9,6 +10,10 @@ main (int argc, char* argv[]) {
 
     boost::asio::io_service ioService;
     ServiceWorker serviceWorker(ioService);
+    TerminationSignalListener signalListener(ioService);
+    signalListener.setHandler([&serviceWorker] () {
+        serviceWorker.shutdown();
+    });
 
     try {
         serviceWorker.start();
