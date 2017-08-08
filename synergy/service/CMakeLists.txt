@@ -6,6 +6,7 @@ set (SERVICE_SOURCES
     ProcessManager.cpp
     SessionManager.cpp
     ServiceWorker.cpp
+    TerminationSignalListener.cpp
 )
 
 add_executable (${PROJECT_NAME} ${SERVICE_SOURCES})
