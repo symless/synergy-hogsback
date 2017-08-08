@@ -21,7 +21,7 @@ ServiceController::ServiceController() :
     m_install(false),
     m_uninstall(false),
     m_foreground(false),
-    m_serviceGroupId(0)
+    m_jobOject(NULL)
 {
     m_status.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
     m_status.dwCurrentState = SERVICE_START_PENDING;
@@ -417,31 +417,27 @@ void ServiceController::startSynergyService()
         startSynergyServiceAsUser(token, &securityAttributes);
     }
     catch (std::runtime_error& e) {
-        writeEventErrorLog(e.what());
+        writeEventErrorLog("Failed to start synergy service");
     }
 }
 
 void ServiceController::stopSynergyService()
 {
-    if (m_serviceGroupId == 0) {
-        return;
-    }
-
-    HANDLE process;
     const UINT kExitCode = 0;
-    const UINT shutdownTimeout = 3000;
-    if (findProcessInSession(kServiceProcess, &process, getActiveSession())) {
-        GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, m_serviceGroupId);
-        DWORD exitCode = WaitForSingleObject(process, shutdownTimeout);
-        if (exitCode != WAIT_OBJECT_0) {
-            // forcefully shutdown service after graceful shutdown times out
-            if (!TerminateProcess(process, kExitCode)) {
-                writeEventErrorLog("Failed to shutdown synergy service");
-            }
+    if (m_jobOject != NULL) {
+        BOOL result = TerminateJobObject(m_jobOject, kExitCode);
+        if (!result) {
+            writeEventErrorLog("Failed to terminate synergy service group");
+        }
+        else {
+            // TODO: forcefully kill all related processes
+//            if (!TerminateProcess(process, kExitCode)) {
+//                writeEventErrorLog("Failed to shutdown synergy service");
+//            }
         }
     }
 
-    m_serviceGroupId = 0;
+    return;
 }
 
 DWORD ServiceController::getActiveSession()
@@ -460,7 +456,8 @@ HANDLE ServiceController::getElevateTokenInSession(DWORD sessionId, LPSECURITY_A
         errorMsg += " in session ";
         errorMsg += stream.str();
 
-        throw std::runtime_error(errorMsg.c_str());
+        writeEventErrorLog(errorMsg.c_str());
+        throw;
     }
 
     return duplicateProcessToken(process, security);
@@ -479,10 +476,13 @@ void ServiceController::startSynergyServiceAsUser(HANDLE userToken, LPSECURITY_A
     si.lpDesktop = "winsta0\\Default";
     si.dwFlags |= STARTF_USESTDHANDLES;
 
+    m_jobOject = CreateJobObject(NULL, "SynergyJob");
+
     LPVOID environment;
     BOOL createRet = CreateEnvironmentBlock(&environment, userToken, FALSE);
     if (!createRet) {
-        throw std::runtime_error("Failed to create environment block");
+        writeEventErrorLog("Failed to create environment block");
+        throw;
     }
 
     DWORD creationFlags =
@@ -498,10 +498,15 @@ void ServiceController::startSynergyServiceAsUser(HANDLE userToken, LPSECURITY_A
         environment, NULL, &si, &processInfo);
 
     if (!createRet) {
-        throw std::runtime_error("Failed to create the service in user session");
+        writeEventErrorLog("Failed to create the service in user session");
+        throw;
     }
 
-    m_serviceGroupId = processInfo.dwProcessId;
+    createRet = AssignProcessToJobObject(m_jobOject, processInfo.hProcess);
+    if (!createRet) {
+        writeEventErrorLog("Failed to assign the service in a group");
+        throw;
+    }
 
     DestroyEnvironmentBlock(environment);
     CloseHandle(userToken);
@@ -615,7 +620,8 @@ ServiceController::duplicateProcessToken(HANDLE process, LPSECURITY_ATTRIBUTES s
         &sourceToken);
 
     if (!tokenRet) {
-        throw std::runtime_error("Failed to open process token");
+        writeEventErrorLog("Failed to open process token");
+        throw;
     }
 
     HANDLE newToken;
@@ -624,7 +630,8 @@ ServiceController::duplicateProcessToken(HANDLE process, LPSECURITY_ATTRIBUTES s
         SecurityImpersonation, TokenPrimary, &newToken);
 
     if (!duplicateRet) {
-        throw std::runtime_error("Failed to duplicate process token");
+        writeEventErrorLog("Failed to duplicate process token");
+        throw;
     }
 
     return newToken;
