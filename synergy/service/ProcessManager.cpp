@@ -132,9 +132,7 @@ ProcessManager::start (std::vector<std::string> command) {
             }
         );
 
-        m_impl->m_outPipe.cancel();
-        m_impl->m_errorPipe.cancel();
-        process->terminate();
+        shutdown();
         return;
     }
 
@@ -149,6 +147,11 @@ ProcessManager::awaitingExit () const noexcept {
 }
 
 void
-ProcessManager::stop()
+ProcessManager::shutdown()
 {
+    if (m_impl->m_process) {
+        m_impl->m_outPipe.cancel();
+        m_impl->m_errorPipe.cancel();
+        m_impl->m_process->terminate();
+    }
 }
