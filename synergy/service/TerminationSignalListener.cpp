@@ -4,9 +4,9 @@
 
 TerminationSignalListener::TerminationSignalListener(boost::asio::io_service &io) :
 #if defined(SIGQUIT)
-    m_signals(io, SIGTERM, SIGINT, SIGBREAK, SIGQUIT)
+    m_signals(io, SIGTERM, SIGINT, SIGQUIT)
 #else
-    m_signals(io, SIGTERM, SIGINT, SIGBREAK)
+    m_signals(io, SIGTERM, SIGINT)
 #endif
 {
     m_signals.async_wait(
@@ -22,9 +22,9 @@ TerminationSignalListener::terminationHandler(
     }
 
 #if defined(SIGQUIT)
-    if (signalNumber == SIGINT || signalNumber == SIGTERM || signalNumber == SIGBREAK || signalNumber == SIGQUIT) {
+    if (signalNumber == SIGINT || signalNumber == SIGTERM || signalNumber == SIGQUIT) {
 #else
-    if (signalNumber == SIGINT || signalNumber == SIGTERM || signalNumber == SIGBREAK) {
+    if (signalNumber == SIGINT || signalNumber == SIGTERM) {
 #endif
         m_handler();
     }
