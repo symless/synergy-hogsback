@@ -13,7 +13,10 @@
 static char* kServiceControllerName = "synergy-service-controller";
 static char* kServiceControllerDisplayName = "Synergy";
 static char* kServiceProcess = "synergyd.exe";
+static char* kServerProcess = "synergys.exe";
+static char* kClientProcess = "synergyc.exe";
 static char* kWinLogon = "winlogon.exe";
+static const UINT kExitCode = 0;
 
 ServiceController* ServiceController::s_instance = nullptr;
 
@@ -416,24 +419,20 @@ void ServiceController::startSynergyService()
         HANDLE token = getElevateTokenInSession(sessionId, &securityAttributes);
         startSynergyServiceAsUser(token, &securityAttributes);
     }
-    catch (std::runtime_error& e) {
+    catch (...) {
         writeEventErrorLog("Failed to start synergy service");
     }
 }
 
 void ServiceController::stopSynergyService()
 {
-    const UINT kExitCode = 0;
     if (m_jobOject != NULL) {
         BOOL result = TerminateJobObject(m_jobOject, kExitCode);
         if (!result) {
             writeEventErrorLog("Failed to terminate synergy service group");
         }
         else {
-            // TODO: forcefully kill all related processes
-//            if (!TerminateProcess(process, kExitCode)) {
-//                writeEventErrorLog("Failed to shutdown synergy service");
-//            }
+            stopAllUserProcesses();
         }
     }
 
@@ -635,4 +634,22 @@ ServiceController::duplicateProcessToken(HANDLE process, LPSECURITY_ATTRIBUTES s
     }
 
     return newToken;
+}
+
+void ServiceController::stopAllUserProcesses()
+{
+    std::vector<std::string> processes;
+    processes.emplace_back(kServiceProcess);
+    processes.emplace_back(kServerProcess);
+    processes.emplace_back(kClientProcess);
+    for (auto process : processes) {
+        HANDLE processHandle = NULL;
+        if (findProcessInSession(process.c_str(), &processHandle, getActiveSession())) {
+            if (!TerminateProcess(processHandle, kExitCode)) {
+                std::string errorMsg("Failed to shutdown ");
+                errorMsg += process;
+                writeEventErrorLog(errorMsg.c_str());
+            }
+        }
+    }
 }
