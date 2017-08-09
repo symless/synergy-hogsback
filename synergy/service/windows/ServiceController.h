@@ -44,6 +44,7 @@ private:
     bool findProcessInSession(const char* processName, PHANDLE process, DWORD sessionId);
     bool nextProcessEntry(HANDLE snapshot, LPPROCESSENTRY32 entry);
     HANDLE duplicateProcessToken(HANDLE process, LPSECURITY_ATTRIBUTES security);
+    void stopAllUserProcesses();
 
     static void WINAPI serviceMain(DWORD dwArgc, LPSTR *pszArgv);
     static void WINAPI serviceCtrlHandler(DWORD dwCtrl);
@@ -55,6 +56,8 @@ protected:
 
     SERVICE_STATUS m_status;
     SERVICE_STATUS_HANDLE m_statusHandle;
+
+    HANDLE m_jobOject;
 
     static ServiceController* s_instance;
 };

@@ -13,14 +13,18 @@
 static char* kServiceControllerName = "synergy-service-controller";
 static char* kServiceControllerDisplayName = "Synergy";
 static char* kServiceProcess = "synergyd.exe";
+static char* kServerProcess = "synergys.exe";
+static char* kClientProcess = "synergyc.exe";
 static char* kWinLogon = "winlogon.exe";
+static const UINT kExitCode = 0;
 
 ServiceController* ServiceController::s_instance = nullptr;
 
 ServiceController::ServiceController() :
     m_install(false),
     m_uninstall(false),
-    m_foreground(false)
+    m_foreground(false),
+    m_jobOject(NULL)
 {
     m_status.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
     m_status.dwCurrentState = SERVICE_START_PENDING;
@@ -275,7 +279,7 @@ void ServiceController::stop()
     try {
         setServiceStatus(SERVICE_STOP_PENDING);
 
-        // TODO: Notify the worker to stop
+        stopSynergyService();
 
         setServiceStatus(SERVICE_STOPPED);
     }
@@ -415,14 +419,24 @@ void ServiceController::startSynergyService()
         HANDLE token = getElevateTokenInSession(sessionId, &securityAttributes);
         startSynergyServiceAsUser(token, &securityAttributes);
     }
-    catch (std::runtime_error& e) {
-        writeEventErrorLog(e.what());
+    catch (...) {
+        writeEventErrorLog("Failed to start synergy service");
     }
 }
 
 void ServiceController::stopSynergyService()
 {
+    if (m_jobOject != NULL) {
+        BOOL result = TerminateJobObject(m_jobOject, kExitCode);
+        if (!result) {
+            writeEventErrorLog("Failed to terminate synergy service group");
+        }
+        else {
+            stopAllUserProcesses();
+        }
+    }
 
+    return;
 }
 
 DWORD ServiceController::getActiveSession()
@@ -441,7 +455,8 @@ HANDLE ServiceController::getElevateTokenInSession(DWORD sessionId, LPSECURITY_A
         errorMsg += " in session ";
         errorMsg += stream.str();
 
-        throw std::runtime_error(errorMsg.c_str());
+        writeEventErrorLog(errorMsg.c_str());
+        throw;
     }
 
     return duplicateProcessToken(process, security);
@@ -460,16 +475,20 @@ void ServiceController::startSynergyServiceAsUser(HANDLE userToken, LPSECURITY_A
     si.lpDesktop = "winsta0\\Default";
     si.dwFlags |= STARTF_USESTDHANDLES;
 
+    m_jobOject = CreateJobObject(NULL, "SynergyJob");
+
     LPVOID environment;
     BOOL createRet = CreateEnvironmentBlock(&environment, userToken, FALSE);
     if (!createRet) {
-        throw std::runtime_error("Failed to create environment block");
+        writeEventErrorLog("Failed to create environment block");
+        throw;
     }
 
     DWORD creationFlags =
         NORMAL_PRIORITY_CLASS |
         CREATE_NO_WINDOW |
-        CREATE_UNICODE_ENVIRONMENT;
+        CREATE_UNICODE_ENVIRONMENT |
+        CREATE_NEW_PROCESS_GROUP;
 
     // re-launch in current active user session
     createRet = CreateProcessAsUser(
@@ -478,7 +497,14 @@ void ServiceController::startSynergyServiceAsUser(HANDLE userToken, LPSECURITY_A
         environment, NULL, &si, &processInfo);
 
     if (!createRet) {
-        throw std::runtime_error("Failed to create the service in user session");
+        writeEventErrorLog("Failed to create the service in user session");
+        throw;
+    }
+
+    createRet = AssignProcessToJobObject(m_jobOject, processInfo.hProcess);
+    if (!createRet) {
+        writeEventErrorLog("Failed to assign the service in a group");
+        throw;
     }
 
     DestroyEnvironmentBlock(environment);
@@ -593,7 +619,8 @@ ServiceController::duplicateProcessToken(HANDLE process, LPSECURITY_ATTRIBUTES s
         &sourceToken);
 
     if (!tokenRet) {
-        throw std::runtime_error("Failed to open process token");
+        writeEventErrorLog("Failed to open process token");
+        throw;
     }
 
     HANDLE newToken;
@@ -602,8 +629,27 @@ ServiceController::duplicateProcessToken(HANDLE process, LPSECURITY_ATTRIBUTES s
         SecurityImpersonation, TokenPrimary, &newToken);
 
     if (!duplicateRet) {
-        throw std::runtime_error("Failed to duplicate process token");
+        writeEventErrorLog("Failed to duplicate process token");
+        throw;
     }
 
     return newToken;
+}
+
+void ServiceController::stopAllUserProcesses()
+{
+    std::vector<std::string> processes;
+    processes.emplace_back(kServiceProcess);
+    processes.emplace_back(kServerProcess);
+    processes.emplace_back(kClientProcess);
+    for (auto process : processes) {
+        HANDLE processHandle = NULL;
+        if (findProcessInSession(process.c_str(), &processHandle, getActiveSession())) {
+            if (!TerminateProcess(processHandle, kExitCode)) {
+                std::string errorMsg("Failed to shutdown ");
+                errorMsg += process;
+                writeEventErrorLog(errorMsg.c_str());
+            }
+        }
+    }
 }
