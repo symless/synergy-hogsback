@@ -11,19 +11,15 @@
 
 class ProcessManagerImpl;
 
-class ProcessManager final
-{
+class ProcessManager final {
 public:
     explicit ProcessManager (boost::asio::io_service& io);
-    ~ProcessManager() noexcept;
     ProcessManager (ProcessManager const&) = delete;
     ProcessManager& operator= (ProcessManager const&) = delete;
+    ~ProcessManager() noexcept;
 
     void start (std::vector<std::string> command);
-    bool awaitingExit() const noexcept;
     void shutdown();
-
-    auto& ioService() const noexcept { return m_ioService; }
 
 public:
     template <typename... Args>

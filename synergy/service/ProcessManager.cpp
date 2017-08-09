@@ -7,6 +7,7 @@
 #include <string>
 #include <boost/asio/strand.hpp>
 #include <mutex>
+#include <cassert>
 
 namespace bp = boost::process;
 namespace bs = boost::system;
@@ -19,26 +20,25 @@ public:
     }
 
     void start (ProcessManager& manager);
+    void shutdown ();
 
-    std::mutex m_mutex;
+    std::vector<std::string> m_command;
+    bool m_awaitingExit = false;
 
     boost::asio::io_service::strand m_strand;
-    bp::async_pipe m_outPipe;
-    bp::async_pipe m_errorPipe;
     boost::asio::streambuf m_outBuf;
     boost::asio::streambuf m_errorBuf;
     std::string m_lineBuf;
-
+    bp::async_pipe m_outPipe;
+    bp::async_pipe m_errorPipe;
     optional<bp::child> m_process;
-    std::vector<std::string> m_command;
-    bool m_awaitingExit = false;
 };
 
 template <typename Strand, typename Pipe, typename Buffer, typename Line>
 static void
 asyncReadLines (ProcessManager& manager, Strand& strand, Pipe& pipe,
                 Buffer& buffer, Line& line, bs::error_code const& ec,
-                std::size_t bytes) {
+                std::size_t const bytes) {
     std::istream stream (&buffer);
     if (ec || !bytes || !std::getline (stream, line)) {
         return;
@@ -51,7 +51,7 @@ asyncReadLines (ProcessManager& manager, Strand& strand, Pipe& pipe,
         buffer,
         '\n',
         strand.wrap (
-            [&](boost::system::error_code const& ec, std::size_t bytes) {
+            [&](boost::system::error_code const& ec, std::size_t const bytes) {
                 return asyncReadLines (manager, strand, pipe, buffer, line,
                                        ec, bytes);
         })
@@ -60,13 +60,16 @@ asyncReadLines (ProcessManager& manager, Strand& strand, Pipe& pipe,
 
 void
 ProcessManagerImpl::start (ProcessManager& manager) {
+    assert (!m_command.empty());
+    assert (!m_process);
+
     m_process.emplace (
         m_command,
         bp::std_in.close (),
         bp::std_out > m_outPipe,
         bp::std_err > m_errorPipe,
-        bp::on_exit = [&manager](int exit, std::error_code const& ec){
-            if (manager.awaitingExit()) {
+        bp::on_exit = [this, &manager](int exit, std::error_code const& ec){
+            if (m_awaitingExit) {
                 manager.onExit();
             } else {
                 manager.onUnexpectedExit();
@@ -75,8 +78,7 @@ ProcessManagerImpl::start (ProcessManager& manager) {
         m_strand.get_io_service()
     );
 
-    m_lineBuf.clear ();
-
+    /* Start the stdout I/O loop */
     boost::asio::async_read_until (
         m_outPipe,
         m_outBuf,
@@ -88,6 +90,7 @@ ProcessManagerImpl::start (ProcessManager& manager) {
         })
     );
 
+    /* Start the stderr I/O loop */
     boost::asio::async_read_until (
         m_errorPipe,
         m_errorBuf,
@@ -100,6 +103,19 @@ ProcessManagerImpl::start (ProcessManager& manager) {
     );
 }
 
+void
+ProcessManagerImpl::shutdown() {
+    auto& ioService = m_strand.get_io_service();
+
+    /* Cancel the standard stream I/O loops */
+    m_outPipe.cancel();
+    m_errorPipe.cancel();
+    ioService.poll();
+
+    m_process->terminate();
+    ioService.poll();
+}
+
 template <typename T, typename... Args> static inline
 std::unique_ptr<T>
 make_unique (Args&&... args) {
@@ -107,8 +123,7 @@ make_unique (Args&&... args) {
 }
 
 ProcessManager::ProcessManager (boost::asio::io_service &io)
-    : m_ioService (io),
-      m_impl (make_unique<ProcessManagerImpl> (m_ioService)) {
+    : m_ioService (io) {
 }
 
 ProcessManager::~ProcessManager () noexcept {
@@ -116,42 +131,29 @@ ProcessManager::~ProcessManager () noexcept {
 
 void
 ProcessManager::start (std::vector<std::string> command) {
-    std::unique_lock<std::mutex> lock (m_impl->m_mutex);
-
-    auto& process = m_impl->m_process;
-    if (process) {
+    if (m_impl) {
         m_impl->m_awaitingExit = true;
 
-        onExit.connect_extended (
-            [this, &process, command = std::move(command)](auto& connection) {
-                connection.disconnect();
-                process->join();
-                process = decltype(m_impl->m_process)();
-                m_impl->m_awaitingExit = false;
-                this->start (std::move(command));
-            }
-        );
+        onExit.connect_extended ([this, &process = m_impl->m_process]
+                                 (auto& connection) {
+            connection.disconnect();
+            process->join();
+            m_impl->m_awaitingExit = false;
+        });
 
         shutdown();
-        return;
     }
 
+    assert (!m_impl);
+    m_impl = std::make_unique<ProcessManagerImpl>(m_ioService);
     m_impl->m_command = std::move (command);
     m_impl->start (*this);
 }
 
-bool
-ProcessManager::awaitingExit () const noexcept {
-    std::unique_lock<std::mutex> lock (m_impl->m_mutex);
-    return m_impl->m_awaitingExit;
-}
-
 void
-ProcessManager::shutdown()
-{
-    if (m_impl->m_process) {
-        m_impl->m_outPipe.cancel();
-        m_impl->m_errorPipe.cancel();
-        m_impl->m_process->terminate();
+ProcessManager::shutdown() {
+    if (m_impl) {
+        m_impl->shutdown();
+        m_impl.reset();
     }
 }
