@@ -388,6 +388,36 @@ Rectangle {
                                         }
                                     }
                                 }
+
+                                Text {
+                                    id: errorMessage
+                                    width: parent.width
+                                    font.pixelSize: dp(10)
+                                    anchors.top: errorMessageDialog.top
+                                    anchors.topMargin: dp(25)
+                                    horizontalAlignment: Text.AlignHCenter
+                                    wrapMode: Text.WordWrap
+                                    text: "This is a really long test message!"
+                                }
+
+                                Text {
+                                    id: troubleshootLink
+                                    width: parent.width
+                                    font.pixelSize: dp(10)
+                                    anchors.top: errorMessage.bottom
+                                    anchors.topMargin: dp(15)
+                                    horizontalAlignment: Text.AlignHCenter
+                                    wrapMode: Text.WordWrap
+                                    text: "<a href='https://symless.com/synergy'>Troubleshoot</a>"
+
+                                    onLinkActivated: Qt.openUrlExternally(link)
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        acceptedButtons: Qt.NoButton
+                                        cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                    }
+                                }
                             }
                         }
                     }
