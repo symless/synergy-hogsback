@@ -14,9 +14,9 @@ boost::signals2::signal<void()> testFinished;
 std::vector<std::string> testCommand;
 bool timeout;
 
-void startTest(std::vector<std::string>& cmd)
+void startTest(std::vector<std::string> cmd)
 {
-    testCommand = cmd;
+    testCommand = std::move(cmd);
     testFinished();
 }
 
