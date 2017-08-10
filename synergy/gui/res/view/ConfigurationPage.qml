@@ -334,6 +334,7 @@ Rectangle {
 
                             // connecting error indication
                             Image {
+                                id: errorIndication
                                 sourceSize.width: dp(14)
                                 sourceSize.height: sourceSize.width
                                 anchors.horizontalCenter: connectingBar.horizontalCenter
@@ -342,6 +343,51 @@ Rectangle {
                                 smooth: false
                                 source: "qrc:/res/image/error-indication.svg"
                                 z: 2
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    acceptedButtons: Qt.LeftButton
+
+                                    onReleased: {
+                                        errorMessageDialog.visible = !errorMessageDialog.visible
+                                    }
+                                }
+                            }
+
+                            Image {
+                                id: errorMessageDialog
+                                anchors.horizontalCenter: errorIndication.horizontalCenter
+                                anchors.top: errorIndication.bottom
+                                anchors.topMargin: dp(5)
+                                width: dp(screenListModel.screenIconWidth() * 1.5)
+                                height: dp(screenListModel.screenIconHeight() * 1.5)
+                                smooth: true
+                                fillMode: Image.PreserveAspectFit
+                                source: "qrc:/res/image/error-message-dialog.png"
+                                z: 2
+
+                                Image {
+                                    id: closeIcon
+                                    anchors.top: errorMessageDialog.top
+                                    anchors.topMargin: dp(15)
+                                    anchors.right: errorMessageDialog.right
+                                    anchors.rightMargin: dp(5)
+                                    width: dp(10)
+                                    height: width
+                                    smooth: true
+                                    source: "qrc:/res/image/close-icon.png"
+                                    visible: errorMessageDialog.visible
+                                    z: 2
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        acceptedButtons: Qt.LeftButton
+
+                                        onReleased: {
+                                            errorMessageDialog.visible = false
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
