@@ -103,7 +103,7 @@ set (Websocketpp_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/websocketp
 include_directories (${Websocketpp_INCLUDE_DIR})
 
 #
-# Google Breakpad
+# Google Crashpad
 #
 if ((CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo") AND
         ((${CMAKE_SYSTEM_NAME} MATCHES "Darwin") OR (${CMAKE_SYSTEM_NAME} MATCHES "Windows")))
@@ -121,9 +121,9 @@ endif()
 #
 # Boost
 #
-set (Boost_USE_STATIC_LIBS ON)
-set (Boost_USE_STATIC_RUNTIME OFF)
-set (Boost_USE_MULTITHREADED ON)
+set (Boost_USE_STATIC_LIBS      ON)
+set (Boost_USE_STATIC_RUNTIME   OFF)
+set (Boost_USE_MULTITHREADED    ON)
 find_package (Boost 1.55 REQUIRED COMPONENTS system date_time filesystem regex
                                              thread chrono)
 include_directories (BEFORE SYSTEM ${Boost_INCLUDE_DIRS})
@@ -132,16 +132,18 @@ include_directories (BEFORE "${CMAKE_SOURCE_DIR}/third_party/callable_traits/inc
 # Enable the latest version of Boost Thread (default as of 1.64.0 is 2)
 add_definitions (-DBOOST_THREAD_VERSION=5)
 
-# Enable exerimental executor support for boost::future
+# Enable experimental executor support for boost::future
 add_definitions (-DBOOST_THREAD_PROVIDES_EXECUTORS)
 
 #
 # Websocket++
+#
 set (Websocketpp_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/websocketpp")
 include_directories(${Websocketpp_INCLUDE_DIR})
 
 #
 # Autobahn
+#
 set (Autobahn_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/autobahn-cpp")
 include_directories(${Autobahn_INCLUDE_DIR})
 
