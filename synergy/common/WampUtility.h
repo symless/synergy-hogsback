@@ -1,6 +1,8 @@
 #ifndef WAMPUTILITY_H
 #define WAMPUTILITY_H
 
+#include <tuple>
+
 namespace {
 
 struct make_tuple {
