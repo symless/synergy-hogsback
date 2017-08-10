@@ -35,3 +35,15 @@ RpcManager::stop()
 {
     m_router->stop();
 }
+
+const char *
+RpcManager::ipAddress() const
+{
+    return kLocalIpAddress;
+}
+
+const int
+RpcManager::port() const
+{
+    return kWampDefaultPort;
+}
