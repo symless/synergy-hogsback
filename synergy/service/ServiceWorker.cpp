@@ -13,10 +13,6 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
     m_processManager (std::make_unique<ProcessManager>(m_ioService)),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService))
 {
-    m_processManager->onOutput.connect([](std::string line) {
-        std::cout << line << std::endl;
-    });
-
     m_rpcManager->ready.connect([this]() { provideCore(); });
     m_rpcManager->start();
 }
@@ -52,9 +48,9 @@ void ServiceWorker::shutdown()
 {
     m_processManager->shutdown();
     m_rpcManager->stop();
-
     m_work.reset();
-    //finish processing all of the remaining completion handlers
+
+    // Finish processing all of the remaining completion handlers
     m_ioService.poll();
     m_ioService.stop();
 }
