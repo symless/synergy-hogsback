@@ -247,8 +247,9 @@ Rectangle {
                             HeaderText {
                                 id: screenNameText
                                 width: parent.width - dp(14)
-                                anchors.verticalCenter: parent.verticalCenter
                                 anchors.horizontalCenter: parent.horizontalCenter
+                                anchors.top: parent.top
+                                anchors.topMargin: parent.height / 4
                                 text: name
                                 color: screenStatus == "Connected" ? "black" : "white"
                                 horizontalAlignment: Text.AlignHCenter
@@ -300,7 +301,7 @@ Rectangle {
                                 visible: (screenStatus == "Connecting" || screenStatus == "ConnectingWithError") && screenImage.source != "qrc:/res/image/screen-edit.png"
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 anchors.bottom: parent.bottom
-                                anchors.bottomMargin: dp(10)
+                                anchors.bottomMargin: dp(15)
                                 width: parent.width / 7 * 5
                                 height: dp(4)
                                 clip: true
@@ -313,7 +314,7 @@ Rectangle {
                                     x: -width
                                     width: dp(25)
                                     height: dp(4)
-                                    color: "#96C13D"
+                                    color: screenStatus == "Connecting" ? "#96C13D" : "red"
                                     z: 1
                                     states: [
                                         State {
@@ -333,7 +334,7 @@ Rectangle {
 
                             // connecting error indication
                             Image {
-                                sourceSize.width: dp(12)
+                                sourceSize.width: dp(14)
                                 sourceSize.height: sourceSize.width
                                 anchors.horizontalCenter: connectingBar.horizontalCenter
                                 anchors.verticalCenter: connectingBar.verticalCenter
