@@ -24,6 +24,9 @@ public:
         return m_server;
     }
 
+    const char* ipAddress() const;
+    const int port() const;
+
 public:
     boost::signals2::signal<void()> ready;
 

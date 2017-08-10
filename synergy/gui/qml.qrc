@@ -6,7 +6,6 @@
         <file>res/image/synergy-logo.png</file>
         <file>res/image/screen-edit.png</file>
         <file>res/image/edit.png</file>
-        <file>res/image/unsub.png</file>
         <file>res/image/accessibility-tutorial.gif</file>
         <file>res/image/profile-icon.svg</file>
         <file alias="Museo.otf">res/font/Museo.otf</file>
@@ -26,5 +25,8 @@
         <file alias="ConfigurationPage.qml">res/view/ConfigurationPage.qml</file>
         <file alias="ProfilePage.qml">res/view/ProfilePage.qml</file>
         <file>res/image/symless-signin-button.svg</file>
+        <file>res/image/error-indication.svg</file>
+        <file>res/image/close-icon.png</file>
+        <file>res/image/error-message-dialog.png</file>
     </qresource>
 </RCC>

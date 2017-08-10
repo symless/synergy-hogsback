@@ -1,6 +1,8 @@
 #ifndef WAMPSERVER_H
 #define WAMPSERVER_H
 
+#include "WampUtility.h"
+
 #include <memory>
 #include <functional>
 #include <type_traits>
@@ -13,13 +15,6 @@
 #include <synergy/common/AsioExecutor.h>
 
 namespace {
-
-struct make_tuple {
-    template <typename... Args>
-    auto operator()(Args&&... args) const {
-        return std::make_tuple (std::forward<Args>(args)...);
-    }
-};
 
 template <typename Fun>
 class WampCallee final {

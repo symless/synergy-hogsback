@@ -23,13 +23,6 @@ Rectangle {
     }
 
     Connections {
-        target: screenManager
-        onLocalhostUnsubscribed: {
-            stackView.toPage("ProfilePage")
-        }
-    }
-
-    Connections {
         target: applicationWindow
         onKeyReceived: {
             screenManager.onKeyPressed(key)
@@ -85,80 +78,6 @@ Rectangle {
                 smooth: true
                 //source: "qrc:/res/image/synergy-icon.png"
             }
-
-            /*Image {
-                id: profileButton
-                anchors.right: parent.right
-                anchors.rightMargin: dp(20)
-                anchors.verticalCenter: parent.verticalCenter
-                source: "qrc:/res/image/profile-icon.svg"
-                sourceSize.width: dp(36) * 0.9
-                sourceSize.height: dp(28) * 0.9
-                smooth: false
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        profileMenu.visible = !profileMenu.visible;
-                        openProfileMenuAnimation.running = profileMenu.visible
-                        closeProfileMenuAnimation.running = !openProfileMenuAnimation.running
-                    }
-                }
-            }
-
-            ProfileMenu {
-                id: profileMenu
-                visible: false
-                x: profileButton.x - width + profileButton.width
-                y: profileButton.y + profileButton.height + 10
-
-                onProfileCreated: {
-                    CloudClient.switchProfile(name)
-                }
-
-                onVisibleChanged: {
-                    if (visible) {
-                        CloudClient.userProfiles()
-                        listModel = ProfileManager.listModel()
-                    }
-                }
-
-                ParallelAnimation {
-                    id: openProfileMenuAnimation
-                    ScaleAnimator {
-                        target: profileMenu
-                        from: 0
-                        to: 1
-                        duration: 400
-                    }
-                    OpacityAnimator {
-                        target: profileMenu;
-                        from: 0;
-                        to: 1;
-                        duration: 600
-                    }
-
-                    running: false;
-                }
-
-                ParallelAnimation {
-                    id: closeProfileMenuAnimation
-                    ScaleAnimator {
-                        target: profileMenu
-                        from: 1
-                        to: 0
-                        duration: 400
-                    }
-                    OpacityAnimator {
-                        target: profileMenu;
-                        from: 1;
-                        to: 0;
-                        duration: 600
-                    }
-                    running: false;
-                }
-            }
-            */
         }
 
         // separator
@@ -328,8 +247,9 @@ Rectangle {
                             HeaderText {
                                 id: screenNameText
                                 width: parent.width - dp(14)
-                                anchors.verticalCenter: parent.verticalCenter
                                 anchors.horizontalCenter: parent.horizontalCenter
+                                anchors.top: parent.top
+                                anchors.topMargin: parent.height / 4
                                 text: name
                                 color: screenStatus == "Connected" ? "black" : "white"
                                 horizontalAlignment: Text.AlignHCenter
@@ -378,10 +298,10 @@ Rectangle {
                             // connecting prograss bar background
                             Rectangle {
                                 id: connectingBar
-                                visible: screenStatus == "Connecting" && screenImage.source != "qrc:/res/image/screen-edit.png"
+                                visible: (screenStatus == "Connecting" || screenStatus == "ConnectingWithError") && screenImage.source != "qrc:/res/image/screen-edit.png"
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 anchors.bottom: parent.bottom
-                                anchors.bottomMargin: dp(10)
+                                anchors.bottomMargin: dp(15)
                                 width: parent.width / 7 * 5
                                 height: dp(4)
                                 clip: true
@@ -394,8 +314,8 @@ Rectangle {
                                     x: -width
                                     width: dp(25)
                                     height: dp(4)
-                                    color: "#96C13D"
-
+                                    color: screenStatus == "Connecting" ? "#96C13D" : "red"
+                                    z: 1
                                     states: [
                                         State {
                                             when: connectingBar.visible
@@ -408,6 +328,94 @@ Rectangle {
 
                                     transitions: Transition {
                                         NumberAnimation { loops: Animation.Infinite; property: "x"; duration: 1500}
+                                    }
+                                }
+                            }
+
+                            // connecting error indication
+                            Image {
+                                id: errorIndication
+                                sourceSize.width: dp(14)
+                                sourceSize.height: sourceSize.width
+                                anchors.horizontalCenter: connectingBar.horizontalCenter
+                                anchors.verticalCenter: connectingBar.verticalCenter
+                                visible: screenStatus == "ConnectingWithError"
+                                smooth: false
+                                source: "qrc:/res/image/error-indication.svg"
+                                z: 2
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    acceptedButtons: Qt.LeftButton
+
+                                    onReleased: {
+                                        errorMessageDialog.visible = !errorMessageDialog.visible
+                                    }
+                                }
+                            }
+
+                            Image {
+                                id: errorMessageDialog
+                                anchors.horizontalCenter: errorIndication.horizontalCenter
+                                anchors.top: errorIndication.bottom
+                                anchors.topMargin: dp(5)
+                                width: dp(screenListModel.screenIconWidth() * 1.5)
+                                height: dp(screenListModel.screenIconHeight() * 1.5)
+                                smooth: true
+                                fillMode: Image.PreserveAspectFit
+                                source: "qrc:/res/image/error-message-dialog.png"
+                                z: 2
+
+                                Image {
+                                    id: closeIcon
+                                    anchors.top: errorMessageDialog.top
+                                    anchors.topMargin: dp(15)
+                                    anchors.right: errorMessageDialog.right
+                                    anchors.rightMargin: dp(5)
+                                    width: dp(10)
+                                    height: width
+                                    smooth: true
+                                    source: "qrc:/res/image/close-icon.png"
+                                    visible: errorMessageDialog.visible
+                                    z: 2
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        acceptedButtons: Qt.LeftButton
+
+                                        onReleased: {
+                                            errorMessageDialog.visible = false
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    id: errorMessage
+                                    width: parent.width
+                                    font.pixelSize: dp(10)
+                                    anchors.top: errorMessageDialog.top
+                                    anchors.topMargin: dp(25)
+                                    horizontalAlignment: Text.AlignHCenter
+                                    wrapMode: Text.WordWrap
+                                    text: "This is a really long test message!"
+                                }
+
+                                Text {
+                                    id: troubleshootLink
+                                    width: parent.width
+                                    font.pixelSize: dp(10)
+                                    anchors.top: errorMessage.bottom
+                                    anchors.topMargin: dp(15)
+                                    horizontalAlignment: Text.AlignHCenter
+                                    wrapMode: Text.WordWrap
+                                    text: "<a href='https://symless.com/synergy'>Troubleshoot</a>"
+
+                                    onLinkActivated: Qt.openUrlExternally(link)
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        acceptedButtons: Qt.NoButton
+                                        cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
                                     }
                                 }
                             }
