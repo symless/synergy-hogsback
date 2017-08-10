@@ -17,6 +17,7 @@ target_compile_definitions (${PROJECT_NAME}
 target_link_libraries (${PROJECT_NAME}
     commonlib
     ${Boost_LIBRARIES}
+    ${CMAKE_THREAD_LIBS_INIT}
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
