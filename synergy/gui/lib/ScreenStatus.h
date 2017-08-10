@@ -7,7 +7,8 @@ enum ScreenStatus {
     kConnected,
     kConnecting,
     kDisconnected,
-    kInactive
+    kInactive,
+    kConnectingWithError
 };
 
 static ScreenStatus
@@ -18,8 +19,11 @@ stringToScreenStatus(QString str)
     if (str.contains("Connected", Qt::CaseInsensitive)) {
         status = kConnected;
     }
-    else if (str.contains("Connecting", Qt::CaseInsensitive)) {
+    else if (str.compare("Connecting", Qt::CaseInsensitive) == 0) {
         status = kConnecting;
+    }
+    else if (str.compare("ConnectingWithError", Qt::CaseInsensitive) == 0) {
+        status = kConnectingWithError;
     }
     else if (str.contains("Disconnected", Qt::CaseInsensitive)) {
         status = kDisconnected;
@@ -43,6 +47,8 @@ screenStatusToString(ScreenStatus s)
         return "Disconnected";
     case kInactive:
         return "Inactive";
+    case kConnectingWithError:
+        return "ConnectingWithError";
     }
 
     return "Inactive";

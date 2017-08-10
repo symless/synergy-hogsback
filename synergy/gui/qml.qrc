@@ -26,5 +26,6 @@
         <file alias="ConfigurationPage.qml">res/view/ConfigurationPage.qml</file>
         <file alias="ProfilePage.qml">res/view/ProfilePage.qml</file>
         <file>res/image/symless-signin-button.svg</file>
+        <file>res/image/error-indication.svg</file>
     </qresource>
 </RCC>

@@ -297,7 +297,7 @@ Rectangle {
                             // connecting prograss bar background
                             Rectangle {
                                 id: connectingBar
-                                visible: screenStatus == "Connecting" && screenImage.source != "qrc:/res/image/screen-edit.png"
+                                visible: (screenStatus == "Connecting" || screenStatus == "ConnectingWithError") && screenImage.source != "qrc:/res/image/screen-edit.png"
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 anchors.bottom: parent.bottom
                                 anchors.bottomMargin: dp(10)
@@ -314,7 +314,7 @@ Rectangle {
                                     width: dp(25)
                                     height: dp(4)
                                     color: "#96C13D"
-
+                                    z: 1
                                     states: [
                                         State {
                                             when: connectingBar.visible
@@ -329,6 +329,18 @@ Rectangle {
                                         NumberAnimation { loops: Animation.Infinite; property: "x"; duration: 1500}
                                     }
                                 }
+                            }
+
+                            // connecting error indication
+                            Image {
+                                sourceSize.width: dp(12)
+                                sourceSize.height: sourceSize.width
+                                anchors.horizontalCenter: connectingBar.horizontalCenter
+                                anchors.verticalCenter: connectingBar.verticalCenter
+                                visible: screenStatus == "ConnectingWithError"
+                                smooth: false
+                                source: "qrc:/res/image/error-indication.svg"
+                                z: 2
                             }
                         }
                     }
