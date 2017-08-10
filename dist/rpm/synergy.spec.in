@@ -21,6 +21,8 @@ systemctl enable synergy.service
 systemctl daemon-reload
 systemctl start synergy.service
 
+%define _unpackaged_files_terminate_build 0
+
 %files
 %defattr(755,root,root,-)
 %{_bindir}/synergy2
