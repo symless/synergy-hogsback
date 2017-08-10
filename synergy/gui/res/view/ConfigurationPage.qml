@@ -23,13 +23,6 @@ Rectangle {
     }
 
     Connections {
-        target: screenManager
-        onLocalhostUnsubscribed: {
-            stackView.toPage("ProfilePage")
-        }
-    }
-
-    Connections {
         target: applicationWindow
         onKeyReceived: {
             screenManager.onKeyPressed(key)
@@ -85,80 +78,6 @@ Rectangle {
                 smooth: true
                 //source: "qrc:/res/image/synergy-icon.png"
             }
-
-            /*Image {
-                id: profileButton
-                anchors.right: parent.right
-                anchors.rightMargin: dp(20)
-                anchors.verticalCenter: parent.verticalCenter
-                source: "qrc:/res/image/profile-icon.svg"
-                sourceSize.width: dp(36) * 0.9
-                sourceSize.height: dp(28) * 0.9
-                smooth: false
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        profileMenu.visible = !profileMenu.visible;
-                        openProfileMenuAnimation.running = profileMenu.visible
-                        closeProfileMenuAnimation.running = !openProfileMenuAnimation.running
-                    }
-                }
-            }
-
-            ProfileMenu {
-                id: profileMenu
-                visible: false
-                x: profileButton.x - width + profileButton.width
-                y: profileButton.y + profileButton.height + 10
-
-                onProfileCreated: {
-                    CloudClient.switchProfile(name)
-                }
-
-                onVisibleChanged: {
-                    if (visible) {
-                        CloudClient.userProfiles()
-                        listModel = ProfileManager.listModel()
-                    }
-                }
-
-                ParallelAnimation {
-                    id: openProfileMenuAnimation
-                    ScaleAnimator {
-                        target: profileMenu
-                        from: 0
-                        to: 1
-                        duration: 400
-                    }
-                    OpacityAnimator {
-                        target: profileMenu;
-                        from: 0;
-                        to: 1;
-                        duration: 600
-                    }
-
-                    running: false;
-                }
-
-                ParallelAnimation {
-                    id: closeProfileMenuAnimation
-                    ScaleAnimator {
-                        target: profileMenu
-                        from: 1
-                        to: 0
-                        duration: 400
-                    }
-                    OpacityAnimator {
-                        target: profileMenu;
-                        from: 1;
-                        to: 0;
-                        duration: 600
-                    }
-                    running: false;
-                }
-            }
-            */
         }
 
         // separator
