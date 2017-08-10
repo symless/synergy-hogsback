@@ -1,6 +1,8 @@
 #ifndef WAMPCLIENT_H
 #define WAMPCLIENT_H
 
+#include "WampUtility.h"
+
 #include <autobahn/autobahn.hpp>
 // TODO: Figure out why AsioExecutor has to be included after autobahn
 #include <synergy/common/AsioExecutor.h>
@@ -15,13 +17,6 @@
 #include <boost/signals2.hpp>
 
 namespace {
-
-struct make_tuple {
-    template <typename... Args>
-    auto operator()(Args&&... args) const {
-        return std::make_tuple (std::forward<Args>(args)...);
-    }
-};
 
 template <typename R>
 struct WampCallHelper {
