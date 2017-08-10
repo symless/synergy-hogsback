@@ -41,3 +41,6 @@
 [submodule "third_party/callable_traits"]
     path = third_party/callable_traits
     url = https://github.com/badair/callable_traits.git
+[submodule "third_party/cxxopts"]
+	path = third_party/cxxopts
+	url = https://github.com/jarro2783/cxxopts.git

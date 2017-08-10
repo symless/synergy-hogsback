@@ -4,7 +4,6 @@ cmake_minimum_required (VERSION 3.4)
 set (SERVICE_SOURCES
     main.cpp
     ProcessManager.cpp
-    SessionManager.cpp
     ServiceWorker.cpp
     TerminationSignalListener.cpp
 )
