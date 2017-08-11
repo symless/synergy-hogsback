@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4.4 4.4">
+  <title>Asset 6</title>
+  <g id="Layer_2" data-name="Layer 2">
+    <g id="Artwork">
+      <g>
+        <line x1="0.2" y1="0.2" x2="4.2" y2="4.2" fill="none" stroke="#4d4d4d" stroke-miterlimit="10" stroke-width="0.5"/>
+        <line x1="4.2" y1="0.2" x2="0.2" y2="4.2" fill="none" stroke="#4d4d4d" stroke-miterlimit="10" stroke-width="0.5"/>
+      </g>
+    </g>
+  </g>
+</svg>
