@@ -369,13 +369,13 @@ Rectangle {
                                 Image {
                                     id: closeIcon
                                     anchors.top: errorMessageDialog.top
-                                    anchors.topMargin: dp(15)
+                                    anchors.topMargin: dp(17)
                                     anchors.right: errorMessageDialog.right
                                     anchors.rightMargin: dp(5)
-                                    width: dp(10)
-                                    height: width
                                     smooth: true
-                                    source: "qrc:/res/image/close-icon.png"
+                                    source: "qrc:/res/image/close-icon.svg"
+                                    sourceSize.width: dp(7)
+                                    sourceSize.height: sourceSize.width
                                     visible: errorMessageDialog.visible
                                     z: 2
 
@@ -391,24 +391,24 @@ Rectangle {
 
                                 Text {
                                     id: errorMessage
-                                    width: parent.width
+                                    width: parent.width - dp(5)
                                     font.pixelSize: dp(10)
                                     anchors.top: errorMessageDialog.top
-                                    anchors.topMargin: dp(25)
+                                    anchors.topMargin: dp(30)
                                     horizontalAlignment: Text.AlignHCenter
                                     wrapMode: Text.WordWrap
-                                    text: "This is a really long test message!"
+                                    text: "Unable to engage warp drive system!"
                                 }
 
                                 Text {
-                                    id: troubleshootLink
+                                    id: helpLink
                                     width: parent.width
                                     font.pixelSize: dp(10)
                                     anchors.top: errorMessage.bottom
-                                    anchors.topMargin: dp(15)
+                                    anchors.topMargin: dp(7)
                                     horizontalAlignment: Text.AlignHCenter
                                     wrapMode: Text.WordWrap
-                                    text: "<a href='https://symless.com/synergy'>Troubleshoot</a>"
+                                    text: "<a href='https://symless.com/synergy/help'>Help</a>"
 
                                     onLinkActivated: Qt.openUrlExternally(link)
 
