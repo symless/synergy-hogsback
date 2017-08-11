@@ -12,6 +12,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/asio/steady_timer.hpp>
 
 namespace bp = boost::process;
 namespace bs = boost::system;
@@ -23,17 +24,11 @@ make_unique (Args&&... args) {
     return std::unique_ptr<T>(new T (std::forward<Args>(args)...));
 }
 
-enum class ClientState: int {
-    Disconnected = 0,
-    Connecting   = 1,
-    Connected    = 2
-};
-
 class ProcessManagerImpl {
 public:
     ProcessManagerImpl (boost::asio::io_service& io,
                         std::vector<std::string> command)
-        : m_command(std::move(command)), m_ioStrand (io),
+        : m_command(std::move(command)), m_ioStrand (io), m_connectionTimer(io),
           m_outPipe (io), m_errorPipe (io) {
     }
 
@@ -41,12 +36,13 @@ public:
     void shutdown ();
 
 public:
-    std::map<std::string, ClientState> m_clients;
+    std::map<std::string, ScreenStatus> m_clients;
     std::vector<boost::signals2::connection> m_signals;
     std::vector<std::string> m_command;
     bool m_expectingExit = false;
 
     boost::asio::io_service::strand m_ioStrand;
+    boost::asio::steady_timer m_connectionTimer;
     boost::asio::streambuf m_outputBuffer;
     boost::asio::streambuf m_errorBuffer;
     std::string m_lineBuffer;
@@ -174,42 +170,66 @@ ProcessManager::start (std::vector<std::string> command) {
         throw;
     }
 
+    auto& localScreenName = *nameArg;
     assert (!m_impl);
     m_impl = std::make_unique<ProcessManagerImpl>(m_ioService,
                                                   std::move (command));
     auto& signals = m_impl->m_signals;
     auto& clients = m_impl->m_clients;
-    auto localScreenName = *nameArg;
     auto& localState = clients[localScreenName];
     using boost::algorithm::contains;
 
+    screenStatusChanged.connect (
+        [this](auto const& screenName, ScreenStatus const status) {
+            auto& timer = m_impl->m_connectionTimer;
+            if (status == ScreenStatus::Connecting) {
+                if (timer.expires_at() > std::chrono::steady_clock::now()) {
+                    return;
+                }
+                timer.expires_from_now (std::chrono::seconds (10));
+                timer.async_wait ([this, screenName](auto const& ec) {
+                    if (ec == boost::asio::error::operation_aborted) {
+                        return;
+                    } else if (ec) {
+                        throw boost::system::system_error(ec);
+                    }
+                    screenConnectionWarning (screenName, "timeout-connecting");
+                });
+            } else {
+                timer.cancel();
+            }
+        },
+        boost::signals2::at_front
+    );
+
     if (binary.string() == "synergyc") {
-        localState = ClientState::Disconnected;
+        localState = ScreenStatus::Disconnected;
 
         signals.emplace_back (
-            onOutput.connect ([this, &localState](std::string const& line) {
+            onOutput.connect ([&, this](std::string const& line) {
                 if (contains (line, "connected to server")) {
-                    assert (localState == ClientState::Connecting);
-                    localState = ClientState::Connected;
-                    onReady();
+                    assert (localState == ScreenStatus::Connecting);
+                    localState = ScreenStatus::Connected;
+                    screenStatusChanged (localScreenName, localState);
                 }
             }, boost::signals2::at_front)
         );
 
         signals.emplace_back (
-            onOutput.connect ([this, &localState](std::string const& line) {
+            onOutput.connect ([&, this](std::string const& line) {
                 if (contains (line, "disconnected from server")) {
-                    assert (localState != ClientState::Disconnected);
-                    localState = ClientState::Disconnected;
+                    assert (localState != ScreenStatus::Disconnected);
+                    localState = ScreenStatus::Disconnected;
+                    screenStatusChanged (localScreenName, localState);
                 }
             }, boost::signals2::at_front)
         );
 
         signals.emplace_back (
-            onOutput.connect ([this, &localState](std::string const& line) {
+            onOutput.connect ([&, this](std::string const& line) {
                 if (contains (line, "connecting to")) {
-                    assert (localState == ClientState::Disconnected);
-                    localState = ClientState::Connecting;
+                    localState = ScreenStatus::Connecting;
+                    screenStatusChanged (localScreenName, localState);
                 }
             }, boost::signals2::at_front)
         );
@@ -222,30 +242,31 @@ ProcessManager::start (std::vector<std::string> command) {
         );
     }
     else {
-        localState = ClientState::Connecting;
+        localState = ScreenStatus::Connecting;
 
         signals.emplace_back (
-            onOutput.connect_extended ([this, &localState]
+            onOutput.connect_extended ([&, this]
                                        (auto& connection, std::string const& line) {
                 if (contains (line, "started server, waiting for clients")) {
                     connection.disconnect();
-                    assert (localState == ClientState::Connecting);
-                    localState = ClientState::Connected;
-                    onReady();
+                    assert (localState == ScreenStatus::Connecting);
+                    localState = ScreenStatus::Connected;
+                    screenStatusChanged (localScreenName, localState);
                 }
             }, boost::signals2::at_front)
         );
 
         signals.emplace_back (
-            onOutput.connect ([this, &clients](std::string const& line) {
+            onOutput.connect ([&, this](std::string const& line) {
                 static const boost::regex rgx("client \"(.*)\" has connected$");
                 boost::match_results<std::string::const_iterator> results;
                 if (regex_search (line, results, rgx)) {
                     assert (results.size() == 2);
                     auto screenName = results[1].str();
                     auto& status = clients[screenName];
-                    assert (status == ClientState::Disconnected);
-                    status = ClientState::Connected;
+                    assert (status == ScreenStatus::Disconnected);
+                    status = ScreenStatus::Connected;
+                    screenStatusChanged (screenName, status);
                 }
             }, boost::signals2::at_front)
         );
@@ -258,13 +279,15 @@ ProcessManager::start (std::vector<std::string> command) {
                     assert (results.size() == 2);
                     auto screenName = results[1].str();
                     auto& status = clients[screenName];
-                    assert (status == ClientState::Connected);
-                    status = ClientState::Disconnected;
+                    assert (status == ScreenStatus::Connected);
+                    status = ScreenStatus::Disconnected;
+                    screenStatusChanged (screenName, status);
                 }
             }, boost::signals2::at_front)
         );
     }
 
+    screenStatusChanged (localScreenName, localState);
     m_impl->start (*this);
 }
 

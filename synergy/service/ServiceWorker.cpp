@@ -39,9 +39,24 @@ ServiceWorker::provideCore()
         m_processManager->start (std::move (cmd));
     });
 
-    m_processManager->onOutput.connect([server](std::string line) {
-        server->publish ("synergy.core.log", std::move(line));
-    });
+    m_processManager->onOutput.connect(
+        [server](std::string line) {
+            server->publish ("synergy.core.log", std::move(line));
+        }
+    );
+
+    m_processManager->screenStatusChanged.connect(
+        [server](std::string const& screenName, ScreenStatus state) {
+            server->publish ("synergy.screen.status", screenName, int(state));
+        }
+    );
+
+    m_processManager->screenConnectionWarning.connect(
+        [server](std::string const& screenName, std::string slug) {
+            server->publish ("synergy.screen.connection-warning", screenName,
+                             std::move(slug));
+        }
+    );
 }
 
 void ServiceWorker::shutdown()
