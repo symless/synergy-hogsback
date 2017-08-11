@@ -15,7 +15,9 @@ public:
         kPosYRole,
         kNameRole,
         kStatusImageRole,
-        kScreenStatusRole
+        kScreenStatusRole,
+        kErrorMessageRole,
+        kHelpLinkRole
     };
 
     ScreenListModel();

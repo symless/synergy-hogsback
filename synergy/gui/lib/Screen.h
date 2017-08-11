@@ -3,6 +3,7 @@
 
 #include "LibMacro.h"
 #include "ScreenStatus.h"
+#include "synergy/common/ErrorMessage.h"
 
 #include <QString>
 #include <QHash>
@@ -28,6 +29,8 @@ public:
 	int posY() const;
     QString name() const;
     QString statusImage() const;
+    QString lastErrorMessage() const;
+    QString helpLink() const;
 
 	void setPosX(int x);
 	void setPosY(int y);
@@ -49,6 +52,7 @@ private:
     QString m_statusImage;
     bool m_locked;
     static QHash<ScreenStatus, QString> m_statusImages;
+    ErrorCode m_lastErrorCode;
 };
 
 #endif // SCREEN_H

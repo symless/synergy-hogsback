@@ -104,6 +104,10 @@ QVariant ScreenListModel::data(const QModelIndex& index, int role) const
         return screen.statusImage();
     else if (role == kScreenStatusRole)
         return screenStatusToString(screen.status());
+    else if (role == kErrorMessageRole)
+        return screen.lastErrorMessage();
+    else if (role == kHelpLinkRole)
+        return screen.helpLink();
     return QVariant();
 }
 
@@ -123,6 +127,8 @@ QHash<int, QByteArray> ScreenListModel::roleNames() const
     roles[kNameRole] = "name";
     roles[kStatusImageRole] = "statusImage";
     roles[kScreenStatusRole] = "screenStatus";
+    roles[kErrorMessageRole] = "errorMessage";
+    roles[kHelpLinkRole] = "helpLink";
 
     return roles;
 }

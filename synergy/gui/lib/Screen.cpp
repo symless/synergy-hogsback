@@ -16,7 +16,8 @@ Screen::Screen(QString name) :
     m_posY(-1),
     m_name(name),
     m_status(kInactive),
-    m_locked(false)
+    m_locked(false),
+    m_lastErrorCode(kNoError)
 {
     m_statusImage = m_statusImages[m_status];
 }
@@ -39,6 +40,18 @@ QString Screen::name() const
 QString Screen::statusImage() const
 {
     return m_statusImage;
+}
+
+QString
+Screen::lastErrorMessage() const
+{
+    return  QString::fromStdString(getErrorMessage(m_lastErrorCode));
+}
+
+QString
+Screen::helpLink() const
+{
+    return  QString::fromStdString(getHelpUrl(m_lastErrorCode));
 }
 
 void Screen::setPosX(int const x)

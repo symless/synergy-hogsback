@@ -390,25 +390,25 @@ Rectangle {
                                 }
 
                                 Text {
-                                    id: errorMessage
+                                    id: errorMessageText
                                     width: parent.width
                                     font.pixelSize: dp(10)
                                     anchors.top: errorMessageDialog.top
                                     anchors.topMargin: dp(25)
                                     horizontalAlignment: Text.AlignHCenter
                                     wrapMode: Text.WordWrap
-                                    text: "This is a really long test message!"
+                                    text: errorMessage
                                 }
 
                                 Text {
-                                    id: troubleshootLink
+                                    id: helpLinkText
                                     width: parent.width
                                     font.pixelSize: dp(10)
-                                    anchors.top: errorMessage.bottom
+                                    anchors.top: errorMessageText.bottom
                                     anchors.topMargin: dp(15)
                                     horizontalAlignment: Text.AlignHCenter
                                     wrapMode: Text.WordWrap
-                                    text: "<a href='https://symless.com/synergy'>Troubleshoot</a>"
+                                    text: helpLink
 
                                     onLinkActivated: Qt.openUrlExternally(link)
 
