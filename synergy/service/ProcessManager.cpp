@@ -264,7 +264,7 @@ ProcessManager::start (std::vector<std::string> command) {
                     assert (results.size() == 2);
                     auto screenName = results[1].str();
                     auto& status = clients[screenName];
-                    assert (status == ScreenStatus::Disconnected);
+                    //assert (status == ScreenStatus::Disconnected);
                     status = ScreenStatus::Connected;
                     screenStatusChanged (screenName, status);
                 }

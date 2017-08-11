@@ -15,7 +15,7 @@ static struct ErrorMessage {
     std::string troubleshootUrl;
 }
 errorMessageTable[] {
-    {kConnectionError, "Can't connect to server", "connect"}
+    {kConnectionError, "Can't send your passwords to Nick", "connect"}
 };
 
 static const char* kSynergyHelpUrl = "https://symless.com/synergy/help/";

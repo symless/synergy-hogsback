@@ -237,7 +237,7 @@ void ScreenManager::updateScreens(QByteArray reply)
                 screen.setId(obj["id"].toInt());
                 screen.setPosX(obj["x_pos"].toInt());
                 screen.setPosY(obj["y_pos"].toInt());
-                screen.setStatus("ConnectingWithError");//obj["status"].toString()
+                screen.setStatus(obj["status"].toString());
                 if (!obj["active"].toBool()) {
                     screen.setStatus(kInactive);
                 }

@@ -10,9 +10,9 @@
 #include <string>
 
 enum class ScreenStatus: int {
-    Disconnected = 0,
-    Connecting   = 1,
-    Connected    = 2
+    Connected,
+    Connecting,
+    Disconnected
 };
 
 class ProcessManagerImpl;
