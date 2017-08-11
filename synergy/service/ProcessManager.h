@@ -9,6 +9,12 @@
 #include <vector>
 #include <string>
 
+enum class ScreenStatus: int {
+    Disconnected = 0,
+    Connecting   = 1,
+    Connected    = 2
+};
+
 class ProcessManagerImpl;
 
 class ProcessManager final {
@@ -28,7 +34,8 @@ public:
     signal<void()> onExit;
     signal<void()> onUnexpectedExit;
     signal<void(std::string const&)> onOutput;
-    signal<void()> onReady;
+    signal<void(std::string const&, ScreenStatus)> screenStatusChanged;
+    signal<void(std::string const&, std::string)> screenConnectionWarning;
 
 private:
     boost::asio::io_service& m_ioService;
