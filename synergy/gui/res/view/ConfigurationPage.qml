@@ -369,13 +369,13 @@ Rectangle {
                                 Image {
                                     id: closeIcon
                                     anchors.top: errorMessageDialog.top
-                                    anchors.topMargin: dp(15)
+                                    anchors.topMargin: dp(17)
                                     anchors.right: errorMessageDialog.right
                                     anchors.rightMargin: dp(5)
-                                    width: dp(10)
-                                    height: width
                                     smooth: true
-                                    source: "qrc:/res/image/close-icon.png"
+                                    source: "qrc:/res/image/close-icon.svg"
+                                    sourceSize.width: dp(7)
+                                    sourceSize.height: sourceSize.width
                                     visible: errorMessageDialog.visible
                                     z: 2
 
@@ -391,10 +391,10 @@ Rectangle {
 
                                 Text {
                                     id: errorMessageText
-                                    width: parent.width
+                                    width: parent.width - dp(5)
                                     font.pixelSize: dp(10)
                                     anchors.top: errorMessageDialog.top
-                                    anchors.topMargin: dp(25)
+                                    anchors.topMargin: dp(30)
                                     horizontalAlignment: Text.AlignHCenter
                                     wrapMode: Text.WordWrap
                                     text: errorMessage
@@ -405,7 +405,7 @@ Rectangle {
                                     width: parent.width
                                     font.pixelSize: dp(10)
                                     anchors.top: errorMessageText.bottom
-                                    anchors.topMargin: dp(15)
+                                    anchors.topMargin: dp(7)
                                     horizontalAlignment: Text.AlignHCenter
                                     wrapMode: Text.WordWrap
                                     text: helpLink

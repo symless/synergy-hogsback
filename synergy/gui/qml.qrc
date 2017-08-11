@@ -26,7 +26,7 @@
         <file alias="ProfilePage.qml">res/view/ProfilePage.qml</file>
         <file>res/image/symless-signin-button.svg</file>
         <file>res/image/error-indication.svg</file>
-        <file>res/image/close-icon.png</file>
         <file>res/image/error-message-dialog.png</file>
+        <file>res/image/close-icon.svg</file>
     </qresource>
 </RCC>
