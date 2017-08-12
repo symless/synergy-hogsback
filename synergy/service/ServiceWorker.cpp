@@ -51,10 +51,10 @@ ServiceWorker::provideCore()
         }
     );
 
-    m_processManager->screenConnectionWarning.connect(
-        [server](std::string const& screenName, std::string slug) {
-            server->publish ("synergy.screen.connection-warning", screenName,
-                             std::move(slug));
+    m_processManager->screenConnectionError.connect(
+        [server](std::string const& screenName, ErrorCode ec) {
+            server->publish ("synergy.screen.erroe", screenName,
+                             (int)ec);
         }
     );
 }

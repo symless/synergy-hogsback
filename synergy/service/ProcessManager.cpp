@@ -193,7 +193,7 @@ ProcessManager::start (std::vector<std::string> command) {
                     } else if (ec) {
                         throw boost::system::system_error(ec);
                     }
-                    screenConnectionWarning (screenName, "timeout-connecting");
+                    screenConnectionError (screenName, kConnectionTimeout);
                 });
             } else {
                 timer.cancel();

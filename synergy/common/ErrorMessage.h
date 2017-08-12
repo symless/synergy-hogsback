@@ -6,7 +6,7 @@
 
 enum ErrorCode {
     kNoError,
-    kConnectionError
+    kConnectionTimeout
 };
 
 static struct ErrorMessage {
@@ -15,7 +15,7 @@ static struct ErrorMessage {
     std::string troubleshootUrl;
 }
 errorMessageTable[] {
-    {kConnectionError, "Can't send your passwords to Nick", "connect"}
+    {kConnectionTimeout, "Can't send your passwords to Nick", "timeout-connecting"}
 };
 
 static const char* kSynergyHelpUrl = "https://symless.com/synergy/help/";
