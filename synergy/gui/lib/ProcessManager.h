@@ -2,7 +2,7 @@
 #define PROCESSMANAGER_H
 
 #include "LibMacro.h"
-#include "ScreenStatus.h"
+#include "synergy/common/ScreenStatus.h"
 
 #include <boost/asio.hpp>
 #include <QQuickItem>

@@ -239,7 +239,7 @@ void ScreenManager::updateScreens(QByteArray reply)
                 screen.setPosY(obj["y_pos"].toInt());
                 screen.setStatus(obj["status"].toString());
                 if (!obj["active"].toBool()) {
-                    screen.setStatus(kInactive);
+                    screen.setStatus(ScreenStatus::kInactive);
                 }
                 latestScreenList.push_back(screen);
             }
@@ -281,7 +281,7 @@ void ScreenManager::updateScreens(QByteArray reply)
         emit newServer(serverId);
         m_previousServerId = serverId;
 
-        QPair<QString, ScreenStatus> p (m_localHostname, kConnecting);
+        QPair<QString, ScreenStatus> p (m_localHostname, ScreenStatus::kConnecting);
         onScreenStatusChanged(p);
     }
 }

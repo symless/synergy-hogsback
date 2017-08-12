@@ -2,6 +2,7 @@
 #define SYNERGY_SERVICE_PROCESSMANAGER_H
 
 #include "synergy/common/ErrorMessage.h"
+#include "synergy/common/ScreenStatus.h"
 
 #include <boost/asio.hpp>
 #include <boost/signals2.hpp>
@@ -10,12 +11,6 @@
 #include <memory>
 #include <vector>
 #include <string>
-
-enum class ScreenStatus: int {
-    Connected,
-    Connecting,
-    Disconnected
-};
 
 class ProcessManagerImpl;
 

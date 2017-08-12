@@ -103,7 +103,7 @@ QVariant ScreenListModel::data(const QModelIndex& index, int role) const
     else if (role == kStatusImageRole)
         return screen.statusImage();
     else if (role == kScreenStatusRole)
-        return screenStatusToString(screen.status());
+        return QString::fromStdString(screenStatusToString(screen.status()));
     else if (role == kErrorMessageRole)
         return screen.lastErrorMessage();
     else if (role == kHelpLinkRole)

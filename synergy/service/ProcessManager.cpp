@@ -182,7 +182,7 @@ ProcessManager::start (std::vector<std::string> command) {
     screenStatusChanged.connect (
         [this](auto const& screenName, ScreenStatus const status) {
             auto& timer = m_impl->m_connectionTimer;
-            if (status == ScreenStatus::Connecting) {
+            if (status == ScreenStatus::kConnecting) {
                 if (timer.expires_at() > std::chrono::steady_clock::now()) {
                     return;
                 }
@@ -203,13 +203,13 @@ ProcessManager::start (std::vector<std::string> command) {
     );
 
     if (binary.string() == "synergyc") {
-        localState = ScreenStatus::Disconnected;
+        localState = ScreenStatus::kDisconnected;
 
         signals.emplace_back (
             onOutput.connect ([&, this](std::string const& line) {
                 if (contains (line, "connected to server")) {
-                    assert (localState == ScreenStatus::Connecting);
-                    localState = ScreenStatus::Connected;
+                    assert (localState == ScreenStatus::kConnecting);
+                    localState = ScreenStatus::kConnected;
                     screenStatusChanged (localScreenName, localState);
                 }
             }, boost::signals2::at_front)
@@ -218,8 +218,8 @@ ProcessManager::start (std::vector<std::string> command) {
         signals.emplace_back (
             onOutput.connect ([&, this](std::string const& line) {
                 if (contains (line, "disconnected from server")) {
-                    assert (localState != ScreenStatus::Disconnected);
-                    localState = ScreenStatus::Disconnected;
+                    assert (localState != ScreenStatus::kDisconnected);
+                    localState = ScreenStatus::kDisconnected;
                     screenStatusChanged (localScreenName, localState);
                 }
             }, boost::signals2::at_front)
@@ -228,7 +228,7 @@ ProcessManager::start (std::vector<std::string> command) {
         signals.emplace_back (
             onOutput.connect ([&, this](std::string const& line) {
                 if (contains (line, "connecting to")) {
-                    localState = ScreenStatus::Connecting;
+                    localState = ScreenStatus::kConnecting;
                     screenStatusChanged (localScreenName, localState);
                 }
             }, boost::signals2::at_front)
@@ -242,15 +242,15 @@ ProcessManager::start (std::vector<std::string> command) {
         );
     }
     else {
-        localState = ScreenStatus::Connecting;
+        localState = ScreenStatus::kConnecting;
 
         signals.emplace_back (
             onOutput.connect_extended ([&, this]
                                        (auto& connection, std::string const& line) {
                 if (contains (line, "started server, waiting for clients")) {
                     connection.disconnect();
-                    assert (localState == ScreenStatus::Connecting);
-                    localState = ScreenStatus::Connected;
+                    assert (localState == ScreenStatus::kConnecting);
+                    localState = ScreenStatus::kConnected;
                     screenStatusChanged (localScreenName, localState);
                 }
             }, boost::signals2::at_front)
@@ -265,7 +265,7 @@ ProcessManager::start (std::vector<std::string> command) {
                     auto screenName = results[1].str();
                     auto& status = clients[screenName];
                     //assert (status == ScreenStatus::Disconnected);
-                    status = ScreenStatus::Connected;
+                    status = ScreenStatus::kConnected;
                     screenStatusChanged (screenName, status);
                 }
             }, boost::signals2::at_front)
@@ -279,8 +279,8 @@ ProcessManager::start (std::vector<std::string> command) {
                     assert (results.size() == 2);
                     auto screenName = results[1].str();
                     auto& status = clients[screenName];
-                    assert (status == ScreenStatus::Connected);
-                    status = ScreenStatus::Disconnected;
+                    assert (status == ScreenStatus::kConnected);
+                    status = ScreenStatus::kDisconnected;
                     screenStatusChanged (screenName, status);
                 }
             }, boost::signals2::at_front)
