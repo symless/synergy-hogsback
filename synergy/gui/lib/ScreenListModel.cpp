@@ -167,6 +167,17 @@ void ScreenListModel::setScreenStatus(int index, ScreenStatus status)
     dataChanged(getIndex(index), getIndex(index));
 }
 
+void ScreenListModel::setScreenErrorCode(int index, ErrorCode ec)
+{
+    if (index < 0 || index > getScreenModeSize()) {
+        return;
+    }
+
+    m_screens[index].setLastErrorCode(ec);
+
+    dataChanged(getIndex(index), getIndex(index));
+}
+
 int ScreenListModel::findScreen(QString name)
 {
     for (int index = 0; index < m_screens.count(); index++) {

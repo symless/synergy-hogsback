@@ -40,6 +40,7 @@ public:
 signals:
     void screenStatusChanged(QPair<QString, ScreenStatus>);
     void rpcScreenStatusChanged(QString, int);
+    void screenError(QString, int);
     void localInputDetected();
     void logCoreOutput(QString);
 

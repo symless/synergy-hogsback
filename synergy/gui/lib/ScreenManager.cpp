@@ -96,6 +96,8 @@ void ScreenManager::setProcessManager(ProcessManager* processManager)
             m_processManager, &ProcessManager::newServerDetected);
     connect(m_processManager, &ProcessManager::screenStatusChanged,
             this, &ScreenManager::onScreenStatusChanged);
+    connect(m_processManager, &ProcessManager::screenError,
+            this, &ScreenManager::onScreenError);
     connect(m_processManager, &ProcessManager::localInputDetected,
             this, &ScreenManager::onLocalInputDetected);
 }
@@ -327,4 +329,15 @@ void ScreenManager::onScreenStatusChanged(QPair<QString, ScreenStatus> r)
 void ScreenManager::onLocalInputDetected()
 {
     m_cloudClient->claimServer();
+}
+
+void ScreenManager::onScreenError(QString screenName, int errorCode)
+{
+    int index = m_screenListModel->findScreen(screenName);
+    if (index != -1) {
+        m_screenListModel->setScreenErrorCode(index, (ErrorCode)errorCode);
+        const Screen& s = m_screenListModel->getScreen(index);
+
+        m_cloudClient->updateScreen(s);
+    }
 }

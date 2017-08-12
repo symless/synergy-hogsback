@@ -43,7 +43,11 @@ ProcessManager::ProcessManager(WampClient& wampClient) :
         wampClient.subscribe ("synergy.screen.status",
                               [this](std::string screenName, int status) {
             emit rpcScreenStatusChanged(QString::fromStdString(screenName), status);
+        });
 
+        wampClient.subscribe ("synergy.screen.error",
+                              [this](std::string screenName, int errorCode) {
+            emit screenError(QString::fromStdString(screenName), errorCode);
         });
     });
 }

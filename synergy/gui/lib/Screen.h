@@ -42,17 +42,19 @@ public:
 	void setName(QString n);
     void setStatus(ScreenStatus s);
     void setStatus(QString s);
+    void setLastErrorCode(const ErrorCode &lastErrorCode);
 
     bool locked() const;
     void setLocked(bool value);
 
     ScreenStatus status() const;
 
+
 private:
     int m_id;
     int m_posX;
     int m_posY;
-	QString m_name;
+    QString m_name;
     ScreenStatus m_status;
     QString m_statusImage;
     bool m_locked;
