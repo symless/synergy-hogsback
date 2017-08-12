@@ -8,17 +8,17 @@
 #include <QString>
 #include <QHash>
 
+inline
+int qHash(ScreenStatus key, uint seed = 0) noexcept {
+    return qHash(static_cast<int>(key), seed);
+}
+
 class LIB_SPEC Screen
 {
 public:
     friend inline
     uint qHash (Screen const& screen, uint seed = 0) noexcept {
         return qHash (screen.m_name, seed);
-    }
-
-    friend inline
-    uint qHash(ScreenStatus key, uint seed = 0) noexcept {
-        return qHash(static_cast<uint>(key), seed);
     }
 
     friend bool
