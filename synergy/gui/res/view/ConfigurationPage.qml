@@ -343,13 +343,14 @@ Rectangle {
                                 smooth: false
                                 source: "qrc:/res/image/error-indication.svg"
                                 z: 2
+                                property bool errorDialog: false
 
                                 MouseArea {
                                     anchors.fill: parent
                                     acceptedButtons: Qt.LeftButton
 
                                     onReleased: {
-                                        errorMessageDialog.visible = !errorMessageDialog.visible
+                                        errorIndication.errorDialog = !errorIndication.errorDialog
                                     }
                                 }
                             }
@@ -362,7 +363,7 @@ Rectangle {
                                 width: dp(screenListModel.screenIconWidth() * 1.5)
                                 height: dp(screenListModel.screenIconHeight() * 1.5)
                                 smooth: true
-                                visible: false
+                                visible: errorIndication.errorDialog && errorIndication.visible
                                 fillMode: Image.PreserveAspectFit
                                 source: "qrc:/res/image/error-message-dialog.png"
                                 z: 2
