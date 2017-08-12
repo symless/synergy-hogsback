@@ -97,7 +97,7 @@ void ScreenManager::setProcessManager(ProcessManager* processManager)
     connect(m_processManager, &ProcessManager::screenStatusChanged,
             this, &ScreenManager::onScreenStatusChanged);
     connect(m_processManager, &ProcessManager::screenError,
-            this, &ScreenManager::onScreenError);
+            this, &ScreenManager::onScreenError, Qt::QueuedConnection);
     connect(m_processManager, &ProcessManager::localInputDetected,
             this, &ScreenManager::onLocalInputDetected);
 }

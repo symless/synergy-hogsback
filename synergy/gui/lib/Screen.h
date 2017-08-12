@@ -48,7 +48,7 @@ public:
     void setLocked(bool value);
 
     ScreenStatus status() const;
-
+    ErrorCode lastErrorCode() const;
 
 private:
     int m_id;

@@ -314,7 +314,7 @@ Rectangle {
                                     x: -width
                                     width: dp(25)
                                     height: dp(4)
-                                    color: screenStatus == "Connecting" ? "#96C13D" : "red"
+                                    color: lastErrorCode === 0 ? "#96C13D" : "red"
                                     z: 1
                                     states: [
                                         State {
@@ -339,7 +339,7 @@ Rectangle {
                                 sourceSize.height: sourceSize.width
                                 anchors.horizontalCenter: connectingBar.horizontalCenter
                                 anchors.verticalCenter: connectingBar.verticalCenter
-                                visible: screenStatus == "ConnectingWithError"
+                                visible: lastErrorCode !== 0
                                 smooth: false
                                 source: "qrc:/res/image/error-indication.svg"
                                 z: 2
@@ -362,6 +362,7 @@ Rectangle {
                                 width: dp(screenListModel.screenIconWidth() * 1.5)
                                 height: dp(screenListModel.screenIconHeight() * 1.5)
                                 smooth: true
+                                visible: false
                                 fillMode: Image.PreserveAspectFit
                                 source: "qrc:/res/image/error-message-dialog.png"
                                 z: 2
@@ -398,6 +399,7 @@ Rectangle {
                                     horizontalAlignment: Text.AlignHCenter
                                     wrapMode: Text.WordWrap
                                     text: errorMessage
+                                    visible: errorMessageDialog.visible
                                 }
 
                                 Text {
@@ -409,6 +411,7 @@ Rectangle {
                                     horizontalAlignment: Text.AlignHCenter
                                     wrapMode: Text.WordWrap
                                     text: helpLink
+                                    visible: errorMessageDialog.visible
 
                                     onLinkActivated: Qt.openUrlExternally(link)
 

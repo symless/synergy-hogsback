@@ -16,6 +16,7 @@ public:
         kNameRole,
         kStatusImageRole,
         kScreenStatusRole,
+        kScreenLastErrorCode,
         kErrorMessageRole,
         kHelpLinkRole
     };

@@ -107,6 +107,11 @@ ScreenStatus Screen::status() const
     return m_status;
 }
 
+ErrorCode Screen::lastErrorCode() const
+{
+    return m_lastErrorCode;
+}
+
 void Screen::setLastErrorCode(const ErrorCode &lastErrorCode)
 {
     m_lastErrorCode = lastErrorCode;
