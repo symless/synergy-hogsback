@@ -195,7 +195,6 @@ Rectangle {
                         height: dp(screenListModel.screenIconHeight())
                         property point beginDrag
                         property int modelIndex: -1
-                        property var editMode: false
 
                         // mouse area that covers the whole individual screen
                         MouseArea {
@@ -255,44 +254,6 @@ Rectangle {
                                 horizontalAlignment: Text.AlignHCenter
                                 elide: Text.ElideRight
                                 visible: screenImage.source != "qrc:/res/image/screen-edit.png"
-                            }
-
-                            // unsubscrible button in edit mode
-                            Image {
-                                id: screenUnsubIcon
-                                parent: screenImage
-                                width: dp(25)
-                                height: width
-                                anchors.right: parent.horizontalCenter
-                                anchors.rightMargin: dp(4)
-                                anchors.verticalCenter: parent.verticalCenter
-                                fillMode: Image.PreserveAspectFit
-                                smooth: true
-                                visible: screenImage.source == "qrc:/res/image/screen-edit.png"
-                                source: "qrc:/res/image/unsub.png"
-
-                                MouseArea {
-                                    id: unsubScreenMouseArea
-                                    anchors.fill: parent
-                                    onPressed: {
-                                        //screenManager.removeScreen(name, true)
-                                    }
-                                }
-                            }
-
-                            // furthur edit button in edit mode
-                            Image {
-                                id: screenEditIcon
-                                parent: screenImage
-                                width: dp(25)
-                                height: width
-                                anchors.left: parent.horizontalCenter
-                                anchors.leftMargin: dp(4)
-                                anchors.verticalCenter: parent.verticalCenter
-                                fillMode: Image.PreserveAspectFit
-                                smooth: true
-                                visible: screenImage.source == "qrc:/res/image/screen-edit.png"
-                                source: "qrc:/res/image/edit.png"
                             }
 
                             // connecting prograss bar background
