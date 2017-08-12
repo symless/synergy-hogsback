@@ -170,6 +170,10 @@ void ScreenListModel::setScreenStatus(int index, ScreenStatus status)
 
     m_screens[index].setStatus(status);
 
+    if (status == ScreenStatus::kConnected) {
+        m_screens[index].setLastErrorCode(kNoError);
+    }
+
     dataChanged(getIndex(index), getIndex(index));
 }
 
