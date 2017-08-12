@@ -297,7 +297,7 @@ Rectangle {
                             Image {
                                 id: errorIndication
                                 sourceSize.width: dp(14)
-                                sourceSize.height: sourceSize.width
+                                sourceSize.height: dp(14)
                                 anchors.horizontalCenter: connectingBar.horizontalCenter
                                 anchors.verticalCenter: connectingBar.verticalCenter
                                 visible: lastErrorCode !== 0
@@ -338,7 +338,7 @@ Rectangle {
                                     smooth: true
                                     source: "qrc:/res/image/close-icon.svg"
                                     sourceSize.width: dp(7)
-                                    sourceSize.height: sourceSize.width
+                                    sourceSize.height: dp(7)
                                     visible: errorMessageDialog.visible
                                     z: 2
 
