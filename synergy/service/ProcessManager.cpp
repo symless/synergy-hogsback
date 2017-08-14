@@ -18,6 +18,8 @@ namespace bp = boost::process;
 namespace bs = boost::system;
 using boost::optional;
 
+static const int kConnectingTimeout = 3;
+
 template <typename T, typename... Args> static inline
 std::unique_ptr<T>
 make_unique (Args&&... args) {
@@ -186,7 +188,7 @@ ProcessManager::start (std::vector<std::string> command) {
                 if (timer.expires_at() > std::chrono::steady_clock::now()) {
                     return;
                 }
-                timer.expires_from_now (std::chrono::seconds (10));
+                timer.expires_from_now (std::chrono::seconds (kConnectingTimeout));
                 timer.async_wait ([this, screenName](auto const& ec) {
                     if (ec == boost::asio::error::operation_aborted) {
                         return;
