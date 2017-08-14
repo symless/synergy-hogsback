@@ -346,7 +346,7 @@ Rectangle {
                                         acceptedButtons: Qt.LeftButton
 
                                         onReleased: {
-                                            errorMessageDialog.visible = false
+                                            errorIndication.errorDialog = false
                                         }
                                     }
                                 }
