@@ -42,8 +42,13 @@ WampClient::connect()
                 return;
             }
             m_retryTimer.expires_from_now(boost::posix_time::milliseconds(500));
-            m_retryTimer.async_wait([&](boost::system::error_code) {
-                connectionRetry();
+            m_retryTimer.async_wait([&](boost::system::error_code const& ec) {
+                if (ec) {
+                    if (ec == boost::asio::error::operation_aborted) {
+                        return;
+                    }
+                    throw boost::system::system_error(ec);
+                }
                 connect();
             });
             return;
