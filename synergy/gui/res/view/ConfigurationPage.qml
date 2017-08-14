@@ -327,7 +327,6 @@ Rectangle {
                                 visible: errorIndication.errorDialog && errorIndication.visible
                                 fillMode: Image.PreserveAspectFit
                                 source: "qrc:/res/image/error-message-dialog.png"
-                                z: 4
 
                                 Image {
                                     id: closeIcon
@@ -356,7 +355,11 @@ Rectangle {
                                     width: parent.width - dp(5)
                                     font.pixelSize: dp(10)
                                     anchors.top: errorMessageDialog.top
+                                    anchors.left: errorMessageDialog.left
+                                    anchors.right: errorMessageDialog.right
                                     anchors.topMargin: dp(30)
+                                    anchors.leftMargin: dp(5)
+                                    anchors.rightMargin: anchors.leftMargin
                                     horizontalAlignment: Text.AlignHCenter
                                     wrapMode: Text.WordWrap
                                     text: errorMessage
