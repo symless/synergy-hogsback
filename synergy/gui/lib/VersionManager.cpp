@@ -57,8 +57,7 @@ void VersionManager::checkUpdate(QJsonDocument& updateReplyDoc)
             msgBox.setText("This version of Synergy is not supported anymore. "
                            "Please <a href='https://symless.com/synergy/downloads'>download</a> the latest version.");
             msgBox.exec();
-
-            throw std::runtime_error("required force update");
+            QApplication::exit(1);
         }
         else {
             LogManager::debug(QString("unrecognized update reply: %1").arg(updateReplyResult));
