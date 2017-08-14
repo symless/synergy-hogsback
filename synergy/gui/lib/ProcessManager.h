@@ -2,13 +2,14 @@
 #define PROCESSMANAGER_H
 
 #include "LibMacro.h"
-#include "ScreenStatus.h"
+#include "synergy/common/ScreenStatus.h"
 
 #include <boost/asio.hpp>
 #include <QQuickItem>
 #include <QProcess>
 #include <thread>
 #include <memory>
+#include <utility>
 
 class ScreenListModel;
 class AppConfig;
@@ -38,11 +39,14 @@ public:
 
 signals:
     void screenStatusChanged(QPair<QString, ScreenStatus>);
+    void rpcScreenStatusChanged(QString, int);
+    void screenError(QString, int);
     void localInputDetected();
     void logCoreOutput(QString);
 
 public slots:
-     void newServerDetected(int serverId);
+    void newServerDetected(int serverId);
+    void onRpcScreenStatusChanged(QString, int);
 
 private slots:
     void exit(int exitCode, QProcess::ExitStatus);

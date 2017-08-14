@@ -69,7 +69,10 @@ void ScreenListModel::update(const QList<Screen>& screens)
     for (int i = 0; i < screens.count(); i++) {
         int r = findScreen(screens[i].name());
         if (r != -1) {
+            // TODO: sync error code to cloud
+            ErrorCode ec =m_screens[r].lastErrorCode();
             m_screens[r] = screens[i];
+            m_screens[r].setLastErrorCode(ec);
             dataChanged(getIndex(r), getIndex(r));
         }
         else {
@@ -103,7 +106,9 @@ QVariant ScreenListModel::data(const QModelIndex& index, int role) const
     else if (role == kStatusImageRole)
         return screen.statusImage();
     else if (role == kScreenStatusRole)
-        return screenStatusToString(screen.status());
+        return QString::fromStdString(screenStatusToString(screen.status()));
+    else if (role == kScreenLastErrorCode)
+        return (int)screen.lastErrorCode();
     else if (role == kErrorMessageRole)
         return screen.lastErrorMessage();
     else if (role == kHelpLinkRole)
@@ -129,6 +134,7 @@ QHash<int, QByteArray> ScreenListModel::roleNames() const
     roles[kScreenStatusRole] = "screenStatus";
     roles[kErrorMessageRole] = "errorMessage";
     roles[kHelpLinkRole] = "helpLink";
+    roles[kScreenLastErrorCode] = "lastErrorCode";
 
     return roles;
 }
@@ -163,6 +169,21 @@ void ScreenListModel::setScreenStatus(int index, ScreenStatus status)
     }
 
     m_screens[index].setStatus(status);
+
+    if (status == ScreenStatus::kConnected) {
+        m_screens[index].setLastErrorCode(kNoError);
+    }
+
+    dataChanged(getIndex(index), getIndex(index));
+}
+
+void ScreenListModel::setScreenErrorCode(int index, ErrorCode ec)
+{
+    if (index < 0 || index > getScreenModeSize()) {
+        return;
+    }
+
+    m_screens[index].setLastErrorCode(ec);
 
     dataChanged(getIndex(index), getIndex(index));
 }

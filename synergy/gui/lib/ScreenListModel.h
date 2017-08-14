@@ -16,6 +16,7 @@ public:
         kNameRole,
         kStatusImageRole,
         kScreenStatusRole,
+        kScreenLastErrorCode,
         kErrorMessageRole,
         kHelpLinkRole
     };
@@ -51,6 +52,7 @@ public:
     void lockScreen(int index);
     void unlockScreen(int index);
     void setScreenStatus(int index, ScreenStatus status);
+    void setScreenErrorCode(int index, ErrorCode ec);
 
 signals:
     void scaleChanged();

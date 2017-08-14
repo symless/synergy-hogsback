@@ -417,7 +417,7 @@ void CloudClient::updateScreen(const Screen& screen)
     QJsonObject screenObject;
     screenObject.insert("id", screen.id());
     screenObject.insert("name", screen.name());
-    screenObject.insert("status", screenStatusToString(screen.status()));
+    screenObject.insert("status", QString::fromStdString(screenStatusToString(screen.status())));
 
     QJsonDocument doc(screenObject);
 

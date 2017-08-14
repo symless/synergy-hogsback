@@ -2,11 +2,16 @@
 #define SCREEN_H
 
 #include "LibMacro.h"
-#include "ScreenStatus.h"
+#include "synergy/common/ScreenStatus.h"
 #include "synergy/common/ErrorMessage.h"
 
 #include <QString>
 #include <QHash>
+
+inline
+int qHash(ScreenStatus key, uint seed = 0) noexcept {
+    return qHash(static_cast<int>(key), seed);
+}
 
 class LIB_SPEC Screen
 {
@@ -37,17 +42,19 @@ public:
 	void setName(QString n);
     void setStatus(ScreenStatus s);
     void setStatus(QString s);
+    void setLastErrorCode(const ErrorCode &lastErrorCode);
 
     bool locked() const;
     void setLocked(bool value);
 
     ScreenStatus status() const;
+    ErrorCode lastErrorCode() const;
 
 private:
     int m_id;
     int m_posX;
     int m_posY;
-	QString m_name;
+    QString m_name;
     ScreenStatus m_status;
     QString m_statusImage;
     bool m_locked;

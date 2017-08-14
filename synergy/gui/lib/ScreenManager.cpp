@@ -96,6 +96,8 @@ void ScreenManager::setProcessManager(ProcessManager* processManager)
             m_processManager, &ProcessManager::newServerDetected);
     connect(m_processManager, &ProcessManager::screenStatusChanged,
             this, &ScreenManager::onScreenStatusChanged);
+    connect(m_processManager, &ProcessManager::screenError,
+            this, &ScreenManager::onScreenError, Qt::QueuedConnection);
     connect(m_processManager, &ProcessManager::localInputDetected,
             this, &ScreenManager::onLocalInputDetected);
 }
@@ -237,9 +239,9 @@ void ScreenManager::updateScreens(QByteArray reply)
                 screen.setId(obj["id"].toInt());
                 screen.setPosX(obj["x_pos"].toInt());
                 screen.setPosY(obj["y_pos"].toInt());
-                screen.setStatus("ConnectingWithError");//obj["status"].toString()
+                screen.setStatus(obj["status"].toString());
                 if (!obj["active"].toBool()) {
-                    screen.setStatus(kInactive);
+                    screen.setStatus(ScreenStatus::kInactive);
                 }
                 latestScreenList.push_back(screen);
             }
@@ -281,7 +283,7 @@ void ScreenManager::updateScreens(QByteArray reply)
         emit newServer(serverId);
         m_previousServerId = serverId;
 
-        QPair<QString, ScreenStatus> p (m_localHostname, kConnecting);
+        QPair<QString, ScreenStatus> p (m_localHostname, ScreenStatus::kConnecting);
         onScreenStatusChanged(p);
     }
 }
@@ -327,4 +329,15 @@ void ScreenManager::onScreenStatusChanged(QPair<QString, ScreenStatus> r)
 void ScreenManager::onLocalInputDetected()
 {
     m_cloudClient->claimServer();
+}
+
+void ScreenManager::onScreenError(QString screenName, int errorCode)
+{
+    int index = m_screenListModel->findScreen(screenName);
+    if (index != -1) {
+        m_screenListModel->setScreenErrorCode(index, (ErrorCode)errorCode);
+        const Screen& s = m_screenListModel->getScreen(index);
+
+        m_cloudClient->updateScreen(s);
+    }
 }

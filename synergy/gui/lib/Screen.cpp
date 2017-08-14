@@ -3,11 +3,11 @@
 #include "Common.h"
 
 QHash<ScreenStatus, QString> Screen::m_statusImages = {
-    {kConnected, "qrc:/res/image/screen-active.png"},
-    {kConnecting, "qrc:/res/image/screen-inactive.png"},
-    {kConnectingWithError, "qrc:/res/image/screen-inactive.png"},
-    {kDisconnected, "qrc:/res/image/screen-inactive.png"},
-    {kInactive, "qrc:/res/image/screen-inactive.png"}
+    {ScreenStatus::kConnected, "qrc:/res/image/screen-active.png"},
+    {ScreenStatus::kConnecting, "qrc:/res/image/screen-inactive.png"},
+    {ScreenStatus::kConnectingWithError, "qrc:/res/image/screen-inactive.png"},
+    {ScreenStatus::kDisconnected, "qrc:/res/image/screen-inactive.png"},
+    {ScreenStatus::kInactive, "qrc:/res/image/screen-inactive.png"}
 };
 
 Screen::Screen(QString name) :
@@ -15,7 +15,7 @@ Screen::Screen(QString name) :
     m_posX(-1),
     m_posY(-1),
     m_name(name),
-    m_status(kInactive),
+    m_status(ScreenStatus::kInactive),
     m_locked(false),
     m_lastErrorCode(kNoError)
 {
@@ -88,7 +88,7 @@ void Screen::setStatus(ScreenStatus s)
 
 void Screen::setStatus(QString s)
 {
-    ScreenStatus status = stringToScreenStatus(s);
+    ScreenStatus status = stringToScreenStatus(s.toStdString());
     setStatus(status);
 }
 
@@ -105,6 +105,16 @@ void Screen::setLocked(bool value)
 ScreenStatus Screen::status() const
 {
     return m_status;
+}
+
+ErrorCode Screen::lastErrorCode() const
+{
+    return m_lastErrorCode;
+}
+
+void Screen::setLastErrorCode(const ErrorCode &lastErrorCode)
+{
+    m_lastErrorCode = lastErrorCode;
 }
 
 int Screen::id() const

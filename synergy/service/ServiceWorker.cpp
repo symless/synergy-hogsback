@@ -3,6 +3,7 @@
 #include <synergy/common/RpcManager.h>
 #include <synergy/common/WampServer.h>
 #include <synergy/common/WampRouter.h>
+#include <synergy/common/ScreenStatus.h>
 #include "ProcessManager.h"
 #include <boost/asio.hpp>
 #include <iostream>
@@ -51,10 +52,12 @@ ServiceWorker::provideCore()
         }
     );
 
-    m_processManager->screenConnectionWarning.connect(
-        [server](std::string const& screenName, std::string slug) {
-            server->publish ("synergy.screen.connection-warning", screenName,
-                             std::move(slug));
+    m_processManager->screenConnectionError.connect(
+        [server](std::string const& screenName, ErrorCode ec) {
+            server->publish ("synergy.screen.error", screenName,
+                                (int)ec);
+            server->publish ("synergy.screen.status", screenName,
+                                (int)ScreenStatus::kConnectingWithError);
         }
     );
 }

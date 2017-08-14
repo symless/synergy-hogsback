@@ -195,7 +195,6 @@ Rectangle {
                         height: dp(screenListModel.screenIconHeight())
                         property point beginDrag
                         property int modelIndex: -1
-                        property var editMode: false
 
                         // mouse area that covers the whole individual screen
                         MouseArea {
@@ -257,44 +256,6 @@ Rectangle {
                                 visible: screenImage.source != "qrc:/res/image/screen-edit.png"
                             }
 
-                            // unsubscrible button in edit mode
-                            Image {
-                                id: screenUnsubIcon
-                                parent: screenImage
-                                width: dp(25)
-                                height: width
-                                anchors.right: parent.horizontalCenter
-                                anchors.rightMargin: dp(4)
-                                anchors.verticalCenter: parent.verticalCenter
-                                fillMode: Image.PreserveAspectFit
-                                smooth: true
-                                visible: screenImage.source == "qrc:/res/image/screen-edit.png"
-                                source: "qrc:/res/image/unsub.png"
-
-                                MouseArea {
-                                    id: unsubScreenMouseArea
-                                    anchors.fill: parent
-                                    onPressed: {
-                                        //screenManager.removeScreen(name, true)
-                                    }
-                                }
-                            }
-
-                            // furthur edit button in edit mode
-                            Image {
-                                id: screenEditIcon
-                                parent: screenImage
-                                width: dp(25)
-                                height: width
-                                anchors.left: parent.horizontalCenter
-                                anchors.leftMargin: dp(4)
-                                anchors.verticalCenter: parent.verticalCenter
-                                fillMode: Image.PreserveAspectFit
-                                smooth: true
-                                visible: screenImage.source == "qrc:/res/image/screen-edit.png"
-                                source: "qrc:/res/image/edit.png"
-                            }
-
                             // connecting prograss bar background
                             Rectangle {
                                 id: connectingBar
@@ -314,7 +275,7 @@ Rectangle {
                                     x: -width
                                     width: dp(25)
                                     height: dp(4)
-                                    color: screenStatus == "Connecting" ? "#96C13D" : "red"
+                                    color: lastErrorCode === 0 ? "#96C13D" : "red"
                                     z: 1
                                     states: [
                                         State {
@@ -336,20 +297,21 @@ Rectangle {
                             Image {
                                 id: errorIndication
                                 sourceSize.width: dp(14)
-                                sourceSize.height: sourceSize.width
+                                sourceSize.height: dp(14)
                                 anchors.horizontalCenter: connectingBar.horizontalCenter
                                 anchors.verticalCenter: connectingBar.verticalCenter
-                                visible: screenStatus == "ConnectingWithError"
+                                visible: lastErrorCode !== 0
                                 smooth: false
                                 source: "qrc:/res/image/error-indication.svg"
                                 z: 2
+                                property bool errorDialog: false
 
                                 MouseArea {
                                     anchors.fill: parent
                                     acceptedButtons: Qt.LeftButton
 
                                     onReleased: {
-                                        errorMessageDialog.visible = !errorMessageDialog.visible
+                                        errorIndication.errorDialog = !errorIndication.errorDialog
                                     }
                                 }
                             }
@@ -362,6 +324,7 @@ Rectangle {
                                 width: dp(screenListModel.screenIconWidth() * 1.5)
                                 height: dp(screenListModel.screenIconHeight() * 1.5)
                                 smooth: true
+                                visible: errorIndication.errorDialog && errorIndication.visible
                                 fillMode: Image.PreserveAspectFit
                                 source: "qrc:/res/image/error-message-dialog.png"
                                 z: 2
@@ -375,7 +338,7 @@ Rectangle {
                                     smooth: true
                                     source: "qrc:/res/image/close-icon.svg"
                                     sourceSize.width: dp(7)
-                                    sourceSize.height: sourceSize.width
+                                    sourceSize.height: dp(7)
                                     visible: errorMessageDialog.visible
                                     z: 2
 
@@ -398,6 +361,7 @@ Rectangle {
                                     horizontalAlignment: Text.AlignHCenter
                                     wrapMode: Text.WordWrap
                                     text: errorMessage
+                                    visible: errorMessageDialog.visible
                                 }
 
                                 Text {
@@ -409,6 +373,7 @@ Rectangle {
                                     horizontalAlignment: Text.AlignHCenter
                                     wrapMode: Text.WordWrap
                                     text: helpLink
+                                    visible: errorMessageDialog.visible
 
                                     onLinkActivated: Qt.openUrlExternally(link)
 
