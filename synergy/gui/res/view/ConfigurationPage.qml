@@ -327,7 +327,7 @@ Rectangle {
                                 visible: errorIndication.errorDialog && errorIndication.visible
                                 fillMode: Image.PreserveAspectFit
                                 source: "qrc:/res/image/error-message-dialog.png"
-                                z: 2
+                                z: 4
 
                                 Image {
                                     id: closeIcon
@@ -340,7 +340,6 @@ Rectangle {
                                     sourceSize.width: dp(7)
                                     sourceSize.height: dp(7)
                                     visible: errorMessageDialog.visible
-                                    z: 2
 
                                     MouseArea {
                                         anchors.fill: parent
