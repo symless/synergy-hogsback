@@ -15,7 +15,7 @@ static struct ErrorMessage {
     std::string troubleshootUrl;
 }
 errorMessageTable[] {
-    {kConnectionTimeout, "Can't send your passwords to Nick", "timeout-connecting"}
+    {kConnectionTimeout, "Unable to connect because of a timeout error.", "timeout-connecting"}
 };
 
 static const char* kSynergyHelpUrl = "https://symless.com/synergy/help/";
