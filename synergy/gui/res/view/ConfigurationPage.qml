@@ -193,6 +193,7 @@ Rectangle {
                         x: dp(posX); y: dp(posY)
                         width: dp(screenListModel.screenIconWidth())
                         height: dp(screenListModel.screenIconHeight())
+                        z: errorMessageDialog.visible ? 5 : 1
                         property point beginDrag
                         property int modelIndex: -1
 
