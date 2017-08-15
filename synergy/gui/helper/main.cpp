@@ -97,9 +97,18 @@ main (int, const char*[])
         if (!appVersionFile.is_open()) {
             /* Remove all the service files */
             boost::system::error_code ec;
-            boost::filesystem::remove (kHelperPListPath, ec);
-            boost::filesystem::remove (kHelperExecPath, ec);
             boost::filesystem::remove (kServiceUserAgentPListTargetPath, ec);
+            log() << fmt::format ("[{}] uninstalling user agent plist file... {}\n", 
+                                  timestamp(), ec ? "done" : "failed");
+            
+            boost::filesystem::remove (kHelperPListPath, ec);
+            log() << fmt::format ("[{}] uninstalling helper plist file... {}\n", 
+                                  timestamp(), ec ? "done" : "failed");
+            
+            boost::filesystem::remove (kHelperExecPath, ec);
+            log() << fmt::format ("[{}] uninstalling helper executable file... {}\n", 
+                                  timestamp(), ec ? "done (Au Revoir!)" : "failed");
+            
             return EXIT_SUCCESS;
         }
 
