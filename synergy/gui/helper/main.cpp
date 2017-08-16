@@ -1,5 +1,3 @@
-#include "synergy/common/DirectoryManager.h"
-
 #include <cstdlib>
 #include <unistd.h>
 #include <fstream>
@@ -16,68 +14,44 @@ std::string const kSharedConfigPath ("/Users/Shared/Synergy");
 std::string const kAppPath ("/Applications/Synergy.app");
 std::string const kAppResourcePath (kAppPath + "/Contents/Resources");
 
-auto const kAppClientExecPath = kAppPath + "/Contents/MacOS/synergyc";
 auto const kAppVersionFilePath = kAppResourcePath + "/Version.txt";
 
-auto const kHelperPListPath = "/Library/LaunchDaemons/com.symless.synergy.v2.ServiceHelper.plist";
-auto const kHelperExecPath = "/Library/PrivilegedHelperTools/com.symless.synergy.v2.ServiceHelper";
-
-std::string const kPreLoginAgentFilename = "com.symless.synergy.v2.PreLoginAgent.plist";
-auto const kPreLoginAgentPListPath = "/Library/LaunchAgents/" + kPreLoginAgentFilename;
-auto const kPreLoginAgentPListSourcePath = kAppResourcePath + "/" + kPreLoginAgentFilename;
+std::string const kHelperName = "com.symless.synergy.v2.ServiceHelper";
+auto const kHelperPListPath = "/Library/LaunchDaemons/" + kHelperName + ".plist";
+auto const kHelperExecPath = "/Library/PrivilegedHelperTools/" + kHelperName;
 
 std::string const kServiceUserAgentFilename = "com.symless.synergy.v2.synergyd.plist";
 auto const kServiceUserAgentPListTargetPath = "/Library/LaunchAgents/" + kServiceUserAgentFilename;
 auto const kServiceUserAgentPListSourcePath = kAppResourcePath + "/" + kServiceUserAgentFilename;
 
-
 static std::ofstream&
 log() {
-    static std::ofstream log_ (kSharedConfigPath + "/helper.log", std::ios::out | std::ios::app);
-    return log_;
+    static std::ofstream lofs(kSharedConfigPath + "/helper.log", std::ios::out | std::ios::app);
+    assert (lofs.is_open());
+    return lofs;
 }
 
-
-static bool
-installPreLoginAgent() {
-    if (boost::filesystem::exists (kPreLoginAgentPListPath)) {
-        return true;
-    }
-    if (!boost::filesystem::exists (kPreLoginAgentPListSourcePath)) {
-        return false;
-    }
-
-    boost::system::error_code ec;
-    boost::filesystem::copy_file
-        (kPreLoginAgentPListSourcePath, kPreLoginAgentPListPath, ec);
-    if (ec) {
-        return false;
-    }
-
-    /* Load the PreLogin agent */
-    boost::process::ipstream launchd_out;
-    boost::process::child launchd (fmt::format ("launchctl start {}", kPreLoginAgentPListPath),
-                                   boost::process::std_out > launchd_out);
-    std::string line;
-    while (launchd_out && std::getline(launchd_out, line)) {
-        if (!line.empty()) {
-            log() << line << std::endl;
-            line.clear();
-        }
-    }
-    launchd.wait();
-    return (EXIT_SUCCESS == launchd.exit_code());
+static
+std::string timestamp() {
+    time_t t;
+    ::time (&t);
+    std::array<char, 64> ct_buf;
+    auto ct = ::ctime_r (&t, ct_buf.data());
+    assert (ct == ct_buf.data());
+    /* ctime_r() oddly terminates the string with a newline */
+    std::replace (begin(ct_buf), end(ct_buf), '\n', '\0');
+    return ct;
 }
 
 static bool
 installSynergyService()
 {
     if (boost::filesystem::exists (kServiceUserAgentPListTargetPath)) {
-        log() << "service already installed\n";
+        log() << fmt::format ("[{}] service already installed, we're done\n", timestamp());
         return true;
     }
     if (!boost::filesystem::exists (kServiceUserAgentPListSourcePath)) {
-        log() << "service source file doesn't exist\n";
+        log() << fmt::format ("[{}] service plist file doesn't exist\n", timestamp());
         return false;
     }
 
@@ -85,7 +59,7 @@ installSynergyService()
     boost::filesystem::copy_file
         (kServiceUserAgentPListSourcePath, kServiceUserAgentPListTargetPath, ec);
     if (ec) {
-        log() << "failed to copy service file over\n";
+        log() << fmt::format ("[{}] failed to install service plist file\n", timestamp());
         return false;
     }
 
@@ -98,18 +72,17 @@ installSynergyService()
     while ((launchd_out && std::getline(launchd_out, line)) ||
            (launchd_err && std::getline(launchd_err, line))) {
         if (!line.empty()) {
-            log() << line << std::endl;
+            log() << fmt::format("[{}] {}\n", timestamp(), line);
             line.clear();
         }
     }
     launchd.wait();
 
     if (EXIT_SUCCESS != launchd.exit_code()) {
-        log() << fmt::format ("{} failed with error code: [{}]\n", cmd, launchd.exit_code());
+        log() << fmt::format ("[{}] {} failed with error code {}\n", timestamp(), cmd, launchd.exit_code());
     }
     return (EXIT_SUCCESS == launchd.exit_code());
 }
-
 
 int
 main (int, const char*[])
@@ -124,9 +97,18 @@ main (int, const char*[])
         if (!appVersionFile.is_open()) {
             /* Remove all the service files */
             boost::system::error_code ec;
+            boost::filesystem::remove (kServiceUserAgentPListTargetPath, ec);
+            log() << fmt::format ("[{}] uninstalling user agent plist file... {}\n", 
+                                  timestamp(), ec ? "done" : "failed");
+            
             boost::filesystem::remove (kHelperPListPath, ec);
+            log() << fmt::format ("[{}] uninstalling helper plist file... {}\n", 
+                                  timestamp(), ec ? "done" : "failed");
+            
             boost::filesystem::remove (kHelperExecPath, ec);
-            boost::filesystem::remove (kPreLoginAgentPListPath, ec);
+            log() << fmt::format ("[{}] uninstalling helper executable file... {}\n", 
+                                  timestamp(), ec ? "done (Au Revoir!)" : "failed");
+            
             return EXIT_SUCCESS;
         }
 
@@ -134,37 +116,27 @@ main (int, const char*[])
         std::getline (appVersionFile, version);
         appVersionFile.close();
 
-        time_t t;
-        time (&t);
-        std::array<char, 32> ct_buf;
-        auto ct = ctime_r (&t, ct_buf.data());
-        assert (ct == ct_buf.data());
-        std::replace (begin(ct_buf), end(ct_buf), '\n', '\0');
-
-        log() << fmt::format ("[{}] installed helper revision = {}\n", ct, SYNERGY_REVISION);
-        log() << fmt::format ("[{}] installed app revision = {}\n", ct, version);
-        log() << fmt::format ("[{}] helper uid = {}, euid = {}, pid = {}\n", ct,
+        auto ts = timestamp();
+        log() << fmt::format ("[{}] helper uid = {}, euid = {}, pid = {}\n", ts,
                               getuid(), geteuid(), getpid());
-
-//        if (!installPreLoginAgent()) {
-//            log() << fmt::format ("[{}] failed to install PreLoginAgent\n", ct);
-//        }
+        log() << fmt::format ("[{}] installed helper revision = {}\n", ts, SYNERGY_REVISION);
+        log() << fmt::format ("[{}] installed app revision = {}\n", ts, version);
 
         if (!installSynergyService()) {
-            log() << fmt::format ("[{}] failed to install synergy service\n", ct);
+            log() << fmt::format ("[{}] failed to install the service\n", timestamp());
         }
         else {
-            log() << "install synergy service success\n";
+            log() << fmt::format ("[{}] installed the service successfully\n", timestamp());
         }
 
         log().close();
         return EXIT_SUCCESS;
     }
     catch (std::exception& ex) {
-        log() << "Exception thrown: " << ex.what() << "\n";
+        log() << fmt::format ("[{}] Exception thrown: {}\n", timestamp(), ex.what());
     }
     catch (...) {
-        log() << "Unknown exception thrown\n";
+        log() << fmt::format ("[{}] Unknown exception thrown\n", timestamp());
     }
 
     log().close();

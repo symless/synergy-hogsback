@@ -89,45 +89,38 @@ main(int argc, char* argv[])
     ConnectivityTester tester;
     processManager.setConnectivityTester(&tester);
 
-    try {
-        qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");
-        qmlRegisterType<ScreenListModel>("com.synergy.gui", 1, 0, "ScreenListModel");
-        qmlRegisterType<ScreenManager>("com.synergy.gui", 1, 0, "ScreenManager");
-        qmlRegisterType<ProcessManager>("com.synergy.gui", 1, 0, "ProcessManager");
-        qmlRegisterType<AccessibilityManager>("com.synergy.gui", 1, 0, "AccessibilityManager");
-        qmlRegisterType<ProfileListModel>("com.synergy.gui", 1, 0, "ProfileListModel");
-        qmlRegisterSingletonType<CloudClient>("com.synergy.gui", 1, 0, "CloudClient", CloudClient::instance);
-        qmlRegisterSingletonType<ProfileManager>("com.synergy.gui", 1, 0, "ProfileManager", ProfileManager::instance);
-        qmlRegisterSingletonType<AppConfig>("com.synergy.gui", 1, 0, "AppConfig", AppConfig::instance);
-        qmlRegisterSingletonType<VersionManager>("com.synergy.gui", 1, 0, "VersionManager", VersionManager::instance);
-        qmlRegisterSingletonType<LogManager>("com.synergy.gui", 1, 0, "LogManager", LogManager::instance);
+    qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");
+    qmlRegisterType<ScreenListModel>("com.synergy.gui", 1, 0, "ScreenListModel");
+    qmlRegisterType<ScreenManager>("com.synergy.gui", 1, 0, "ScreenManager");
+    qmlRegisterType<ProcessManager>("com.synergy.gui", 1, 0, "ProcessManager");
+    qmlRegisterType<AccessibilityManager>("com.synergy.gui", 1, 0, "AccessibilityManager");
+    qmlRegisterType<ProfileListModel>("com.synergy.gui", 1, 0, "ProfileListModel");
+    qmlRegisterSingletonType<CloudClient>("com.synergy.gui", 1, 0, "CloudClient", CloudClient::instance);
+    qmlRegisterSingletonType<ProfileManager>("com.synergy.gui", 1, 0, "ProfileManager", ProfileManager::instance);
+    qmlRegisterSingletonType<AppConfig>("com.synergy.gui", 1, 0, "AppConfig", AppConfig::instance);
+    qmlRegisterSingletonType<VersionManager>("com.synergy.gui", 1, 0, "VersionManager", VersionManager::instance);
+    qmlRegisterSingletonType<LogManager>("com.synergy.gui", 1, 0, "LogManager", LogManager::instance);
 
-        QQmlApplicationEngine engine;
-        LogManager::instance();
-        LogManager::setQmlContext(engine.rootContext());
-        LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
+    QQmlApplicationEngine engine;
+    LogManager::instance();
+    LogManager::setQmlContext(engine.rootContext());
+    LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
 
 #ifndef SYNERGY_DEVELOPER_MODE
-        CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
-        cloudClient->checkUpdate();
+    CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
+    cloudClient->checkUpdate();
 #endif
 
-        engine.rootContext()->setContextProperty
-            ("PixelPerPoint", QGuiApplication::primaryScreen()->physicalDotsPerInch() / 72);
-        engine.rootContext()->setContextProperty
-            ("rpcProcessManager", static_cast<QObject*>(&processManager));
+    engine.rootContext()->setContextProperty
+        ("PixelPerPoint", QGuiApplication::primaryScreen()->physicalDotsPerInch() / 72);
+    engine.rootContext()->setContextProperty
+        ("rpcProcessManager", static_cast<QObject*>(&processManager));
 
-        engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-        auto qtAppRet = app.exec();
+    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+    auto qtAppRet = app.exec();
 
-        /* The RPC thread should stop and join us when it runs out of work */
-        rpcThread.join();
+    /* The RPC thread should stop and join us when it runs out of work */
+    rpcThread.join();
 
-        return qtAppRet;
-    }
-    catch (std::runtime_error& e) {
-        LogManager::setQmlContext(NULL);
-        LogManager::error(QString("exception caught: %1").arg(e.what()));
-        return EXIT_FAILURE;
-    }
+    return qtAppRet;
 }

@@ -107,7 +107,6 @@ public:
     }
 
     boost::signals2::signal<void()> connected;
-    boost::signals2::signal<void()> connectionRetry;
 
 private:
     void connect();

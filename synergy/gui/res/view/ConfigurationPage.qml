@@ -193,6 +193,7 @@ Rectangle {
                         x: dp(posX); y: dp(posY)
                         width: dp(screenListModel.screenIconWidth())
                         height: dp(screenListModel.screenIconHeight())
+                        z: errorMessageDialog.visible ? 5 : 1
                         property point beginDrag
                         property int modelIndex: -1
 
@@ -327,7 +328,6 @@ Rectangle {
                                 visible: errorIndication.errorDialog && errorIndication.visible
                                 fillMode: Image.PreserveAspectFit
                                 source: "qrc:/res/image/error-message-dialog.png"
-                                z: 2
 
                                 Image {
                                     id: closeIcon
@@ -340,14 +340,13 @@ Rectangle {
                                     sourceSize.width: dp(7)
                                     sourceSize.height: dp(7)
                                     visible: errorMessageDialog.visible
-                                    z: 2
 
                                     MouseArea {
                                         anchors.fill: parent
                                         acceptedButtons: Qt.LeftButton
 
                                         onReleased: {
-                                            errorMessageDialog.visible = false
+                                            errorIndication.errorDialog = false
                                         }
                                     }
                                 }
@@ -357,7 +356,11 @@ Rectangle {
                                     width: parent.width - dp(5)
                                     font.pixelSize: dp(10)
                                     anchors.top: errorMessageDialog.top
+                                    anchors.left: errorMessageDialog.left
+                                    anchors.right: errorMessageDialog.right
                                     anchors.topMargin: dp(30)
+                                    anchors.leftMargin: dp(5)
+                                    anchors.rightMargin: anchors.leftMargin
                                     horizontalAlignment: Text.AlignHCenter
                                     wrapMode: Text.WordWrap
                                     text: errorMessage
