@@ -97,12 +97,6 @@ add_definitions (-DMSGPACK_DEFAULT_API_VERSION=1)
 include_directories (${Msgpack_INCLUDE_DIR})
 
 #
-# Websocket++
-#
-set (Websocketpp_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/websocketpp")
-include_directories (${Websocketpp_INCLUDE_DIR})
-
-#
 # Google Crashpad
 #
 if ((CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo") AND
@@ -134,12 +128,6 @@ add_definitions (-DBOOST_THREAD_VERSION=5)
 
 # Enable experimental executor support for boost::future
 add_definitions (-DBOOST_THREAD_PROVIDES_EXECUTORS)
-
-#
-# Websocket++
-#
-set (Websocketpp_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/websocketpp")
-include_directories(${Websocketpp_INCLUDE_DIR})
 
 #
 # Autobahn
