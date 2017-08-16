@@ -29,9 +29,6 @@
 [submodule "third_party/autobahn-cpp"]
     path = third_party/autobahn-cpp
     url = https://github.com/crossbario/autobahn-cpp.git
-[submodule "third_party/websocketpp"]
-    path = third_party/websocketpp
-    url = https://github.com/zaphoyd/websocketpp.git
 [submodule "third_party/msgpack-c"]
     path = third_party/msgpack-c
     url = https://github.com/msgpack/msgpack-c.git
