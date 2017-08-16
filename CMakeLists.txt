@@ -130,6 +130,12 @@ add_definitions (-DBOOST_THREAD_VERSION=5)
 add_definitions (-DBOOST_THREAD_PROVIDES_EXECUTORS)
 
 #
+# Beast
+#
+set (Beast_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/beast/include")
+include_directories(${Beast_INCLUDE_DIR})
+
+#
 # Autobahn
 #
 set (Autobahn_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/autobahn-cpp")
