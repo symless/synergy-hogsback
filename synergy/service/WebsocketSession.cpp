@@ -116,9 +116,12 @@ WebsocketSession::onSslHandshakeFinished(errorCode ec)
     const char* fakeChannel = "/pubsub/auth/1";
 
     // websocket handshake
-    m_websocket.async_handshake(
+    m_websocket.async_handshake_ex(
         kServerHostname,
         fakeChannel,
+        [](boost::beast::websocket::request_type & req) {
+            req.set("X-Auth-Token", "Test-Token");
+        },
         std::bind(
             &WebsocketSession::onWebsocketHandshakeFinished,
             this,
