@@ -5,7 +5,6 @@
 #include "synergy/service/WebsocketSession.h"
 
 #include <boost/asio/io_service.hpp>
-#include <memory>
 
 class CloudClient
 {
@@ -17,7 +16,7 @@ public:
 private:
     boost::asio::io_service& m_ioService;
     HttpSession m_httpSession;
-    std::shared_ptr<WebsocketSession> m_websocket;
+    WebsocketSession m_websocket;
 };
 
 #endif // CLOUDCLIENT_H

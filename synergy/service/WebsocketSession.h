@@ -10,8 +10,7 @@ using tcp = boost::asio::ip::tcp;
 namespace ssl = boost::asio::ssl;
 namespace websocket = boost::beast::websocket;
 
-class WebsocketSession :
-        public std::enable_shared_from_this<WebsocketSession>
+class WebsocketSession
 {
 public:
     WebsocketSession(boost::asio::io_service& ioService);

@@ -21,7 +21,7 @@ void WebsocketSession::connect()
         {kServerHostname, kServerPort},
         std::bind(
             &WebsocketSession::onResolveFinished,
-            shared_from_this(),
+            this,
             std::placeholders::_1,
             std::placeholders::_2)
     );
@@ -33,7 +33,7 @@ void WebsocketSession::disconnect()
     m_websocket.async_close(websocket::close_code::normal,
         std::bind(
             &WebsocketSession::onDisconnectFinished,
-            shared_from_this(),
+            this,
             std::placeholders::_1)
                             );
 }
@@ -44,7 +44,7 @@ void WebsocketSession::write(std::string& message)
         boost::asio::buffer(message),
         std::bind(
             &WebsocketSession::onWriteFinished,
-            shared_from_this(),
+            this,
             std::placeholders::_1)
     );
 }
@@ -76,7 +76,7 @@ WebsocketSession::onResolveFinished(errorCode ec,
         result,
         std::bind(
             &WebsocketSession::onConnectFinished,
-            shared_from_this(),
+            this,
             std::placeholders::_1)
     );
 }
@@ -92,7 +92,7 @@ WebsocketSession::onConnectFinished(errorCode ec)
 //        ssl::stream_base::client,
 //        std::bind(
 //            &WebsocketSession::onSslHandshakeFinished,
-//            shared_from_this(),
+//            this,
 //            std::placeholders::_1)
 //    );
 
@@ -121,7 +121,7 @@ WebsocketSession::onSslHandshakeFinished(errorCode ec)
         fakeChannel,
         std::bind(
             &WebsocketSession::onWebsocketHandshakeFinished,
-            shared_from_this(),
+            this,
             std::placeholders::_1)
     );
 }
@@ -135,7 +135,7 @@ WebsocketSession::onWebsocketHandshakeFinished(WebsocketSession::errorCode ec)
         m_readBuffer,
         std::bind(
             &WebsocketSession::onReadFinished,
-            shared_from_this(),
+            this,
             std::placeholders::_1)
     );
 }
@@ -152,7 +152,7 @@ WebsocketSession::onReadFinished(WebsocketSession::errorCode ec)
         m_readBuffer,
         std::bind(
             &WebsocketSession::onReadFinished,
-            shared_from_this(),
+            this,
             std::placeholders::_1)
     );
 }
