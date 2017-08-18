@@ -109,8 +109,8 @@ WebsocketSession::onConnectFinished(errorCode ec)
         reconnectRequired();
     }
 
-//    // SSL handshake
-    // TODO: use SSL
+// TODO: use SSL
+// SSL handshake
 //    m_websocket.next_layer().async_handshake(
 //        ssl::stream_base::client,
 //        std::bind(
