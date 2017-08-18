@@ -16,7 +16,8 @@ WebsocketSession::WebsocketSession(boost::asio::io_service &ioService) :
     loadCertificate(m_sslContext);
 }
 
-void WebsocketSession::connect()
+void
+WebsocketSession::connect()
 {
     m_resolver.async_resolve(
         {kServerHostname, kServerPort},
@@ -28,7 +29,8 @@ void WebsocketSession::connect()
     );
 }
 
-void WebsocketSession::disconnect()
+void
+WebsocketSession::disconnect()
 {
 
     m_websocket.async_close(websocket::close_code::normal,
@@ -39,7 +41,8 @@ void WebsocketSession::disconnect()
     );
 }
 
-void WebsocketSession::reconnect(long waitSec)
+void
+WebsocketSession::reconnect(long waitSec)
 {
     if (m_connected) {
         m_websocket.close(websocket::close_code::normal);
@@ -56,7 +59,8 @@ void WebsocketSession::reconnect(long waitSec)
     }
 }
 
-void WebsocketSession::write(std::string& message)
+void
+WebsocketSession::write(std::string& message)
 {
     m_websocket.async_write(
         boost::asio::buffer(message),
