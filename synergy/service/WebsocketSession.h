@@ -27,6 +27,7 @@ public:
     using signal = boost::signals2::signal<Args...>;
     signal<void()> reconnectRequired;
     signal<void()> disconnected;
+    signal<void(std::string const&)> messageReceived;
 
 private:
     typedef boost::system::error_code errorCode;

@@ -182,9 +182,16 @@ WebsocketSession::onWebsocketHandshakeFinished(WebsocketSession::errorCode ec)
 void
 WebsocketSession::onReadFinished(WebsocketSession::errorCode ec)
 {
-    checkError(ec);
+    if (checkError(ec)) {
+        return;
+    }
 
-    // TODO: pass message to process manager
+    std::ostringstream stream;
+    stream << boost::beast::buffers(m_readBuffer.data());
+    std::string message =  stream.str();
+    messageReceived(std::move(message));
+
+    m_readBuffer.consume(m_readBuffer.size());
 
     // keep reading
     m_websocket.async_read(
