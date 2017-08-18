@@ -26,6 +26,7 @@ public:
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
     signal<void()> reconnectRequired;
+    signal<void()> disconnected;
 
 private:
     typedef boost::system::error_code errorCode;

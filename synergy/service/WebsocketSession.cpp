@@ -130,7 +130,10 @@ WebsocketSession::onConnectFinished(errorCode ec)
 void
 WebsocketSession::onDisconnectFinished(errorCode ec)
 {
-    // TODO: closed notify whoever is interested
+    checkError(ec);
+
+    m_connected = false;
+    disconnected();
 }
 
 void
