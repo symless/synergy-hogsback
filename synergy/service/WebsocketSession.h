@@ -5,6 +5,8 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
 #include <boost/beast/websocket/ssl.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/signals2.hpp>
 
 using tcp = boost::asio::ip::tcp;
 namespace ssl = boost::asio::ssl;
@@ -17,12 +19,18 @@ public:
 
     void connect();
     void disconnect();
+    void reconnect(long waitSec = 0);
     void write(std::string& message);
+
+public:
+    template <typename... Args>
+    using signal = boost::signals2::signal<Args...>;
+    signal<void()> reconnectRequired;
 
 private:
     typedef boost::system::error_code errorCode;
     void loadCertificate(boost::asio::ssl::context& ctx);
-    void checkError(errorCode ec);
+    bool checkError(errorCode ec);
     void onResolveFinished(errorCode ec,
                         tcp::resolver::iterator result);
     void onConnectFinished(errorCode ec);
@@ -38,6 +46,7 @@ private:
     websocket::stream<tcp::socket> m_websocket;
     tcp::resolver m_resolver;
     boost::beast::multi_buffer m_readBuffer;
+    boost::asio::deadline_timer m_reconnectTimer;
     bool m_connected;
 };
 

@@ -10,6 +10,7 @@ WebsocketSession::WebsocketSession(boost::asio::io_service &ioService) :
     m_sslContext(ssl::context::sslv3_client),
     m_websocket(ioService),
     m_resolver(ioService),
+    m_reconnectTimer(ioService),
     m_connected(false)
 {
     loadCertificate(m_sslContext);
@@ -35,7 +36,24 @@ void WebsocketSession::disconnect()
             &WebsocketSession::onDisconnectFinished,
             this,
             std::placeholders::_1)
-                            );
+    );
+}
+
+void WebsocketSession::reconnect(long waitSec)
+{
+    if (m_connected) {
+        m_websocket.close(websocket::close_code::normal);
+        m_connected = false;
+    }
+
+    if (waitSec > 0) {
+        m_reconnectTimer.cancel();
+        m_reconnectTimer.expires_from_now(boost::posix_time::seconds(waitSec));
+
+        m_reconnectTimer.async_wait([this](const boost::system::error_code&) {
+            connect();
+        });
+    }
 }
 
 void WebsocketSession::write(std::string& message)
@@ -55,21 +73,24 @@ WebsocketSession::loadCertificate(ssl::context &ctx)
     // TODO: server certificate management
 }
 
-void
+bool
 WebsocketSession::checkError(errorCode ec)
 {
     if (ec) {
-        // TODO: handle failure
+       // TODO: use logging subsystem
        std::cout << ec << std::endl;
-       return;
     }
+
+    return ec;
 }
 
 void
 WebsocketSession::onResolveFinished(errorCode ec,
                                   tcp::resolver::iterator result)
 {
-    checkError(ec);
+    if (checkError(ec)) {
+        reconnectRequired();
+    }
 
     boost::asio::async_connect(
         m_websocket.next_layer(),
@@ -84,7 +105,9 @@ WebsocketSession::onResolveFinished(errorCode ec,
 void
 WebsocketSession::onConnectFinished(errorCode ec)
 {
-    checkError(ec);
+    if (checkError(ec)) {
+        reconnectRequired();
+    }
 
 //    // SSL handshake
     // TODO: use SSL
@@ -109,7 +132,9 @@ WebsocketSession::onDisconnectFinished(errorCode ec)
 void
 WebsocketSession::onSslHandshakeFinished(errorCode ec)
 {
-    checkError(ec);
+    if (checkError(ec)) {
+        reconnectRequired();
+    }
 
     // TODO: get user ID as the unique pubsub channel
     // TODO: put user token into websocket request header
@@ -132,6 +157,10 @@ WebsocketSession::onSslHandshakeFinished(errorCode ec)
 void
 WebsocketSession::onWebsocketHandshakeFinished(WebsocketSession::errorCode ec)
 {
+    if (checkError(ec)) {
+        reconnectRequired();
+    }
+
     m_connected = true;
 
     m_websocket.async_read(
