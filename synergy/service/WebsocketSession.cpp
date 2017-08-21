@@ -125,6 +125,7 @@ WebsocketSession::onReadFinished(errorCode ec)
     std::string message =  stream.str();
     messageReceived(std::move(message));
 
+    // TODO: pass message to process manager
     m_readBuffer.consume(m_readBuffer.size());
 
     // keep reading
