@@ -6,6 +6,7 @@ set (SERVICE_SOURCES
     ProcessManager.cpp
     ServiceWorker.cpp
     CloudClient.cpp
+    SecuredTcpSession.cpp
     HttpSession.cpp
     WebsocketSession.cpp
     TerminationSignalListener.cpp

@@ -2,37 +2,37 @@
 
 #include <boost/asio/connect.hpp>
 
-static const char* kServerHostname = "192.168.3.93";
-static const char* kServerPort = "80";
+static const long kReconnectDelaySec = 3;
 
-WebsocketSession::WebsocketSession(boost::asio::io_service &ioService) :
-    m_ioService(ioService),
-    m_sslContext(ssl::context::sslv3_client),
-    m_websocket(ioService),
-    m_resolver(ioService),
+WebsocketSession::WebsocketSession(
+        boost::asio::io_service &ioService,
+        std::string hostname,
+        std::string port) :
     m_reconnectTimer(ioService),
+    m_session(ioService),
+    m_websocket(m_session.stream()),
     m_connected(false)
 {
-    loadCertificate(m_sslContext);
+    m_session.setHostname(hostname);
+    m_session.setPort(port);
 }
 
 void
 WebsocketSession::connect()
 {
-    m_resolver.async_resolve(
-        {kServerHostname, kServerPort},
-        std::bind(
-            &WebsocketSession::onResolveFinished,
-            this,
-            std::placeholders::_1,
-            std::placeholders::_2)
+    m_session.connected.connect(
+        [this]() {
+            onSessionConnected();
+        },
+        boost::signals2::at_front
     );
+
+    m_session.connect();
 }
 
 void
 WebsocketSession::disconnect()
 {
-
     m_websocket.async_close(websocket::close_code::normal,
         std::bind(
             &WebsocketSession::onDisconnectFinished,
@@ -42,106 +42,39 @@ WebsocketSession::disconnect()
 }
 
 void
-WebsocketSession::reconnect(long waitSec)
+WebsocketSession::reconnect()
 {
     if (m_connected) {
         m_websocket.close(websocket::close_code::normal);
         m_connected = false;
     }
 
-    if (waitSec > 0) {
-        m_reconnectTimer.cancel();
-        m_reconnectTimer.expires_from_now(boost::posix_time::seconds(waitSec));
+    m_reconnectTimer.cancel();
+    m_reconnectTimer.expires_from_now(boost::posix_time::seconds(kReconnectDelaySec));
 
-        m_reconnectTimer.async_wait([this](const boost::system::error_code&) {
-            connect();
-        });
-    }
+    m_reconnectTimer.async_wait([this](const boost::system::error_code&) {
+        connect();
+    });
+
 }
 
 void
 WebsocketSession::write(std::string& message)
 {
-    m_websocket.async_write(
-        boost::asio::buffer(message),
-        std::bind(
-            &WebsocketSession::onWriteFinished,
-            this,
-            std::placeholders::_1)
-    );
-}
-
-void
-WebsocketSession::loadCertificate(ssl::context &ctx)
-{
-    // TODO: server certificate management
-}
-
-bool
-WebsocketSession::checkError(errorCode ec)
-{
-    if (ec) {
-       // TODO: use logging subsystem
-       std::cout << ec << std::endl;
+    if (m_connected) {
+        m_websocket.async_write(
+            boost::asio::buffer(message),
+            std::bind(
+                &WebsocketSession::onWriteFinished,
+                this,
+                std::placeholders::_1)
+        );
     }
-
-    return ec;
 }
 
 void
-WebsocketSession::onResolveFinished(errorCode ec,
-                                  tcp::resolver::iterator result)
+WebsocketSession::onSessionConnected()
 {
-    if (checkError(ec)) {
-        reconnectRequired();
-    }
-
-    boost::asio::async_connect(
-        m_websocket.next_layer(),
-        result,
-        std::bind(
-            &WebsocketSession::onConnectFinished,
-            this,
-            std::placeholders::_1)
-    );
-}
-
-void
-WebsocketSession::onConnectFinished(errorCode ec)
-{
-    if (checkError(ec)) {
-        reconnectRequired();
-    }
-
-// TODO: use SSL
-// SSL handshake
-//    m_websocket.next_layer().async_handshake(
-//        ssl::stream_base::client,
-//        std::bind(
-//            &WebsocketSession::onSslHandshakeFinished,
-//            this,
-//            std::placeholders::_1)
-//    );
-
-    onSslHandshakeFinished(ec);
-
-}
-
-void
-WebsocketSession::onDisconnectFinished(errorCode ec)
-{
-    checkError(ec);
-
-    m_connected = false;
-    disconnected();
-}
-
-void
-WebsocketSession::onSslHandshakeFinished(errorCode ec)
-{
-    if (checkError(ec)) {
-        reconnectRequired();
-    }
 
     // TODO: get user ID as the unique pubsub channel
     // TODO: put user token into websocket request header
@@ -149,7 +82,7 @@ WebsocketSession::onSslHandshakeFinished(errorCode ec)
 
     // websocket handshake
     m_websocket.async_handshake_ex(
-        kServerHostname,
+        m_session.hostname().c_str(),
         fakeChannel,
         [](boost::beast::websocket::request_type & req) {
             req.set("X-Auth-Token", "Test-Token");
@@ -162,10 +95,11 @@ WebsocketSession::onSslHandshakeFinished(errorCode ec)
 }
 
 void
-WebsocketSession::onWebsocketHandshakeFinished(WebsocketSession::errorCode ec)
+WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
 {
-    if (checkError(ec)) {
-        reconnectRequired();
+    if (m_session.checkError(ec)) {
+        reconnect();
+        return;
     }
 
     m_connected = true;
@@ -180,9 +114,9 @@ WebsocketSession::onWebsocketHandshakeFinished(WebsocketSession::errorCode ec)
 }
 
 void
-WebsocketSession::onReadFinished(WebsocketSession::errorCode ec)
+WebsocketSession::onReadFinished(errorCode ec)
 {
-    if (checkError(ec)) {
+    if (m_session.checkError(ec)) {
         return;
     }
 
@@ -204,7 +138,16 @@ WebsocketSession::onReadFinished(WebsocketSession::errorCode ec)
 }
 
 void
-WebsocketSession::onWriteFinished(WebsocketSession::errorCode ec)
+WebsocketSession::onWriteFinished(errorCode ec)
 {
-    checkError(ec);
+    m_session.checkError(ec);
+}
+
+void
+WebsocketSession::onDisconnectFinished(errorCode ec)
+{
+    m_session.checkError(ec);
+
+    m_connected = false;
+    disconnected();
 }
