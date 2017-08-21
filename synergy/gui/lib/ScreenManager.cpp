@@ -295,7 +295,7 @@ void ScreenManager::onUpdateProfileConfig()
     profileObject.insert ("name", "default");
 
     QJsonArray screenArray;
-    ;
+
     for (Screen& s : m_screenListModel->getScreenList()) {
         QJsonObject screenObject;
         screenObject.insert("id", s.id());
