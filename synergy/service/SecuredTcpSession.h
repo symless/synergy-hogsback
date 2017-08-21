@@ -37,12 +37,11 @@ private:
     void onConnectFinished(errorCode ec);
     void onSslHandshakeFinished(errorCode ec);
 
-protected:
+private:
     boost::asio::io_service& m_ioService;
     boost::asio::ssl::context m_sslContext;
     ssl::stream<tcp::socket> m_stream;
     tcp::resolver m_resolver;
-    tcp::resolver::iterator m_resolveResult;
     std::string m_hostname;
     std::string m_port;
 };
