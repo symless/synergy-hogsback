@@ -2,6 +2,7 @@
 
 #include "AppConfig.h"
 #include "DirectoryManager.h"
+#include "DebugLevelUtil.h"
 #include "Common.h"
 
 #include <QHostInfo>

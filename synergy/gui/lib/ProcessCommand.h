@@ -2,7 +2,6 @@
 #define PROCESSCOMMAND_H
 
 #include "LibMacro.h"
-#include "DebugLevel.h"
 
 #include <QObject>
 

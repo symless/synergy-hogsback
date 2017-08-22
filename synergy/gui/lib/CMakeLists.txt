@@ -12,7 +12,7 @@ set (GUI_LIB_SOURCES
     ConfigFileManager.cpp
     ConnectivityTester.cpp
     CoreInterface.cpp
-    DebugLevel.cpp
+    DebugLevelUtil.cpp
     DirectoryManager.cpp
     FontManager.cpp
     Hostname.cpp

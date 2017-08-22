@@ -2,7 +2,7 @@
 #define APPCONFIGURATION_H
 
 #include "LibMacro.h"
-#include "DebugLevel.h"
+#include "DebugLevelUtil.h"
 
 #include <QObject>
 #include <QQmlEngine>

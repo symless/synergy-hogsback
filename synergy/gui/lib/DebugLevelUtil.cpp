@@ -1,4 +1,4 @@
-#include "DebugLevel.h"
+#include "DebugLevelUtil.h"
 
 QString debugLevelToStr(DebugLevel value)
 {
