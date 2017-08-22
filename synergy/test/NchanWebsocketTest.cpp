@@ -36,7 +36,7 @@ TEST_CASE("Nchan Websocket connections", "[Websocket]")
     );
 
     subWebsocket.messageReceived.connect(
-        [&subResult](std::string& msg) {
+        [&subResult](std::string msg) {
             subResult = std::move(msg);
             testFinished();
         },

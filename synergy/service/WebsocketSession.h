@@ -27,7 +27,7 @@ public:
 
     signal<void()> connected;
     signal<void()> disconnected;
-    signal<void(std::string&)> messageReceived;
+    signal<void(std::string)> messageReceived;
 
 private:
     void onSessionConnected();
