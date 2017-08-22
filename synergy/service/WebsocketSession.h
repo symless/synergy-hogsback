@@ -14,7 +14,7 @@ namespace ssl = boost::asio::ssl;
 class WebsocketSession final
 {
 public:
-    WebsocketSession(boost::asio::io_service& ioService, std::string hostname, std::string port);
+    WebsocketSession(boost::asio::io_service& ioService, const std::string& hostname, const std::string &target, const std::string& port);
 
     void connect();
     void disconnect();
@@ -25,8 +25,9 @@ public:
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
 
+    signal<void()> connected;
     signal<void()> disconnected;
-    signal<void(std::string const&)> messageReceived;
+    signal<void(std::string&)> messageReceived;
 
 private:
     void onSessionConnected();
@@ -42,6 +43,7 @@ private:
     boost::asio::deadline_timer m_reconnectTimer;
     SecuredTcpSession m_session;
     websocket::stream<ssl::stream<tcp::socket>&> m_websocket;
+    const std::string m_target;
     bool m_connected;
 };
 

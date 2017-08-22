@@ -8,7 +8,8 @@ static const char* kCloudServerPort = "80";
 CloudClient::CloudClient(boost::asio::io_service& ioService) :
     m_ioService(ioService),
     m_httpSession(ioService, kCloudServerHostname, kCloudServerPort),
-    m_websocket(ioService, kPubSubServerHostname, kPubSubServerPort)
+    // TODO: get user ID as the unique pubsub channel
+    m_websocket(ioService, kPubSubServerHostname, "/pubsub/auth/1", kPubSubServerPort)
 {
     init();
 }

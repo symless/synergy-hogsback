@@ -10,9 +10,9 @@
 #include <vector>
 
 boost::signals2::signal<void()> serverReady;
-boost::signals2::signal<void()> testFinished;
+static boost::signals2::signal<void()> testFinished;
 std::vector<std::string> testCommand;
-bool timeout;
+static bool timeout;
 
 void startTest(std::vector<std::string> cmd)
 {

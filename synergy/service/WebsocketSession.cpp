@@ -4,13 +4,14 @@
 
 static const long kReconnectDelaySec = 3;
 
-WebsocketSession::WebsocketSession(
-        boost::asio::io_service &ioService,
-        std::string hostname,
-        std::string port) :
+WebsocketSession::WebsocketSession(boost::asio::io_service &ioService,
+        const std::string& hostname,
+        const std::string& target,
+        const std::string& port) :
     m_reconnectTimer(ioService),
     m_session(ioService),
     m_websocket(m_session.stream()),
+    m_target(target),
     m_connected(false)
 {
     m_session.setHostname(hostname);
@@ -75,15 +76,12 @@ WebsocketSession::write(std::string& message)
 void
 WebsocketSession::onSessionConnected()
 {
-
-    // TODO: get user ID as the unique pubsub channel
     // TODO: put user token into websocket request header
-    const char* fakeChannel = "/pubsub/auth/1";
 
     // websocket handshake
     m_websocket.async_handshake_ex(
         m_session.hostname().c_str(),
-        fakeChannel,
+        m_target.c_str(),
         [](boost::beast::websocket::request_type & req) {
             req.set("X-Auth-Token", "Test-Token");
         },
@@ -103,6 +101,7 @@ WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
     }
 
     m_connected = true;
+    connected();
 
     m_websocket.async_read(
         m_readBuffer,
