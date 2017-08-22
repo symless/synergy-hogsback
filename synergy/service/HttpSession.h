@@ -14,16 +14,18 @@ public:
     HttpSession(boost::asio::io_service& ioService, std::string hostname, std::string port);
 
     void get(const std::string& target);
+    void post(const std::string& target, const std::string &body);
 
 private:
+    void connect();
     void onSessionConnected();
-    void setupRequest(http::verb method, const std::string &target);
+    void setupRequest(http::verb method, const std::string &target, const std::string &body = "");
     void onWriteFinished(errorCode ec);
 
 private:
     SecuredTcpSession m_session;
     ssl::stream<tcp::socket>& m_stream;
-    http::request<http::empty_body> m_request;
+    http::request<http::string_body> m_request;
     http::response<http::string_body> m_response;
 };
 

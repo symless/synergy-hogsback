@@ -16,6 +16,18 @@ void HttpSession::get(const std::string &target)
 {
     setupRequest(http::verb::get, target);
 
+    connect();
+}
+
+void HttpSession::post(const std::string &target, const std::string &body)
+{
+    setupRequest(http::verb::post, target, body);
+
+    connect();
+}
+
+void HttpSession::connect()
+{
     m_session.connected.connect(
         [this]() {
             onSessionConnected();
@@ -35,12 +47,18 @@ void HttpSession::onSessionConnected()
             std::placeholders::_1));
 }
 
-void HttpSession::setupRequest(http::verb method, const std::string &target)
+void HttpSession::setupRequest(http::verb method, const std::string &target, const std::string &body)
 {
     m_request.version = kHttpVersion;
     m_request.method(method);
     m_request.target(target);
     m_request.set(http::field::host, m_session.hostname().c_str());
+
+    if (!body.empty()) {
+        m_request.set(http::field::content_type, "application/json");
+        m_request.body = body.c_str();
+    }
+
     // TODO: add user token
 }
 
