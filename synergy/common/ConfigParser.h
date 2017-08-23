@@ -17,6 +17,7 @@ public:
     static ConfigParser parse_memory (char const* buf, size_t size);
     static ConfigParser parse_c_str (char const* const str);
     ConfigParser get_section (char const*) const;
+    bool isValid() const;
 
     template <typename T>
     T
@@ -26,13 +27,13 @@ public:
     }
 
     template <typename T>
-    value_type
+    T
     get_value_or (char const* const key, T&& init) const {
         auto const ptr = get_value_ptr (key);
         if (!ptr) {
-            return value_type (std::forward<T> (init));
+            return std::forward<T> (init);
         }
-        return get_value_of (ptr);
+        return boost::get<T> (get_value_of (ptr));
     }
 
 private:

@@ -1,12 +1,35 @@
 #include "UserConfig.h"
 
+#include "ConfigParser.h"
 #include "DirectoryManager.h"
 
+#include <boost/filesystem.hpp>
+#include <cpptoml.h>
+#include <iostream>
+#include <fstream>
+
 const char* kUserConfigFilename = "synergy-user.cfg";
+
+UserConfig::
+UserConfig(std::string filename) :
+    m_altFilename(std::move(filename)),
+    m_debugLevel(kInfo),
+    m_userToken(""),
+    m_userId(-1),
+    m_profileId(-1),
+    m_screenId(-1),
+    m_dragAndDrop(false)
+{
+    load();
+}
 
 std::string
 UserConfig::filename()
 {
+    if (!m_altFilename.empty()) {
+        return m_altFilename;
+    }
+
     boost::filesystem::path dir(DirectoryManager::instance()->profileDir());
     boost::filesystem::path file(kUserConfigFilename);
     boost::filesystem::path filename = dir / file;
@@ -15,10 +38,120 @@ UserConfig::filename()
 
 void UserConfig::load()
 {
+    if (persistFilename()) {
+        return;
+    }
 
+    ConfigParser parser = ConfigParser::parse_file(filename());
+
+    auto authConfig = parser.get_section("auth");
+    if (authConfig.isValid()) {
+        m_userId = authConfig.get_value<int64_t>("user-id");
+        m_userToken = authConfig.get_value<std::string>("user-token");
+    }
+
+    auto profileConfig = parser.get_section("profile");
+    if (profileConfig.isValid()) {
+
+        m_profileId = profileConfig.get_value<int64_t>("profile-id");
+        m_screenId = profileConfig.get_value<int64_t>("screen-id");
+        m_dragAndDrop = profileConfig.get_value<bool>("drag-and-drop");
+        m_debugLevel = (DebugLevel)profileConfig.get_value<int64_t>("debug-level");
+    }
 }
 
 void UserConfig::save()
 {
+    std::shared_ptr<cpptoml::table> root = cpptoml::make_table();
 
+    auto authTable = cpptoml::make_table();
+    authTable->insert("user-id", m_userId);
+    authTable->insert("user-token", m_userToken);
+
+    auto profileTable = cpptoml::make_table();
+    profileTable->insert("profile-id", m_profileId);
+    profileTable->insert("screen-id", m_screenId);
+    profileTable->insert("drag-and-drop", m_dragAndDrop);
+    profileTable->insert("debug-level", (int)m_debugLevel);
+
+    root->insert("auth", authTable);
+    root->insert("profile", profileTable);
+
+    std::ofstream file;
+    file.open(filename());
+    file << *root;
+    file.close();
+}
+
+DebugLevel UserConfig::debugLevel() const
+{
+    return m_debugLevel;
+}
+
+void UserConfig::setDebugLevel(const DebugLevel &debugLevel)
+{
+    m_debugLevel = debugLevel;
+}
+
+std::string UserConfig::userToken() const
+{
+    return m_userToken;
+}
+
+void UserConfig::setUserToken(const std::string &userToken)
+{
+    m_userToken = userToken;
+}
+
+int64_t UserConfig::userId() const
+{
+    return m_userId;
+}
+
+void UserConfig::setUserId(const int64_t &userId)
+{
+    m_userId = userId;
+}
+
+int64_t UserConfig::profileId() const
+{
+    return m_profileId;
+}
+
+void UserConfig::setProfileId(const int64_t &profileId)
+{
+    m_profileId = profileId;
+}
+
+int64_t UserConfig::screenId() const
+{
+    return m_screenId;
+}
+
+void UserConfig::setScreenId(const int64_t &screenId)
+{
+    m_screenId = screenId;
+}
+
+bool UserConfig::dragAndDrop() const
+{
+    return m_dragAndDrop;
+}
+
+void UserConfig::setDragAndDrop(bool dragAndDrop)
+{
+    m_dragAndDrop = dragAndDrop;
+}
+
+bool UserConfig::persistFilename()
+{
+    if (!boost::filesystem::exists(filename())) {
+        std::ofstream file;
+        file.open(filename());
+        file.close();
+
+        return true;
+    }
+
+    return false;
 }

@@ -77,6 +77,11 @@ ConfigParser::parse_c_str (const char* const str) {
     return parse_memory (str, std::strlen (str));
 }
 
+bool ConfigParser::isValid() const
+{
+    return impl_ ? true : false;
+}
+
 ConfigParser
 ConfigParser::get_section (const char* const key) const {
     ConfigParser config;
