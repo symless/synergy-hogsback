@@ -1,7 +1,6 @@
 #include <synergy/common/CrashHandler.h>
 #include <synergy/service/ServiceWorker.h>
 #include <synergy/service/TerminationSignalListener.h>
-#include "synergy/service/CloudClient.h"
 
 #include <boost/asio/io_service.hpp>
 #include <cstdlib>
@@ -15,8 +14,6 @@ main (int argc, char* argv[]) try {
     crashHandlerIsInstalled = startCrashHandler();
 
     boost::asio::io_service ioService;
-
-    CloudClient cloudClient(ioService);
 
     ServiceWorker serviceWorker(ioService);
 
