@@ -145,9 +145,11 @@ void UserConfig::setDragAndDrop(bool dragAndDrop)
 
 bool UserConfig::persistFilename()
 {
+    boost::filesystem::path dir(DirectoryManager::instance()->profileDir());
+    boost::filesystem::create_directories(dir);
     if (!boost::filesystem::exists(filename())) {
-        std::ofstream file;
-        file.open(filename());
+        std::fstream file;
+        file.open(filename(), std::ios::out | std::ios::app);
         file.close();
 
         return true;
