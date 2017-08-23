@@ -35,6 +35,10 @@ include_directories (
 add_library (commonlib ${COMMON_LIB_SOURCES})
 target_link_libraries(commonlib bonefish)
 
+if (WIN32)
+    target_link_libraries (commonlib Wtsapi32)
+endif()
+
 if (SYNERGY_CRASHPAD)
     if (WIN32)
         target_link_libraries (commonlib ws2_32 rpcrt4 iphlpapi)
