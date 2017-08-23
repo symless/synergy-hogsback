@@ -16,7 +16,9 @@ public:
     void shutdown();
 
 private:
+    void provideRpcEndpoints();
     void provideCore();
+    void provideAuthUpdate();
     boost::asio::io_service& m_ioService;
     std::unique_ptr<RpcManager> m_rpcManager;
     std::unique_ptr<ProcessManager> m_processManager;

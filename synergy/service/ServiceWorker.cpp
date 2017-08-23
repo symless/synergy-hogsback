@@ -14,7 +14,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
     m_processManager (std::make_unique<ProcessManager>(m_ioService)),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService))
 {
-    m_rpcManager->ready.connect([this]() { provideCore(); });
+    m_rpcManager->ready.connect([this]() { provideRpcEndpoints(); });
     m_rpcManager->start();
 }
 
@@ -62,6 +62,16 @@ ServiceWorker::provideCore()
     );
 }
 
+void ServiceWorker::provideAuthUpdate()
+{
+    auto server = m_rpcManager->server();
+
+    server->provide ("synergy.auth.update",
+                     [this](int userId, int screenId, std::string userToken) {
+        std::string test = userToken;
+    });
+}
+
 void ServiceWorker::shutdown()
 {
     m_processManager->shutdown();
@@ -71,4 +81,10 @@ void ServiceWorker::shutdown()
     // Finish processing all of the remaining completion handlers
     m_ioService.poll();
     m_ioService.stop();
+}
+
+void ServiceWorker::provideRpcEndpoints()
+{
+    provideCore();
+    provideAuthUpdate();
 }

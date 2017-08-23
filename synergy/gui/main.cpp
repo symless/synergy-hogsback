@@ -79,16 +79,6 @@ main(int argc, char* argv[])
         }
     );
 
-    WampClient wampClient (io);
-    std::thread rpcThread ([&]{
-        wampClient.start ("127.0.0.1", 24888);
-        io.run ();
-    });
-
-    ProcessManager processManager (wampClient);
-    ConnectivityTester tester;
-    processManager.setConnectivityTester(&tester);
-
     qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");
     qmlRegisterType<ScreenListModel>("com.synergy.gui", 1, 0, "ScreenListModel");
     qmlRegisterType<ScreenManager>("com.synergy.gui", 1, 0, "ScreenManager");
@@ -106,8 +96,27 @@ main(int argc, char* argv[])
     LogManager::setQmlContext(engine.rootContext());
     LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
 
-#ifndef SYNERGY_DEVELOPER_MODE
+    // TODO: refactor main function
+    WampClient wampClient (io);
+    std::thread rpcThread ([&]{
+        wampClient.start ("127.0.0.1", 24888);
+        io.run ();
+    });
+
     CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
+    QObject::connect(cloudClient, &CloudClient::loginOk, [&wampClient](){
+        AppConfig* appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
+        wampClient.call<void> ("synergy.auth.update",
+                               appConfig->userId(),
+                               appConfig->screenId(),
+                               appConfig->userToken().toStdString());
+    });
+
+    ProcessManager processManager (wampClient);
+    ConnectivityTester tester;
+    processManager.setConnectivityTester(&tester);
+
+#ifndef SYNERGY_DEVELOPER_MODE
     cloudClient->checkUpdate();
 #endif
 
