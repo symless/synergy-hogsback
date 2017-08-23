@@ -21,7 +21,6 @@ public:
     explicit CloudClient(QObject* parent = 0);
     ~CloudClient();
 
-    Q_INVOKABLE void login(QString email, QString password);
     Q_INVOKABLE void getUserToken();
     Q_INVOKABLE bool verifyUser();
     Q_INVOKABLE void getUserId(bool initialCall = true);
@@ -50,7 +49,6 @@ signals:
     void invalidAuth();
 
 private slots:
-    void onLoginFinished(QNetworkReply* reply);
     void onGetIdentifyFinished(QNetworkReply* reply);
     void onGetUserIdFinished(QNetworkReply* reply);
     void onGetScreensFinished(QNetworkReply* reply);

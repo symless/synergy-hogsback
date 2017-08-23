@@ -29,7 +29,6 @@
 static const char kUserProfilesUrl[] = SYNERGY_CLOUD_URI "/user/profiles"; // TODO: change to /user/%1/profiles
 static const char kSwitchProfileUrl[] = SYNERGY_CLOUD_URI "/profile/switch"; // TODO: change to POST to /user/%1/screens
 static const char kUnsubProfileUrl[] = SYNERGY_CLOUD_URI "/profile/unsub"; // TODO: change to DELETE /profile/%1/screen/%2
-static const char kLoginUrl[] = SYNERGY_CLOUD_URI "/login";
 static const char kIdentifyUrl[] = SYNERGY_CLOUD_URI "/user/identify";
 static const char kProfileScreensUrl[] = SYNERGY_CLOUD_URI "/profile/%1/screens";
 static const char kUpdateProfileConfigUrl[] = SYNERGY_CLOUD_URI "/profile/update"; // TODO: change to PUT to /profile/%1
@@ -63,23 +62,6 @@ CloudClient::instance (QQmlEngine* engine, QJSEngine* scriptEngine)
     QQmlEngine::setObjectOwnership(&s_instance, QQmlEngine::CppOwnership);
 
     return &s_instance;
-}
-
-void CloudClient::login(QString email, QString password)
-{
-    QUrl cloudUrl = QUrl(kLoginUrl);
-    QNetworkRequest req(cloudUrl);
-    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
-
-    QJsonObject jsonObject;
-    jsonObject.insert("email", email);
-    jsonObject.insert("password", password);
-    QJsonDocument doc(jsonObject);
-
-    auto reply = m_networkManager->post(req, doc.toJson());
-    connect (reply, &QNetworkReply::finished, [this, reply]() {
-        onLoginFinished (reply);
-    });
 }
 
 void CloudClient::getUserToken()
@@ -512,32 +494,6 @@ void CloudClient::updateProfileConfig(QJsonDocument& doc)
     connect (reply, &QNetworkReply::finished, [this, reply]{
         onUpdateProfileConfigFinished (reply);
     });
-}
-
-void CloudClient::onLoginFinished(QNetworkReply* reply)
-{
-    if (replyHasError(reply)) {
-        emit loginFail(reply->errorString());
-        return;
-    }
-
-    m_Data = reply->readAll();
-    reply->deleteLater();
-    QByteArray token = reply->rawHeader("X-Auth-Token");
-    m_appConfig->setUserToken(token);
-
-    QJsonDocument doc = QJsonDocument::fromJson(m_Data);
-    if (!doc.isNull()) {
-        if (doc.isObject()) {
-            QJsonObject obj = doc.object();
-            int id = obj["user"].toInt();
-            m_appConfig->setUserId(id);
-            emit loginOk();
-            return;
-        }
-    }
-
-    emit loginFail(reply->errorString());
 }
 
 void CloudClient::onGetIdentifyFinished(QNetworkReply *reply)
