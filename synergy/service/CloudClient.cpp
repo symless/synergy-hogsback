@@ -2,9 +2,8 @@
 
 #include <synergy/common/UserConfig.h>
 
-//static const char* kPubSubServerHostname = "165.227.29.181";
-static const char* kPubSubServerHostname = "192.168.3.93";
-static const char* kPubSubServerPort = "80";
+static const char* kPubSubServerHostname = "165.227.29.181";
+static const char* kPubSubServerPort = "8081";
 static const char* kSubTarget = "/sub/auth";
 static const char* kCloudServerHostname = "192.168.3.93";
 static const char* kCloudServerPort = "80";
