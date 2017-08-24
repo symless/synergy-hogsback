@@ -18,8 +18,6 @@ Rectangle {
         id: screenManager
         screenListModel: screenListModel
         processManager: applicationWindow.processManager
-        //viewWidth: screenArrangementScrollView.width
-        //viewHeight: screenArrangementScrollView.height
     }
 
     Connections {
