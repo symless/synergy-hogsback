@@ -100,7 +100,8 @@ main(int argc, char* argv[])
     WampClient wampClient (io);
 
     CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
-    QObject::connect(cloudClient, &CloudClient::loginOk, [&wampClient](){
+
+    QObject::connect(cloudClient, &CloudClient::profileUpdated, [&wampClient](){
         AppConfig* appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
         wampClient.call<void> ("synergy.auth.update",
                                appConfig->userId(),

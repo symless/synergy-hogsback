@@ -317,6 +317,7 @@ void CloudClient::onSwitchProfileFinished(QNetworkReply* reply)
     }
 
     syncConfig();
+    emit profileUpdated();
 }
 
 void CloudClient::userProfiles()
