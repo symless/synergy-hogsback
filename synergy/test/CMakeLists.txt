@@ -7,11 +7,13 @@ add_executable (${PROJECT_NAME}
     ${TEST_SOURCES}
     ../service/WebsocketSession.cpp
     ../service/SecuredTcpSession.cpp
+    ../service/ProfileSnapshot.cpp
 )
 
 target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
     ${CMAKE_SOURCE_DIR}/third_party/catch/include
     ${Boost_INCLUDE_DIRS}
+    ${fmt_INCLUDE_DIR}
 )
 
 target_compile_definitions (${PROJECT_NAME}
@@ -54,6 +56,7 @@ target_link_libraries (${PROJECT_NAME}
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
     ${OPENSSL_LIBS}
+    fmt
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
