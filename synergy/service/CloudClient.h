@@ -5,6 +5,7 @@
 #include "synergy/service/WebsocketSession.h"
 
 #include <boost/asio/io_service.hpp>
+#include <boost/signals2.hpp>
 #include <memory.h>
 
 class UserConfig;
@@ -15,6 +16,11 @@ public:
     CloudClient(boost::asio::io_service& ioService, std::shared_ptr<UserConfig> userConfig);
 
     void init();
+
+    template <typename... Args>
+    using signal = boost::signals2::signal<Args...>;
+
+    signal<void(std::string)> websocketMessageReceived;
 
 private:
     boost::asio::io_service& m_ioService;

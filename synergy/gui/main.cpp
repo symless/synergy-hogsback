@@ -98,10 +98,6 @@ main(int argc, char* argv[])
 
     // TODO: refactor main function
     WampClient wampClient (io);
-    std::thread rpcThread ([&]{
-        wampClient.start ("127.0.0.1", 24888);
-        io.run ();
-    });
 
     CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
     QObject::connect(cloudClient, &CloudClient::loginOk, [&wampClient](){
@@ -115,6 +111,18 @@ main(int argc, char* argv[])
     ProcessManager processManager (wampClient);
     ConnectivityTester tester;
     processManager.setConnectivityTester(&tester);
+
+    wampClient.connected.connect([&]() {
+        wampClient.subscribe ("synergy.profile.snapshot", [&](std::string json) {
+            QByteArray byteArray(json.c_str(), json.length());
+            cloudClient->receivedScreens(byteArray);
+        });
+    });
+
+    std::thread rpcThread ([&]{
+        wampClient.start ("127.0.0.1", 24888);
+        io.run ();
+    });
 
 #ifndef SYNERGY_DEVELOPER_MODE
     cloudClient->checkUpdate();

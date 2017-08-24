@@ -21,6 +21,11 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
     m_userConfig->load();
     m_cloudClient->init();
 
+    m_cloudClient->websocketMessageReceived.connect([this](std::string& json){
+        auto server = m_rpcManager->server();
+        server->publish ("synergy.profile.snapshot", std::move(json));
+    });
+
     m_rpcManager->ready.connect([this]() { provideRpcEndpoints(); });
     m_rpcManager->start();
 }
