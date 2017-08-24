@@ -135,7 +135,7 @@ WebsocketSession::onReadFinished(errorCode ec)
     messageReceived(std::move(message));
 
     // TODO: pass message to process manager
-    m_readBuffer.consume(m_readBuffer.size());
+    m_readBuffer = boost::beast::multi_buffer();
 
     // keep reading
     m_websocket.async_read(
