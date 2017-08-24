@@ -25,10 +25,7 @@ void CloudClient::init()
         m_websocket.addHeader("X-Channel-Id", std::to_string(profileId));
         m_websocket.addHeader("X-Auth-Token", m_userConfig->userToken());
 
-        if (m_websocket.isConnected()) {
-            m_websocket.reconnect();
-        }
-        else {
+        if (!m_websocket.isConnected()) {
             m_websocket.connect(kSubTarget);
         }
     }
