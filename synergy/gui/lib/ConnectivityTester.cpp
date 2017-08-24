@@ -30,8 +30,6 @@ ConnectivityTester::ConnectivityTester(QObject* parent) :
     m_cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
     connect(m_cloudClient, SIGNAL(receivedScreens(QByteArray)), this,
             SLOT(testNewScreens(QByteArray)));
-    connect(&m_timer, SIGNAL(timeout()), this, SLOT(pollScreens()));
-    m_timer.start(1000);
 }
 
 ConnectivityTester::~ConnectivityTester()
@@ -107,11 +105,6 @@ void ConnectivityTester::testNewScreens(QByteArray reply)
         // remove inactive screen id
         m_screenIdSet.intersect(latestScreenIdSet);
     }
-}
-
-void ConnectivityTester::pollScreens()
-{
-     m_cloudClient->getScreens();
 }
 
 void ConnectivityTester::onNewConnection()

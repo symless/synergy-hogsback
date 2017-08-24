@@ -6,7 +6,6 @@
 #include <QQuickItem>
 #include <QObject>
 
-#include <QTimer>
 #include <QSet>
 #include <QList>
 
@@ -28,14 +27,12 @@ signals:
 
 private slots:
     void testNewScreens(QByteArray reply);
-    void pollScreens();
     void onNewConnection();
     void onConnectionReadyRead();
     void onStartTesting();
     void onTestDelegateeDone(QMap<QString, bool> results);
 
 private:
-    QTimer m_timer;
     QSet<int> m_screenIdSet;
     QList<QString> m_pendingTestCases;
     QString m_localHostname;

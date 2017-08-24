@@ -30,7 +30,6 @@ static const char kUserProfilesUrl[] = SYNERGY_CLOUD_URI "/user/profiles"; // TO
 static const char kSwitchProfileUrl[] = SYNERGY_CLOUD_URI "/profile/switch"; // TODO: change to POST to /user/%1/screens
 static const char kUnsubProfileUrl[] = SYNERGY_CLOUD_URI "/profile/unsub"; // TODO: change to DELETE /profile/%1/screen/%2
 static const char kIdentifyUrl[] = SYNERGY_CLOUD_URI "/user/identify";
-static const char kProfileScreensUrl[] = SYNERGY_CLOUD_URI "/profile/%1/screens";
 static const char kUpdateProfileConfigUrl[] = SYNERGY_CLOUD_URI "/profile/update"; // TODO: change to PUT to /profile/%1
 static const char kReportUrl[] = SYNERGY_CLOUD_URI "/report"; // TODO: change to POST to /user/connectivity-reports
 static const char kClaimServerUrl[] = SYNERGY_CLOUD_URI "/profile/server/claim"; // TODO: change to POST to /profile/%1/server
@@ -320,23 +319,6 @@ void CloudClient::onSwitchProfileFinished(QNetworkReply* reply)
     syncConfig();
 }
 
-void CloudClient::getScreens()
-{
-    if (m_profileId < 0) {
-        LogManager::debug("retry get screens in 1 second");
-        return;
-    }
-
-    QUrl profileScreensUrl = QUrl(QString(kProfileScreensUrl).arg(QString::number(m_profileId)));
-    QNetworkRequest req(profileScreensUrl);
-    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
-
-    auto reply = m_networkManager->get(req);
-    connect (reply, &QNetworkReply::finished, [this, reply]{
-        onGetScreensFinished (reply);
-    });
-}
-
 void CloudClient::userProfiles()
 {
     if (m_appConfig->userToken().isEmpty()) {
@@ -536,16 +518,6 @@ void CloudClient::onGetUserIdFinished(QNetworkReply *reply)
         emit loginOk();
         m_elapsedTimer.stop();
     }
-}
-
-void CloudClient::onGetScreensFinished(QNetworkReply* reply)
-{
-    if (replyHasError(reply)) {
-        return;
-    }
-
-    reply->deleteLater();
-    emit receivedScreens (reply->readAll());
 }
 
 void CloudClient::onReplyError(QNetworkReply::NetworkError code)
