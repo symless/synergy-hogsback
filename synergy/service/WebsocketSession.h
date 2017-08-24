@@ -21,7 +21,7 @@ public:
     void disconnect();
     void reconnect();
     void write(std::string& message);
-    void addHeader(std::string headerName, std::string& headerContent);
+    void addHeader(std::string headerName, std::string headerContent);
     bool isConnected();
 
 public:

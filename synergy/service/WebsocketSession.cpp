@@ -73,7 +73,7 @@ WebsocketSession::write(std::string& message)
     }
 }
 
-void WebsocketSession::addHeader(std::string headerName, std::string &headerContent)
+void WebsocketSession::addHeader(std::string headerName, std::string headerContent)
 {
     m_headers[headerName] = headerContent;
 }

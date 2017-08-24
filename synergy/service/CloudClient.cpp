@@ -13,7 +13,7 @@ CloudClient::CloudClient(boost::asio::io_service& ioService, std::shared_ptr<Use
     m_userConfig(userConfig),
     m_websocket(ioService, kPubSubServerHostname, kPubSubServerPort)
 {
-    m_websocket.messageReceived.connect([this](std::string& msg) {
+    m_websocket.messageReceived.connect([this](std::string msg) {
         websocketMessageReceived(msg);
     });
 }
