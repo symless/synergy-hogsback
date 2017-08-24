@@ -443,7 +443,12 @@ void CloudClient::uploadLogFile(QString filename)
         onUploadLogFileFinished (reply);
     });
     connect(reply, SIGNAL(uploadProgress(qint64, qint64)),
-          this, SLOT  (onUploadProgress(qint64, qint64)));
+            this, SLOT  (onUploadProgress(qint64, qint64)));
+}
+
+void CloudClient::receivedScreensInterface(QByteArray msg)
+{
+    emit receivedScreens(msg);
 }
 
 void CloudClient::report(int destId, QString successfulIpList, QString failedIpList)

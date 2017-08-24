@@ -116,7 +116,7 @@ main(int argc, char* argv[])
     wampClient.connected.connect([&]() {
         wampClient.subscribe ("synergy.profile.snapshot", [&](std::string json) {
             QByteArray byteArray(json.c_str(), json.length());
-            cloudClient->receivedScreens(byteArray);
+            cloudClient->receivedScreensInterface(byteArray);
         });
     });
 

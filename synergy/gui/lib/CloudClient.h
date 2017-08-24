@@ -37,6 +37,7 @@ public:
     void claimServer();
     void updateScreen(const Screen& screen);
     void uploadLogFile(QString filename);
+    void receivedScreensInterface(QByteArray msg);
 
     static QObject* instance(QQmlEngine* engine = NULL, QJSEngine* scriptEngine = NULL);
 
