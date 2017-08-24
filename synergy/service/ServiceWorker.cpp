@@ -80,9 +80,10 @@ void ServiceWorker::provideAuthUpdate()
     auto server = m_rpcManager->server();
 
     server->provide ("synergy.auth.update",
-                     [this](int userId, int screenId, std::string userToken) {
+                     [this](int userId, int screenId, int profileId, std::string userToken) {
         m_userConfig->setUserId(userId);
         m_userConfig->setScreenId(screenId);
+        m_userConfig->setProfileId(profileId);
         m_userConfig->setUserToken(std::move(userToken));
         m_userConfig->save();
         m_cloudClient->init();

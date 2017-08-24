@@ -105,6 +105,7 @@ main(int argc, char* argv[])
         wampClient.call<void> ("synergy.auth.update",
                                appConfig->userId(),
                                appConfig->screenId(),
+                               appConfig->profileId(),
                                appConfig->userToken().toStdString());
     });
 

@@ -20,7 +20,7 @@ CloudClient::CloudClient(boost::asio::io_service& ioService, std::shared_ptr<Use
 
 void CloudClient::init()
 {
-    int64_t profileId = 1;//m_userConfig->profileId();
+    int64_t profileId = m_userConfig->profileId();
     if (profileId != -1) {
         m_websocket.addHeader("X-Channel-Id", std::to_string(profileId));
         m_websocket.addHeader("X-Auth-Token", m_userConfig->userToken());
