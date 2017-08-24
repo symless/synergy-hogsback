@@ -6,12 +6,11 @@ static const long kReconnectDelaySec = 3;
 
 WebsocketSession::WebsocketSession(boost::asio::io_service &ioService,
         const std::string& hostname,
-        const std::string& target,
         const std::string& port) :
     m_reconnectTimer(ioService),
     m_session(ioService),
     m_websocket(m_session.stream()),
-    m_target(target),
+    m_target(),
     m_connected(false)
 {
     m_session.setHostname(hostname);
@@ -19,8 +18,10 @@ WebsocketSession::WebsocketSession(boost::asio::io_service &ioService,
 }
 
 void
-WebsocketSession::connect()
+WebsocketSession::connect(const std::string target)
 {
+    m_target = target;
+
     m_session.connected.connect(
         [this]() {
             onSessionConnected();
@@ -54,9 +55,8 @@ WebsocketSession::reconnect()
     m_reconnectTimer.expires_from_now(boost::posix_time::seconds(kReconnectDelaySec));
 
     m_reconnectTimer.async_wait([this](const boost::system::error_code&) {
-        connect();
+        connect(m_target);
     });
-
 }
 
 void
@@ -73,17 +73,27 @@ WebsocketSession::write(std::string& message)
     }
 }
 
+void WebsocketSession::addHeader(std::string headerName, std::string &headerContent)
+{
+    m_headers[headerName] = headerContent;
+}
+
+bool WebsocketSession::isConnected()
+{
+    return m_connected;
+}
+
 void
 WebsocketSession::onSessionConnected()
 {
-    // TODO: put user token into websocket request header
-
     // websocket handshake
     m_websocket.async_handshake_ex(
         m_session.hostname().c_str(),
         m_target.c_str(),
-        [](boost::beast::websocket::request_type & req) {
-            req.set("X-Auth-Token", "Test-Token");
+        [this](boost::beast::websocket::request_type & req) {
+            for (auto const& i : m_headers) {
+                req.set(i.first, i.second);
+            }
         },
         std::bind(
             &WebsocketSession::onWebsocketHandshakeFinished,

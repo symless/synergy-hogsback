@@ -18,8 +18,8 @@ TEST_CASE("Nchan Websocket connections", "[Websocket]")
     std::string subResult;
     boost::asio::io_service ioService;
 
-    WebsocketSession pubWebsocket(ioService, kPubSubServerHostname, "/pub/test", kPubSubServerPort);
-    WebsocketSession subWebsocket(ioService, kPubSubServerHostname, "/sub/test", kPubSubServerPort);
+    WebsocketSession pubWebsocket(ioService, kPubSubServerHostname, kPubSubServerPort);
+    WebsocketSession subWebsocket(ioService, kPubSubServerHostname, kPubSubServerPort);
 
     boost::asio::deadline_timer timer(ioService, boost::posix_time::seconds(5));
     timer.async_wait([](const boost::system::error_code&) {
@@ -48,8 +48,8 @@ TEST_CASE("Nchan Websocket connections", "[Websocket]")
         ioService.stop();
     });
 
-    pubWebsocket.connect();
-    subWebsocket.connect();
+    pubWebsocket.connect("/pub/test");
+    subWebsocket.connect("/sub/test");
 
     ioService.run();
 

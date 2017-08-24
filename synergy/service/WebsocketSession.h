@@ -7,6 +7,7 @@
 #include <boost/beast/websocket/ssl.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/signals2.hpp>
+#include <map>
 
 namespace websocket = boost::beast::websocket;
 namespace ssl = boost::asio::ssl;
@@ -14,12 +15,14 @@ namespace ssl = boost::asio::ssl;
 class WebsocketSession final
 {
 public:
-    WebsocketSession(boost::asio::io_service& ioService, const std::string& hostname, const std::string &target, const std::string& port);
+    WebsocketSession(boost::asio::io_service& ioService, const std::string& hostname, const std::string& port);
 
-    void connect();
+    void connect(const std::string target);
     void disconnect();
     void reconnect();
     void write(std::string& message);
+    void addHeader(std::string headerName, std::string& headerContent);
+    bool isConnected();
 
 public:
     template <typename... Args>
@@ -43,7 +46,8 @@ private:
     boost::asio::deadline_timer m_reconnectTimer;
     SecuredTcpSession m_session;
     websocket::stream<ssl::stream<tcp::socket>&> m_websocket;
-    const std::string m_target;
+    std::string m_target;
+    std::map<std::string, std::string> m_headers;
     bool m_connected;
 };
 
