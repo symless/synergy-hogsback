@@ -18,6 +18,7 @@ TEST_CASE("User configuration settings", "[configuration]")
 
     // initialization without a config file
     UserConfig userConfig(testFilename);
+    userConfig.load();
 
     REQUIRE(userConfig.debugLevel() == kInfo);
     REQUIRE(userConfig.userToken() == "");
@@ -39,6 +40,8 @@ TEST_CASE("User configuration settings", "[configuration]")
 
     // initializaiton from previous config file
     UserConfig newUserConfig(testFilename);
+    newUserConfig.load();
+
     REQUIRE(newUserConfig.debugLevel() == kDebug);
     REQUIRE(newUserConfig.userToken() == "TestToken");
     REQUIRE(newUserConfig.userId() == 10);

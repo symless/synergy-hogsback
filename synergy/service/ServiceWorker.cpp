@@ -15,9 +15,12 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
     m_rpcManager (std::make_unique<RpcManager>(m_ioService)),
     m_processManager (std::make_unique<ProcessManager>(m_ioService)),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService)),
-    m_cloudClient(std::make_shared<CloudClient>(ioService)),
-    m_userConfig(std::make_shared<UserConfig>())
+    m_userConfig(std::make_shared<UserConfig>()),
+    m_cloudClient(std::make_shared<CloudClient>(ioService, m_userConfig))
 {
+    m_userConfig->load();
+    m_cloudClient->init();
+
     m_rpcManager->ready.connect([this]() { provideRpcEndpoints(); });
     m_rpcManager->start();
 }
@@ -26,6 +29,7 @@ ServiceWorker::~ServiceWorker()
 {
     m_work.reset();
     m_ioService.stop();
+    m_userConfig->save();
 }
 
 void
@@ -76,6 +80,7 @@ void ServiceWorker::provideAuthUpdate()
         m_userConfig->setScreenId(screenId);
         m_userConfig->setUserToken(std::move(userToken));
         m_userConfig->save();
+        m_cloudClient->init();
     });
 }
 

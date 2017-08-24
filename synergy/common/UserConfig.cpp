@@ -20,7 +20,6 @@ UserConfig(std::string filename) :
     m_screenId(-1),
     m_dragAndDrop(false)
 {
-    load();
 }
 
 std::string
