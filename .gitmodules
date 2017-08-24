@@ -44,3 +44,6 @@
 [submodule "third_party/beast"]
 	path = third_party/beast
 	url = https://github.com/boostorg/Beast.git
+[submodule "third_party/json"]
+	path = third_party/json
+	url = https://github.com/taocpp/json

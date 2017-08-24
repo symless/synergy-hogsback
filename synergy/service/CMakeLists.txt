@@ -10,6 +10,7 @@ set (SERVICE_SOURCES
     HttpSession.cpp
     WebsocketSession.cpp
     TerminationSignalListener.cpp
+    ProfileSnapshot.cpp
 )
 
 add_executable (${PROJECT_NAME} ${SERVICE_SOURCES})
