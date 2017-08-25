@@ -48,8 +48,8 @@ TEST_CASE("Nchan Websocket connections", "[Websocket]")
         ioService.stop();
     });
 
-    pubWebsocket.connect("/pub/test");
-    subWebsocket.connect("/sub/test");
+    pubWebsocket.connect("/synergy/pub/test");
+    subWebsocket.connect("/synergy/sub/test");
 
     ioService.run();
 
