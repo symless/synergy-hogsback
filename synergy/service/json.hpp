@@ -8,6 +8,7 @@
 #include <boost/fusion/sequence/intrinsic/at_c.hpp>
 #include <boost/fusion/sequence/intrinsic/size.hpp>
 #include <boost/fusion/support/is_sequence.hpp>
+#include <boost/mpl/for_each.hpp>
 #include <boost/mpl/range_c.hpp>
 #include <boost/optional.hpp>
 #include <cmath>
@@ -20,8 +21,13 @@
 
 namespace json = tao::json;
 
+#ifdef _WIN32
+#define SCS_LIKELY(X) (X)
+#define SCS_UNLIKELY(X) (X)
+#else
 #define SCS_LIKELY(X) __builtin_expect (!!(X), 1)
 #define SCS_UNLIKELY(X) __builtin_expect (!!(X), 0)
+#endif
 
 #define DEFINE_JSON(NAME, ...)                                                 \
     BOOST_FUSION_DEFINE_STRUCT ((), NAME, __VA_ARGS__);
@@ -123,6 +129,27 @@ from_json (T& dest, json::value* const src, char const* const field_name = "") {
 }
 
 template <typename T>
+struct from_json_object_helper {
+    from_json_object_helper(T& dest, std::map<std::string, json::value>& src) noexcept:
+        dest_(dest), src_(src) {}
+
+    template <typename I>
+    void operator()(I) {
+        auto const field_name =
+            boost::fusion::extension::struct_member_name<T, I::value>::call ();
+        auto const it = src_.find (field_name);
+        auto& value   = boost::fusion::at_c<I::value> (dest_);
+        if (it == src_.end ()) {
+            return from_json (value, nullptr, field_name);
+        }
+        from_json (value, &it->second, field_name);
+    }
+
+    T& dest_;
+    std::map<std::string, json::value>& src_;
+};
+
+template <typename T>
 inline std::enable_if_t<boost::fusion::traits::is_sequence<T>::value>
 from_json (T& dest, std::map<std::string, json::value>& src,
            char const* const = "") {
@@ -130,16 +157,7 @@ from_json (T& dest, std::map<std::string, json::value>& src,
     using range = boost::mpl::
         range_c<int, 0, boost::fusion::result_of::size<T>::type::value>;
 
-    boost::fusion::for_each (range (), [&dest, &src](auto i) {
-        auto const field_name =
-            boost::fusion::extension::struct_member_name<T, i>::call ();
-        auto const it = src.find (field_name);
-        auto& value   = boost::fusion::at_c<i> (dest);
-        if (it == src.end ()) {
-            return from_json (value, nullptr, field_name);
-        }
-        from_json (value, &it->second, field_name);
-    });
+    boost::mpl::for_each<range> (from_json_object_helper<T>(dest, src));
 }
 
 template <typename T>
