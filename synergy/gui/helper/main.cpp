@@ -99,15 +99,15 @@ main (int, const char*[])
             boost::system::error_code ec;
             boost::filesystem::remove (kServiceUserAgentPListTargetPath, ec);
             log() << fmt::format ("[{}] uninstalling user agent plist file... {}\n", 
-                                  timestamp(), ec ? "done" : "failed");
+                                  timestamp(), ec ? "failed" : "done");
             
             boost::filesystem::remove (kHelperPListPath, ec);
             log() << fmt::format ("[{}] uninstalling helper plist file... {}\n", 
-                                  timestamp(), ec ? "done" : "failed");
+                                  timestamp(), ec ? "failed" : "done");
             
             boost::filesystem::remove (kHelperExecPath, ec);
             log() << fmt::format ("[{}] uninstalling helper executable file... {}\n", 
-                                  timestamp(), ec ? "done (Au Revoir!)" : "failed");
+                                  timestamp(), ec ? "failed" : "done");
             
             return EXIT_SUCCESS;
         }
