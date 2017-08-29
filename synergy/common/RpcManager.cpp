@@ -3,7 +3,7 @@
 #include <synergy/common/WampServer.h>
 
 const char* const kLocalIpAddress = "127.0.0.1";
-const int kWampDefaultPort = 24888;
+const int kWampDefaultPort = 24889;
 
 RpcManager::RpcManager(boost::asio::io_service& ioService) :
     m_ioService(ioService)
