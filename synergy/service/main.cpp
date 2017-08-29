@@ -10,7 +10,7 @@
 static bool crashHandlerIsInstalled = false;
 
 int
-main (int argc, char* argv[]) try {
+main (int argc, char* argv[]) {
     crashHandlerIsInstalled = startCrashHandler();
 
     boost::asio::io_service ioService;
