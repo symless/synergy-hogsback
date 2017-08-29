@@ -50,6 +50,14 @@ checkService() {
 int
 main(int argc, char* argv[])
 {
+    /* temporary infinite sleep loop,
+     * so i can attach debugger to debug build */
+#if defined (Q_OS_WIN)
+    while (true) {
+        Sleep(1000);
+    }
+#endif
+
     /* Workaround for QTBUG-40332
      * "High ping when QNetworkAccessManager is instantiated" */
 #if defined (Q_OS_WIN)
