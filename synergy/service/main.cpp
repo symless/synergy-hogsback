@@ -25,16 +25,4 @@ main (int argc, char* argv[]) try {
     serviceWorker.start();
     return EXIT_SUCCESS;
 
-} catch (std::exception& e) {
-    if (crashHandlerIsInstalled) {
-        throw;
-    } else {
-        std::cerr << "Exception: " << e.what() << std::endl;
-    }
-    return EXIT_FAILURE;
-} catch (...) {
-    if (crashHandlerIsInstalled) {
-        throw;
-    }
-    return EXIT_FAILURE;
 }
