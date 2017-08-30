@@ -31,7 +31,7 @@ MSWindowsDirectoryManager::profileDir()
         dir = result;
     }
 
-    return dir + "\\Synergy v2";
+    return dir + "\\Symless\\Synergy";
 
     HANDLE sourceToken = NULL;
     WTSQueryUserToken(WTSGetActiveConsoleSessionId(), &sourceToken);
