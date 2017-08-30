@@ -54,7 +54,7 @@ main(int argc, char* argv[])
      * so i can attach debugger to debug build */
 #if defined (Q_OS_WIN)
     while (true) {
-        Sleep(1000);
+        Sleep(2000);
     }
 #endif
 
