@@ -66,7 +66,7 @@ main(int argc, char* argv[])
     }
 
 #ifdef Q_OS_OSX
-    if (installService()) {
+    {
         QProcess serviceLoader;
         QString cmd("launchctl load /Library/LaunchAgents/com.symless.synergy.v2.synergyd.plist");
         serviceLoader.start(cmd);
