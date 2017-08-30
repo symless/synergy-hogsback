@@ -47,7 +47,7 @@ MSWindowsDirectoryManager::profileDir()
         throw;
     }
 
-    dir.append("\\Synergy v2");
+    dir.append("\\Symless\\Synergy");
     return dir;
 }
 
