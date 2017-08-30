@@ -56,9 +56,9 @@ main(int argc, char* argv[])
             QProcess service;
             QString cmd("/Applications/Synergy.app/Contents/MacOS/synergyd");
             QStringList args;
-            service.startDetached(cmd, args);
+            service.start(cmd, args);
 
-            service.waitForStarted();
+            service.waitForFinished(-1);
             return 0;
         }
     }
