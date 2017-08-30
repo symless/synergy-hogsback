@@ -53,8 +53,12 @@ main(int argc, char* argv[])
     /* temporary infinite sleep loop,
      * so i can attach debugger to debug build */
 #if defined (Q_OS_WIN)
+    bool break_ = false;
     while (true) {
         Sleep(2000);
+        if (break_) {
+            break;
+        }
     }
 #endif
 
