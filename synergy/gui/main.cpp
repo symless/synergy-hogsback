@@ -50,6 +50,19 @@ checkService() {
 int
 main(int argc, char* argv[])
 {
+    if (argc == 2) {
+        QString para = argv[1];
+        if (para == "--service") {
+            QProcess service;
+            QString cmd("/Applications/Synergy.app/Contents/MacOS/synergyd");
+            QStringList args;
+            service.startDetached(cmd, args);
+
+            service.waitForStarted();
+            return 0;
+        }
+    }
+
     /* Workaround for QTBUG-40332
      * "High ping when QNetworkAccessManager is instantiated" */
 #if defined (Q_OS_WIN)
