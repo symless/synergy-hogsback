@@ -33,17 +33,19 @@ namespace asio = boost::asio;
 #ifdef Q_OS_OSX
 bool installServiceHelper();
 
-static void
-checkService() {
+static bool
+installService() {
     if (!boost::filesystem::exists
             ("/Library/LaunchDaemons/com.symless.synergy.v2.ServiceHelper.plist")) {
         std::clog << "Service helper not installed, installing...\n";
         if (!installServiceHelper()) {
             std::clog << "Failed to install service helper" << "\n";
-            return;
+            return false;
         }
         std::clog << "Service helper installed\n";
+        return true;
     }
+    return false;
 }
 #endif
 
@@ -63,6 +65,15 @@ main(int argc, char* argv[])
         }
     }
 
+#ifdef Q_OS_OSX
+    if (installService()) {
+        QProcess serviceLoader;
+        QString cmd("launchctl load /Library/LaunchAgents/com.symless.synergy.v2.synergyd.plist");
+        serviceLoader.start(cmd);
+        serviceLoader.waitForFinished(5000);
+    }
+#endif
+
     /* Workaround for QTBUG-40332
      * "High ping when QNetworkAccessManager is instantiated" */
 #if defined (Q_OS_WIN)
@@ -78,10 +89,6 @@ main(int argc, char* argv[])
      * because it depends on file paths that are unavailable until then. */
     QApplication app(argc, argv);
     startCrashHandler();
-
-#ifdef Q_OS_OSX
-    checkService();
-#endif
 
     FontManager::loadAll();
 
