@@ -18,7 +18,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
     m_userConfig(std::make_shared<UserConfig>()),
     m_cloudClient(std::make_shared<CloudClient>(ioService, m_userConfig))
 {
-   // m_userConfig->load();
+    m_userConfig->load();
     m_cloudClient->init();
 
     m_cloudClient->websocketMessageReceived.connect([this](std::string json){
