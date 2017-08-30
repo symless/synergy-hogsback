@@ -43,6 +43,7 @@ installService() {
             return false;
         }
         std::clog << "Service helper installed\n";
+        sleep(3);
         return true;
     }
     return false;
