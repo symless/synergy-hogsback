@@ -46,5 +46,5 @@
 	url = https://github.com/boostorg/Beast.git
 [submodule "third_party/json"]
 	path = third_party/json
-	url = git@github.com:symless/json.git
+	url = https://github.com/symless/json.git
     branch = synergy
