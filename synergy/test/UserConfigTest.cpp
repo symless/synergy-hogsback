@@ -8,7 +8,12 @@
 TEST_CASE("User configuration settings", "[configuration]")
 {
     // test configuration file
-    boost::filesystem::path dir(DirectoryManager::instance()->profileDir());
+#ifdef _WIN32
+        boost::filesystem::path dir(DirectoryManager::instance()->systemAppDir());
+#else
+        boost::filesystem::path dir(DirectoryManager::instance()->profileDir());
+#endif
+
     boost::filesystem::path file("synergy-test-user.cfg");
     boost::filesystem::path filename = dir / file;
     std::string testFilename = filename.string();
