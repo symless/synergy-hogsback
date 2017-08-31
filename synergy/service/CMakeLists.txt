@@ -11,6 +11,7 @@ set (SERVICE_SOURCES
     WebsocketSession.cpp
     TerminationSignalListener.cpp
     ProfileSnapshot.cpp
+    ConfigGenerator.cpp
 )
 
 add_executable (${PROJECT_NAME} ${SERVICE_SOURCES})
