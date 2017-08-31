@@ -47,3 +47,4 @@
 [submodule "third_party/json"]
 	path = third_party/json
 	url = git@github.com:symless/json.git
+    branch = synergy
