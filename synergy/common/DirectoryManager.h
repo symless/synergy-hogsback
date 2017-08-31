@@ -17,7 +17,7 @@ public:
 
     virtual boost::filesystem::path
     crashDumpDir() {
-        boost::filesystem::path path (profileDir());
+        boost::filesystem::path path (installedDir());
         path /= "dumps";
         boost::system::error_code ec;
         if (!boost::filesystem::exists (path, ec)) {
