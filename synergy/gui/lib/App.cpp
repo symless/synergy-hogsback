@@ -31,6 +31,14 @@ namespace asio = boost::asio;
 #include <cstdlib>
 #endif
 
+App::App() :
+    m_options("Synergy Config", "Makes it super easy to configure Synergy")
+{
+    m_options.add_options()
+      ("disable-version-check", "Disable version check")
+    ;
+}
+
 #ifdef Q_OS_OSX
 bool installServiceHelper();
 
@@ -51,6 +59,7 @@ checkService() {
 int
 App::run(int argc, char* argv[])
 {
+    m_options.parse(argc, argv);
     if ((argc > 1) && (std::string(argv[1]) == "--sleep-loop")) {
         /* temporary infinite sleep loop,
          * so i can attach debugger to debug build */
@@ -141,9 +150,9 @@ App::run(int argc, char* argv[])
         io.run ();
     });
 
-#ifndef SYNERGY_DEVELOPER_MODE
-    cloudClient->checkUpdate();
-#endif
+    if (!m_options.count("disable-version-check")) {
+        cloudClient->checkUpdate();
+    }
 
     engine.rootContext()->setContextProperty
         ("PixelPerPoint", QGuiApplication::primaryScreen()->physicalDotsPerInch() / 72);
