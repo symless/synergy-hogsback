@@ -2,7 +2,6 @@
 #include <cassert>
 #include <cstdint>
 #include <vector>
-#include <iostream>
 #include <ostream>
 #include <array>
 #include <synergy/service/Screen.h>
@@ -89,10 +88,7 @@ linkHorizontally (Screen& screen, std::vector<Screen*> targets) {
         screen.sides[int(Right)].set (make_pair (i, target->id));
         target->sides[int(Left)].set (make_pair (i, screen.id));
     }
-
-    std::cout << screen.name << " => " << screen.sides[int(Right)] << std::endl;
 }
-
 
 static void
 linkVertically (Screen& screen, std::vector<Screen*> targets) {
@@ -116,14 +112,12 @@ linkVertically (Screen& screen, std::vector<Screen*> targets) {
         screen.sides[int(Up)].set (make_pair (i, target->id));
         target->sides[int(Down)].set (make_pair (i, screen.id));
     }
-
-    std::cout << screen.name << " =^ " << screen.sides[int(Up)] << std::endl;
 }
 
 void
-printScreenLinks (std::ostream const& os, Screen& screen,
+printScreenLinks (std::ostream& os, Screen& screen,
                   std::vector<Screen> const& targets) {
-    std::cout << screen.name << ":" << std::endl;
+    os << screen.name << ":" << std::endl;
 
     for (auto side = 0; side < 4; ++side) {
         auto const& links = screen.sides[side];
@@ -146,7 +140,7 @@ printScreenLinks (std::ostream const& os, Screen& screen,
                     double dst_l = (lower - dest->x) * 100.0 / dest->width;
                     double dst_u = (upper - dest->x) * 100.0 / dest->width;
 
-                    std::cout << "\t" << directionNames[side]
+                    os << "\t" << directionNames[side]
                               << "(" << src_l << "," << src_u << ") = "
                               << dest->name
                               << "(" << dst_l << "," << dst_u << ")"
@@ -171,7 +165,7 @@ printScreenLinks (std::ostream const& os, Screen& screen,
                     double dst_l = (lower - dest->y) * 100.0 / dest->height;
                     double dst_u = (upper - dest->y) * 100.0 / dest->height;
 
-                    std::cout << "\t" << directionNames[side]
+                    os << "\t" << directionNames[side]
                               << "(" << src_l << "," << src_u << ") = "
                               << dest->name
                               << "(" << dst_l << "," << dst_u << ")"
