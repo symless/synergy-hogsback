@@ -36,23 +36,29 @@ App::App() :
 {
     m_options.add_options()
       ("disable-version-check", "Disable version check")
+#ifdef Q_OS_OSX
+      ("service", "Start the service (Mac only)")
+#endif
     ;
 }
 
 #ifdef Q_OS_OSX
 bool installServiceHelper();
 
-static void
-checkService() {
+static bool
+installService() {
     if (!boost::filesystem::exists
             ("/Library/LaunchDaemons/com.symless.synergy.v2.ServiceHelper.plist")) {
         std::clog << "Service helper not installed, installing...\n";
         if (!installServiceHelper()) {
             std::clog << "Failed to install service helper" << "\n";
-            return;
+            return false;
         }
         std::clog << "Service helper installed\n";
+        sleep(3);
+        return true;
     }
+    return false;
 }
 #endif
 
@@ -60,19 +66,26 @@ int
 App::run(int argc, char* argv[])
 {
     m_options.parse(argc, argv);
-    if ((argc > 1) && (std::string(argv[1]) == "--sleep-loop")) {
-        /* temporary infinite sleep loop,
-         * so i can attach debugger to debug build */
-    #if defined (Q_OS_WIN)
-        bool volatile break_ = false;
-        while (true) {
-            Sleep(1000);
-            if (break_) {
-                break;
-            }
-        }
-    #endif
+
+#ifdef Q_OS_OSX
+
+    if (!m_options.count("service")) {
+        QProcess service;
+        QString cmd("/Applications/Synergy.app/Contents/MacOS/synergyd");
+        QStringList args;
+        service.start(cmd, args);
+        service.waitForFinished(-1);
+        return 0;
     }
+
+    if (installService()) {
+        QProcess serviceLoader;
+        QString cmd("launchctl load /Library/LaunchAgents/com.symless.synergy.v2.synergyd.plist");
+        serviceLoader.start(cmd);
+        serviceLoader.waitForFinished(5000);
+    }
+
+#endif
 
     /* Workaround for QTBUG-40332
      * "High ping when QNetworkAccessManager is instantiated" */
@@ -89,10 +102,6 @@ App::run(int argc, char* argv[])
      * because it depends on file paths that are unavailable until then. */
     QApplication app(argc, argv);
     startCrashHandler();
-
-#ifdef Q_OS_OSX
-    checkService();
-#endif
 
     FontManager::loadAll();
 

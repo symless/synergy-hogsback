@@ -5,10 +5,10 @@
 #include <fmt/format.h>
 #include <boost/filesystem.hpp>
 #include <string>
-#include <boost/process.hpp>
 #include <stdexcept>
 #include <cassert>
 #include <time.h>
+#include <array>
 
 std::string const kSharedConfigPath ("/Users/Shared/Synergy");
 std::string const kAppPath ("/Applications/Synergy.app");
@@ -63,25 +63,7 @@ installSynergyService()
         return false;
     }
 
-    /* Load the service agent */
-    boost::process::ipstream launchd_out;
-    boost::process::ipstream launchd_err;
-    std::string cmd = fmt::format ("launchctl load {}", kServiceUserAgentPListTargetPath);
-    boost::process::child launchd (cmd, boost::process::std_out > launchd_out, boost::process::std_err > launchd_err);
-    std::string line;
-    while ((launchd_out && std::getline(launchd_out, line)) ||
-           (launchd_err && std::getline(launchd_err, line))) {
-        if (!line.empty()) {
-            log() << fmt::format("[{}] {}\n", timestamp(), line);
-            line.clear();
-        }
-    }
-    launchd.wait();
-
-    if (EXIT_SUCCESS != launchd.exit_code()) {
-        log() << fmt::format ("[{}] {} failed with error code {}\n", timestamp(), cmd, launchd.exit_code());
-    }
-    return (EXIT_SUCCESS == launchd.exit_code());
+    return true;
 }
 
 int

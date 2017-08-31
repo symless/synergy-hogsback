@@ -29,7 +29,12 @@ UserConfig::filename()
         return m_altFilename;
     }
 
-    boost::filesystem::path dir(DirectoryManager::instance()->profileDir());
+#ifdef _WIN32
+        boost::filesystem::path dir(DirectoryManager::instance()->systemAppDir());
+#else
+        boost::filesystem::path dir(DirectoryManager::instance()->profileDir());
+#endif
+
     boost::filesystem::path file(kUserConfigFilename);
     boost::filesystem::path filename = dir / file;
     return filename.string();
@@ -144,7 +149,12 @@ void UserConfig::setDragAndDrop(bool dragAndDrop)
 
 bool UserConfig::persistFilename()
 {
-    boost::filesystem::path dir(DirectoryManager::instance()->profileDir());
+#ifdef _WIN32
+        boost::filesystem::path dir(DirectoryManager::instance()->systemAppDir());
+#else
+        boost::filesystem::path dir(DirectoryManager::instance()->profileDir());
+#endif
+
     boost::filesystem::create_directories(dir);
     if (!boost::filesystem::exists(filename())) {
         std::fstream file;
