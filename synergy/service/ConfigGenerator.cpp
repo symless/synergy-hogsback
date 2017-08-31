@@ -114,8 +114,9 @@ linkVertically (Screen& screen, std::vector<Screen*> targets) {
     }
 }
 
+// TODO: refactor to operator<< (std::ostream&, Screen const&)
 void
-printScreenLinks (std::ostream& os, Screen& screen,
+printScreenLinks (std::ostream& os, Screen const& screen,
                   std::vector<Screen> const& targets) {
     os << screen.name << ":" << std::endl;
 

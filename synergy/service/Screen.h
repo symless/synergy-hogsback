@@ -15,8 +15,10 @@ struct Screen {
     int64_t width  = 0;
     int64_t height = 0;
     std::array<ScreenLinkMap, 4> sides;
+    // TODO: add (weak) pointer back to Config
 };
 
 struct Config {
+    // TODO: add getScreen(id) function to access a screen
     std::vector<Screen> screens;
 };
