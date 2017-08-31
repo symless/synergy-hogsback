@@ -34,23 +34,29 @@ namespace asio = boost::asio;
 #ifdef Q_OS_OSX
 bool installServiceHelper();
 
-static void
-checkService() {
+static bool
+installService() {
     if (!boost::filesystem::exists
             ("/Library/LaunchDaemons/com.symless.synergy.v2.ServiceHelper.plist")) {
         std::clog << "Service helper not installed, installing...\n";
         if (!installServiceHelper()) {
             std::clog << "Failed to install service helper" << "\n";
-            return;
+            return false;
         }
         std::clog << "Service helper installed\n";
+        sleep(3);
+        return true;
     }
+    return false;
 }
 #endif
 
 int
 App::run(int argc, char* argv[])
 {
+
+#ifdef Q_OS_OSX
+
     if (argc == 2) {
         QString para = argv[1];
         if (para == "--service") {
@@ -64,13 +70,13 @@ App::run(int argc, char* argv[])
         }
     }
 
-#ifdef Q_OS_OSX
     if (installService()) {
         QProcess serviceLoader;
         QString cmd("launchctl load /Library/LaunchAgents/com.symless.synergy.v2.synergyd.plist");
         serviceLoader.start(cmd);
         serviceLoader.waitForFinished(5000);
     }
+
 #endif
 
     /* Workaround for QTBUG-40332
