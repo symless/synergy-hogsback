@@ -118,7 +118,7 @@ linkVertically (Screen& screen, std::vector<Screen*> targets) {
 void
 printScreenLinks (std::ostream& os, Screen const& screen,
                   std::vector<Screen> const& targets) {
-    os << screen.name << ":" << std::endl;
+    os << screen.name << ":\n";
 
     for (auto side = 0; side < 4; ++side) {
         auto const& links = screen.sides[side];
@@ -133,8 +133,8 @@ printScreenLinks (std::ostream& os, Screen const& screen,
                     double src_u = (upper - screen.x) * 100.0 / screen.width;
 
                     auto dest = std::find_if (
-                        begin (targets), end (targets), [&](auto& s) {
-                            return s.id == link.second;
+                        begin (targets), end (targets), [&](auto& screen) {
+                            return screen.id == link.second;
                         });
 
                     assert (dest != end (targets));
@@ -144,8 +144,7 @@ printScreenLinks (std::ostream& os, Screen const& screen,
                     os << "\t" << directionNames[side]
                               << "(" << src_l << "," << src_u << ") = "
                               << dest->name
-                              << "(" << dst_l << "," << dst_u << ")"
-                              << std::endl;
+                              << "(" << dst_l << "," << dst_u << ")\n";
                 }
                 break;
 
@@ -158,8 +157,8 @@ printScreenLinks (std::ostream& os, Screen const& screen,
                     double src_u = (upper - screen.y) * 100.0 / screen.height;
 
                     auto dest = std::find_if (
-                        begin (targets), end (targets), [&](auto& s) {
-                            return s.id == link.second;
+                        begin (targets), end (targets), [&](auto& screen) {
+                            return screen.id == link.second;
                         });
 
                     assert (dest != end (targets));
@@ -169,8 +168,7 @@ printScreenLinks (std::ostream& os, Screen const& screen,
                     os << "\t" << directionNames[side]
                               << "(" << src_l << "," << src_u << ") = "
                               << dest->name
-                              << "(" << dst_l << "," << dst_u << ")"
-                              << std::endl;
+                              << "(" << dst_l << "," << dst_u << ")\n";
                 }
                 break;
         }
