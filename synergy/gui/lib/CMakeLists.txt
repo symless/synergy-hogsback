@@ -5,6 +5,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 set (GUI_LIB_SOURCES
+    App.cpp
     AppConfig.cpp
     AccessibilityManager.cpp
     Common.cpp
