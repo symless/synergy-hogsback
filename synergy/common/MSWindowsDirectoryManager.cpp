@@ -10,7 +10,13 @@
 std::string
 MSWindowsDirectoryManager::systemAppDir()
 {
-    return "";
+    std::string dir;
+    TCHAR result[MAX_PATH];
+    if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL, 0, result))) {
+        dir = result;
+    }
+
+    return dir + "\\Symless\\Synergy";
 }
 
 boost::filesystem::path
@@ -24,22 +30,14 @@ MSWindowsDirectoryManager::installedDir()
 std::string
 MSWindowsDirectoryManager::profileDir()
 {
-    //HACK: use common application data folder for profile directory
     std::string dir;
-    TCHAR result[MAX_PATH];
-    if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL, 0, result))) {
-        dir = result;
-    }
-
-    return dir + "\\Symless\\Synergy";
-
     HANDLE sourceToken = NULL;
     WTSQueryUserToken(WTSGetActiveConsoleSessionId(), &sourceToken);
 
     // when source is valid, we get the profile directory from that user
     // when source is still NULL, we get profile directory from the user
     // that spawns this process
-//    TCHAR result[MAX_PATH];
+    TCHAR result[MAX_PATH];
     if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, sourceToken, 0, result))) {
         dir = result;
     }
