@@ -51,6 +51,28 @@ checkService() {
 int
 App::run(int argc, char* argv[])
 {
+    if (argc == 2) {
+        QString para = argv[1];
+        if (para == "--service") {
+            QProcess service;
+            QString cmd("/Applications/Synergy.app/Contents/MacOS/synergyd");
+            QStringList args;
+            service.start(cmd, args);
+
+            service.waitForFinished(-1);
+            return 0;
+        }
+    }
+
+#ifdef Q_OS_OSX
+    if (installService()) {
+        QProcess serviceLoader;
+        QString cmd("launchctl load /Library/LaunchAgents/com.symless.synergy.v2.synergyd.plist");
+        serviceLoader.start(cmd);
+        serviceLoader.waitForFinished(5000);
+    }
+#endif
+
     /* Workaround for QTBUG-40332
      * "High ping when QNetworkAccessManager is instantiated" */
 #if defined (Q_OS_WIN)
@@ -66,10 +88,6 @@ App::run(int argc, char* argv[])
      * because it depends on file paths that are unavailable until then. */
     QApplication app(argc, argv);
     startCrashHandler();
-
-#ifdef Q_OS_OSX
-    checkService();
-#endif
 
     FontManager::loadAll();
 

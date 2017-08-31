@@ -13,7 +13,8 @@
     <true/>
         <key>ProgramArguments</key>
     <array>
-            <string>/Applications/Synergy.app/Contents/MacOS/synergyd</string>
+            <string>/Applications/Synergy.app/Contents/MacOS/synergy2</string>
+            <string>--service</string>
     </array>
 </dict>
 </plist>
