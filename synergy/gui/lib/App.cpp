@@ -34,17 +34,20 @@ namespace asio = boost::asio;
 #ifdef Q_OS_OSX
 bool installServiceHelper();
 
-static void
-checkService() {
+static bool
+installService() {
     if (!boost::filesystem::exists
             ("/Library/LaunchDaemons/com.symless.synergy.v2.ServiceHelper.plist")) {
         std::clog << "Service helper not installed, installing...\n";
         if (!installServiceHelper()) {
             std::clog << "Failed to install service helper" << "\n";
-            return;
+            return false;
         }
         std::clog << "Service helper installed\n";
+        sleep(3);
+        return true;
     }
+    return false;
 }
 #endif
 
