@@ -31,17 +31,6 @@ namespace asio = boost::asio;
 #include <cstdlib>
 #endif
 
-App::App() :
-    m_options("Synergy Config", "Makes it super easy to configure Synergy")
-{
-    m_options.add_options()
-      ("disable-version-check", "Disable version check")
-#ifdef Q_OS_OSX
-      ("service", "Start the service (Mac only)")
-#endif
-    ;
-}
-
 #ifdef Q_OS_OSX
 bool installServiceHelper();
 
@@ -65,17 +54,20 @@ installService() {
 int
 App::run(int argc, char* argv[])
 {
-    m_options.parse(argc, argv);
 
 #ifdef Q_OS_OSX
 
-    if (m_options.count("service")) {
-        QProcess service;
-        QString cmd("/Applications/Synergy.app/Contents/MacOS/synergyd");
-        QStringList args;
-        service.start(cmd, args);
-        service.waitForFinished(-1);
-        return 0;
+    if (argc == 2) {
+        QString para = argv[1];
+        if (para == "--service") {
+            QProcess service;
+            QString cmd("/Applications/Synergy.app/Contents/MacOS/synergyd");
+            QStringList args;
+            service.start(cmd, args);
+
+            service.waitForFinished(-1);
+            return 0;
+        }
     }
 
     if (installService()) {
@@ -159,9 +151,9 @@ App::run(int argc, char* argv[])
         io.run ();
     });
 
-    if (!m_options.count("disable-version-check")) {
-        cloudClient->checkUpdate();
-    }
+#ifndef SYNERGY_DEVELOPER_MODE
+    cloudClient->checkUpdate();
+#endif
 
     engine.rootContext()->setContextProperty
         ("PixelPerPoint", QGuiApplication::primaryScreen()->physicalDotsPerInch() / 72);

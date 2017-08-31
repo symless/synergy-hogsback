@@ -95,12 +95,6 @@ include_directories (BEFORE SYSTEM third_party/cppzmq)
 include_directories (BEFORE SYSTEM third_party/json/include)
 
 #
-# cxxopts
-#
-
-include_directories (BEFORE SYSTEM third_party/cxxopts/include)
-
-#
 # Msgpack
 #
 set (Msgpack_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/msgpack-c/include")
