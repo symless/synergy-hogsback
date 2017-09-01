@@ -1,4 +1,4 @@
-#include <synergy/common/Screen.h>
+#include <synergy/common/ConfigGen.h>
 
 using boost::icl::interval;
 using boost::icl::interval_map;
@@ -6,17 +6,6 @@ using boost::icl::interval_map;
 enum class Direction : int { Up = 0, Right = 1, Down = 2, Left = 3 };
 static char const* const directionNames[] = {"up", "right", "down", "left"};
 
-struct ScreenLinkMap final {
-    Screen* m_screen = nullptr;
-    ScreenLinks* m_links = nullptr;
-
-    ScreenLinkMap (Screen* screen, ScreenLinks* links) noexcept:
-        m_screen(screen), m_links(links) {}
-
-    auto& edges() const noexcept { return m_links->edges(); }
-    Screen* operator->() const noexcept { return m_screen; }
-    operator Screen&() const noexcept { return *m_screen; }
-};
 
 static void
 removeSource (Screen& source, std::vector<ScreenLinkMap>& targets) {
@@ -121,6 +110,28 @@ linkUp (ScreenLinkMap& source, std::vector<ScreenLinkMap> targets) {
     }
 }
 
+std::vector<ScreenLinks>
+linkScreens (std::vector<Screen>& screens) {
+    /* Create all the links */
+    std::vector<ScreenLinks> links;
+    links.resize (screens.size());
+
+    /* SOA -> AOS */
+    std::vector<ScreenLinkMap> targets;
+    targets.reserve (screens.size());
+
+    for (auto t = 0; t < screens.size(); ++t) {
+        targets.emplace_back (&screens[t], &links[t]);
+    }
+
+    for (auto& target : targets) {
+        linkUp (target, targets);
+        linkRight (target, targets);
+    }
+
+    return links;
+}
+
 void
 printScreenLinks (std::ostream& os, ScreenLinkMap const& screen,
                   std::vector<ScreenLinkMap> const& targets) {
@@ -181,26 +192,4 @@ printScreenLinks (std::ostream& os, ScreenLinkMap const& screen,
                 break;
         }
     }
-}
-
-std::vector<ScreenLinks>
-linkScreens (std::vector<Screen>& screens) {
-    /* Create all the links */
-    std::vector<ScreenLinks> links;
-    links.resize (screens.size());
-
-    /* SOA -> AOS */
-    std::vector<ScreenLinkMap> targets;
-    targets.reserve (screens.size());
-
-    for (auto t = 0; t < screens.size(); ++t) {
-        targets.emplace_back (&screens[t], &links[t]);
-    }
-
-    for (auto& target : targets) {
-        linkUp (target, targets);
-        linkRight (target, targets);
-    }
-
-    return links;
 }
