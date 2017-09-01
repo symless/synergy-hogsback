@@ -1,4 +1,4 @@
-#include <synergy/service/Screen.h>
+#include <synergy/common/Screen.h>
 
 ScreenNeighbourIterator
 ScreenLinks::begin() {

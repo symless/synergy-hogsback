@@ -67,7 +67,7 @@ public:
     ScreenNeighbourIterator end();
 
     auto& edges() { return *m_edges; }
-    auto& edges() const { return *m_edges; }
+    auto const& edges() const { return *m_edges; }
 
 private:
     std::unique_ptr<std::array<ScreenEdge, 4>> m_edges;
@@ -90,4 +90,3 @@ private:
     std::vector<Screen> m_screens;
     std::vector<ScreenLinks> m_links;
 };
-

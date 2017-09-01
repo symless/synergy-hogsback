@@ -17,6 +17,8 @@ set (COMMON_LIB_SOURCES
     WampClient.cpp
     WampServer.cpp
     WampRouter.cpp
+    Screen.cpp
+    ConfigGenerator.cpp
     ${platform_sources}
 )
 

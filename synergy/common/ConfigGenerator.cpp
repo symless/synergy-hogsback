@@ -1,10 +1,4 @@
-#include <boost/icl/interval_map.hpp>
-#include <cassert>
-#include <cstdint>
-#include <vector>
-#include <ostream>
-#include <array>
-#include <synergy/service/Screen.h>
+#include <synergy/common/Screen.h>
 
 using boost::icl::interval;
 using boost::icl::interval_map;
