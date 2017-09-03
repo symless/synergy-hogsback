@@ -4,6 +4,7 @@
 #include "LogManager.h"
 #include "VersionManager.h"
 #include "AppConfig.h"
+#include "App.h"
 
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
@@ -17,29 +18,16 @@
 #include <QEventLoop>
 #include <QHttpMultiPart>
 #include <QNetworkInterface>
+#include <cxxopts.hpp>
 
-#ifdef SYNERGY_DEVELOPER_MODE
-#define SYNERGY_CLOUD_URI "https://alpha1.cloud.symless.com"
-#define SYMLESS_LOGIN_CLIENT_ID "4"
-#else
-#define SYNERGY_CLOUD_URI "https://v1.api.cloud.symless.com"
-#define SYMLESS_LOGIN_CLIENT_ID "3"
-#endif
+using namespace std;
 
-static const char kUserProfilesUrl[] = SYNERGY_CLOUD_URI "/user/profiles"; // TODO: change to /user/%1/profiles
-static const char kSwitchProfileUrl[] = SYNERGY_CLOUD_URI "/profile/switch"; // TODO: change to POST to /user/%1/screens
-static const char kUnsubProfileUrl[] = SYNERGY_CLOUD_URI "/profile/unsub"; // TODO: change to DELETE /profile/%1/screen/%2
-static const char kIdentifyUrl[] = SYNERGY_CLOUD_URI "/user/identify";
-static const char kUpdateProfileConfigUrl[] = SYNERGY_CLOUD_URI "/profile/update"; // TODO: change to PUT to /profile/%1
-static const char kReportUrl[] = SYNERGY_CLOUD_URI "/report"; // TODO: change to POST to /user/connectivity-reports
-static const char kClaimServerUrl[] = SYNERGY_CLOUD_URI "/profile/server/claim"; // TODO: change to POST to /profile/%1/server
-static const char kUpdateScreenUrl[] = SYNERGY_CLOUD_URI "/screen/update"; // TODO: change to PUT to /screen/%1
-static const char kCheckUpdateUrl[] = SYNERGY_CLOUD_URI "/update";
 static const char kLogUploadUrl[] = "https://symless.com/api/client/log";
 static const int kPollingTimeout = 60000; // 1 minute
 
 CloudClient::CloudClient(QObject* parent) : QObject(parent)
 {
+    setUrls();
     m_networkManager = new QNetworkAccessManager(this);
     m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
     m_profileId = m_appConfig->profileId();
@@ -67,8 +55,7 @@ void CloudClient::getUserToken()
 {
     if (m_appConfig->userToken().isEmpty() ||
             (m_appConfig->userId() == -1)) {
-        QUrl identifyUrl = QUrl(kIdentifyUrl);
-        QNetworkRequest req(identifyUrl);
+        QNetworkRequest req(m_identifyUrl);
 
         auto reply = m_networkManager->get(req);
         connect (reply, &QNetworkReply::finished, [this, reply]() {
@@ -114,8 +101,7 @@ void CloudClient::getUserId(bool initialCall)
 
     // start polling cloud to see if we have a valid user ID associated
     // with this user token
-    QUrl identifyUrl = QUrl(kIdentifyUrl);
-    QNetworkRequest req(identifyUrl);
+    QNetworkRequest req(m_identifyUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -137,8 +123,7 @@ void CloudClient::unsubProfile(int screenId)
         return;
     }
 
-    static const QUrl unsubProfileUrl = QUrl(kUnsubProfileUrl);
-    QNetworkRequest req (unsubProfileUrl);
+    QNetworkRequest req (m_unsubProfileUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -254,8 +239,7 @@ void CloudClient::onUploadProgress(qint64 done, qint64 total)
 
 void CloudClient::switchProfile(QString profileName)
 {
-    static const QUrl switchProfileUrl = QUrl(kSwitchProfileUrl);
-    QNetworkRequest req (switchProfileUrl);
+    QNetworkRequest req (m_switchProfileUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -326,8 +310,7 @@ void CloudClient::userProfiles()
         return;
     }
 
-    QUrl userProfilesUrl = QUrl(kUserProfilesUrl);
-    QNetworkRequest req(userProfilesUrl);
+    QNetworkRequest req(m_userProfilesUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -339,8 +322,7 @@ void CloudClient::userProfiles()
 
 void CloudClient::checkUpdate()
 {
-    QUrl checkUpdateUrl = QUrl(kCheckUpdateUrl);
-    QNetworkRequest req(checkUpdateUrl);
+    QNetworkRequest req(m_checkUpdateUrl);
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
     VersionManager* versionManager = qobject_cast<VersionManager*>(VersionManager::instance());
@@ -358,8 +340,7 @@ void CloudClient::checkUpdate()
 
 void CloudClient::claimServer()
 {
-    QUrl claimUrl = QUrl(kClaimServerUrl);
-    QNetworkRequest req(claimUrl);
+    QNetworkRequest req(m_claimServerUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -374,8 +355,7 @@ void CloudClient::claimServer()
 
 void CloudClient::updateScreen(const Screen& screen)
 {
-    QUrl updateScreenUrl = QUrl(kUpdateScreenUrl);
-    QNetworkRequest req(updateScreenUrl);
+    QNetworkRequest req(m_updateScreenUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -395,8 +375,7 @@ void CloudClient::goOffline()
         return;
     }
 
-    QUrl updateScreenUrl = QUrl(kUpdateScreenUrl);
-    QNetworkRequest req(updateScreenUrl);
+    QNetworkRequest req(m_updateScreenUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -454,8 +433,7 @@ void CloudClient::receivedScreensInterface(QByteArray msg)
 
 void CloudClient::report(int destId, QString successfulIpList, QString failedIpList)
 {
-    QUrl reportUrl = QUrl(kReportUrl);
-    QNetworkRequest req(reportUrl);
+    QNetworkRequest req(m_reportUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -473,8 +451,7 @@ void CloudClient::report(int destId, QString successfulIpList, QString failedIpL
 
 void CloudClient::updateProfileConfig(QJsonDocument& doc)
 {
-    QUrl reportUrl = QUrl(kUpdateProfileConfigUrl);
-    QNetworkRequest req(reportUrl);
+    QNetworkRequest req(m_updateProfileConfigUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -544,6 +521,30 @@ void CloudClient::syncConfig()
     m_appConfig->setScreenId(m_screenId);
 }
 
+void CloudClient::setUrls()
+{
+    bool useTestCloud = g_options.count("use-test-cloud");
+
+    if (useTestCloud) {
+        m_cloudUri = "https://alpha1.cloud.symless.com";
+        m_loginClientId = "4";
+    }
+    else {
+        m_cloudUri = "https://v1.api.cloud.symless.com";
+        m_loginClientId = "3";
+    }
+
+    m_userProfilesUrl = QString::fromStdString(m_cloudUri + "/user/profiles"); // TODO: change to /user/%1/profiles
+    m_switchProfileUrl = QString::fromStdString(m_cloudUri + "/profile/switch"); // TODO: change to POST to /user/%1/screens
+    m_unsubProfileUrl = QString::fromStdString(m_cloudUri + "/profile/unsub"); // TODO: change to DELETE /profile/%1/screen/%2
+    m_identifyUrl = QString::fromStdString(m_cloudUri + "/user/identify");
+    m_updateProfileConfigUrl = QString::fromStdString(m_cloudUri + "/profile/update"); // TODO: change to PUT to /profile/%1
+    m_reportUrl = QString::fromStdString(m_cloudUri + "/report"); // TODO: change to POST to /user/connectivity-reports
+    m_claimServerUrl = QString::fromStdString(m_cloudUri + "/profile/server/claim"); // TODO: change to POST to /profile/%1/server
+    m_updateScreenUrl = QString::fromStdString(m_cloudUri + "/screen/update"); // TODO: change to PUT to /screen/%1
+    m_checkUpdateUrl = QString::fromStdString(m_cloudUri + "/update");
+}
+
 bool CloudClient::replyHasError(QNetworkReply* reply)
 {
     bool result = false;
@@ -578,10 +579,10 @@ bool CloudClient::replyHasError(QNetworkReply* reply)
 
 QString
 CloudClient::serverHostname() const {
-    return SYNERGY_CLOUD_URI;
+    return QString::fromStdString(m_cloudUri);
 }
 
 QString CloudClient::loginClientId()
 {
-    return SYMLESS_LOGIN_CLIENT_ID;
+    return QString::fromStdString(m_loginClientId);
 }

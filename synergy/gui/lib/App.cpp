@@ -1,4 +1,5 @@
 #include "App.h"
+
 #include "ConnectivityTester.h"
 #include "CloudClient.h"
 #include "ScreenListModel.h"
@@ -11,6 +12,7 @@
 #include "AppConfig.h"
 #include "Hostname.h"
 #include "Common.h"
+
 #include <DirectoryManager.h>
 #include <ProfileListModel.h>
 #include <ProfileManager.h>
@@ -26,20 +28,27 @@
 #include <synergy/common/CrashHandler.h>
 
 namespace asio = boost::asio;
+using namespace std;
 
 #ifdef Q_OS_DARWIN
 #include <cstdlib>
 #endif
 
-#ifdef Q_OS_OSX
-bool installServiceHelper();
+cxxopts::Options g_options("");
 
-static bool
-installService() {
+App::App(bool (*installServiceHelper)())
+{
+    m_installServiceHelper = installServiceHelper;
+}
+
+#ifdef Q_OS_OSX
+
+bool
+App::installService() {
     if (!boost::filesystem::exists
             ("/Library/LaunchDaemons/com.symless.synergy.v2.ServiceHelper.plist")) {
         std::clog << "Service helper not installed, installing...\n";
-        if (!installServiceHelper()) {
+        if (!m_installServiceHelper()) {
             std::clog << "Failed to install service helper" << "\n";
             return false;
         }
@@ -54,20 +63,36 @@ installService() {
 int
 App::run(int argc, char* argv[])
 {
+    cxxopts::Options options("synergy2");
+
+    options.add_options()
+      ("help", "Print command line argument help")
+      ("disable-version-check", "Disable version check")
+      ("use-test-cloud", "Connect to the test cloud server")
+#ifdef Q_OS_OSX
+      ("service", "Start the service (Mac only)")
+#endif
+    ;
+
+    options.parse(argc, argv);
+
+    g_options = options;
+
+    if (g_options.count("help"))
+    {
+      std::cout << g_options.help({"", "Group"}) << std::endl;
+      return 0;
+    }
 
 #ifdef Q_OS_OSX
 
-    if (argc == 2) {
-        QString para = argv[1];
-        if (para == "--service") {
-            QProcess service;
-            QString cmd("/Applications/Synergy.app/Contents/MacOS/synergyd");
-            QStringList args;
-            service.start(cmd, args);
-
-            service.waitForFinished(-1);
-            return 0;
-        }
+    if (g_options.count("service")) {
+        QProcess service;
+        QString cmd("/Applications/Synergy.app/Contents/MacOS/synergyd");
+        QStringList args;
+        service.start(cmd, args);
+        service.waitForFinished(-1);
+        return 0;
     }
 
     if (installService()) {
@@ -151,9 +176,9 @@ App::run(int argc, char* argv[])
         io.run ();
     });
 
-#ifndef SYNERGY_DEVELOPER_MODE
-    cloudClient->checkUpdate();
-#endif
+    if (!g_options.count("disable-version-check")) {
+        cloudClient->checkUpdate();
+    }
 
     engine.rootContext()->setContextProperty
         ("PixelPerPoint", QGuiApplication::primaryScreen()->physicalDotsPerInch() / 72);

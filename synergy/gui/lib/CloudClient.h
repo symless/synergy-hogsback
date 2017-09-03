@@ -64,6 +64,7 @@ private slots:
 
 private:
     void syncConfig();
+    void setUrls();
     bool replyHasError(QNetworkReply* reply);
 
 private:
@@ -73,6 +74,17 @@ private:
     QTimer m_elapsedTimer;
     int64_t m_profileId = -1;
     int64_t m_screenId = -1;
+    std::string m_loginClientId;
+    std::string m_cloudUri;
+    QUrl m_userProfilesUrl;
+    QUrl m_switchProfileUrl;
+    QUrl m_unsubProfileUrl;
+    QUrl m_identifyUrl;
+    QUrl m_updateProfileConfigUrl;
+    QUrl m_reportUrl;
+    QUrl m_claimServerUrl;
+    QUrl m_updateScreenUrl;
+    QUrl m_checkUpdateUrl;
 
 };
 
