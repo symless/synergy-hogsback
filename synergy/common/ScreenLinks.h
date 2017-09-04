@@ -70,9 +70,9 @@ public:
     std::size_t size() const;
     bool empty() const { return size() == 0; }
 
-    ScreenEdge& up() const { return m_edges->at(0); }
+    ScreenEdge& top() const { return m_edges->at(0); }
     ScreenEdge& right() const { return m_edges->at(1); }
-    ScreenEdge& down() const { return m_edges->at(2); }
+    ScreenEdge& bottom() const { return m_edges->at(2); }
     ScreenEdge& left() const { return m_edges->at(3); }
 
 private:
