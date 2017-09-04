@@ -6,6 +6,9 @@
 std::vector<ScreenLinks>
 linkScreens (std::vector<Screen>& screens);
 
+void
+printScreenLinks (std::ostream& os, std::vector<Screen> const& screens,
+                  std::vector<ScreenLinks> const& links, int i);
 
 void
 printScreenLinks (std::ostream& os, ScreenLinkMap const& screen,

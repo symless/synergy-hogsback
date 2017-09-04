@@ -133,6 +133,26 @@ linkScreens (std::vector<Screen>& screens) {
 }
 
 void
+printScreenLinks (std::ostream& os, std::vector<Screen> const& screens,
+                  std::vector<ScreenLinks> const& links, int i) {
+    assert (screens.size() == links.size());
+
+    /* SOA -> AOS */
+    std::vector<ScreenLinkMap> targets;
+    targets.reserve (screens.size());
+
+    for (auto t = 0; t < screens.size(); ++t) {
+        targets.emplace_back (const_cast<Screen*>(&screens[t]),
+                              const_cast<ScreenLinks*>(&links[t]));
+    }
+
+    return printScreenLinks(os, ScreenLinkMap(
+                                const_cast<Screen*>(&screens.at(i)),
+                                const_cast<ScreenLinks*>(&links.at(i))),
+                            targets);
+}
+
+void
 printScreenLinks (std::ostream& os, ScreenLinkMap const& screen,
                   std::vector<ScreenLinkMap> const& targets) {
     os << screen->name << ":\n";
