@@ -11,6 +11,8 @@ set (SERVICE_SOURCES
     WebsocketSession.cpp
     TerminationSignalListener.cpp
     ProfileSnapshot.cpp
+    ConnectivityTester.cpp
+    TestDelegatee.cpp
 )
 
 add_executable (${PROJECT_NAME} ${SERVICE_SOURCES})

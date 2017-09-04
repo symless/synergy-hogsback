@@ -1,5 +1,7 @@
 #include "ServiceWorker.h"
 
+#include "synergy/service/ProfileSnapshot.h"
+#include "synergy/service/ConnectivityTester.h"
 #include "synergy/service/CloudClient.h"
 #include <synergy/common/UserConfig.h>
 #include <synergy/common/RpcManager.h>
@@ -14,6 +16,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
     m_ioService (ioService),
     m_rpcManager (std::make_unique<RpcManager>(m_ioService)),
     m_processManager (std::make_unique<ProcessManager>(m_ioService)),
+    m_connectivityTester (std::make_unique<ConnectivityTester>()),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService)),
     m_userConfig(std::make_shared<UserConfig>()),
     m_cloudClient(std::make_shared<CloudClient>(ioService, m_userConfig))
@@ -22,6 +25,20 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
     m_cloudClient->init();
 
     m_cloudClient->websocketMessageReceived.connect([this](std::string json){
+        // parse message
+        ProfileSnapshot snapshot;
+        try {
+            snapshot.parseJsonSnapshot(json);
+        }
+        catch (...) {
+            // TODO: log error
+            return;
+        }
+
+        // notify connectivity tester
+        m_connectivityTester->testNewScreens(snapshot.getScreens());
+
+        // forward the message via rpc server
         auto server = m_rpcManager->server();
         server->publish ("synergy.profile.snapshot", std::move(json));
     });

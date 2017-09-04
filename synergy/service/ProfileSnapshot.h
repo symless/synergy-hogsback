@@ -7,11 +7,6 @@
 class ProfileSnapshot
 {
 public:
-    void parseJsonSnapshot(std::string const &jsonConfig);
-
-    // TODO: ideally those structs should be private,
-    // but private control accessiblity prevent them being used by boost fusion
-public:
     struct Profile {
         int configVersion = -1;
         int id = -1;
@@ -33,6 +28,13 @@ public:
         Profile profile;
         std::vector<Screen> screens;
     };
+
+public:
+    void parseJsonSnapshot(std::string const &jsonConfig);
+
+    const std::vector<Screen>& getScreens() const;
+    // TODO: ideally those structs should be private,
+    // but private control accessiblity prevent them being used by boost fusion
 
 private:
     Snapshot m_data;

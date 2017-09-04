@@ -30,3 +30,8 @@ void ProfileSnapshot::parseJsonSnapshot(std::string const &jsonConfig)
 {
     from_json(m_data, jsonConfig);
 }
+
+const std::vector<ProfileSnapshot::Screen>& ProfileSnapshot::getScreens() const
+{
+    return m_data.screens;
+}
