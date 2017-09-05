@@ -81,15 +81,15 @@ private:
 
 
 struct ScreenLinkMap final {
-    Screen* m_screen = nullptr;
+    Screen const* m_screen = nullptr;
     ScreenLinks* m_links = nullptr;
 
-    ScreenLinkMap (Screen* screen, ScreenLinks* links) noexcept:
+    ScreenLinkMap (Screen const* screen, ScreenLinks* links) noexcept:
         m_screen(screen), m_links(links) {}
 
     auto& edges() const noexcept { return m_links->edges(); }
-    Screen* operator->() const noexcept { return m_screen; }
-    operator Screen&() const noexcept { return *m_screen; }
+    Screen const* operator->() const noexcept { return m_screen; }
+    operator Screen const&() const noexcept { return *m_screen; }
 };
 
 #endif

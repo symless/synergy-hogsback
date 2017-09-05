@@ -7,12 +7,12 @@ enum class Direction : int { Up = 0, Right = 1, Down = 2, Left = 3 };
 static char const* const directionNames[] = {"up", "right", "down", "left"};
 
 static void
-removeSource (Screen& source, std::vector<ScreenLinkMap>& targets) {
+removeSource (Screen const& source, std::vector<ScreenLinkMap>& targets) {
     /* Remove the source from the target list (screens can't be linked to
      * themselves) */
     targets.erase (
         std::remove_if (begin (targets), end(targets), [&source](auto& p) {
-            Screen& target = p;
+            Screen const& target = p;
             return (&target == &source);
         }),
         end(targets)
@@ -20,7 +20,7 @@ removeSource (Screen& source, std::vector<ScreenLinkMap>& targets) {
 }
 
 static void
-removeLeft (Screen& source, std::vector<ScreenLinkMap>& targets) {
+removeLeft (Screen const& source, std::vector<ScreenLinkMap>& targets) {
     /* Remove potential targets to the left of source */
     targets.erase (
         std::remove_if (begin (targets), end(targets), [&source](auto& target) {
@@ -31,7 +31,7 @@ removeLeft (Screen& source, std::vector<ScreenLinkMap>& targets) {
 }
 
 static void
-removeRight (Screen& source, std::vector<ScreenLinkMap>& targets) {
+removeRight (Screen const& source, std::vector<ScreenLinkMap>& targets) {
     /* Remove potential targets to the right of source */
     targets.erase (
         std::remove_if (begin (targets), end(targets), [&source](auto& target) {
@@ -42,7 +42,7 @@ removeRight (Screen& source, std::vector<ScreenLinkMap>& targets) {
 }
 
 static void
-removeAbove (Screen& source, std::vector<ScreenLinkMap>& targets) {
+removeAbove (Screen const& source, std::vector<ScreenLinkMap>& targets) {
     /* Remove potential targets above the source */
     targets.erase (
         std::remove_if (begin (targets), end(targets), [&source](auto& target) {
@@ -53,7 +53,7 @@ removeAbove (Screen& source, std::vector<ScreenLinkMap>& targets) {
 }
 
 static void
-removeBelow (Screen& source, std::vector<ScreenLinkMap>& targets) {
+removeBelow (Screen const& source, std::vector<ScreenLinkMap>& targets) {
     /* Remove potential targets below the source */
     targets.erase (
         std::remove_if (begin (targets), end(targets), [&source](auto& target) {
@@ -64,7 +64,7 @@ removeBelow (Screen& source, std::vector<ScreenLinkMap>& targets) {
 }
 
 static void
-linkLeft (ScreenLinkMap& source, std::vector<ScreenLinkMap> targets) {
+linkLeft (ScreenLinkMap const& source, std::vector<ScreenLinkMap> targets) {
     removeSource (source, targets);
     removeRight (source, targets);
     removeAbove (source, targets);
@@ -152,7 +152,7 @@ linkDown (ScreenLinkMap& source, std::vector<ScreenLinkMap> targets) {
 }
 
 std::vector<ScreenLinks>
-linkScreens (std::vector<Screen>& screens) {
+linkScreens (std::vector<Screen> const& screens) {
     /* Create all the links */
     std::vector<ScreenLinks> links;
     links.resize (screens.size());
@@ -177,7 +177,7 @@ linkScreens (std::vector<Screen>& screens) {
 
 void
 printScreenLinks (std::ostream& os, std::vector<Screen> const& screens,
-                  std::vector<ScreenLinks> const& links, int i) {
+                  std::vector<ScreenLinks>& links, int const i) {
     assert (screens.size() == links.size());
 
     /* SOA -> AOS */
@@ -185,14 +185,11 @@ printScreenLinks (std::ostream& os, std::vector<Screen> const& screens,
     targets.reserve (screens.size());
 
     for (auto t = 0; t < screens.size(); ++t) {
-        targets.emplace_back (const_cast<Screen*>(&screens[t]),
-                              const_cast<ScreenLinks*>(&links[t]));
+        targets.emplace_back (&screens[t], &links[t]);
     }
 
-    return printScreenLinks(os, ScreenLinkMap(
-                                const_cast<Screen*>(&screens.at(i)),
-                                const_cast<ScreenLinks*>(&links.at(i))),
-                            targets);
+    return printScreenLinks (os, ScreenLinkMap(&screens.at(i), &links.at(i)),
+                             targets);
 }
 
 void
@@ -255,4 +252,23 @@ printScreenLinks (std::ostream& os, ScreenLinkMap const& screen,
                 break;
         }
     }
+}
+
+void
+printConfig (std::ostream& os, std::vector<Screen> const& screens) {
+    os << "section: options\n";
+    os << "end\n\n";
+
+    os << "section: screens\n";
+    for (auto& screen: screens) {
+        os << screen.name << ":\n";
+    }
+    os << "end\n\n";
+
+    os << "section: links\n";
+    auto links = linkScreens(screens);
+    for (int i = 0; i < screens.size(); ++i) {
+        printScreenLinks (os, screens, links, i);
+    }
+    os << "end\n\n";
 }
