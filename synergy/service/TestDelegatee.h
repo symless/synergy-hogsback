@@ -3,6 +3,7 @@
 
 #include <list>
 #include <string>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/asio.hpp>
 #include <boost/signals2.hpp>
 
@@ -25,9 +26,14 @@ public:
     void start();
 
 private:
+    void onTestFinish();
+
+private:
     boost::asio::io_service& m_ioService;
+    boost::asio::deadline_timer m_timeout;
     std::vector<std::string> m_ipList;
     int m_batchSize;
+    std::map<std::string, bool> m_results;
 };
 
 #endif // TESTDELEGATEE_H
