@@ -1,7 +1,15 @@
 #include "TestDelegatee.h"
 
-TestDelegatee::TestDelegatee(boost::asio::io_service &io, const std::list<std::string> &testCases, int batchSize) :
-    m_ioService(io)
+
+TestDelegatee::TestDelegatee(boost::asio::io_service &io, std::vector<std::string> &ipList, int batchSize) :
+    m_ioService(io),
+    m_ipList(std::move(ipList)),
+    m_batchSize(batchSize)
+{
+
+}
+
+TestDelegatee::~TestDelegatee()
 {
 
 }
@@ -12,5 +20,5 @@ void TestDelegatee::start()
 
     // TODO: start the actual test
 
-    done(results);
+    done(results, m_batchSize);
 }

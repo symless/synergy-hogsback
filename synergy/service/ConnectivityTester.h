@@ -29,18 +29,19 @@ public:
 //
 //
 private:
-    void startTesting();
-    void onTestDelegateeDone(std::map<std::string, bool> results);
+    void startTesting(int batchSize);
+    void onTestDelegateeDone(std::map<std::string, bool> results, int batchSize);
+    std::vector<std::string> extractIpListFromTestCase(std::string testCase);
+    boost::optional<int> extractScreenIdFromTestCase(std::string testCase);
 
 private:
     std::set<int> m_screenIdSet;
     std::list<std::string> m_pendingTestCases;
     std::string m_localHostname;
     TestDelegatee* m_testDelegatee;
-    int m_testCaseBatchSize;
     boost::asio::io_service& m_ioService;
 //    QTcpServer* m_tcpServer;
-//    QMap<int, QStringList> m_screenSuccessfulResults;
+    std::map<int, std::vector<std::string>> m_screenSuccessfulResults;
 };
 
 #endif // CONNECTIVITYTESTER_H
