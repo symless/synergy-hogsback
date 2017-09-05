@@ -1,6 +1,7 @@
 #include "TestDelegatee.h"
 
 static const long kTimeoutSec = 3;
+static const std::string kDefaultConnectivityTestPort = "24810";
 
 TestDelegatee::TestDelegatee(boost::asio::io_service &io, std::vector<std::string> &ipList, int batchSize) :
     m_ioService(io),
@@ -11,15 +12,24 @@ TestDelegatee::TestDelegatee(boost::asio::io_service &io, std::vector<std::strin
 
 }
 
-TestDelegatee::~TestDelegatee()
-{
-
-}
-
 void TestDelegatee::start()
 {
     for (auto ip : m_ipList) {
-        // TODO: start the test in parallel
+        std::unique_ptr<SecuredTcpSession> session = std::make_unique<SecuredTcpSession>(m_ioService);
+
+        session->setHostname(ip);
+        session->setPort(kDefaultConnectivityTestPort);
+
+        session->connected.connect(
+            [this](SecuredTcpSession* orginalSession) {
+                onSessionConnected(orginalSession);
+            },
+            boost::signals2::at_front
+        );
+
+        session->connect();
+
+        m_sessions.push_back(std::move(session));
     }
 
     m_timeout.cancel();
@@ -33,4 +43,10 @@ void TestDelegatee::start()
 void TestDelegatee::onTestFinish()
 {
     done(m_results, m_batchSize);
+}
+
+void TestDelegatee::onSessionConnected(SecuredTcpSession* orginalSession)
+{
+    auto remoteIp = orginalSession->stream().lowest_layer().remote_endpoint().address().to_string();
+    m_results[remoteIp] = true;
 }

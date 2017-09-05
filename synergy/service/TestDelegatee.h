@@ -1,6 +1,8 @@
 #ifndef TESTDELEGATEE_H
 #define TESTDELEGATEE_H
 
+#include "SecuredTcpSession.h"
+
 #include <list>
 #include <string>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -11,7 +13,6 @@ class TestDelegatee
 {
 public:
     TestDelegatee(boost::asio::io_service &io, std::vector<std::string> &ipList, int batchSize);
-    ~TestDelegatee();
 
     TestDelegatee(const TestDelegatee&) = delete;
     TestDelegatee(const TestDelegatee&&) = delete;
@@ -27,11 +28,13 @@ public:
 
 private:
     void onTestFinish();
+    void onSessionConnected(SecuredTcpSession* orginalSession);
 
 private:
     boost::asio::io_service& m_ioService;
     boost::asio::deadline_timer m_timeout;
     std::vector<std::string> m_ipList;
+    std::vector<std::unique_ptr<SecuredTcpSession>> m_sessions;
     int m_batchSize;
     std::map<std::string, bool> m_results;
 };
