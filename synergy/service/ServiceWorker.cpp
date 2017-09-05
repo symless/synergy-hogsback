@@ -22,6 +22,12 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
     m_userConfig->load();
     m_cloudClient->init();
 
+    g_log.onLogLine.connect([this](std::string logLine) {
+        auto server = m_rpcManager->server();
+        // TODO: change to synergy.service.log
+        server->publish ("synergy.core.log", std::move(logLine));
+    });
+
     m_cloudClient->websocketMessageReceived.connect([this](std::string json){
         auto server = m_rpcManager->server();
         server->publish ("synergy.profile.snapshot", std::move(json));

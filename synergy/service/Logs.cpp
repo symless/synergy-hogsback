@@ -2,6 +2,18 @@
 
 #include <iostream>
 
+Log g_log;
+
+class LogSignalSink : public spdlog::sinks::sink
+{
+    void log(const spdlog::details::log_msg& logLine) override
+    {
+        g_log.onLogLine(logLine.raw.str());
+    }
+
+    void flush() { }
+};
+
 static auto
 initMainLog()
 {
@@ -14,9 +26,12 @@ initMainLog()
     auto rotating = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
         "synergy-service.log", 1024 * 1024, 1);
 
+    auto signal = std::make_shared<LogSignalSink>();
+
     std::vector<spdlog::sink_ptr> sinks;
     sinks.push_back(console);
     sinks.push_back(rotating);
+    sinks.push_back(signal);
 
     auto logger = std::make_shared<spdlog::logger>("main", begin(sinks), end(sinks));
     logger->flush_on(spdlog::level::debug);
