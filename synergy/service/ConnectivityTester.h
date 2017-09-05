@@ -18,7 +18,7 @@ public:
 
     void testNewScreens(const std::vector<ProfileSnapshot::Screen>& screens);
 
-    //std::vector<std::string> getSuccessfulResults(int screenId) const;
+    std::vector<std::string> getSuccessfulResults(int screenId) const;
 
 //    using signal = boost::signals2::signal<Args...>;
 

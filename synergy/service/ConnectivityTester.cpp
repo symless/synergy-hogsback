@@ -48,19 +48,27 @@ void ConnectivityTester::testNewScreens(const std::vector<ProfileSnapshot::Scree
                 m_screenIdSet.insert(screenId);
             }
         }
-
-        // remove inactive screen id
-        std::vector<int> result;
-        std::set_intersection(
-            latestScreenIdSet.begin(), latestScreenIdSet.end(),
-            m_screenIdSet.begin(), m_screenIdSet.end(),
-            std::back_inserter(result));
-        m_screenIdSet = std::move(std::set<int>(result.begin(), result.end()));
     }
+
+    // remove inactive screen id
+    std::vector<int> result;
+    std::set_intersection(
+        latestScreenIdSet.begin(), latestScreenIdSet.end(),
+        m_screenIdSet.begin(), m_screenIdSet.end(),
+        std::back_inserter(result));
+    m_screenIdSet = std::move(std::set<int>(result.begin(), result.end()));
 
     // start connectivity test
     if (testCaseBatchSize > 0 && !m_testDelegatee) {
         startTesting(testCaseBatchSize);
+    }
+}
+
+std::vector<std::string> ConnectivityTester::getSuccessfulResults(int screenId) const
+{
+    auto it = m_screenSuccessfulResults.find(screenId);
+    if (it != m_screenSuccessfulResults.end()) {
+        return it->second;
     }
 }
 
