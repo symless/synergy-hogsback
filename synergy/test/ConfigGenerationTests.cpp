@@ -301,6 +301,7 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
 
                 /* Check links on screen 1 */
                 REQUIRE (links[0].size() == 1);
+                //REQUIRE (std::distance(links[0].begin(), links[0].end()) == 1);
                 REQUIRE (links[0].left().empty());
                 REQUIRE (links[0].top().empty());
                 REQUIRE (links[0].bottom().empty());

@@ -6,7 +6,6 @@ using boost::icl::interval_map;
 enum class Direction : int { Up = 0, Right = 1, Down = 2, Left = 3 };
 static char const* const directionNames[] = {"up", "right", "down", "left"};
 
-
 static void
 removeSource (Screen& source, std::vector<ScreenLinkMap>& targets) {
     /* Remove the source from the target list (screens can't be linked to

@@ -3,18 +3,18 @@
 ScreenLinks::ScreenLinks(): m_edges(std::make_unique<std::array<ScreenEdge, 4>>()) {
 }
 
-ScreenNeighbourIterator
+ScreenLinkIterator
 ScreenLinks::begin() {
     using std::begin;
-    auto const edge = 0;
-    return ScreenNeighbourIterator(m_edges.get(), begin((*m_edges)[edge]), edge);
+    /* FIXME */
+    return ScreenLinkIterator(m_edges.get(), begin((*m_edges)[0]), 0);
 }
 
-ScreenNeighbourIterator
+ScreenLinkIterator
 ScreenLinks::end() {
     using std::end;
-    auto const edge = 3;
-    return ScreenNeighbourIterator(m_edges.get(), end((*m_edges)[edge]), edge);
+    /* FIXME */
+    return ScreenLinkIterator(m_edges.get(), end((*m_edges)[3]), 4);
 }
 
 size_t
