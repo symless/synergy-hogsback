@@ -29,7 +29,7 @@ void HttpSession::post(const std::string &target, const std::string &body)
 void HttpSession::connect()
 {
     m_session.connected.connect(
-        [this]() {
+        [this](SecuredTcpSession*) {
             onSessionConnected();
         },
         boost::signals2::at_front

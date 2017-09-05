@@ -23,7 +23,7 @@ WebsocketSession::connect(const std::string target)
     m_target = target;
 
     m_session.connected.connect(
-        [this]() {
+        [this](SecuredTcpSession*) {
             onSessionConnected();
         },
         boost::signals2::at_front
@@ -134,7 +134,6 @@ WebsocketSession::onReadFinished(errorCode ec)
     std::string message =  stream.str();
     messageReceived(std::move(message));
 
-    // TODO: pass message to process manager
     m_readBuffer = boost::beast::multi_buffer();
 
     // keep reading

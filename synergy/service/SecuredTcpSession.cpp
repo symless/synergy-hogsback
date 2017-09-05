@@ -63,7 +63,7 @@ bool SecuredTcpSession::checkError(errorCode ec)
 void SecuredTcpSession::onResolveFinished(errorCode ec, tcp::resolver::iterator result)
 {
     if (checkError(ec)) {
-        connectFailed();
+        connectFailed(this);
         return;
     }
 
@@ -79,7 +79,7 @@ void SecuredTcpSession::onResolveFinished(errorCode ec, tcp::resolver::iterator 
 void SecuredTcpSession::onConnectFinished(errorCode ec)
 {
     if (checkError(ec)) {
-        connectFailed();
+        connectFailed(this);
         return;
     }
 
@@ -95,11 +95,11 @@ void SecuredTcpSession::onConnectFinished(errorCode ec)
 void SecuredTcpSession::onSslHandshakeFinished(errorCode ec)
 {
     if (checkError(ec)) {
-        connectFailed();
+        connectFailed(this);
         return;
     }
 
-    connected();
+    connected(this);
 }
 
 ssl::stream<tcp::socket>& SecuredTcpSession::stream()

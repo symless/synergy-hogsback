@@ -26,8 +26,8 @@ public:
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
 
-    signal<void()> connected;
-    signal<void()> connectFailed;
+    signal<void(SecuredTcpSession*)> connected;
+    signal<void(SecuredTcpSession*)> connectFailed;
 
     void connect();
     bool checkError(errorCode ec);
