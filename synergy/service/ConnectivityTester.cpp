@@ -2,11 +2,10 @@
 #include "TestDelegatee.h"
 
 #include <algorithm>
-#include <thread>
 
-ConnectivityTester::ConnectivityTester() :
-    m_testThread(nullptr),
-    m_testDelegatee(nullptr)
+ConnectivityTester::ConnectivityTester(boost::asio::io_service &io) :
+    m_testDelegatee(nullptr),
+    m_ioService(io)
 {
 
 }
@@ -28,7 +27,7 @@ void ConnectivityTester::testNewScreens(const std::vector<ProfileSnapshot::Scree
             latestScreenIdSet.insert(screenId);
             std::set<int>::const_iterator i = m_screenIdSet.find(screenId);
             // if this is a new screen and there is not a connectivity test running already
-            if (i == m_screenIdSet.end() && !m_testThread) {
+            if (i == m_screenIdSet.end() && !m_testDelegatee) {
                 // get ip list
                 std::string ipList = screen.ipList;
                 if (ipList.empty()) {
@@ -50,7 +49,7 @@ void ConnectivityTester::testNewScreens(const std::vector<ProfileSnapshot::Scree
 
 
         // start connectivity test
-        if (m_testCaseBatchSize > 0 && !m_testThread) {
+        if (m_testCaseBatchSize > 0 && !m_testDelegatee) {
             startTesting();
         }
 
@@ -66,25 +65,17 @@ void ConnectivityTester::testNewScreens(const std::vector<ProfileSnapshot::Scree
 
 void ConnectivityTester::startTesting()
 {
-    if (m_testThread) {
-        return;
-    }
-
-    m_testDelegatee = new TestDelegatee(m_pendingTestCases, m_testCaseBatchSize);
+    m_testDelegatee = new TestDelegatee(m_ioService, m_pendingTestCases, m_testCaseBatchSize);
     m_testDelegatee->done.connect(std::bind(&ConnectivityTester::onTestDelegateeDone, this, std::placeholders::_1));
-    m_testThread = new std::thread ([this]{
-        m_testDelegatee->start();
-    });
+    m_testDelegatee->start();
 }
 
 void ConnectivityTester::onTestDelegateeDone(std::map<std::string, bool> results)
 {
-    m_testThread->join();
-
     // TODO: process the test results
 
-    delete m_testThread;
-    m_testThread = nullptr;
     delete m_testDelegatee;
     m_testDelegatee = nullptr;
+
+    // TODO: check if there is some pending test left
 }

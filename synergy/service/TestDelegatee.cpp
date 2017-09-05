@@ -1,6 +1,7 @@
 #include "TestDelegatee.h"
 
-TestDelegatee::TestDelegatee(const std::list<std::string> &testCases, int batchSize)
+TestDelegatee::TestDelegatee(boost::asio::io_service &io, const std::list<std::string> &testCases, int batchSize) :
+    m_ioService(io)
 {
 
 }

@@ -3,21 +3,18 @@
 
 #include "ProfileSnapshot.h"
 
+#include <boost/asio.hpp>
 #include <boost/signals2.hpp>
 #include <set>
 #include <vector>
 #include <string>
-
-namespace std {
-    class thread;
-}
 
 class TestDelegatee;
 
 class ConnectivityTester
 {
 public:
-    ConnectivityTester();
+    ConnectivityTester(boost::asio::io_service &io);
 
     void testNewScreens(const std::vector<ProfileSnapshot::Screen>& screens);
 
@@ -39,9 +36,9 @@ private:
     std::set<int> m_screenIdSet;
     std::list<std::string> m_pendingTestCases;
     std::string m_localHostname;
-    std::thread* m_testThread;
     TestDelegatee* m_testDelegatee;
     int m_testCaseBatchSize;
+    boost::asio::io_service& m_ioService;
 //    QTcpServer* m_tcpServer;
 //    QMap<int, QStringList> m_screenSuccessfulResults;
 };
