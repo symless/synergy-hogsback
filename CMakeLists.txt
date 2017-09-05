@@ -101,6 +101,12 @@ include_directories (BEFORE SYSTEM third_party/json/include)
 include_directories (BEFORE SYSTEM third_party/cxxopts/include)
 
 #
+# spdlog
+#
+
+include_directories (BEFORE SYSTEM third_party/spdlog/include)
+
+#
 # Msgpack
 #
 set (Msgpack_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/msgpack-c/include")

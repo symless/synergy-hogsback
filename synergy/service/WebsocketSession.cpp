@@ -1,5 +1,6 @@
 #include "WebsocketSession.h"
 
+#include <synergy/service/Logs.h>
 #include <boost/asio/connect.hpp>
 
 static const long kReconnectDelaySec = 3;
@@ -29,6 +30,7 @@ WebsocketSession::connect(const std::string target)
         boost::signals2::at_front
     );
 
+    mainLog()->debug("connecting websocket");
     m_session.connect();
 }
 
@@ -110,6 +112,7 @@ WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
         return;
     }
 
+    mainLog()->debug("websocket connected");
     m_connected = true;
     connected();
 

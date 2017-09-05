@@ -8,6 +8,7 @@ add_executable (${PROJECT_NAME}
     ../service/WebsocketSession.cpp
     ../service/SecuredTcpSession.cpp
     ../service/ProfileSnapshot.cpp
+    ../service/Logs.cpp
 )
 
 target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
