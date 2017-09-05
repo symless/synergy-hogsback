@@ -65,6 +65,28 @@ removeBelow (Screen& source, std::vector<ScreenLinkMap>& targets) {
 }
 
 static void
+linkLeft (ScreenLinkMap& source, std::vector<ScreenLinkMap> targets) {
+    removeSource (source, targets);
+    removeRight (source, targets);
+    removeAbove (source, targets);
+    removeBelow (source, targets);
+
+    /* Sort targets in to ascending order by x-coordinate (so we link up the
+     * left-most screens first, working right back toward the source).
+     */
+    std::sort (begin(targets), end(targets),
+               [](auto t1, auto t2) { return t1->x < t2->x; });
+
+    for (auto& target : targets) {
+        auto i = interval<int64_t>::closed (
+            std::max (source->y, target->y),
+            std::min (source->y + source->height, target->y + target->height)
+        );
+        source.edges()[int(Direction::Left)].set (make_pair (i, target->id));
+    }
+}
+
+static void
 linkRight (ScreenLinkMap& source, std::vector<ScreenLinkMap> targets) {
     removeSource (source, targets);
     removeLeft (source, targets);
@@ -83,7 +105,6 @@ linkRight (ScreenLinkMap& source, std::vector<ScreenLinkMap> targets) {
             std::min (source->y + source->height, target->y + target->height)
         );
         source.edges()[int(Direction::Right)].set (make_pair (i, target->id));
-        target.edges()[int(Direction::Left)].set (make_pair (i, source->id));
     }
 }
 
@@ -95,7 +116,7 @@ linkUp (ScreenLinkMap& source, std::vector<ScreenLinkMap> targets) {
     removeBelow (source, targets);
 
     /* Sort targets in to ascending order by y-coordinate (so we link up the
-     * upper-most screens first, working down back toward the source).
+     * top-most screens first, working down back toward the source).
      */
     std::sort (begin(targets), end(targets),
                [](auto t1, auto t2) { return t1->y < t2->y; });
@@ -106,7 +127,28 @@ linkUp (ScreenLinkMap& source, std::vector<ScreenLinkMap> targets) {
             std::min (source->x + source->width, target->x + target->width)
         );
         source.edges()[int(Direction::Up)].set (make_pair (i, target->id));
-        target.edges()[int(Direction::Down)].set (make_pair (i, source->id));
+    }
+}
+
+static void
+linkDown (ScreenLinkMap& source, std::vector<ScreenLinkMap> targets) {
+    removeSource (source, targets);
+    removeLeft (source, targets);
+    removeRight (source, targets);
+    removeAbove (source, targets);
+
+    /* Sort targets in to descending order by y-coordinate (so we link up the
+     * bottom-most screens first, working up back toward the source).
+     */
+    std::sort (begin(targets), end(targets),
+               [](auto t1, auto t2) { return t1->y > t2->y; });
+
+    for (auto& target : targets) {
+        auto i = interval<int64_t>::closed (
+            std::max (source->x, target->x),
+            std::min (source->x + source->width, target->x + target->width)
+        );
+        source.edges()[int(Direction::Down)].set (make_pair (i, target->id));
     }
 }
 
@@ -127,6 +169,8 @@ linkScreens (std::vector<Screen>& screens) {
     for (auto& target : targets) {
         linkUp (target, targets);
         linkRight (target, targets);
+        linkDown (target, targets);
+        linkLeft (target, targets);
     }
 
     return links;
