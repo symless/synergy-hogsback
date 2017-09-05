@@ -357,7 +357,8 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
 
 
             SECTION ("Three screens (s1,s2,s3) next to one another, touching "
-                     "horizontally, with the center screen dropped by 50%") {
+                     "horizontally, with the center screen dropped by 50% "
+                     "(screens added left to right)") {
                 s2.x = s1.x + s1.width;
                 s2.y = s1.y + s1.height / 2;
                 s3.x = s1.x + s1.width + s2.width;
@@ -432,6 +433,166 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                     "Andrews-Cray2:\n"
                         "\tleft(0,50) = Andrews-PC(0,50)\n"
                         "\tleft(50,100) = Andrews-iMac(0,50)\n";
+                REQUIRE (expected == oss.str());
+            }
+
+            SECTION ("Three screens (s1,s2,s3) next to one another, touching "
+                     "horizontally, with the center screen dropped by 50% "
+                     "(screens added out of order)") {
+                s2.x = s1.x + s1.width;
+                s2.y = s1.y + s1.height / 2;
+                s3.x = s1.x + s1.width + s2.width;
+                s3.y = s1.y;
+                screens.push_back (s3);
+                screens.push_back (s2);
+                auto links = linkScreens (screens);
+                REQUIRE (links.size() == 3);
+
+                /* Check links on screen 1 */
+                REQUIRE (links[0].size() == 2);
+                REQUIRE (links[0].left().empty());
+                REQUIRE (links[0].top().empty());
+                REQUIRE (links[0].bottom().empty());
+                REQUIRE (links[0].right().iterative_size() == 2);
+
+                auto link = links[0].right().begin();
+                REQUIRE (link->first.lower() == 0);
+                REQUIRE (link->first.upper() == 540);
+                REQUIRE (link->second == s3.id);
+
+                ++link;
+                REQUIRE (link->first.lower() == 540);
+                REQUIRE (link->first.upper() == 1080);
+                REQUIRE (link->second == s2.id);
+
+                /* Check links on screen 3 */
+                REQUIRE (links[2].size() == 2);
+                REQUIRE (links[2].top().empty());
+                REQUIRE (links[2].bottom().empty());
+                REQUIRE (links[2].left().iterative_size() == 1);
+                REQUIRE (links[2].right().iterative_size() == 1);
+
+                link = links[2].left().begin();
+                REQUIRE (link->first.lower() == 540);
+                REQUIRE (link->first.upper() == 1080);
+                REQUIRE (link->second == s1.id);
+
+                link = links[2].right().begin();
+                REQUIRE (link->first.lower() == 540);
+                REQUIRE (link->first.upper() == 1080);
+                REQUIRE (link->second == s3.id);
+
+                /* Check links on screen 2 */
+                REQUIRE (links[1].size() == 2);
+                REQUIRE (links[1].top().empty());
+                REQUIRE (links[1].bottom().empty());
+                REQUIRE (links[1].left().iterative_size() == 2);
+                REQUIRE (links[1].right().empty());
+
+                link = links[1].left().begin();
+                REQUIRE (link->first.lower() == 0);
+                REQUIRE (link->first.upper() == 540);
+                REQUIRE (link->second == s1.id);
+
+                ++link;
+                REQUIRE (link->first.lower() == 540);
+                REQUIRE (link->first.upper() == 1080);
+                REQUIRE (link->second == s2.id);
+
+                std::ostringstream oss;
+                printScreenLinks (oss, screens, links, 0);
+                printScreenLinks (oss, screens, links, 2);
+                printScreenLinks (oss, screens, links, 1);
+                auto expected =
+                    "Andrews-PC:\n"
+                        "\tright(0,50) = Andrews-Cray2(0,50)\n"
+                        "\tright(50,100) = Andrews-iMac(0,50)\n"
+                    "Andrews-iMac:\n"
+                        "\tright(0,50) = Andrews-Cray2(50,100)\n"
+                        "\tleft(0,50) = Andrews-PC(50,100)\n"
+                    "Andrews-Cray2:\n"
+                        "\tleft(0,50) = Andrews-PC(0,50)\n"
+                        "\tleft(50,100) = Andrews-iMac(0,50)\n";
+                REQUIRE (expected == oss.str());
+            }
+
+            SECTION ("Three screens (s1,s2,s3) on top of one another, touching "
+                     "vertically, with the center screen kicked to the right by "
+                     "50%") {
+                s2.x = s1.x + s1.width / 2;
+                s2.y = s1.y + s1.height;
+                s3.x = s1.x;
+                s3.y = s2.y + s2.height;
+                screens.push_back (s2);
+                screens.push_back (s3);
+                auto links = linkScreens (screens);
+                REQUIRE (links.size() == 3);
+
+                /* Check links on screen 1 */
+                REQUIRE (links[0].size() == 2);
+                REQUIRE (links[0].left().empty());
+                REQUIRE (links[0].top().empty());
+                REQUIRE (links[0].bottom().iterative_size() == 2);
+                REQUIRE (links[0].right().empty());
+
+                auto link = links[0].bottom().begin();
+                REQUIRE (link->first.lower() == 0);
+                REQUIRE (link->first.upper() == 960);
+                REQUIRE (link->second == s3.id);
+
+                ++link;
+                REQUIRE (link->first.lower() == 960);
+                REQUIRE (link->first.upper() == 1920);
+                REQUIRE (link->second == s2.id);
+
+                /* Check links on screen 2 */
+                REQUIRE (links[1].size() == 2);
+                REQUIRE (links[1].top().iterative_size() == 1);
+                REQUIRE (links[1].bottom().iterative_size() == 1);
+                REQUIRE (links[1].left().empty());
+                REQUIRE (links[1].right().empty());
+
+                link = links[1].top().begin();
+                REQUIRE (link->first.lower() == 960);
+                REQUIRE (link->first.upper() == 1920);
+                REQUIRE (link->second == s1.id);
+
+                link = links[1].bottom().begin();
+                REQUIRE (link->first.lower() == 960);
+                REQUIRE (link->first.upper() == 1920);
+                REQUIRE (link->second == s3.id);
+
+                /* Check links on screen 3 */
+                REQUIRE (links[2].size() == 2);
+                REQUIRE (links[2].top().iterative_size() == 2);
+                REQUIRE (links[2].bottom().empty());
+                REQUIRE (links[2].left().empty());
+                REQUIRE (links[2].right().empty());
+
+                link = links[2].top().begin();
+                REQUIRE (link->first.lower() == 0);
+                REQUIRE (link->first.upper() == 960);
+                REQUIRE (link->second == s1.id);
+
+                ++link;
+                REQUIRE (link->first.lower() == 960);
+                REQUIRE (link->first.upper() == 1920);
+                REQUIRE (link->second == s2.id);
+
+                std::ostringstream oss;
+                printScreenLinks (oss, screens, links, 0);
+                printScreenLinks (oss, screens, links, 1);
+                printScreenLinks (oss, screens, links, 2);
+                auto expected =
+                    "Andrews-PC:\n"
+                        "\tdown(0,50) = Andrews-Cray2(0,50)\n"
+                        "\tdown(50,100) = Andrews-iMac(0,50)\n"
+                    "Andrews-iMac:\n"
+                        "\tup(0,50) = Andrews-PC(50,100)\n"
+                        "\tdown(0,50) = Andrews-Cray2(50,100)\n"
+                    "Andrews-Cray2:\n"
+                        "\tup(0,50) = Andrews-PC(0,50)\n"
+                        "\tup(50,100) = Andrews-iMac(0,50)\n";
                 REQUIRE (expected == oss.str());
             }
         }
