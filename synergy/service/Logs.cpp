@@ -8,7 +8,7 @@ class LogSignalSink : public spdlog::sinks::sink
 {
     void log(const spdlog::details::log_msg& logLine) override
     {
-        g_log.onLogLine(logLine.raw.str());
+        g_log.onLogLine(logLine.formatted.str());
     }
 
     void flush() { }
@@ -34,6 +34,7 @@ initMainLog()
     sinks.push_back(signal);
 
     auto logger = std::make_shared<spdlog::logger>("main", begin(sinks), end(sinks));
+    logger->set_pattern("[%Y-%m-%dT%T] %l: %v");
     logger->flush_on(spdlog::level::debug);
     logger->set_level(spdlog::level::debug);
     return logger;

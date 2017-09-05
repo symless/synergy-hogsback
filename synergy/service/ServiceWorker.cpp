@@ -24,8 +24,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
 
     g_log.onLogLine.connect([this](std::string logLine) {
         auto server = m_rpcManager->server();
-        // TODO: change to synergy.service.log
-        server->publish ("synergy.core.log", std::move(logLine));
+        server->publish ("synergy.service.log", std::move(logLine));
     });
 
     m_cloudClient->websocketMessageReceived.connect([this](std::string json){
