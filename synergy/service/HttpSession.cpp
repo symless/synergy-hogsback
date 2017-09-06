@@ -5,11 +5,8 @@
 static const int kHttpVersion = 11;
 
 HttpSession::HttpSession(boost::asio::io_service& ioService, std::string hostname, std::string port) :
-    m_session(ioService),
-    m_stream(m_session.stream())
+    m_tcpClient(ioService, hostname, port)
 {
-    m_session.setHostname(hostname);
-    m_session.setPort(port);
 }
 
 void HttpSession::get(const std::string &target)
@@ -28,19 +25,19 @@ void HttpSession::post(const std::string &target, const std::string &body)
 
 void HttpSession::connect()
 {
-    m_session.connected.connect(
-        [this](SecuredTcpSession*) {
-            onSessionConnected();
+    m_tcpClient.connected.connect(
+        [this](SecuredTcpClient*) {
+            onTcpClientConnected();
         },
         boost::signals2::at_front
     );
 
-    m_session.connect();
+    m_tcpClient.connect();
 }
 
-void HttpSession::onSessionConnected()
+void HttpSession::onTcpClientConnected()
 {
-    http::async_write(m_stream, m_request,
+    http::async_write(m_tcpClient.stream(), m_request,
         std::bind(
             &HttpSession::onWriteFinished,
             this,
@@ -52,7 +49,7 @@ void HttpSession::setupRequest(http::verb method, const std::string &target, con
     m_request.version = kHttpVersion;
     m_request.method(method);
     m_request.target(target);
-    m_request.set(http::field::host, m_session.hostname().c_str());
+    //m_request.set(http::field::host, m_session.hostname().c_str());
 
     if (!body.empty()) {
         m_request.set(http::field::content_type, "application/json");
@@ -64,7 +61,7 @@ void HttpSession::setupRequest(http::verb method, const std::string &target, con
 
 void HttpSession::onWriteFinished(errorCode ec)
 {
-    m_session.checkError(ec);
+    //m_tcpClient.checkError(ec);
 
     // TODO: do we care if the request has been received?
 }

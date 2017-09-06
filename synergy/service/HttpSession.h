@@ -1,7 +1,7 @@
 #ifndef HTTPSESSION_H
 #define HTTPSESSION_H
 
-#include "synergy/service/SecuredTcpSession.h"
+#include "synergy/service/SecuredTcpClient.h"
 
 #include <boost/beast/http.hpp>
 #include <boost/asio/io_service.hpp>
@@ -18,13 +18,12 @@ public:
 
 private:
     void connect();
-    void onSessionConnected();
+    void onTcpClientConnected();
     void setupRequest(http::verb method, const std::string &target, const std::string &body = "");
     void onWriteFinished(errorCode ec);
 
 private:
-    SecuredTcpSession m_session;
-    ssl::stream<tcp::socket>& m_stream;
+    SecuredTcpClient m_tcpClient;
     http::request<http::string_body> m_request;
     http::response<http::string_body> m_response;
 };
