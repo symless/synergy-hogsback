@@ -4,7 +4,7 @@
 
 SecuredTcpClient::SecuredTcpClient(boost::asio::io_service &ioService, std::string hostname, std::string port) :
     m_ioService(ioService),
-    m_sslContext(ssl::context::tlsv12_client),
+    m_sslContext(ssl::context::tls_client),
     m_session(ioService, m_sslContext),
     m_resolver(ioService),
     m_address(hostname),
@@ -58,7 +58,7 @@ void SecuredTcpClient::onConnectFinished(errorCode ec)
         return;
     }
 
-    m_session.startSslHandshake();
+    m_session.startSslHandshake(false);
 }
 
 std::string SecuredTcpClient::address() const
