@@ -140,7 +140,6 @@ Rectangle {
                         text: "Copy"
                         shortcut: "Ctrl+C"
                         onTriggered: {
-                            logConsoleTextArea.selectAll()
                             logConsoleTextArea.copy()
                         }
                     }
