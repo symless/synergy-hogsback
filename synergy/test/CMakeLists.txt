@@ -8,6 +8,10 @@ add_executable (${PROJECT_NAME}
     ../service/WebsocketSession.cpp
     ../service/SecuredTcpSession.cpp
     ../service/ProfileSnapshot.cpp
+    ../service/ConnectivityTester.cpp
+    ../service/TestDelegatee.cpp
+    ../service/SecuredTcpClient.cpp
+    ../service/SecuredTcpServer.cpp
 )
 
 target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
