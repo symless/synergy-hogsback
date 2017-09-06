@@ -25,7 +25,7 @@ public:
     signal<void(SecuredTcpSession*)> connected;
     signal<void(SecuredTcpSession*)> connectFailed;
 
-    void startSslHandshake();
+    void startSslHandshake(bool serverMode);
     void onSslHandshakeFinished(errorCode ec);
 
 private:

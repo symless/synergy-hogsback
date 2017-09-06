@@ -13,20 +13,33 @@ SecuredTcpSession::~SecuredTcpSession()
 {
 }
 
-void SecuredTcpSession::startSslHandshake()
+void SecuredTcpSession::startSslHandshake(bool serverMode)
 {
-    // SSL handshake
-    m_stream.async_handshake(
-        ssl::stream_base::client,
-        std::bind(
-            &SecuredTcpSession::onSslHandshakeFinished,
-            this,
-            std::placeholders::_1));
+    if (serverMode) {
+        // SSL handshake
+        m_stream.async_handshake(
+            ssl::stream_base::server,
+            std::bind(
+                &SecuredTcpSession::onSslHandshakeFinished,
+                this,
+                std::placeholders::_1));
+    }
+    else {
+        // SSL handshake
+        m_stream.async_handshake(
+            ssl::stream_base::client,
+            std::bind(
+                &SecuredTcpSession::onSslHandshakeFinished,
+                this,
+                std::placeholders::_1));
+    }
+
 }
 
 void SecuredTcpSession::onSslHandshakeFinished(errorCode ec)
 {
     if (ec) {
+        std::string error = ec.message();
         connectFailed(this);
         return;
     }
