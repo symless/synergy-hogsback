@@ -9,7 +9,9 @@ TerminationSignalListener::TerminationSignalListener
     m_signals(io, SIGTERM, SIGINT)
 #endif
 {
-    m_signals.async_wait([this](auto&... args) { terminationHandler (args...); });
+    m_signals.async_wait([this](auto&... args) {
+        this->terminationHandler (args...);
+    });
 }
 
 void

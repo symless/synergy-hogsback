@@ -1,29 +1,28 @@
-#include "CloudClient.h"
-
+#include <synergy/service/CloudClient.h>
 #include <synergy/common/UserConfig.h>
 
-static const char* kPubSubServerHostname = "165.227.29.181";
-static const char* kPubSubServerPort = "8081";
-static const char* kSubTarget = "/synergy/sub/auth";
-static const char* kCloudServerHostname = "192.168.3.93";
-static const char* kCloudServerPort = "80";
-CloudClient::CloudClient(boost::asio::io_service& ioService, std::shared_ptr<UserConfig> userConfig) :
+static const char* const kPubSubServerHostname = "165.227.29.181";
+static const char* const kPubSubServerPort = "8081";
+static const char* const kSubTarget = "/synergy/sub/auth";
+static const char* const kCloudServerHostname = "192.168.3.93";
+static const char* const kCloudServerPort = "80";
+
+CloudClient::CloudClient(boost::asio::io_service& ioService) :
     m_ioService(ioService),
     m_httpSession(ioService, kCloudServerHostname, kCloudServerPort),
-    m_userConfig(userConfig),
     m_websocket(ioService, kPubSubServerHostname, kPubSubServerPort)
 {
     m_websocket.messageReceived.connect([this](std::string msg) {
-        websocketMessageReceived(msg);
+        websocketMessageReceived(std::move(msg));
     });
 }
 
-void CloudClient::init()
+void CloudClient::init(UserConfig const& userConfig)
 {
-    int64_t profileId = m_userConfig->profileId();
+    auto const profileId = userConfig.profileId();
     if (profileId != -1) {
         m_websocket.addHeader("X-Channel-Id", std::to_string(profileId));
-        m_websocket.addHeader("X-Auth-Token", m_userConfig->userToken());
+        m_websocket.addHeader("X-Auth-Token", userConfig.userToken());
 
         if (!m_websocket.isConnected()) {
             m_websocket.connect(kSubTarget);
