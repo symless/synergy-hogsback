@@ -35,9 +35,16 @@ ProcessManager::ProcessManager(WampClient& wampClient) :
     connect (this, &ProcessManager::logCoreOutput, this,
              &ProcessManager::onLogCoreOutput, Qt::QueuedConnection);
 
+    connect (this, &ProcessManager::logServiceOutput, this,
+             &ProcessManager::onLogServiceOutput, Qt::QueuedConnection);
+
     wampClient.connected.connect([&]() {
         wampClient.subscribe ("synergy.core.log", [this](std::string line) {
             emit logCoreOutput(QString::fromStdString(line));
+        });
+
+        wampClient.subscribe ("synergy.service.log", [this](std::string line) {
+            emit logServiceOutput(QString::fromStdString(line));
         });
 
         wampClient.subscribe ("synergy.screen.status",
@@ -131,6 +138,8 @@ void ProcessManager::startProcess()
         this, SLOT(onLogCoreOutput()));
     connect(m_process, SIGNAL(readyReadStandardError()),
         this, SLOT(logCoreError()));
+    connect(m_process, SIGNAL(readyReadStandardOutput()),
+        this, SLOT(onLogServiceOutput()));
 
     ProcessCommand processCommand;
     QString command = processCommand.command(
@@ -223,10 +232,19 @@ void ProcessManager::onLogCoreOutput(QString text)
 {
     foreach(QString line, text.split(QRegExp("\r|\n|\r\n"))) {
         if (!line.isEmpty()) {
-            LogManager::raw("[Core] " + line);
+            LogManager::raw("[ Core    ] " + line);
             if (line.contains("local input detected")) {
                 emit localInputDetected();
             }
+        }
+    }
+}
+
+void ProcessManager::onLogServiceOutput(QString text)
+{
+    foreach(QString line, text.split(QRegExp("\r|\n|\r\n"))) {
+        if (!line.isEmpty()) {
+            LogManager::raw("[ Service ] " + line);
         }
     }
 }

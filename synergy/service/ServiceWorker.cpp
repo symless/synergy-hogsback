@@ -1,6 +1,7 @@
 #include "ServiceWorker.h"
 
 #include "synergy/service/CloudClient.h"
+#include <synergy/service/Logs.h>
 #include <synergy/common/UserConfig.h>
 #include <synergy/common/RpcManager.h>
 #include <synergy/common/WampServer.h>
@@ -21,12 +22,20 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
     m_userConfig->load();
     m_cloudClient->init();
 
+    g_log.onLogLine.connect([this](std::string logLine) {
+        auto server = m_rpcManager->server();
+        server->publish ("synergy.service.log", std::move(logLine));
+    });
+
     m_cloudClient->websocketMessageReceived.connect([this](std::string json){
         auto server = m_rpcManager->server();
         server->publish ("synergy.profile.snapshot", std::move(json));
     });
 
-    m_rpcManager->ready.connect([this]() { provideRpcEndpoints(); });
+    m_rpcManager->ready.connect([this]() {
+        provideRpcEndpoints();
+        mainLog()->info("service started successfully");
+    });
     m_rpcManager->start();
 }
 
@@ -103,6 +112,10 @@ void ServiceWorker::shutdown()
 
 void ServiceWorker::provideRpcEndpoints()
 {
+    mainLog()->debug("creating rpc endpoints");
+
     provideCore();
     provideAuthUpdate();
+
+    mainLog()->debug("rpc endpoints created");
 }

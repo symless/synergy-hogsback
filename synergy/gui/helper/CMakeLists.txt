@@ -16,6 +16,6 @@ target_link_libraries (${PROJECT_NAME} "-sectcreate __TEXT __launchd_plist ${CMA
 target_link_libraries (${PROJECT_NAME}
     fmt
     commonlib
-    Boost::filesystem
+    ${Boost_LIBRARIES}
 )
 install (TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${SYNERGY_BUNDLE_LAUNCH_DIR})

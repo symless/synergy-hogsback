@@ -6,6 +6,8 @@ import com.synergy.gui 1.0
 
 Rectangle {
 
+    FontLoader { id: fixedFont; name: "Courier" }
+
     Hostname {
         id: localHostname
     }
@@ -124,8 +126,7 @@ Rectangle {
                 style: TextAreaStyle {
                     backgroundColor: "black"
                     textColor: "white"
-                    font.family: sample.font.family
-                    font.pixelSize: sample.font.pixelSize
+                    font { family: fixedFont.name; pixelSize: sample.font.pixelSize * .8 }
                 }
 
                 menu: Menu {

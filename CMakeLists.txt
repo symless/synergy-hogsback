@@ -88,7 +88,23 @@ add_definitions (-DZMQ_STATIC)
 add_definitions (-DZMQ_BUILD_DRAFT_API)
 include_directories (BEFORE SYSTEM third_party/libzmq/include)
 include_directories (BEFORE SYSTEM third_party/cppzmq)
+
+#
+# JSON
+#
 include_directories (BEFORE SYSTEM third_party/json/include)
+
+#
+# cxxopts
+#
+
+include_directories (BEFORE SYSTEM third_party/cxxopts/include)
+
+#
+# spdlog
+#
+
+include_directories (BEFORE SYSTEM third_party/spdlog/include)
 
 #
 # Msgpack
