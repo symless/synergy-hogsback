@@ -7,11 +7,9 @@ static const char* const kSubTarget = "/synergy/sub/auth";
 static const char* const kCloudServerHostname = "192.168.3.93";
 static const char* const kCloudServerPort = "80";
 
-CloudClient::CloudClient(boost::asio::io_service& ioService,
-                         std::shared_ptr<UserConfig> userConfig) :
+CloudClient::CloudClient(boost::asio::io_service& ioService) :
     m_ioService(ioService),
     m_httpSession(ioService, kCloudServerHostname, kCloudServerPort),
-    m_userConfig(userConfig),
     m_websocket(ioService, kPubSubServerHostname, kPubSubServerPort)
 {
     m_websocket.messageReceived.connect([this](std::string msg) {
@@ -19,12 +17,12 @@ CloudClient::CloudClient(boost::asio::io_service& ioService,
     });
 }
 
-void CloudClient::init()
+void CloudClient::init(UserConfig const& userConfig)
 {
-    auto const profileId = m_userConfig->profileId();
+    auto const profileId = userConfig.profileId();
     if (profileId != -1) {
         m_websocket.addHeader("X-Channel-Id", std::to_string(profileId));
-        m_websocket.addHeader("X-Auth-Token", m_userConfig->userToken());
+        m_websocket.addHeader("X-Auth-Token", userConfig.userToken());
 
         if (!m_websocket.isConnected()) {
             m_websocket.connect(kSubTarget);

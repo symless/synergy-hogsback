@@ -17,10 +17,10 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
     m_rpcManager (std::make_unique<RpcManager>(m_ioService)),
     m_processManager (std::make_unique<ProcessManager>(m_ioService)),
     m_userConfig (std::make_shared<UserConfig>()),
-    m_cloudClient (std::make_unique<CloudClient>(ioService, m_userConfig))
+    m_cloudClient (std::make_unique<CloudClient>(ioService))
 {
     m_userConfig->load();
-    m_cloudClient->init();
+    m_cloudClient->init(*m_userConfig);
 
     g_log.onLogLine.connect([this](std::string logLine) {
         auto server = m_rpcManager->server();
@@ -96,7 +96,7 @@ void ServiceWorker::provideAuthUpdate()
         m_userConfig->setProfileId(profileId);
         m_userConfig->setUserToken(std::move(userToken));
         m_userConfig->save();
-        m_cloudClient->init();
+        m_cloudClient->init(*m_userConfig);
     });
 }
 
