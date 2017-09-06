@@ -232,7 +232,7 @@ void ProcessManager::onLogCoreOutput(QString text)
 {
     foreach(QString line, text.split(QRegExp("\r|\n|\r\n"))) {
         if (!line.isEmpty()) {
-            LogManager::raw("[ Core ] " + line);
+            LogManager::raw("[ Core    ] " + line);
             if (line.contains("local input detected")) {
                 emit localInputDetected();
             }

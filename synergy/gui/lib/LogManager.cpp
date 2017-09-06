@@ -20,7 +20,7 @@ bool LogManager::s_uploading = false;
 const int LogManager::s_maximumUploadLogLines = 1000;
 
 const QString kDefaultLogFile = "synergy.log";
-const QString kGUILogPrefix = "[ Config ] ";
+const QString kGUILogPrefix = "[ Config  ] ";
 
 // TODO: Make LogManager thread safe
 QObject* LogManager::instance(QQmlEngine* engine,
