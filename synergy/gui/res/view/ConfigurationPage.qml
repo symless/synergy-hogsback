@@ -6,7 +6,7 @@ import com.synergy.gui 1.0
 
 Rectangle {
 
-    FontLoader { id: fixedFont; name: "Courier" }
+    FontLoader { id: fixedFont; name: "monaco" }
 
     Hostname {
         id: localHostname

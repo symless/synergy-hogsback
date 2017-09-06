@@ -7,7 +7,8 @@
 static QList<QString> kFontList = {
                             ":/Raleway-Regular.ttf",
                             ":/Museo.otf",
-                            ":/AlternateGotNo3D.otf"};
+                            ":/AlternateGotNo3D.otf",
+                            ":/Monaco.ttf"};
 
 FontManager::FontManager()
 {
