@@ -18,13 +18,8 @@ TEST_CASE("User configuration settings", "[configuration]")
     boost::filesystem::path filename = dir / file;
     std::string testFilename = filename.string();
 
-    // no config file from beginning
-    boost::filesystem::remove(testFilename);
-
-    // initialization without a config file
-    UserConfig userConfig(testFilename);
-    userConfig.load();
-
+    // test default config
+    UserConfig userConfig;
     REQUIRE(userConfig.debugLevel() == kInfo);
     REQUIRE(userConfig.userToken() == "");
     REQUIRE(userConfig.userId() == -1);
@@ -41,11 +36,12 @@ TEST_CASE("User configuration settings", "[configuration]")
     userConfig.setDragAndDrop(true);
 
     // save to file
-    userConfig.save();
+    boost::filesystem::remove(testFilename);
+    userConfig.save(testFilename);
 
     // initializaiton from previous config file
-    UserConfig newUserConfig(testFilename);
-    newUserConfig.load();
+    UserConfig newUserConfig;
+    newUserConfig.load(testFilename);
 
     REQUIRE(newUserConfig.debugLevel() == kDebug);
     REQUIRE(newUserConfig.userToken() == "TestToken");
