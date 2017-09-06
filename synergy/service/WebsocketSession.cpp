@@ -8,13 +8,11 @@ WebsocketSession::WebsocketSession(boost::asio::io_service &ioService,
         const std::string& hostname,
         const std::string& port) :
     m_reconnectTimer(ioService),
-    m_session(ioService),
-    m_websocket(m_session.stream()),
+    m_tcpClient(ioService, hostname, port),
+    m_websocket(m_tcpClient.stream()),
     m_target(),
     m_connected(false)
 {
-    m_session.setHostname(hostname);
-    m_session.setPort(port);
 }
 
 void
@@ -22,14 +20,14 @@ WebsocketSession::connect(const std::string target)
 {
     m_target = target;
 
-    m_session.connected.connect(
-        [this](SecuredTcpSession*) {
+    m_tcpClient.connected.connect(
+        [this](SecuredTcpClient*) {
             onSessionConnected();
         },
         boost::signals2::at_front
     );
 
-    m_session.connect();
+    m_tcpClient.connect();
 }
 
 void
@@ -88,7 +86,7 @@ WebsocketSession::onSessionConnected()
 {
     // websocket handshake
     m_websocket.async_handshake_ex(
-        m_session.hostname().c_str(),
+        m_tcpClient.address().c_str(),
         m_target.c_str(),
         [this](boost::beast::websocket::request_type & req) {
             for (auto const& i : m_headers) {
@@ -105,7 +103,7 @@ WebsocketSession::onSessionConnected()
 void
 WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
 {
-    if (m_session.checkError(ec)) {
+    if (ec) {
         reconnect();
         return;
     }
@@ -125,7 +123,7 @@ WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
 void
 WebsocketSession::onReadFinished(errorCode ec)
 {
-    if (m_session.checkError(ec)) {
+    if (ec) {
         return;
     }
 
@@ -149,14 +147,11 @@ WebsocketSession::onReadFinished(errorCode ec)
 void
 WebsocketSession::onWriteFinished(errorCode ec)
 {
-    m_session.checkError(ec);
 }
 
 void
 WebsocketSession::onDisconnectFinished(errorCode ec)
 {
-    m_session.checkError(ec);
-
     m_connected = false;
     disconnected();
 }

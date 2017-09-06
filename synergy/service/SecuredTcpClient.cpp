@@ -1,0 +1,67 @@
+#include "SecuredTcpClient.h"
+
+#include <boost/asio/connect.hpp>
+
+SecuredTcpClient::SecuredTcpClient(boost::asio::io_service &ioService, std::string hostname, std::string port) :
+    m_ioService(ioService),
+    m_sslContext(ssl::context::tlsv12_client),
+    m_session(ioService, m_sslContext),
+    m_resolver(ioService),
+    m_address(hostname),
+    m_port(port)
+{
+    m_session.connected.connect([this](SecuredTcpSession*){
+        connected(this);
+    });
+
+    m_session.connectFailed.connect([this](SecuredTcpSession*){
+        connectFailed(this);
+    });
+}
+
+void SecuredTcpClient::connect()
+{
+    m_resolver.async_resolve(
+        {m_address, m_port},
+        std::bind(
+            &SecuredTcpClient::onResolveFinished,
+            this,
+            std::placeholders::_1,
+                    std::placeholders::_2));
+}
+
+ssl::stream<tcp::socket> &SecuredTcpClient::stream()
+{
+    return m_session.stream();
+}
+
+void SecuredTcpClient::onResolveFinished(errorCode ec, tcp::resolver::iterator result)
+{
+    if (ec) {
+        connectFailed(this);
+        return;
+    }
+
+    boost::asio::async_connect(
+        m_session.stream().next_layer(),
+        result,
+        std::bind(
+            &SecuredTcpClient::onConnectFinished,
+            this,
+            std::placeholders::_1));
+}
+
+void SecuredTcpClient::onConnectFinished(errorCode ec)
+{
+    if (ec) {
+        connectFailed(this);
+        return;
+    }
+
+    m_session.startSslHandshake();
+}
+
+std::string SecuredTcpClient::address() const
+{
+    return m_address;
+}

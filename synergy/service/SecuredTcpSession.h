@@ -14,13 +14,9 @@ typedef boost::system::error_code errorCode;
 class SecuredTcpSession
 {
 public:
-    SecuredTcpSession(boost::asio::io_service& ioService);
+    SecuredTcpSession(boost::asio::io_service& ioService,  boost::asio::ssl::context& context);
     virtual ~SecuredTcpSession();
 
-    std::string hostname() const;
-    void setHostname(const std::string &hostname);
-    std::string port() const;
-    void setPort(const std::string &port);
     ssl::stream<tcp::socket>& stream();
 
     template <typename... Args>
@@ -29,21 +25,13 @@ public:
     signal<void(SecuredTcpSession*)> connected;
     signal<void(SecuredTcpSession*)> connectFailed;
 
-    void connect();
-    bool checkError(errorCode ec);
-
-private:
-    void onResolveFinished(errorCode ec, tcp::resolver::iterator result);
-    void onConnectFinished(errorCode ec);
+    void startSslHandshake();
     void onSslHandshakeFinished(errorCode ec);
 
 private:
     boost::asio::io_service& m_ioService;
-    boost::asio::ssl::context m_sslContext;
+    boost::asio::ssl::context& m_sslContext;
     ssl::stream<tcp::socket> m_stream;
-    tcp::resolver m_resolver;
-    std::string m_hostname;
-    std::string m_port;
 };
 
 #endif // TCPSESSION_H

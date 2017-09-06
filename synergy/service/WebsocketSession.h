@@ -1,7 +1,7 @@
 #ifndef WEBSOCKETSESSION_H
 #define WEBSOCKETSESSION_H
 
-#include "synergy/service/SecuredTcpSession.h"
+#include "synergy/service/SecuredTcpClient.h"
 
 #include <boost/beast/websocket.hpp>
 #include <boost/beast/websocket/ssl.hpp>
@@ -44,7 +44,7 @@ private:
 private:
     boost::beast::multi_buffer m_readBuffer;
     boost::asio::deadline_timer m_reconnectTimer;
-    SecuredTcpSession m_session;
+    SecuredTcpClient m_tcpClient;
     websocket::stream<ssl::stream<tcp::socket>&> m_websocket;
     std::string m_target;
     std::map<std::string, std::string> m_headers;
