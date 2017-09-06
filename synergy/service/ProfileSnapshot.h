@@ -17,7 +17,7 @@ public:
     struct Screen {
         int id = -1;
         std::string name;
-        std::string active;
+        bool active;
         std::string ipList;
         std::string status;
         int x_pos = -1;

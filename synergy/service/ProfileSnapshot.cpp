@@ -13,7 +13,7 @@ BOOST_FUSION_ADAPT_STRUCT(
     ProfileSnapshot::Screen,
     (int, id)
     (std::string, name)
-    (std::string, active)
+    (bool, active)
     (std::string, ipList)
     (std::string, status)
     (int, x_pos)
