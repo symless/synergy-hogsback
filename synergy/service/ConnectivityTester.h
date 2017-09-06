@@ -1,6 +1,7 @@
 #ifndef CONNECTIVITYTESTER_H
 #define CONNECTIVITYTESTER_H
 
+#include "SecuredTcpServer.h"
 #include "ProfileSnapshot.h"
 
 #include <boost/asio.hpp>
@@ -11,24 +12,20 @@
 
 class TestDelegatee;
 
-class ConnectivityTester
+class ConnectivityTester final
 {
 public:
     ConnectivityTester(boost::asio::io_service &io);
 
     void testNewScreens(const std::vector<ProfileSnapshot::Screen>& screens);
-
     std::vector<std::string> getSuccessfulResults(int screenId) const;
 
-//    using signal = boost::signals2::signal<Args...>;
+    static const std::string testServerCertificate();
+    static const std::string testServerKey();
+    static const std::string testServerDH();
 
-//private slots:
-
-//    void onNewConnection();
-//    void onConnectionReadyRead();
-//
-//
 private:
+    void startTestServer();
     void startTesting(int batchSize);
     void onTestDelegateeDone(std::map<std::string, bool> results, int batchSize);
     std::vector<std::string> extractIpListFromTestCase(std::string testCase);
@@ -40,7 +37,7 @@ private:
     std::string m_localHostname;
     TestDelegatee* m_testDelegatee;
     boost::asio::io_service& m_ioService;
-//    QTcpServer* m_tcpServer;
+    std::unique_ptr<SecuredTcpServer> m_testServer;
     std::map<int, std::vector<std::string>> m_screenSuccessfulResults;
 };
 
