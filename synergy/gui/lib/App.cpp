@@ -157,7 +157,12 @@ App::run(int argc, char* argv[])
     ConnectivityTester tester;
     processManager.setConnectivityTester(&tester);
 
+    wampClient.connecting.connect([&]() {
+        LogManager::debug(QString("connecting to service"));
+    });
+
     wampClient.connected.connect([&]() {
+        LogManager::debug(QString("connected to service"));
         wampClient.subscribe ("synergy.profile.snapshot", [&](std::string json) {
             QByteArray byteArray(json.c_str(), json.length());
             cloudClient->receivedScreensInterface(byteArray);
