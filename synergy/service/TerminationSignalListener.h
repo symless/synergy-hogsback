@@ -2,13 +2,12 @@
 #define TERMINATIONSIGNALLISTENER_H
 
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
 #include <functional>
 
-class TerminationSignalListener
+class TerminationSignalListener final
 {
 public:
-    TerminationSignalListener(boost::asio::io_service& io);
+    explicit TerminationSignalListener(boost::asio::io_service& io);
 
     template<typename FuncT>
     void setHandler(FuncT&& handler) {
@@ -16,9 +15,8 @@ public:
     }
 
 private:
-    void terminationHandler(
-            const boost::system::error_code& errorCode,
-            int signalNumber);
+    void terminationHandler
+    (boost::system::error_code const& errorCode, int signalNumber);
 
 private:
     boost::asio::signal_set m_signals;
