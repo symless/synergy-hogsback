@@ -17,7 +17,7 @@ void ConnectivityTester::testNewScreens(const std::vector<ProfileSnapshot::Scree
     int testCaseBatchSize = 0;
     for (ProfileSnapshot::Screen const& screen : screens) {
         // skip inactive screens
-        if (screen.active == "false") {
+        if (!screen.active) {
             continue;
         }
 
@@ -86,9 +86,9 @@ void ConnectivityTester::startTesting(int batchSize)
         }
     }
 
-    m_testDelegatee = new TestDelegatee(m_ioService, std::move(testIpList), batchSize);
+    m_testDelegatee = new TestDelegatee(m_ioService, batchSize);
     m_testDelegatee->done.connect(std::bind(&ConnectivityTester::onTestDelegateeDone, this, std::placeholders::_1, std::placeholders::_2));
-    m_testDelegatee->start();
+    m_testDelegatee->start(testIpList);
 }
 
 void ConnectivityTester::onTestDelegateeDone(std::map<std::string, bool> results, int batchSize)
