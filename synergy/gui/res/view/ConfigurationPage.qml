@@ -6,7 +6,10 @@ import com.synergy.gui 1.0
 
 Rectangle {
 
-    FontLoader { id: fixedFont; name: "Courier" }
+    FontLoader {
+        id: consoleFont;
+        name: "Source Code Pro"
+    }
 
     Hostname {
         id: localHostname
@@ -126,7 +129,10 @@ Rectangle {
                 style: TextAreaStyle {
                     backgroundColor: "black"
                     textColor: "white"
-                    font { family: fixedFont.name; pixelSize: sample.font.pixelSize * .8 }
+                    font {
+                        family: consoleFont.name;
+                        pixelSize: sample.font.pixelSize * .9
+                    }
                 }
 
                 menu: Menu {

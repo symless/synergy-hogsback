@@ -5,9 +5,10 @@
 #include <QFontDatabase>
 
 static QList<QString> kFontList = {
-                            ":/Raleway.otf",
+                            ":/Raleway-Regular.ttf",
                             ":/Museo.otf",
-                            ":/AlternateGotNo3D.otf"};
+                            ":/AlternateGotNo3D.otf",
+                            ":/SourceCodePro-Regular.ttf"};
 
 FontManager::FontManager()
 {
