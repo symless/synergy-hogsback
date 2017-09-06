@@ -5,7 +5,7 @@
 #include <QFontDatabase>
 
 static QList<QString> kFontList = {
-                            ":/Raleway.otf",
+                            ":/Raleway-Regular.ttf",
                             ":/Museo.otf",
                             ":/AlternateGotNo3D.otf"};
 
