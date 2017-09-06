@@ -97,14 +97,13 @@ include_directories (BEFORE SYSTEM third_party/json/include)
 #
 # cxxopts
 #
-
 include_directories (BEFORE SYSTEM third_party/cxxopts/include)
 
 #
 # spdlog
 #
-
 include_directories (BEFORE SYSTEM third_party/spdlog/include)
+add_definitions (-DSPDLOG_FMT_EXTERNAL=1)
 
 #
 # Msgpack
