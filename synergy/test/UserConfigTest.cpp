@@ -1,22 +1,17 @@
 #include "catch.hpp"
-
 #include "synergy/common/UserConfig.h"
 #include "synergy/common/DirectoryManager.h"
-
 #include <boost/filesystem.hpp>
 
 TEST_CASE("User configuration settings", "[configuration]")
 {
     // test configuration file
 #ifdef _WIN32
-        boost::filesystem::path dir(DirectoryManager::instance()->systemAppDir());
+    auto dir = DirectoryManager::instance()->systemAppDir();
 #else
-        boost::filesystem::path dir(DirectoryManager::instance()->profileDir());
+    auto dir = DirectoryManager::instance()->profileDir();
 #endif
-
-    boost::filesystem::path file("synergy-test-user.cfg");
-    boost::filesystem::path filename = dir / file;
-    std::string testFilename = filename.string();
+    std::string const testFilename = (dir / "synergy-test-user.cfg").string();
 
     // test default config
     UserConfig userConfig;

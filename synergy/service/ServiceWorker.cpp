@@ -13,11 +13,11 @@
 
 ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
     m_ioService (ioService),
+    m_work (std::make_shared<boost::asio::io_service::work>(ioService)),
     m_rpcManager (std::make_unique<RpcManager>(m_ioService)),
     m_processManager (std::make_unique<ProcessManager>(m_ioService)),
-    m_work (std::make_shared<boost::asio::io_service::work>(ioService)),
-    m_userConfig(std::make_shared<UserConfig>()),
-    m_cloudClient(std::make_shared<CloudClient>(ioService, m_userConfig))
+    m_userConfig (std::make_shared<UserConfig>()),
+    m_cloudClient (std::make_unique<CloudClient>(ioService, m_userConfig))
 {
     m_userConfig->load();
     m_cloudClient->init();
@@ -89,7 +89,8 @@ void ServiceWorker::provideAuthUpdate()
     auto server = m_rpcManager->server();
 
     server->provide ("synergy.auth.update",
-                     [this](int userId, int screenId, int profileId, std::string userToken) {
+                     [this](int userId, int screenId, int profileId,
+                     std::string userToken) {
         m_userConfig->setUserId(userId);
         m_userConfig->setScreenId(screenId);
         m_userConfig->setProfileId(profileId);

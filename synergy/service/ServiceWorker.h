@@ -8,10 +8,10 @@ class ProcessManager;
 class CloudClient;
 class UserConfig;
 
-class ServiceWorker
+class ServiceWorker final
 {
 public:
-    ServiceWorker(boost::asio::io_service& ioService);
+    explicit ServiceWorker(boost::asio::io_service& ioService);
     ~ServiceWorker();
 
     void start();
@@ -22,11 +22,11 @@ private:
     void provideCore();
     void provideAuthUpdate();
     boost::asio::io_service& m_ioService;
+    std::shared_ptr<boost::asio::io_service::work> m_work;
     std::unique_ptr<RpcManager> m_rpcManager;
     std::unique_ptr<ProcessManager> m_processManager;
-    std::shared_ptr<boost::asio::io_service::work> m_work;
     std::shared_ptr<UserConfig> m_userConfig;
-    std::shared_ptr<CloudClient> m_cloudClient;
+    std::unique_ptr<CloudClient> m_cloudClient;
 };
 
 #endif // SERVICEWORKER_H

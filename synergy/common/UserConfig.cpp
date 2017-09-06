@@ -24,13 +24,12 @@ std::string
 UserConfig::defaultFilePath()
 {
 #ifdef _WIN32
-    boost::filesystem::path dir(DirectoryManager::instance()->systemAppDir());
+    auto filepath = DirectoryManager::instance()->systemAppDir();
 #else
-    boost::filesystem::path dir(DirectoryManager::instance()->profileDir());
+    auto filepath = DirectoryManager::instance()->profileDir();
 #endif
-    boost::filesystem::path file(kUserConfigFilename);
-    boost::filesystem::path filename = dir / file;
-    return filename.string();
+    filepath /= kUserConfigFilename;
+    return filepath.string();
 }
 
 void UserConfig::load(std::string const& filepath)
