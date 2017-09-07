@@ -16,6 +16,7 @@ TEST_CASE("Nchan Websocket connections", "[Websocket]")
 {
     timeout = false;
     std::string subResult;
+    bool pubConnected = false;
     boost::asio::io_service ioService;
 
     WebsocketSession pubWebsocket(ioService, kPubSubServerHostname, kPubSubServerPort);
@@ -28,7 +29,8 @@ TEST_CASE("Nchan Websocket connections", "[Websocket]")
     });
 
     pubWebsocket.connected.connect(
-        [&pubWebsocket]() {
+        [&pubWebsocket, &pubConnected]() {
+            pubConnected = true;
             std::string pubStr("hello world");
             pubWebsocket.write(pubStr);
         },
@@ -54,5 +56,6 @@ TEST_CASE("Nchan Websocket connections", "[Websocket]")
     ioService.run();
 
     REQUIRE(timeout == false);
+    REQUIRE(pubConnected == true);
     REQUIRE(subResult == "hello world");
 }
