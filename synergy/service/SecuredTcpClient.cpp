@@ -1,6 +1,7 @@
 #include "SecuredTcpClient.h"
 
 #include <boost/asio/connect.hpp>
+#include <synergy/service/
 
 SecuredTcpClient::SecuredTcpClient(boost::asio::io_service &ioService, std::string hostname, std::string port) :
     m_ioService(ioService),
@@ -8,7 +9,8 @@ SecuredTcpClient::SecuredTcpClient(boost::asio::io_service &ioService, std::stri
     m_session(ioService, m_sslContext),
     m_resolver(ioService),
     m_address(hostname),
-    m_port(port)
+    m_port(port),
+    m_connecting(false)
 {
     m_session.connected.connect([this](SecuredTcpSession*){
         connected(this);
@@ -21,6 +23,11 @@ SecuredTcpClient::SecuredTcpClient(boost::asio::io_service &ioService, std::stri
 
 void SecuredTcpClient::connect()
 {
+    if (m_connecting) {
+        mainLog()->warning("tcp client already in connecting");
+        return;
+    }
+
     m_resolver.async_resolve(
         {m_address, m_port},
         std::bind(
@@ -38,6 +45,7 @@ ssl::stream<tcp::socket> &SecuredTcpClient::stream()
 void SecuredTcpClient::onResolveFinished(errorCode ec, tcp::resolver::iterator result)
 {
     if (ec) {
+        mainLog()->debug("tcp client resolve error: {}", ec.message());
         connectFailed(this);
         return;
     }
@@ -54,6 +62,7 @@ void SecuredTcpClient::onResolveFinished(errorCode ec, tcp::resolver::iterator r
 void SecuredTcpClient::onConnectFinished(errorCode ec)
 {
     if (ec) {
+        mainLog()->debug("tcp client connect error: {}", ec.message());
         connectFailed(this);
         return;
     }
@@ -69,10 +78,12 @@ void SecuredTcpClient::onConnectFinished(errorCode ec)
 void SecuredTcpClient::onSslHandshakeFinished(errorCode ec)
 {
     if (ec) {
+        mainLog()->debug("tcp session ssl handshake error: {}", ec.message());
         connectFailed(this);
         return;
     }
 
+    m_connecting = true;
     connected(this);
 }
 
