@@ -19,6 +19,7 @@ set (COMMON_LIB_SOURCES
     WampRouter.cpp
     ScreenLinks.cpp
     ConfigGen.cpp
+    Profile.cpp
     ${platform_sources}
 )
 

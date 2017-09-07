@@ -32,7 +32,8 @@ UserConfig::defaultFilePath()
     return filepath.string();
 }
 
-void UserConfig::load(std::string const& filepath)
+void
+UserConfig::load(std::string const& filepath)
 {
     ConfigParser parser = ConfigParser::parse_file(filepath);
 

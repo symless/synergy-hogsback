@@ -1,7 +1,7 @@
 #ifndef COMMONUSERCONFIG_H
 #define COMMONUSERCONFIG_H
 
-#include "synergy/common/DebugLevel.h"
+#include <synergy/common/DebugLevel.h>
 #include <string>
 #include <cstdint>
 
@@ -10,7 +10,6 @@ class UserConfig final
 public:
     UserConfig();
     static std::string defaultFilePath();
-
     void load (std::string const& filepath = defaultFilePath());
     void save (std::string const& filepath = defaultFilePath());
 
@@ -33,7 +32,7 @@ public:
     void setDragAndDrop(bool dragAndDrop);
 
 private:
-    DebugLevel m_debugLevel;
+    DebugLevel m_debugLevel = kInfo;
     std::string m_userToken;
     int64_t m_userId;
     int64_t m_profileId;

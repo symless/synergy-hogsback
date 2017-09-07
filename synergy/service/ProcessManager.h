@@ -1,22 +1,20 @@
 #ifndef SYNERGY_SERVICE_PROCESSMANAGER_H
 #define SYNERGY_SERVICE_PROCESSMANAGER_H
 
-#include "synergy/common/ErrorMessage.h"
-#include "synergy/common/ScreenStatus.h"
-
 #include <boost/asio.hpp>
 #include <boost/signals2.hpp>
-
-#include <string>
 #include <memory>
 #include <vector>
 #include <string>
 
+class Screen;
+class Profile;
 class ProcessManagerImpl;
 
 class ProcessManager final {
 public:
-    explicit ProcessManager (boost::asio::io_service& io);
+    explicit ProcessManager (boost::asio::io_service& io,
+                             std::shared_ptr<Profile> profile);
     ProcessManager (ProcessManager const&) = delete;
     ProcessManager& operator= (ProcessManager const&) = delete;
     ~ProcessManager() noexcept;
@@ -31,11 +29,10 @@ public:
     signal<void()> onExit;
     signal<void()> onUnexpectedExit;
     signal<void(std::string const&)> onOutput;
-    signal<void(std::string const&, ScreenStatus)> screenStatusChanged;
-    signal<void(std::string const&, ErrorCode)> screenConnectionError;
 
 private:
     boost::asio::io_service& m_ioService;
+    std::shared_ptr<Screen> m_localScreen;
     std::unique_ptr<ProcessManagerImpl> m_impl;
 };
 

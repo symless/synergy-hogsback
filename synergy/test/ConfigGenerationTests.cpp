@@ -12,14 +12,13 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
             REQUIRE (links.empty());
         };
 
-        Screen s1;
-        s1.id = 1;
-        s1.name = "Andrews-PC";
-        s1.width = 1920;
-        s1.height = 1080;
+        Screen s1 (1);
+        s1.name ("Andrews-PC");
+        s1.width (1920);
+        s1.height (1080);
         screens.push_back (s1);
-        REQUIRE (s1.x == 0);
-        REQUIRE (s1.y == 0);
+        REQUIRE (s1.x() == 0);
+        REQUIRE (s1.y() == 0);
 
         SECTION ("A single screen has no links") {
             auto links = linkScreens (screens);
@@ -28,13 +27,12 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
         };
 
         SECTION ("Tests with two screens of the same size") {
-            Screen s2;
-            s2.id = 2;
-            s2.name = "Andrews-iMac";
-            s2.width = 1920;
-            s2.height = 1080;
-            REQUIRE (s2.x == 0);
-            REQUIRE (s2.y == 0);
+            Screen s2 (2);
+            s2.name ("Andrews-iMac");
+            s2.width (1920);
+            s2.height (1080);
+            REQUIRE (s2.x() == 0);
+            REQUIRE (s2.y() == 0);
 
             SECTION ("Two screens exactly on top of one another have all "
                      "4 edges linked") {
@@ -47,8 +45,8 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
 
             SECTION ("Two screens (s1,s2) next to one another, touching "
                      "horizontally, with no vertical offset") {
-                s2.x = s1.x + s1.width;
-                s2.y = s1.y;
+                s2.x(s1.x() + s1.width());
+                s2.y(s1.y());
                 screens.push_back (s2);
                 auto links = linkScreens (screens);
                 REQUIRE (links.size() == 2);
@@ -62,7 +60,7 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 auto link = links[0].right().begin();
                 REQUIRE (link->first.lower() == 0);
                 REQUIRE (link->first.upper() == 1080);
-                REQUIRE (link->second == s2.id);
+                REQUIRE (link->second == s2.id());
 
                 REQUIRE (links[1].size() == 1);
                 REQUIRE (links[1].right().empty());
@@ -73,7 +71,7 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 link = links[1].left().begin();
                 REQUIRE (link->first.lower() == 0);
                 REQUIRE (link->first.upper() == 1080);
-                REQUIRE (link->second == s1.id);
+                REQUIRE (link->second == s1.id());
 
                 std::ostringstream oss;
                 printScreenLinks (oss, screens, links, 0);
@@ -88,8 +86,8 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
 
             SECTION ("Two screens (s1,s2) next to one another, touching "
                      "horizontally, with a 50% vertical offset on s2") {
-                s2.x = s1.x + s1.width;
-                s2.y = s1.y + s1.height / 2;
+                s2.x (s1.x() + s1.width());
+                s2.y (s1.y() + s1.height() / 2);
                 screens.push_back (s2);
                 auto links = linkScreens (screens);
                 REQUIRE (links.size() == 2);
@@ -103,7 +101,7 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 auto link = links[0].right().begin();
                 REQUIRE (link->first.lower() == 540);
                 REQUIRE (link->first.upper() == 1080);
-                REQUIRE (link->second == s2.id);
+                REQUIRE (link->second == s2.id());
 
                 REQUIRE (links[1].size() == 1);
                 REQUIRE (links[1].right().empty());
@@ -114,7 +112,7 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 link = links[1].left().begin();
                 REQUIRE (link->first.lower() == 540);
                 REQUIRE (link->first.upper() == 1080);
-                REQUIRE (link->second == s1.id);
+                REQUIRE (link->second == s1.id());
 
                 std::ostringstream oss;
                 printScreenLinks (oss, screens, links, 0);
@@ -130,8 +128,8 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
             SECTION ("Two screens (s1,s2) next to one another, spaced "
                      "horizontally, with a 50% vertical offset on s2") {
                 auto const space = 5000;
-                s2.x = s1.x + s1.width + space;
-                s2.y = s1.y + s1.height / 2;
+                s2.x (s1.x() + s1.width() + space);
+                s2.y (s1.y() + s1.height() / 2);
                 screens.push_back (s2);
                 auto links = linkScreens (screens);
                 REQUIRE (links.size() == 2);
@@ -145,7 +143,7 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 auto link = links[0].right().begin();
                 REQUIRE (link->first.lower() == 540);
                 REQUIRE (link->first.upper() == 1080);
-                REQUIRE (link->second == s2.id);
+                REQUIRE (link->second == s2.id());
 
                 REQUIRE (links[1].size() == 1);
                 REQUIRE (links[1].right().empty());
@@ -156,7 +154,7 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 link = links[1].left().begin();
                 REQUIRE (link->first.lower() == 540);
                 REQUIRE (link->first.upper() == 1080);
-                REQUIRE (link->second == s1.id);
+                REQUIRE (link->second == s1.id());
 
                 std::ostringstream oss;
                 printScreenLinks (oss, screens, links, 0);
@@ -171,8 +169,8 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
 
             SECTION ("Two screens (s1,s2) of the same size positioned "
                      "diagonally are not linked") {
-                s2.x = s1.x + s1.width;
-                s2.y = s1.y + s1.height;
+                s2.x (s1.x() + s1.width());
+                s2.y (s1.y() + s1.height());
                 screens.push_back (s2);
                 auto links = linkScreens (screens);
                 REQUIRE (links.size() == 2);
@@ -190,8 +188,8 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
 
             SECTION ("Two screens (s1,s2) on top of one another, touching "
                      "vertically, with no horizontal offset") {
-                s2.x = s1.x;
-                s2.y = s1.y + s1.height;
+                s2.x (s1.x());
+                s2.y (s1.y() + s1.height());
                 screens.push_back (s2);
                 auto links = linkScreens (screens);
                 REQUIRE (links.size() == 2);
@@ -205,7 +203,7 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 auto link = links[0].bottom().begin();
                 REQUIRE (link->first.lower() == 0);
                 REQUIRE (link->first.upper() == 1920);
-                REQUIRE (link->second == s2.id);
+                REQUIRE (link->second == s2.id());
 
                 REQUIRE (links[1].size() == 1);
                 REQUIRE (links[1].left().empty());
@@ -216,7 +214,7 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 link = links[1].top().begin();
                 REQUIRE (link->first.lower() == 0);
                 REQUIRE (link->first.upper() == 1920);
-                REQUIRE (link->second == s1.id);
+                REQUIRE (link->second == s1.id());
 
                 std::ostringstream oss;
                 printScreenLinks (oss, screens, links, 0);
@@ -231,8 +229,8 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
 
             SECTION ("Two screens (s1,s2) on top of one another, touching "
                      "vertically, with a 50% horizontal offset") {
-                s2.x = s1.x + s1.width / 2;
-                s2.y = s1.y + s1.height;
+                s2.x (s1.x() + s1.width() / 2);
+                s2.y (s1.y() + s1.height());
                 screens.push_back (s2);
                 auto links = linkScreens (screens);
                 REQUIRE (links.size() == 2);
@@ -246,7 +244,7 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 auto link = links[0].bottom().begin();
                 REQUIRE (link->first.lower() == 960);
                 REQUIRE (link->first.upper() == 1920);
-                REQUIRE (link->second == s2.id);
+                REQUIRE (link->second == s2.id());
 
                 REQUIRE (links[1].size() == 1);
                 REQUIRE (links[1].left().empty());
@@ -257,7 +255,7 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 link = links[1].top().begin();
                 REQUIRE (link->first.lower() == 960);
                 REQUIRE (link->first.upper() == 1920);
-                REQUIRE (link->second == s1.id);
+                REQUIRE (link->second == s1.id());
 
                 std::ostringstream oss;
                 printScreenLinks (oss, screens, links, 0);
@@ -272,28 +270,26 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
         }
 
         SECTION ("Tests with three screens of the same size") {
-            Screen s2;
-            s2.id = 2;
-            s2.name = "Andrews-iMac";
-            s2.width = 1920;
-            s2.height = 1080;
-            REQUIRE (s2.x == 0);
-            REQUIRE (s2.y == 0);
+            Screen s2(2);
+            s2.name ("Andrews-iMac");
+            s2.width (1920);
+            s2.height (1080);
+            REQUIRE (s2.x() == 0);
+            REQUIRE (s2.y() == 0);
 
-            Screen s3;
-            s3.id = 3;
-            s3.name = "Andrews-Cray2";
-            s3.width = 1920;
-            s3.height = 1080;
-            REQUIRE (s3.x == 0);
-            REQUIRE (s3.y == 0);
+            Screen s3(3);
+            s3.name ("Andrews-Cray2");
+            s3.width (1920);
+            s3.height (1080);
+            REQUIRE (s3.x() == 0);
+            REQUIRE (s3.y() == 0);
 
             SECTION ("Three screens (s1,s2,s3) next to one another, touching "
                      "horizontally, with no vertical offset") {
-                s2.x = s1.x + s1.width;
-                s2.y = s1.y;
-                s3.x = s1.x + s1.width + s2.width;
-                s3.y = s1.y;
+                s2.x (s1.x() + s1.width());
+                s2.y (s1.y());
+                s3.x (s1.x() + s1.width() + s2.width());
+                s3.y (s1.y());
                 screens.push_back (s2);
                 screens.push_back (s3);
                 auto links = linkScreens (screens);
@@ -310,7 +306,7 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 auto link = links[0].right().begin();
                 REQUIRE (link->first.lower() == 0);
                 REQUIRE (link->first.upper() == 1080);
-                REQUIRE (link->second == s2.id);
+                REQUIRE (link->second == s2.id());
 
                 /* Check links on screen 2 */
                 REQUIRE (links[1].size() == 2);
@@ -322,12 +318,12 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 link = links[1].left().begin();
                 REQUIRE (link->first.lower() == 0);
                 REQUIRE (link->first.upper() == 1080);
-                REQUIRE (link->second == s1.id);
+                REQUIRE (link->second == s1.id());
 
                 link = links[1].right().begin();
                 REQUIRE (link->first.lower() == 0);
                 REQUIRE (link->first.upper() == 1080);
-                REQUIRE (link->second == s3.id);
+                REQUIRE (link->second == s3.id());
 
                 /* Check links on screen 3 */
                 REQUIRE (links[2].size() == 1);
@@ -339,7 +335,7 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 link = links[2].left().begin();
                 REQUIRE (link->first.lower() == 0);
                 REQUIRE (link->first.upper() == 1080);
-                REQUIRE (link->second == s2.id);
+                REQUIRE (link->second == s2.id());
 
                 std::ostringstream oss;
                 printScreenLinks (oss, screens, links, 0);
@@ -360,10 +356,10 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
             SECTION ("Three screens (s1,s2,s3) next to one another, touching "
                      "horizontally, with the center screen dropped by 50% "
                      "(screens added left to right)") {
-                s2.x = s1.x + s1.width;
-                s2.y = s1.y + s1.height / 2;
-                s3.x = s1.x + s1.width + s2.width;
-                s3.y = s1.y;
+                s2.x (s1.x() + s1.width());
+                s2.y (s1.y() + s1.height() / 2);
+                s3.x (s1.x() + s1.width() + s2.width());
+                s3.y (s1.y());
                 screens.push_back (s2);
                 screens.push_back (s3);
                 auto links = linkScreens (screens);
@@ -379,12 +375,12 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 auto link = links[0].right().begin();
                 REQUIRE (link->first.lower() == 0);
                 REQUIRE (link->first.upper() == 540);
-                REQUIRE (link->second == s3.id);
+                REQUIRE (link->second == s3.id());
 
                 ++link;
                 REQUIRE (link->first.lower() == 540);
                 REQUIRE (link->first.upper() == 1080);
-                REQUIRE (link->second == s2.id);
+                REQUIRE (link->second == s2.id());
 
                 /* Check links on screen 2 */
                 REQUIRE (links[1].size() == 2);
@@ -396,12 +392,12 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 link = links[1].left().begin();
                 REQUIRE (link->first.lower() == 540);
                 REQUIRE (link->first.upper() == 1080);
-                REQUIRE (link->second == s1.id);
+                REQUIRE (link->second == s1.id());
 
                 link = links[1].right().begin();
                 REQUIRE (link->first.lower() == 540);
                 REQUIRE (link->first.upper() == 1080);
-                REQUIRE (link->second == s3.id);
+                REQUIRE (link->second == s3.id());
 
                 /* Check links on screen 3 */
                 REQUIRE (links[2].size() == 2);
@@ -413,12 +409,12 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 link = links[2].left().begin();
                 REQUIRE (link->first.lower() == 0);
                 REQUIRE (link->first.upper() == 540);
-                REQUIRE (link->second == s1.id);
+                REQUIRE (link->second == s1.id());
 
                 ++link;
                 REQUIRE (link->first.lower() == 540);
                 REQUIRE (link->first.upper() == 1080);
-                REQUIRE (link->second == s2.id);
+                REQUIRE (link->second == s2.id());
 
                 std::ostringstream oss;
                 printScreenLinks (oss, screens, links, 0);
@@ -440,10 +436,10 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
             SECTION ("Three screens (s1,s2,s3) next to one another, touching "
                      "horizontally, with the center screen dropped by 50% "
                      "(screens added out of order)") {
-                s2.x = s1.x + s1.width;
-                s2.y = s1.y + s1.height / 2;
-                s3.x = s1.x + s1.width + s2.width;
-                s3.y = s1.y;
+                s2.x (s1.x() + s1.width());
+                s2.y (s1.y() + s1.height() / 2);
+                s3.x (s1.x() + s1.width() + s2.width());
+                s3.y (s1.y());
                 screens.push_back (s3);
                 screens.push_back (s2);
                 auto links = linkScreens (screens);
@@ -459,12 +455,12 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 auto link = links[0].right().begin();
                 REQUIRE (link->first.lower() == 0);
                 REQUIRE (link->first.upper() == 540);
-                REQUIRE (link->second == s3.id);
+                REQUIRE (link->second == s3.id());
 
                 ++link;
                 REQUIRE (link->first.lower() == 540);
                 REQUIRE (link->first.upper() == 1080);
-                REQUIRE (link->second == s2.id);
+                REQUIRE (link->second == s2.id());
 
                 /* Check links on screen 3 */
                 REQUIRE (links[2].size() == 2);
@@ -476,12 +472,12 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 link = links[2].left().begin();
                 REQUIRE (link->first.lower() == 540);
                 REQUIRE (link->first.upper() == 1080);
-                REQUIRE (link->second == s1.id);
+                REQUIRE (link->second == s1.id());
 
                 link = links[2].right().begin();
                 REQUIRE (link->first.lower() == 540);
                 REQUIRE (link->first.upper() == 1080);
-                REQUIRE (link->second == s3.id);
+                REQUIRE (link->second == s3.id());
 
                 /* Check links on screen 2 */
                 REQUIRE (links[1].size() == 2);
@@ -493,12 +489,12 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 link = links[1].left().begin();
                 REQUIRE (link->first.lower() == 0);
                 REQUIRE (link->first.upper() == 540);
-                REQUIRE (link->second == s1.id);
+                REQUIRE (link->second == s1.id());
 
                 ++link;
                 REQUIRE (link->first.lower() == 540);
                 REQUIRE (link->first.upper() == 1080);
-                REQUIRE (link->second == s2.id);
+                REQUIRE (link->second == s2.id());
 
                 std::ostringstream oss;
                 printScreenLinks (oss, screens, links, 0);
@@ -520,10 +516,10 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
             SECTION ("Three screens (s1,s2,s3) on top of one another, touching "
                      "vertically, with the center screen kicked to the right by "
                      "50%") {
-                s2.x = s1.x + s1.width / 2;
-                s2.y = s1.y + s1.height;
-                s3.x = s1.x;
-                s3.y = s2.y + s2.height;
+                s2.x (s1.x() + s1.width() / 2);
+                s2.y (s1.y() + s1.height());
+                s3.x (s1.x());
+                s3.y (s2.y() + s2.height());
                 screens.push_back (s2);
                 screens.push_back (s3);
                 auto links = linkScreens (screens);
@@ -539,12 +535,12 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 auto link = links[0].bottom().begin();
                 REQUIRE (link->first.lower() == 0);
                 REQUIRE (link->first.upper() == 960);
-                REQUIRE (link->second == s3.id);
+                REQUIRE (link->second == s3.id());
 
                 ++link;
                 REQUIRE (link->first.lower() == 960);
                 REQUIRE (link->first.upper() == 1920);
-                REQUIRE (link->second == s2.id);
+                REQUIRE (link->second == s2.id());
 
                 /* Check links on screen 2 */
                 REQUIRE (links[1].size() == 2);
@@ -556,12 +552,12 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 link = links[1].top().begin();
                 REQUIRE (link->first.lower() == 960);
                 REQUIRE (link->first.upper() == 1920);
-                REQUIRE (link->second == s1.id);
+                REQUIRE (link->second == s1.id());
 
                 link = links[1].bottom().begin();
                 REQUIRE (link->first.lower() == 960);
                 REQUIRE (link->first.upper() == 1920);
-                REQUIRE (link->second == s3.id);
+                REQUIRE (link->second == s3.id());
 
                 /* Check links on screen 3 */
                 REQUIRE (links[2].size() == 2);
@@ -573,12 +569,12 @@ TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
                 link = links[2].top().begin();
                 REQUIRE (link->first.lower() == 0);
                 REQUIRE (link->first.upper() == 960);
-                REQUIRE (link->second == s1.id);
+                REQUIRE (link->second == s1.id());
 
                 ++link;
                 REQUIRE (link->first.lower() == 960);
                 REQUIRE (link->first.upper() == 1920);
-                REQUIRE (link->second == s2.id);
+                REQUIRE (link->second == s2.id());
 
                 std::ostringstream oss;
                 printScreenLinks (oss, screens, links, 0);

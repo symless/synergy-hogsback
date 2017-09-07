@@ -9,28 +9,25 @@
 #include <synergy/common/WampServer.h>
 #include <synergy/common/WampRouter.h>
 #include <synergy/common/ScreenStatus.h>
+#include <synergy/common/Profile.h>
 #include "ProcessManager.h"
 #include <boost/asio.hpp>
 #include <iostream>
 
 std::string g_lastProfileSnapshot;
 
-ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
+ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
+                             std::shared_ptr<UserConfig> userConfig) :
     m_ioService (ioService),
+    m_userConfig (std::move(userConfig)),
+    m_activeProfile (std::make_shared<Profile>(userConfig->profileId())),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService)),
     m_rpcManager (std::make_unique<RpcManager>(m_ioService)),
-    m_processManager (std::make_unique<ProcessManager>(m_ioService)),
+    m_processManager (std::make_unique<ProcessManager>(m_ioService, m_activeProfile)),
     m_connectivityTester (std::make_unique<ConnectivityTester>(m_ioService)),
-    m_userConfig(std::make_shared<UserConfig>()),
-    m_cloudClient (std::make_unique<CloudClient>(ioService, m_userConfig))
+    m_cloudClient (std::make_unique<CloudClient>(ioService))
 {
-    m_userConfig->load();
-    m_cloudClient->init();
-
-    g_log.onLogLine.connect([this](std::string logLine) {
-        auto server = m_rpcManager->server();
-        server->publish ("synergy.service.log", std::move(logLine));
-    });
+    m_cloudClient->init(*m_userConfig);
 
     g_log.onLogLine.connect([this](std::string logLine) {
         auto server = m_rpcManager->server();
@@ -107,20 +104,20 @@ ServiceWorker::provideCore()
         }
     );
 
-    m_processManager->screenStatusChanged.connect(
-        [server](std::string const& screenName, ScreenStatus state) {
-            server->publish ("synergy.screen.status", screenName, int(state));
-        }
-    );
+//    m_processManager->screenStatusChanged.connect(
+//        [server](std::string const& screenName, ScreenStatus state) {
+//            server->publish ("synergy.screen.status", screenName, int(state));
+//        }
+//    );
 
-    m_processManager->screenConnectionError.connect(
-        [server](std::string const& screenName, ErrorCode ec) {
-            server->publish ("synergy.screen.error", screenName,
-                                (int)ec);
-            server->publish ("synergy.screen.status", screenName,
-                                (int)ScreenStatus::kConnectingWithError);
-        }
-    );
+//    m_processManager->screenConnectionError.connect(
+//        [server](std::string const& screenName, ErrorCode ec) {
+//            server->publish ("synergy.screen.error", screenName,
+//                                (int)ec);
+//            server->publish ("synergy.screen.status", screenName,
+//                                (int)ScreenStatus::kConnectingWithError);
+//        }
+//    );
 }
 
 void ServiceWorker::provideAuthUpdate()
