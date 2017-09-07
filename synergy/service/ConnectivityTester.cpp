@@ -8,6 +8,7 @@ static const std::string kConnectivityTestIp = "0.0.0.0";
 static const std::string kConnectivityTestPort = "24810";
 
 ConnectivityTester::ConnectivityTester(boost::asio::io_service &io) :
+    m_localHostname(boost::asio::ip::host_name()),
     m_testDelegatee(nullptr),
     m_ioService(io)
 {
