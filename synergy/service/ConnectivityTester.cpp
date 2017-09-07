@@ -4,6 +4,9 @@
 #include <boost/algorithm/string.hpp>
 #include <algorithm>
 
+static const std::string kConnectivityTestIp = "0.0.0.0";
+static const std::string kConnectivityTestPort = "24810";
+
 ConnectivityTester::ConnectivityTester(boost::asio::io_service &io) :
     m_testDelegatee(nullptr),
     m_ioService(io)
@@ -144,8 +147,12 @@ const std::string ConnectivityTester::testServerDH()
 void ConnectivityTester::startTestServer()
 {
     m_testServer.reset(new SecuredTcpServer(m_ioService));
-    // TODO: do we need certificate for test server?
-    //m_testServer->setRawCertificate();
+    m_testServer->setAddress(kConnectivityTestIp);
+    m_testServer->setPort(kConnectivityTestPort);
+    m_testServer->loadRawCetificate(
+                ConnectivityTester::testServerCertificate(),
+                ConnectivityTester::testServerKey(),
+                ConnectivityTester::testServerDH());
     m_testServer->start();
 }
 
