@@ -11,6 +11,7 @@ static boost::signals2::signal<void()> testFinished;
 
 TEST_CASE("Secured TCP Connection test", "[tcp]")
 {
+    const std::string kServerTestIp = "0.0.0.0";
     const std::string kLocalIp = "127.0.0.1";
     const std::string kTestPort = "24811";
     bool connected = false;
@@ -18,7 +19,7 @@ TEST_CASE("Secured TCP Connection test", "[tcp]")
     boost::asio::io_service ioService;
 
     SecuredTcpServer server(ioService);
-    server.setAddress(kLocalIp);
+    server.setAddress(kServerTestIp);
     server.setPort(kTestPort);
     server.loadRawCetificate(
                 ConnectivityTester::testServerCertificate(),
