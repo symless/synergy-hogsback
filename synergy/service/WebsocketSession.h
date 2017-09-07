@@ -33,8 +33,8 @@ public:
     signal<void(std::string)> messageReceived;
 
 private:
-    void onSessionConnected();
-
+    void onTcpClientConnected();
+    void onTcpClientConnectFailed();
     void onWebsocketHandshakeFinished(errorCode ec);
     void onReadFinished(errorCode ec);
     void onWriteFinished(errorCode ec);

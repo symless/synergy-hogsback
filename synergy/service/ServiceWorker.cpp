@@ -3,6 +3,7 @@
 #include "synergy/service/ProfileSnapshot.h"
 #include "synergy/service/ConnectivityTester.h"
 #include "synergy/service/CloudClient.h"
+#include <synergy/service/Logs.h>
 #include <synergy/common/UserConfig.h>
 #include <synergy/common/RpcManager.h>
 #include <synergy/common/WampServer.h>
@@ -19,10 +20,15 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
     m_connectivityTester (std::make_unique<ConnectivityTester>(m_ioService)),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService)),
     m_userConfig(std::make_shared<UserConfig>()),
-    m_cloudClient(std::make_shared<CloudClient>(ioService, m_userConfig))
+    m_cloudClient (std::make_unique<CloudClient>(ioService))
 {
     m_userConfig->load();
-    m_cloudClient->init();
+    m_cloudClient->init(*m_userConfig);
+
+    g_log.onLogLine.connect([this](std::string logLine) {
+        auto server = m_rpcManager->server();
+        server->publish ("synergy.service.log", std::move(logLine));
+    });
 
     m_cloudClient->websocketMessageReceived.connect([this](std::string json){
         // parse message
@@ -43,7 +49,10 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
         server->publish ("synergy.profile.snapshot", std::move(json));
     });
 
-    m_rpcManager->ready.connect([this]() { provideRpcEndpoints(); });
+    m_rpcManager->ready.connect([this]() {
+        provideRpcEndpoints();
+        mainLog()->info("service started successfully");
+    });
     m_rpcManager->start();
 }
 
@@ -97,13 +106,14 @@ void ServiceWorker::provideAuthUpdate()
     auto server = m_rpcManager->server();
 
     server->provide ("synergy.auth.update",
-                     [this](int userId, int screenId, int profileId, std::string userToken) {
+                     [this](int userId, int screenId, int profileId,
+                     std::string userToken) {
         m_userConfig->setUserId(userId);
         m_userConfig->setScreenId(screenId);
         m_userConfig->setProfileId(profileId);
         m_userConfig->setUserToken(std::move(userToken));
         m_userConfig->save();
-        m_cloudClient->init();
+        m_cloudClient->init(*m_userConfig);
     });
 }
 
@@ -120,6 +130,10 @@ void ServiceWorker::shutdown()
 
 void ServiceWorker::provideRpcEndpoints()
 {
+    mainLog()->debug("creating rpc endpoints");
+
     provideCore();
     provideAuthUpdate();
+
+    mainLog()->debug("rpc endpoints created");
 }

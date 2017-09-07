@@ -1,5 +1,6 @@
 #include "HttpSession.h"
 
+#include <synergy/service/Logs.h>
 #include <boost/asio/connect.hpp>
 
 static const int kHttpVersion = 11;
@@ -61,7 +62,9 @@ void HttpSession::setupRequest(http::verb method, const std::string &target, con
 
 void HttpSession::onWriteFinished(errorCode ec)
 {
-    //m_tcpClient.checkError(ec);
+    if (ec) {
+        mainLog()->debug("http session write error: {}", ec.message());
+    }
 
     // TODO: do we care if the request has been received?
 }

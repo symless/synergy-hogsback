@@ -28,5 +28,7 @@
         <file>res/image/error-indication.svg</file>
         <file>res/image/error-message-dialog.png</file>
         <file>res/image/close-icon.svg</file>
+        <file alias="Raleway-Regular.ttf">res/font/Raleway-Regular.ttf</file>
+        <file alias="SourceCodePro-Regular.ttf">res/font/SourceCodePro-Regular.ttf</file>
     </qresource>
 </RCC>

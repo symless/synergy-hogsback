@@ -9,10 +9,10 @@ class ConnectivityTester;
 class CloudClient;
 class UserConfig;
 
-class ServiceWorker
+class ServiceWorker final
 {
 public:
-    ServiceWorker(boost::asio::io_service& ioService);
+    explicit ServiceWorker(boost::asio::io_service& ioService);
     ~ServiceWorker();
 
     void start();
@@ -28,7 +28,7 @@ private:
     std::unique_ptr<ConnectivityTester> m_connectivityTester;
     std::shared_ptr<boost::asio::io_service::work> m_work;
     std::shared_ptr<UserConfig> m_userConfig;
-    std::shared_ptr<CloudClient> m_cloudClient;
+    std::unique_ptr<CloudClient> m_cloudClient;
 };
 
 #endif // SERVICEWORKER_H

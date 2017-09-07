@@ -34,6 +34,7 @@ WampClient::start (std::string const& ip, int const port)
 void
 WampClient::connect()
 {
+    connecting();
     m_transport->connect().then(
         m_executor, [&](boost::future<void> status) {
 

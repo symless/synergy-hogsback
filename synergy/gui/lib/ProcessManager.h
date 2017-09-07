@@ -43,6 +43,7 @@ signals:
     void screenError(QString, int);
     void localInputDetected();
     void logCoreOutput(QString);
+    void logServiceOutput(QString);
 
 public slots:
     void newServerDetected(int serverId);
@@ -51,6 +52,7 @@ public slots:
 private slots:
     void exit(int exitCode, QProcess::ExitStatus);
     void onLogCoreOutput(QString text);
+    void onLogServiceOutput(QString text);
     void logCoreError();
 
 private:

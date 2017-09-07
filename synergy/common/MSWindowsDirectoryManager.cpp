@@ -1,55 +1,54 @@
-#include "MSWindowsDirectoryManager.h"
-
 #define WIN32_LEAN_AND_MEAN
+#include "MSWindowsDirectoryManager.h"
 #include <Windows.h>
 #include <Wtsapi32.h>
 #include <shlobj.h>
 #include <tchar.h>
-#include <string.h>
+#include <stdexcept>
 
-std::string
+boost::filesystem::path
 MSWindowsDirectoryManager::systemAppDir()
 {
-    std::string dir;
+    boost::filesystem::path dir;
     TCHAR result[MAX_PATH];
-    if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL, 0, result))) {
+    if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL, 0,
+                                  result))) {
         dir = result;
+    } else {
+        throw std::runtime_error ("Couldn't determine the system app data "
+                                  "file path");
     }
 
-    return dir + "\\Symless\\Synergy";
+    return dir / "Symless" / "Synergy";
 }
 
 boost::filesystem::path
 MSWindowsDirectoryManager::installedDir()
 {
-    char fileNameBuffer[MAX_PATH];
-    GetModuleFileName(NULL, fileNameBuffer, MAX_PATH);
-    return boost::filesystem::path (fileNameBuffer).parent_path().string();
+    TCHAR exePath[MAX_PATH];
+    GetModuleFileName(NULL, exePath, MAX_PATH);
+    return boost::filesystem::path (exePath).parent_path();
 }
 
-std::string
+boost::filesystem::path
 MSWindowsDirectoryManager::profileDir()
 {
-    std::string dir;
+    boost::filesystem::path dir;
     HANDLE sourceToken = NULL;
     WTSQueryUserToken(WTSGetActiveConsoleSessionId(), &sourceToken);
 
-    // when source is valid, we get the profile directory from that user
-    // when source is still NULL, we get profile directory from the user
-    // that spawns this process
+    /* When source is valid, we get the profile directory from that user. When
+     * source is still NULL, we get profile directory from the user that spawned
+     * this process
+     */
     TCHAR result[MAX_PATH];
-    if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, sourceToken, 0, result))) {
+    if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, sourceToken, 0,
+                                  result))) {
         dir = result;
-    }
-    else {
-        throw;
+    } else {
+        throw std::runtime_error ("Couldn't determine the users app data "
+                                  "file path");
     }
 
-    dir.append("\\Symless\\Synergy");
-    return dir;
-}
-
-std::string MSWindowsDirectoryManager::pathSeparator()
-{
-    return "\\";
+    return dir / "Symless" / "Synergy";
 }

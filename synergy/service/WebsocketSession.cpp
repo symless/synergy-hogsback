@@ -1,5 +1,6 @@
 #include "WebsocketSession.h"
 
+#include <synergy/service/Logs.h>
 #include <boost/asio/connect.hpp>
 
 static const long kReconnectDelaySec = 3;
@@ -22,11 +23,19 @@ WebsocketSession::connect(const std::string target)
 
     m_tcpClient.connected.connect(
         [this](SecuredTcpClient*) {
-            onSessionConnected();
+            onTcpClientConnected();
         },
         boost::signals2::at_front
     );
 
+    m_tcpClient.connectFailed.connect(
+        [this](SecuredTcpClient*) {
+            onTcpClientConnectFailed();
+        },
+        boost::signals2::at_front
+    );
+
+    mainLog()->debug("connecting websocket");
     m_tcpClient.connect();
 }
 
@@ -44,7 +53,10 @@ WebsocketSession::disconnect()
 void
 WebsocketSession::reconnect()
 {
+    mainLog()->debug("retrying websocket connection in {}s", kReconnectDelaySec);
+
     if (m_connected) {
+        mainLog()->debug("closing existing open connection");
         m_websocket.close(websocket::close_code::normal);
         m_connected = false;
     }
@@ -53,6 +65,7 @@ WebsocketSession::reconnect()
     m_reconnectTimer.expires_from_now(boost::posix_time::seconds(kReconnectDelaySec));
 
     m_reconnectTimer.async_wait([this](const boost::system::error_code&) {
+        mainLog()->debug("retrying websocket connection now");
         connect(m_target);
     });
 }
@@ -82,7 +95,7 @@ bool WebsocketSession::isConnected()
 }
 
 void
-WebsocketSession::onSessionConnected()
+WebsocketSession::onTcpClientConnected()
 {
     // websocket handshake
     m_websocket.async_handshake_ex(
@@ -101,15 +114,25 @@ WebsocketSession::onSessionConnected()
 }
 
 void
+WebsocketSession::onTcpClientConnectFailed()
+{
+    mainLog()->debug("websocket connect failed");
+    reconnect();
+}
+
+void
 WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
 {
     if (ec) {
+        mainLog()->debug("websocket handshake error: {}", ec.message());
         reconnect();
         return;
     }
 
+    mainLog()->debug("websocket connected");
     m_connected = true;
     connected();
+    mainLog()->debug("websocket connected");
 
     m_websocket.async_read(
         m_readBuffer,
@@ -124,6 +147,7 @@ void
 WebsocketSession::onReadFinished(errorCode ec)
 {
     if (ec) {
+        mainLog()->debug("websocket read error: {}", ec.message());
         return;
     }
 
@@ -147,11 +171,19 @@ WebsocketSession::onReadFinished(errorCode ec)
 void
 WebsocketSession::onWriteFinished(errorCode ec)
 {
+    if (ec) {
+        mainLog()->debug("websocket write error: {}", ec.message());
+    }
 }
 
 void
 WebsocketSession::onDisconnectFinished(errorCode ec)
 {
+    if (ec) {
+        mainLog()->debug("websocket disconnect error: {}", ec.message());
+    }
+
     m_connected = false;
     disconnected();
+    mainLog()->debug("websocket disconnected");
 }

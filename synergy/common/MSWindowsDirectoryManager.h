@@ -3,15 +3,12 @@
 
 #include "DirectoryManager.h"
 
-#include <string>
-
 class MSWindowsDirectoryManager final : public DirectoryManager
 {
 public:
-    std::string systemAppDir();
+    boost::filesystem::path systemAppDir() override;
     boost::filesystem::path installedDir() override;
-    std::string profileDir();
-    std::string pathSeparator();
+    boost::filesystem::path profileDir() override;
 };
 
 #endif // COMMONMSWINDOWSDIRECTORYMANAGER_H

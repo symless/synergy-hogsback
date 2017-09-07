@@ -1,6 +1,7 @@
 #include "DirectoryManager.h"
 
 #include <cstdlib>
+#include <stdexcept>
 
 #ifdef _WIN32
 #include "MSWindowsDirectoryManager.h"
@@ -10,32 +11,39 @@
 #include "XWindowsDirectoryManager.h"
 #endif
 
-DirectoryManager* DirectoryManager::s_instances = NULL;
-
 DirectoryManager*
 DirectoryManager::instance()
 {
-    if (s_instances == NULL) {
 #ifdef _WIN32
-        s_instances = new MSWindowsDirectoryManager();
+    static auto impl = new MSWindowsDirectoryManager();
 #elif __APPLE__
-        s_instances = new OSXDirectoryManager();
+    static auto impl = new OSXDirectoryManager();
 #else
-        s_instances = new XWindowsDirectoryManager();
+    static auto impl = new XWindowsDirectoryManager();
 #endif
-    }
-
-    return s_instances;
+    return impl;
 }
 
-std::string
+boost::filesystem::path
 DirectoryManager::userDir()
 {
     const char* userDir = getenv("HOME");
-
-    if (userDir) {
-        return userDir;
+    if (!userDir) {
+        throw std::runtime_error("HOME environment variable not set");
     }
+    return userDir;
+}
 
-    throw;
+boost::filesystem::path
+DirectoryManager::crashDumpDir() {
+    auto path = profileDir() / "dumps";
+    boost::system::error_code ec;
+    if (!boost::filesystem::exists (path, ec) && !ec) {
+        boost::filesystem::create_directories (path, ec);
+    }
+    if (ec) {
+        throw boost::system::system_error(ec, "Couldn't verify crash dump "
+                                              "directory");
+    }
+    return path;
 }
