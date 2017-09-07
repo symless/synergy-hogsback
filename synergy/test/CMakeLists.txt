@@ -12,6 +12,7 @@ add_executable (${PROJECT_NAME}
     ../service/TestDelegatee.cpp
     ../service/SecuredTcpClient.cpp
     ../service/SecuredTcpServer.cpp
+    ../service/Logs.cpp
 )
 
 target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC

@@ -15,6 +15,7 @@ set (SERVICE_SOURCES
     ProfileSnapshot.cpp
     ConnectivityTester.cpp
     TestDelegatee.cpp
+    Logs.cpp
 )
 
 add_executable (${PROJECT_NAME} ${SERVICE_SOURCES})

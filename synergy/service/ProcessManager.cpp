@@ -1,4 +1,5 @@
 #include <synergy/service/ProcessManager.h>
+#include <synergy/service/Logs.h>
 #include <boost/process.hpp>
 #include <boost/process/async_pipe.hpp>
 #include <boost/asio/read_until.hpp>
@@ -122,11 +123,15 @@ ProcessManagerImpl::start (ProcessManager& manager) {
                                        m_errorBuffer, m_lineBuffer, ec, bytes);
         })
     );
+
+    mainLog()->debug("core process started");
 }
 
 void
 ProcessManagerImpl::shutdown() {
     auto& ioService = m_ioStrand.get_io_service();
+
+    mainLog()->debug("stopping core process");
 
     /* Cancel the standard stream I/O loops */
     m_outPipe.cancel();
@@ -140,6 +145,8 @@ ProcessManagerImpl::shutdown() {
 
     m_process->terminate();
     ioService.poll();
+
+    mainLog()->debug("core process stopped");
 }
 
 ProcessManager::ProcessManager (boost::asio::io_service &io)
@@ -152,6 +159,8 @@ ProcessManager::~ProcessManager () noexcept {
 
 void
 ProcessManager::start (std::vector<std::string> command) {
+    mainLog()->debug("starting core process");
+
     if (m_impl) {
         m_impl->m_expectingExit = true;
 

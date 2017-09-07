@@ -1,10 +1,9 @@
 #include "OSXDirectoryManager.h"
 
-
-std::string
+boost::filesystem::path
 OSXDirectoryManager::systemAppDir()
 {
-    return "/usr/local/share";
+    return "/usr/local/share/synergy";
 }
 
 boost::filesystem::path
@@ -13,8 +12,8 @@ OSXDirectoryManager::installedDir()
     return "/Applications/Synergy.app/Contents/MacOS";
 }
 
-std::string
+boost::filesystem::path
 OSXDirectoryManager::profileDir()
 {
-    return userDir().append("/Library/Synergy");
+    return userDir() / "Library" / "Synergy";
 }

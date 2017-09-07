@@ -15,10 +15,8 @@ GlobalConfig::GlobalConfig()
 std::string
 GlobalConfig::filename()
 {
-    boost::filesystem::path dir(DirectoryManager::instance()->systemAppDir());
-    boost::filesystem::path file(kGlobalConfigFilename);
-    boost::filesystem::path filename = dir / file;
-    return filename.string();
+    return (DirectoryManager::instance()->systemAppDir()
+                / kGlobalConfigFilename).string();
 }
 
 void GlobalConfig::load()

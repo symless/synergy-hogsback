@@ -122,13 +122,6 @@ App::run(int argc, char* argv[])
 
     FontManager::loadAll();
 
-    asio::io_service io;
-    QObject::connect (&app, &QCoreApplication::aboutToQuit,
-        [rpcWork = std::make_shared<asio::io_service::work> (io)]() mutable {
-            rpcWork.reset();
-        }
-    );
-
     qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");
     qmlRegisterType<ScreenListModel>("com.synergy.gui", 1, 0, "ScreenListModel");
     qmlRegisterType<ScreenManager>("com.synergy.gui", 1, 0, "ScreenManager");
@@ -146,7 +139,7 @@ App::run(int argc, char* argv[])
     LogManager::setQmlContext(engine.rootContext());
     LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
 
-    // TODO: refactor main function
+    asio::io_service io;
     WampClient wampClient (io);
 
     CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
@@ -164,7 +157,12 @@ App::run(int argc, char* argv[])
     ConnectivityTester tester;
     processManager.setConnectivityTester(&tester);
 
+    wampClient.connecting.connect([&]() {
+        LogManager::debug(QString("connecting to service"));
+    });
+
     wampClient.connected.connect([&]() {
+        LogManager::debug(QString("connected to service"));
         wampClient.subscribe ("synergy.profile.snapshot", [&](std::string json) {
             QByteArray byteArray(json.c_str(), json.length());
             cloudClient->receivedScreensInterface(byteArray);
@@ -188,7 +186,8 @@ App::run(int argc, char* argv[])
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     auto qtAppRet = app.exec();
 
-    /* The RPC thread should stop and join us when it runs out of work */
+    // stop rpc
+    io.stop();
     rpcThread.join();
 
     return qtAppRet;

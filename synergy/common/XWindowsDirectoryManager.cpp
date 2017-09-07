@@ -1,7 +1,6 @@
 #include "XWindowsDirectoryManager.h"
 
-
-std::string
+boost::filesystem::path
 XWindowsDirectoryManager::systemAppDir()
 {
     return "/etc/synergy";
@@ -13,8 +12,8 @@ XWindowsDirectoryManager::installedDir()
     return "/usr/bin";
 }
 
-std::string
+boost::filesystem::path
 XWindowsDirectoryManager::profileDir()
 {
-    return userDir().append("/.synergy");
+    return userDir() / ".config" / "synergy";
 }

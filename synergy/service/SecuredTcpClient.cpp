@@ -1,7 +1,7 @@
 #include "SecuredTcpClient.h"
 
 #include <boost/asio/connect.hpp>
-#include <synergy/service/
+#include <synergy/service/Logs.h>
 
 SecuredTcpClient::SecuredTcpClient(boost::asio::io_service &ioService, std::string hostname, std::string port) :
     m_ioService(ioService),
@@ -24,7 +24,7 @@ SecuredTcpClient::SecuredTcpClient(boost::asio::io_service &ioService, std::stri
 void SecuredTcpClient::connect()
 {
     if (m_connecting) {
-        mainLog()->warning("tcp client already in connecting");
+        mainLog()->warn("tcp client already in connecting");
         return;
     }
 

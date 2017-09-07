@@ -6,6 +6,11 @@ import com.synergy.gui 1.0
 
 Rectangle {
 
+    FontLoader {
+        id: consoleFont;
+        name: "Source Code Pro"
+    }
+
     Hostname {
         id: localHostname
     }
@@ -124,8 +129,10 @@ Rectangle {
                 style: TextAreaStyle {
                     backgroundColor: "black"
                     textColor: "white"
-                    font.family: sample.font.family
-                    font.pixelSize: sample.font.pixelSize
+                    font {
+                        family: consoleFont.name;
+                        pixelSize: sample.font.pixelSize * .9
+                    }
                 }
 
                 menu: Menu {
@@ -133,7 +140,6 @@ Rectangle {
                         text: "Copy"
                         shortcut: "Ctrl+C"
                         onTriggered: {
-                            logConsoleTextArea.selectAll()
                             logConsoleTextArea.copy()
                         }
                     }

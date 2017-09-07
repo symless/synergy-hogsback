@@ -90,6 +90,12 @@ void ScreenManager::setScreenModel(ScreenListModel* screenListModel)
 
 void ScreenManager::setProcessManager(ProcessManager* processManager)
 {
+    // weirdly, this function gets called on exit. when this happens
+    // processManager is null, so don't do anything in this case.
+    if (processManager == nullptr) {
+        return;
+    }
+
     m_processManager = processManager;
 
     connect(this, &ScreenManager::newServer,

@@ -8,11 +8,9 @@
 #include <iostream>
 #include <fstream>
 
-const char* kUserConfigFilename = "synergy-user.cfg";
+static const char* const kUserConfigFilename = "synergy-user.cfg";
 
-UserConfig::
-UserConfig(std::string filename) :
-    m_altFilename(std::move(filename)),
+UserConfig::UserConfig():
     m_debugLevel(kInfo),
     m_userToken(""),
     m_userId(-1),
@@ -23,30 +21,20 @@ UserConfig(std::string filename) :
 }
 
 std::string
-UserConfig::filename()
+UserConfig::defaultFilePath()
 {
-    if (!m_altFilename.empty()) {
-        return m_altFilename;
-    }
-
 #ifdef _WIN32
-        boost::filesystem::path dir(DirectoryManager::instance()->systemAppDir());
+    auto filepath = DirectoryManager::instance()->systemAppDir();
 #else
-        boost::filesystem::path dir(DirectoryManager::instance()->profileDir());
+    auto filepath = DirectoryManager::instance()->profileDir();
 #endif
-
-    boost::filesystem::path file(kUserConfigFilename);
-    boost::filesystem::path filename = dir / file;
-    return filename.string();
+    filepath /= kUserConfigFilename;
+    return filepath.string();
 }
 
-void UserConfig::load()
+void UserConfig::load(std::string const& filepath)
 {
-    if (persistFilename()) {
-        return;
-    }
-
-    ConfigParser parser = ConfigParser::parse_file(filename());
+    ConfigParser parser = ConfigParser::parse_file(filepath);
 
     auto authConfig = parser.get_section("auth");
     if (authConfig.isValid()) {
@@ -56,7 +44,6 @@ void UserConfig::load()
 
     auto profileConfig = parser.get_section("profile");
     if (profileConfig.isValid()) {
-
         m_profileId = profileConfig.get_value<int64_t>("profile-id");
         m_screenId = profileConfig.get_value<int64_t>("screen-id");
         m_dragAndDrop = profileConfig.get_value<bool>("drag-and-drop");
@@ -64,7 +51,7 @@ void UserConfig::load()
     }
 }
 
-void UserConfig::save()
+void UserConfig::save(std::string const& filepath)
 {
     std::shared_ptr<cpptoml::table> root = cpptoml::make_table();
 
@@ -82,7 +69,8 @@ void UserConfig::save()
     root->insert("profile", profileTable);
 
     std::ofstream file;
-    file.open(filename());
+    file.imbue (std::locale::classic());
+    file.open (filepath, std::ios::trunc | std::ios::out);
     file << *root;
     file.close();
 }
@@ -145,24 +133,4 @@ bool UserConfig::dragAndDrop() const
 void UserConfig::setDragAndDrop(bool dragAndDrop)
 {
     m_dragAndDrop = dragAndDrop;
-}
-
-bool UserConfig::persistFilename()
-{
-#ifdef _WIN32
-        boost::filesystem::path dir(DirectoryManager::instance()->systemAppDir());
-#else
-        boost::filesystem::path dir(DirectoryManager::instance()->profileDir());
-#endif
-
-    boost::filesystem::create_directories(dir);
-    if (!boost::filesystem::exists(filename())) {
-        std::fstream file;
-        file.open(filename(), std::ios::out | std::ios::app);
-        file.close();
-
-        return true;
-    }
-
-    return false;
 }

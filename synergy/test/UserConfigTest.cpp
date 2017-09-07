@@ -1,30 +1,20 @@
 #include "catch.hpp"
-
 #include "synergy/common/UserConfig.h"
 #include "synergy/common/DirectoryManager.h"
-
 #include <boost/filesystem.hpp>
 
 TEST_CASE("User configuration settings", "[configuration]")
 {
     // test configuration file
 #ifdef _WIN32
-        boost::filesystem::path dir(DirectoryManager::instance()->systemAppDir());
+    auto dir = DirectoryManager::instance()->systemAppDir();
 #else
-        boost::filesystem::path dir(DirectoryManager::instance()->profileDir());
+    auto dir = DirectoryManager::instance()->profileDir();
 #endif
+    std::string const testFilename = (dir / "synergy-test-user.cfg").string();
 
-    boost::filesystem::path file("synergy-test-user.cfg");
-    boost::filesystem::path filename = dir / file;
-    std::string testFilename = filename.string();
-
-    // no config file from beginning
-    boost::filesystem::remove(testFilename);
-
-    // initialization without a config file
-    UserConfig userConfig(testFilename);
-    userConfig.load();
-
+    // test default config
+    UserConfig userConfig;
     REQUIRE(userConfig.debugLevel() == kInfo);
     REQUIRE(userConfig.userToken() == "");
     REQUIRE(userConfig.userId() == -1);
@@ -41,11 +31,12 @@ TEST_CASE("User configuration settings", "[configuration]")
     userConfig.setDragAndDrop(true);
 
     // save to file
-    userConfig.save();
+    boost::filesystem::remove(testFilename);
+    userConfig.save(testFilename);
 
     // initializaiton from previous config file
-    UserConfig newUserConfig(testFilename);
-    newUserConfig.load();
+    UserConfig newUserConfig;
+    newUserConfig.load(testFilename);
 
     REQUIRE(newUserConfig.debugLevel() == kDebug);
     REQUIRE(newUserConfig.userToken() == "TestToken");
