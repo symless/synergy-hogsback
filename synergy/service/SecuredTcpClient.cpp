@@ -38,6 +38,10 @@ ssl::stream<tcp::socket> &SecuredTcpClient::stream()
 void SecuredTcpClient::onResolveFinished(errorCode ec, tcp::resolver::iterator result)
 {
     if (ec) {
+        if (ec == boost::asio::error::operation_aborted) {
+            return;
+        }
+
         connectFailed(this);
         return;
     }
@@ -54,6 +58,10 @@ void SecuredTcpClient::onResolveFinished(errorCode ec, tcp::resolver::iterator r
 void SecuredTcpClient::onConnectFinished(errorCode ec)
 {
     if (ec) {
+        if (ec == boost::asio::error::operation_aborted) {
+            return;
+        }
+
         connectFailed(this);
         return;
     }
@@ -69,6 +77,10 @@ void SecuredTcpClient::onConnectFinished(errorCode ec)
 void SecuredTcpClient::onSslHandshakeFinished(errorCode ec)
 {
     if (ec) {
+        if (ec == boost::asio::error::operation_aborted) {
+            return;
+        }
+
         connectFailed(this);
         return;
     }
