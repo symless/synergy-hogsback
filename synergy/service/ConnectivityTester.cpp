@@ -204,7 +204,9 @@ void ConnectivityTester::onTestDelegateeDone(std::map<std::string, bool> results
             // TODO: report to cloud
 
             // update connectivity results
-            m_screenSuccessfulResults[*screenId] = successfulIpList;
+            if (!successfulIp.empty()) {
+                m_screenSuccessfulResults[*screenId] = successfulIpList;
+            }
         }
 
         testedCount++;
@@ -219,6 +221,8 @@ void ConnectivityTester::onTestDelegateeDone(std::map<std::string, bool> results
 
     delete m_testDelegatee;
     m_testDelegatee = nullptr;
+
+    testBatchFinished();
 
     if (!m_pendingTestCases.empty()) {
         startTesting(m_pendingTestCases.size());

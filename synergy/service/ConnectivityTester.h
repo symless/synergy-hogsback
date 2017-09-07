@@ -20,6 +20,11 @@ public:
     void testNewScreens(const std::vector<ProfileSnapshot::Screen>& screens);
     std::vector<std::string> getSuccessfulResults(int screenId) const;
 
+    template <typename... Args>
+    using signal = boost::signals2::signal<Args...>;
+
+    signal<void()> testBatchFinished;
+
     static const std::string testServerCertificate();
     static const std::string testServerKey();
     static const std::string testServerDH();
