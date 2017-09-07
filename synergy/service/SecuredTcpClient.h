@@ -23,6 +23,7 @@ public:
 private:
     void onResolveFinished(errorCode ec, tcp::resolver::iterator result);
     void onConnectFinished(errorCode ec);
+    void onSslHandshakeFinished(errorCode ec);
 
 private:
     boost::asio::io_service& m_ioService;

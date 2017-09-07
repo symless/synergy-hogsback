@@ -11,6 +11,7 @@ using tcp = boost::asio::ip::tcp;
 namespace ssl = boost::asio::ssl;
 typedef boost::system::error_code errorCode;
 
+// TODO: review this class when work on SSL implementation to see if it's redundant
 class SecuredTcpSession
 {
 public:
@@ -24,9 +25,6 @@ public:
 
     signal<void(SecuredTcpSession*)> connected;
     signal<void(SecuredTcpSession*)> connectFailed;
-
-    void startSslHandshake(bool serverMode);
-    void onSslHandshakeFinished(errorCode ec);
 
 private:
     boost::asio::io_service& m_ioService;

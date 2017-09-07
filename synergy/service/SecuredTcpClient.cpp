@@ -58,7 +58,22 @@ void SecuredTcpClient::onConnectFinished(errorCode ec)
         return;
     }
 
-    m_session.startSslHandshake(false);
+    m_session.stream().async_handshake(
+        ssl::stream_base::client,
+        std::bind(
+            &SecuredTcpClient::onSslHandshakeFinished,
+            this,
+                    std::placeholders::_1));
+}
+
+void SecuredTcpClient::onSslHandshakeFinished(errorCode ec)
+{
+    if (ec) {
+        connectFailed(this);
+        return;
+    }
+
+    connected(this);
 }
 
 std::string SecuredTcpClient::address() const
