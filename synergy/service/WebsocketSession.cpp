@@ -9,10 +9,13 @@ WebsocketSession::WebsocketSession(boost::asio::io_service &ioService,
         const std::string& hostname,
         const std::string& port) :
     m_reconnectTimer(ioService),
-    m_tcpClient(ioService, hostname, port),
-    m_websocket(m_tcpClient.stream()),
+    m_tcpClient(std::make_unique<SecuredTcpClient>(ioService, hostname, port)),
+    m_websocket(std::make_unique<websocket::stream<ssl::stream<tcp::socket>&>>(m_tcpClient->stream())),
     m_target(),
-    m_connected(false)
+    m_connected(false),
+    m_ioService(ioService),
+    m_hostname(hostname),
+    m_port(port)
 {
 }
 
@@ -21,14 +24,14 @@ WebsocketSession::connect(const std::string target)
 {
     m_target = target;
 
-    m_tcpClient.connected.connect(
+    m_tcpClient->connected.connect(
         [this](SecuredTcpClient*) {
             onTcpClientConnected();
         },
         boost::signals2::at_front
     );
 
-    m_tcpClient.connectFailed.connect(
+    m_tcpClient->connectFailed.connect(
         [this](SecuredTcpClient*) {
             onTcpClientConnectFailed();
         },
@@ -36,13 +39,13 @@ WebsocketSession::connect(const std::string target)
     );
 
     mainLog()->debug("connecting websocket");
-    m_tcpClient.connect();
+    m_tcpClient->connect();
 }
 
 void
 WebsocketSession::disconnect()
 {
-    m_websocket.async_close(websocket::close_code::normal,
+    m_websocket->async_close(websocket::close_code::normal,
         std::bind(
             &WebsocketSession::onDisconnectFinished,
             this,
@@ -57,15 +60,18 @@ WebsocketSession::reconnect()
 
     if (m_connected) {
         mainLog()->debug("closing existing open connection");
-        m_websocket.close(websocket::close_code::normal);
+        m_websocket->close(websocket::close_code::normal);
         m_connected = false;
     }
 
-    m_reconnectTimer.cancel();
     m_reconnectTimer.expires_from_now(boost::posix_time::seconds(kReconnectDelaySec));
 
     m_reconnectTimer.async_wait([this](const boost::system::error_code&) {
         mainLog()->debug("retrying websocket connection now");
+
+        m_tcpClient.reset(new SecuredTcpClient(m_ioService, m_hostname, m_port));
+        m_websocket.reset(new websocket::stream<ssl::stream<tcp::socket>&>(m_tcpClient->stream()));
+
         connect(m_target);
     });
 }
@@ -74,7 +80,7 @@ void
 WebsocketSession::write(std::string& message)
 {
     if (m_connected) {
-        m_websocket.async_write(
+        m_websocket->async_write(
             boost::asio::buffer(message),
             std::bind(
                 &WebsocketSession::onWriteFinished,
@@ -98,8 +104,8 @@ void
 WebsocketSession::onTcpClientConnected()
 {
     // websocket handshake
-    m_websocket.async_handshake_ex(
-        m_tcpClient.address().c_str(),
+    m_websocket->async_handshake_ex(
+        m_tcpClient->address().c_str(),
         m_target.c_str(),
         [this](boost::beast::websocket::request_type & req) {
             for (auto const& i : m_headers) {
@@ -116,8 +122,11 @@ WebsocketSession::onTcpClientConnected()
 void
 WebsocketSession::onTcpClientConnectFailed()
 {
-    mainLog()->debug("websocket connect failed");
-    reconnect();
+    if (m_tcpClient) {
+        m_tcpClient.reset();
+        mainLog()->debug("websocket connect failed");
+        reconnect();
+    }
 }
 
 void
@@ -133,7 +142,7 @@ WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
     connected();
     mainLog()->debug("websocket connected");
 
-    m_websocket.async_read(
+    m_websocket->async_read(
         m_readBuffer,
         std::bind(
             &WebsocketSession::onReadFinished,
@@ -158,7 +167,7 @@ WebsocketSession::onReadFinished(errorCode ec)
     m_readBuffer = boost::beast::multi_buffer();
 
     // keep reading
-    m_websocket.async_read(
+    m_websocket->async_read(
         m_readBuffer,
         std::bind(
             &WebsocketSession::onReadFinished,

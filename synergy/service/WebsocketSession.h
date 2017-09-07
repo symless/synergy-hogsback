@@ -8,6 +8,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/signals2.hpp>
 #include <map>
+#include <memory>
 
 namespace websocket = boost::beast::websocket;
 namespace ssl = boost::asio::ssl;
@@ -44,11 +45,14 @@ private:
 private:
     boost::beast::multi_buffer m_readBuffer;
     boost::asio::deadline_timer m_reconnectTimer;
-    SecuredTcpClient m_tcpClient;
-    websocket::stream<ssl::stream<tcp::socket>&> m_websocket;
+    std::unique_ptr<SecuredTcpClient> m_tcpClient;
+    std::unique_ptr<websocket::stream<ssl::stream<tcp::socket>&>> m_websocket;
     std::string m_target;
     std::map<std::string, std::string> m_headers;
     bool m_connected;
+    boost::asio::io_service& m_ioService;
+    std::string m_hostname;
+    std::string m_port;
 };
 
 #endif // WEBSOCKETSESSION_H
