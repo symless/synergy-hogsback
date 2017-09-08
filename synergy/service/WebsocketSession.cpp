@@ -138,6 +138,7 @@ WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
         return;
     }
 
+    mainLog()->debug("websocket connected");
     m_connected = true;
     connected();
     mainLog()->debug("websocket connected");

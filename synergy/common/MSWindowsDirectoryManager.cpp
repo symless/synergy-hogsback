@@ -52,3 +52,9 @@ MSWindowsDirectoryManager::profileDir()
 
     return dir / "Symless" / "Synergy";
 }
+
+boost::filesystem::path
+MSWindowsDirectoryManager::systemLogDir()
+{
+    return systemAppDir();
+}

@@ -12,6 +12,7 @@ public:
     virtual boost::filesystem::path systemAppDir() = 0;
     virtual boost::filesystem::path installedDir() = 0;
     virtual boost::filesystem::path profileDir() = 0;
+    virtual boost::filesystem::path systemLogDir() = 0;
 };
 
 #endif // COMMONDIRECTORYMANAGER_H

@@ -17,3 +17,9 @@ XWindowsDirectoryManager::profileDir()
 {
     return userDir() / ".config" / "synergy";
 }
+
+boost::filesystem::path
+XWindowsDirectoryManager::systemLogDir()
+{
+    return "/var/log";
+}

@@ -13,17 +13,24 @@
 #include <boost/asio.hpp>
 #include <iostream>
 
+std::string g_lastProfileSnapshot;
+
 ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
     m_ioService (ioService),
+    m_work (std::make_shared<boost::asio::io_service::work>(ioService)),
     m_rpcManager (std::make_unique<RpcManager>(m_ioService)),
     m_processManager (std::make_unique<ProcessManager>(m_ioService)),
     m_connectivityTester (std::make_unique<ConnectivityTester>(m_ioService)),
-    m_work (std::make_shared<boost::asio::io_service::work>(ioService)),
     m_userConfig(std::make_shared<UserConfig>()),
     m_cloudClient (std::make_unique<CloudClient>(ioService, m_userConfig))
 {
     m_userConfig->load();
     m_cloudClient->init();
+
+    g_log.onLogLine.connect([this](std::string logLine) {
+        auto server = m_rpcManager->server();
+        server->publish ("synergy.service.log", std::move(logLine));
+    });
 
     g_log.onLogLine.connect([this](std::string logLine) {
         auto server = m_rpcManager->server();
@@ -46,9 +53,9 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
 
         // forward the message via rpc server
         auto server = m_rpcManager->server();
+        g_lastProfileSnapshot = json;
         server->publish ("synergy.profile.snapshot", std::move(json));
     });
-
 
     m_rpcManager->ready.connect([this]() {
         provideRpcEndpoints();
@@ -86,6 +93,12 @@ ServiceWorker::provideCore()
     server->provide ("synergy.core.start",
                      [this](std::vector<std::string>& cmd) {
         m_processManager->start (std::move (cmd));
+    });
+
+    server->provide ("synergy.profile.request",
+                     [server](std::vector<std::string>& cmd) {
+        mainLog()->debug("sending last profile snapshot");
+        server->publish ("synergy.profile.snapshot", g_lastProfileSnapshot);
     });
 
     m_processManager->onOutput.connect(

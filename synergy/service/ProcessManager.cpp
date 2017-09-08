@@ -167,7 +167,14 @@ ProcessManager::start (std::vector<std::string> command) {
         onExit.connect_extended ([this, &process = m_impl->m_process]
                                  (auto& connection) {
             connection.disconnect();
-            process->join();
+
+            if (process) {
+                process->join();
+            }
+            else {
+                mainLog()->error("can't join process, not initialized");
+            }
+
             m_impl->m_expectingExit = false;
         });
 
