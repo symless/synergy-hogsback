@@ -26,14 +26,15 @@ private:
     void provideAuthUpdate();
 
 private:
-    boost::asio::io_service& m_ioService;
-    std::shared_ptr<UserConfig> m_userConfig;
-    std::shared_ptr<Profile> m_activeProfile;
-    std::shared_ptr<boost::asio::io_service::work> m_work;
-    std::unique_ptr<RpcManager> m_rpcManager;
+    boost::asio::io_service&        m_ioService;
+    std::shared_ptr<UserConfig>     m_userConfig;
+    std::shared_ptr<Profile>        m_activeProfile;
+    std::unique_ptr<RpcManager>     m_rpcManager;
+    std::unique_ptr<CloudClient>    m_cloudClient;
     std::unique_ptr<ProcessManager> m_processManager;
     std::unique_ptr<ConnectivityTester> m_connectivityTester;
     std::unique_ptr<CloudClient> m_cloudClient;
+    std::shared_ptr<boost::asio::io_service::work> m_work;
 };
 
 #endif // SERVICEWORKER_H
