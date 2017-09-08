@@ -58,7 +58,6 @@ private slots:
     void updateScreens(QByteArray reply);
     void onUpdateProfileConfig();
     void onScreenStatusChanged(QPair<QString, ScreenStatus> r);
-    void onLocalInputDetected();
     void onScreenError(QString screenName, int errorCode);
 
 private:

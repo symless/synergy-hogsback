@@ -104,8 +104,6 @@ void ScreenManager::setProcessManager(ProcessManager* processManager)
             this, &ScreenManager::onScreenStatusChanged);
     connect(m_processManager, &ProcessManager::screenError,
             this, &ScreenManager::onScreenError, Qt::QueuedConnection);
-    connect(m_processManager, &ProcessManager::localInputDetected,
-            this, &ScreenManager::onLocalInputDetected);
 }
 
 void ScreenManager::setViewWidth(int w)
@@ -134,7 +132,7 @@ void ScreenManager::onKeyPressed (int const key)
     switch (key) {
         case Qt::Key_F12:
             LogManager::debug(QString("claim to be server"));
-            m_cloudClient->claimServer();
+            //m_cloudClient->claimServer();
             //startCoreProcess();
             break;
     }
@@ -330,11 +328,6 @@ void ScreenManager::onScreenStatusChanged(QPair<QString, ScreenStatus> r)
 
         m_cloudClient->updateScreen(s);
     }
-}
-
-void ScreenManager::onLocalInputDetected()
-{
-    m_cloudClient->claimServer();
 }
 
 void ScreenManager::onScreenError(QString screenName, int errorCode)
