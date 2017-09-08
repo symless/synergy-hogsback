@@ -10,10 +10,14 @@ public:
     using signal = boost::signals2::signal<Args...>;
 
     explicit Profile (int64_t id);
-    //void update (Snapshot const&);
+    static Profile fromJSONSnapshot (std::string const&);
+    void merge (Profile);
+
 private:
+    Profile() = default;
     int64_t m_id;
     int64_t m_version;
+    int64_t m_server;
     std::string m_name;
     std::vector<Screen> m_screens;
 
@@ -22,4 +26,3 @@ public:
     signal<void (std::vector<Screen> added, std::vector<Screen> removed)>
         screenSetChanged;
 };
-
