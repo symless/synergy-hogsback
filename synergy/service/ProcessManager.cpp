@@ -219,10 +219,11 @@ ProcessManager::start (std::vector<std::string> command) {
         assert (!m_impl);
     }
 
-    m_impl = std::make_unique<ProcessManagerImpl>
-                (m_ioService, std::move (command));
     auto const binary = getCommandBinaryName (command);
     auto const localScreenName = getCommandLocalScreenName (command);
+
+    m_impl = std::make_unique<ProcessManagerImpl>
+                (m_ioService, std::move (command));
     auto& localState = m_impl->m_clients[localScreenName];
     using boost::algorithm::contains;
 
