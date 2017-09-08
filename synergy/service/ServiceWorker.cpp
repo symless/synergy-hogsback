@@ -63,8 +63,6 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
     m_rpcManager->ready.connect([this]() { provideRpcEndpoints(); });
 
     m_rpcManager->start();
-
-    m_cloudClient->report(1, "successfulIp", "failedIp");
 }
 
 ServiceWorker::~ServiceWorker()
