@@ -1,7 +1,6 @@
 #ifndef SYNERGY_COMMON_SCREEN_H
 #define SYNERGY_COMMON_SCREEN_H
 
-#include <synergy/common/ErrorMessage.h>
 #include <synergy/common/ScreenStatus.h>
 #include <cstdint>
 #include <string>
@@ -14,74 +13,26 @@ public:
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
 
-    explicit
-    Screen(int64_t id) noexcept: m_id (id) {
-    }
+    explicit Screen(ScreenID id) noexcept;
+    ScreenID id() const;
+    void id (ScreenID id);
 
-    ScreenID
-    id() const {
-        return m_id;
-    }
+    std::string name() const;
+    void name (std::string);
 
-    void
-    id (ScreenID id) {
-       m_id = {id};
-    }
+    int64_t x() const noexcept;
+    void x (int64_t);
 
-    std::string
-    name() const {
-        return m_name;
-    }
+    int64_t y() const noexcept;
+    void y (int64_t);
 
-    void
-    name (std::string str) {
-        m_name = std::move(str);
-    }
+    int64_t width() const noexcept;
+    void width (int64_t);
 
-    int64_t
-    x() const noexcept {
-        return m_x;
-    }
+    int64_t height() const noexcept;
+    void height (int64_t);
 
-    void
-    x (int64_t x) noexcept {
-        m_x = {x};
-    }
-
-    int64_t
-    y() const noexcept {
-        return m_y;
-    }
-
-    void
-    y(int64_t y) noexcept {
-        m_y = {y};
-    }
-
-    int64_t
-    height() const noexcept {
-        return m_height;
-    }
-
-    void
-    height(int64_t h) noexcept {
-        m_height = {h};
-    }
-
-    int64_t
-    width() const noexcept {
-        return m_width;
-    }
-
-    void
-    width(int64_t w) noexcept {
-        m_width = {w};
-    }
-
-    ScreenStatus
-    status() const noexcept {
-        return m_status;
-    }
+    ScreenStatus status() const noexcept;
 
 private:
     ScreenID    m_id      = 0;

@@ -17,9 +17,10 @@ set (COMMON_LIB_SOURCES
     WampClient.cpp
     WampServer.cpp
     WampRouter.cpp
-    ScreenLinks.cpp
     ConfigGen.cpp
     Profile.cpp
+    Screen.cpp
+    ScreenLinks.cpp
     ${platform_sources}
 )
 
@@ -27,10 +28,12 @@ if (SYNERGY_CRASHPAD)
     list (APPEND COMMON_LIB_SOURCES CrashHandler.cpp)
 endif()
 
+set (fmt_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/fmt")
 set (Bonefish_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/bonefish/src")
 set (Cpptoml_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/cpptoml/include")
 
 include_directories (
+    ${fmt_INCLUDE_DIR}
     ${Bonefish_INCLUDE_DIR}
     ${Cpptoml_INCLUDE_DIR}
 )
