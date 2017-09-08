@@ -71,6 +71,8 @@ void HttpSession::setupRequest(http::verb method, const std::string &target, con
         for (auto const& i : m_headers) {
             m_request.set(i.first, i.second);
         }
+
+        m_request.prepare_payload();
     }
 }
 
@@ -101,6 +103,7 @@ void HttpSession::onReadFinished(errorCode ec)
     }
 
     if (m_response.result() != http::status::ok) {
+        mainLog()->debug("invalid http request: {}", m_response.body);
         requestFailed(this, m_response.body);
         return;
     }
