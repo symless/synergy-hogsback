@@ -11,6 +11,8 @@
 #include <boost/asio.hpp>
 #include <iostream>
 
+std::string g_lastProfileSnapshot;
+
 ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
     m_ioService (ioService),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService)),
@@ -29,6 +31,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
 
     m_cloudClient->websocketMessageReceived.connect([this](std::string json){
         auto server = m_rpcManager->server();
+        g_lastProfileSnapshot = json;
         server->publish ("synergy.profile.snapshot", std::move(json));
     });
 
@@ -60,6 +63,12 @@ ServiceWorker::provideCore()
     server->provide ("synergy.core.start",
                      [this](std::vector<std::string>& cmd) {
         m_processManager->start (std::move (cmd));
+    });
+
+    server->provide ("synergy.profile.request",
+                     [server](std::vector<std::string>& cmd) {
+        mainLog()->debug("sending last profile snapshot");
+        server->publish ("synergy.profile.snapshot", g_lastProfileSnapshot);
     });
 
     m_processManager->onOutput.connect(

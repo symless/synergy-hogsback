@@ -151,6 +151,9 @@ App::run(int argc, char* argv[])
                                appConfig->screenId(),
                                appConfig->profileId(),
                                appConfig->userToken().toStdString());
+
+        LogManager::debug("requesting profile snapshot");
+        wampClient.call<void> ("synergy.profile.request");
     });
 
     ProcessManager processManager (wampClient);
