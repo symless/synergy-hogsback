@@ -1,6 +1,5 @@
 #include "App.h"
 
-#include "ConnectivityTester.h"
 #include "CloudClient.h"
 #include "ScreenListModel.h"
 #include "ScreenManager.h"
@@ -157,8 +156,6 @@ App::run(int argc, char* argv[])
     });
 
     ProcessManager processManager (wampClient);
-    ConnectivityTester tester;
-    processManager.setConnectivityTester(&tester);
 
     wampClient.connecting.connect([&]() {
         LogManager::debug(QString("connecting to service"));

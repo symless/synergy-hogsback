@@ -1,6 +1,5 @@
 #include "ProcessManager.h"
 
-#include "ConnectivityTester.h"
 #include "ProcessCommand.h"
 #include "ScreenListModel.h"
 #include "LogManager.h"
@@ -81,16 +80,6 @@ bool ProcessManager::active()
 void ProcessManager::setActive(bool active)
 {
     m_active = active;
-}
-
-ConnectivityTester* ProcessManager::connectivityTester()
-{
-    return m_connectivityTester;
-}
-
-void ProcessManager::setConnectivityTester(ConnectivityTester* tester)
-{
-    m_connectivityTester = tester;
 }
 
 void ProcessManager::start()
@@ -182,30 +171,30 @@ void ProcessManager::setServerIp(const QString& serverIp)
 void ProcessManager::newServerDetected(int serverId)
 {
     // decide which mode local screen should be
-    if (serverId == m_appConfig->screenId()) {
-        setProcessMode(kServerMode);
-    }
-    else {
-        setProcessMode(kClientMode);
+//    if (serverId == m_appConfig->screenId()) {
+//        setProcessMode(kServerMode);
+//    }
+//    else {
+//        setProcessMode(kClientMode);
 
-        QStringList r = m_connectivityTester->getSuccessfulResults(serverId);
+//        QStringList r = m_connectivityTester->getSuccessfulResults(serverId);
 
-        if (!r.empty()) {
-            // TODO: furthur ip matching test
-            setServerIp(r.first());
-            LogManager::debug(QString("connecting to server: %1").arg(r.first()));
-        }
-        else {
-            LogManager::debug(QString("can not find any successful connectivity result for the server screen: %1").arg(serverId));
-            LogManager::debug(QString("retry in 3 seconds"));
-            QTimer::singleShot(3000, this, [=](){
-                newServerDetected(serverId);
-            });
-            return;
-        }
-    }
+//        if (!r.empty()) {
+//            // TODO: furthur ip matching test
+//            setServerIp(r.first());
+//            LogManager::debug(QString("connecting to server: %1").arg(r.first()));
+//        }
+//        else {
+//            LogManager::debug(QString("can not find any successful connectivity result for the server screen: %1").arg(serverId));
+//            LogManager::debug(QString("retry in 3 seconds"));
+//            QTimer::singleShot(3000, this, [=](){
+//                newServerDetected(serverId);
+//            });
+//            return;
+//        }
+//    }
 
-    start();
+//    start();
 }
 
 void
@@ -230,14 +219,6 @@ void ProcessManager::exit(int exitCode, QProcess::ExitStatus)
 
 void ProcessManager::onLogCoreOutput(QString text)
 {
-    foreach(QString line, text.split(QRegExp("\r|\n|\r\n"))) {
-        if (!line.isEmpty()) {
-            LogManager::raw("[ Core    ] " + line);
-            if (line.contains("local input detected")) {
-                emit localInputDetected();
-            }
-        }
-    }
 }
 
 void ProcessManager::onLogServiceOutput(QString text)

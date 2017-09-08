@@ -29,6 +29,7 @@ public:
     signal<void()> onExit;
     signal<void()> onUnexpectedExit;
     signal<void(std::string const&)> onOutput;
+    signal<void()> localInputDetected;
 
 private:
     boost::asio::io_service& m_ioService;

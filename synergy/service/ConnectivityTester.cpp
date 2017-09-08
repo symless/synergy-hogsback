@@ -1,5 +1,7 @@
 #include "ConnectivityTester.h"
-#include "TestDelegatee.h"
+
+#include <synergy/service/TestDelegatee.h>
+#include <synergy/service/Logs.h>
 
 #include <boost/algorithm/string.hpp>
 #include <algorithm>
@@ -202,6 +204,7 @@ void ConnectivityTester::onTestDelegateeDone(std::map<std::string, bool> results
             std::string successfulIp = boost::algorithm::join(successfulIpList, ",");
             std::string failedIp = boost::algorithm::join(failedIpList, ",");
 
+            mainLog()->debug("successful report: dest = {}, ips = {}", *screenId, successfulIp);
             newReportGenerated(*screenId, successfulIp, failedIp);
 
             // update connectivity results

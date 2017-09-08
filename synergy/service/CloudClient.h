@@ -8,17 +8,21 @@
 #include <memory.h>
 
 class UserConfig;
+class HttpSession;
 
 class CloudClient
 {
 public:
     void report(int screenId, const std::string& successfulIp, const std::string& failedIp);
+    void claimServer();
 
     CloudClient (boost::asio::io_service& ioService,
                  std::shared_ptr<UserConfig> userConfig);
 
 private:
     void load(const UserConfig &userConfig);
+
+    HttpSession* newHttpSession();
 
     boost::asio::io_service& m_ioService;
     std::shared_ptr<UserConfig> m_userConfig;
