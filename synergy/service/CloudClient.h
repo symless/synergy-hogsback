@@ -12,12 +12,7 @@ class UserConfig;
 class CloudClient
 {
 public:
-    CloudClient(boost::asio::io_service& ioService, std::shared_ptr<UserConfig> userConfig);
-
     void report(int screenId, const std::string& successfulIp, const std::string& failedIp);
-
-    template <typename... Args>
-    using signal = boost::signals2::signal<Args...>;
 
     CloudClient (boost::asio::io_service& ioService,
                  std::shared_ptr<UserConfig> userConfig);
@@ -30,6 +25,9 @@ private:
     WebsocketSession m_websocket;
 
 public:
+    template <typename... Args>
+    using signal = boost::signals2::signal<Args...>;
+
     signal<void(std::string)> websocketMessageReceived;
 };
 
