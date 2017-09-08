@@ -7,33 +7,25 @@
 class WampServer;
 class WampRouter;
 
-class RpcManager
+class RpcManager final
 {
 public:
-    RpcManager(boost::asio::io_service& ioService);
-    ~RpcManager();
+    explicit RpcManager(boost::asio::io_service& ioService);
+    ~RpcManager() noexcept;
 
     void start();
     void stop();
-
-    auto router() const noexcept {
-        return m_router;
-    }
-
-    auto server() const noexcept {
-        return m_server;
-    }
-
-    const char* ipAddress() const;
-    const int port() const;
-
-public:
-    boost::signals2::signal<void()> ready;
+    std::shared_ptr<WampServer> server(); /* TODO: remove */
+    std::string ipAddress() const;
+    int port() const;
 
 private:
     boost::asio::io_service& m_ioService;
     std::shared_ptr<WampRouter> m_router;
     std::shared_ptr<WampServer> m_server;
+
+public:
+    boost::signals2::signal<void()> ready;
 };
 
 #endif // RPCMANAGER_H
