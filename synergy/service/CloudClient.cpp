@@ -11,22 +11,27 @@ static const char* kSubTarget = "/synergy/sub/auth";
 static const char* kCloudServerHostname = "v1.api.cloud.symless.com";
 static const char* kCloudServerPort = "443";
 
-CloudClient::CloudClient(boost::asio::io_service& ioService, std::shared_ptr<UserConfig> userConfig) :
+CloudClient::CloudClient(boost::asio::io_service& ioService,
+                         std::shared_ptr<UserConfig> userConfig) :
     m_ioService(ioService),
-    m_userConfig(userConfig),
+    m_userConfig (std::move(userConfig)),
     m_websocket(ioService, kPubSubServerHostname, kPubSubServerPort)
 {
+    m_userConfig->updated.connect ([this]() { this->load (*m_userConfig); });
+    load (*m_userConfig);
+
     m_websocket.messageReceived.connect([this](std::string msg) {
         websocketMessageReceived(std::move(msg));
     });
 }
 
-void CloudClient::init()
+void
+CloudClient::load(UserConfig const& userConfig)
 {
-    auto const profileId = m_userConfig->profileId();
+    auto const profileId = userConfig.profileId();
     if (profileId != -1) {
         m_websocket.addHeader("X-Channel-Id", std::to_string(profileId));
-        m_websocket.addHeader("X-Auth-Token", m_userConfig->userToken());
+        m_websocket.addHeader("X-Auth-Token", userConfig.userToken());
 
         if (!m_websocket.isConnected()) {
             m_websocket.connect(kSubTarget);

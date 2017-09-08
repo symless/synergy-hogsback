@@ -50,6 +50,8 @@ UserConfig::load(std::string const& filepath)
         m_dragAndDrop = profileConfig.get_value<bool>("drag-and-drop");
         m_debugLevel = static_cast<DebugLevel>(profileConfig.get_value<int64_t>("debug-level"));
     }
+
+    updated();
 }
 
 void UserConfig::save(std::string const& filepath)
@@ -74,6 +76,8 @@ void UserConfig::save(std::string const& filepath)
     file.open (filepath, std::ios::trunc | std::ios::out);
     file << *root;
     file.close();
+
+    updated();
 }
 
 DebugLevel UserConfig::debugLevel() const

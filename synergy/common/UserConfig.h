@@ -2,12 +2,16 @@
 #define COMMONUSERCONFIG_H
 
 #include <synergy/common/DebugLevel.h>
+#include <boost/signals2/signal.hpp>
 #include <string>
 #include <cstdint>
 
 class UserConfig final
 {
 public:
+    template <typename... Args>
+    using signal = boost::signals2::signal<Args...>;
+
     UserConfig();
     static std::string defaultFilePath();
     void load (std::string const& filepath = defaultFilePath());
@@ -43,6 +47,9 @@ private:
     /* Process options */
     DebugLevel m_debugLevel = kInfo;
     bool m_dragAndDrop;
+
+public:
+    signal<void()> updated;
 };
 
 #endif // COMMONUSERCONFIG_H
