@@ -13,9 +13,7 @@ public:
     void load (std::string const& filepath = defaultFilePath());
     void save (std::string const& filepath = defaultFilePath());
 
-    DebugLevel debugLevel() const;
-    void setDebugLevel(const DebugLevel& debugLevel);
-
+    /* Cloud config */
     std::string userToken() const;
     void setUserToken(const std::string& userToken);
 
@@ -28,15 +26,22 @@ public:
     int64_t screenId() const;
     void setScreenId(const int64_t& screenId);
 
+    /* Process options */
+    DebugLevel debugLevel() const;
+    void setDebugLevel(const DebugLevel& debugLevel);
+
     bool dragAndDrop() const;
     void setDragAndDrop(bool dragAndDrop);
 
 private:
-    DebugLevel m_debugLevel = kInfo;
+    /* Cloud config */
     std::string m_userToken;
     int64_t m_userId;
     int64_t m_profileId;
     int64_t m_screenId;
+
+    /* Process options */
+    DebugLevel m_debugLevel = kInfo;
     bool m_dragAndDrop;
 };
 

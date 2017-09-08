@@ -11,11 +11,11 @@
 static const char* const kUserConfigFilename = "synergy-user.cfg";
 
 UserConfig::UserConfig():
-    m_debugLevel(kInfo),
-    m_userToken(""),
+    m_userToken(),
     m_userId(-1),
     m_profileId(-1),
     m_screenId(-1),
+    m_debugLevel(kInfo),
     m_dragAndDrop(false)
 {
 }
@@ -48,7 +48,7 @@ UserConfig::load(std::string const& filepath)
         m_profileId = profileConfig.get_value<int64_t>("profile-id");
         m_screenId = profileConfig.get_value<int64_t>("screen-id");
         m_dragAndDrop = profileConfig.get_value<bool>("drag-and-drop");
-        m_debugLevel = (DebugLevel)profileConfig.get_value<int64_t>("debug-level");
+        m_debugLevel = static_cast<DebugLevel>(profileConfig.get_value<int64_t>("debug-level"));
     }
 }
 
