@@ -11,7 +11,6 @@ set (GUI_LIB_SOURCES
     Common.cpp
     CloudClient.cpp
     ConfigFileManager.cpp
-    ConnectivityTester.cpp
     CoreInterface.cpp
     DebugLevelUtil.cpp
     DirectoryManager.cpp
@@ -31,7 +30,6 @@ set (GUI_LIB_SOURCES
     Profile.cpp
     ProfileListModel.cpp
     ProfileManager.cpp
-    TestDelegatee.cpp
     VersionManager.cpp
     ${GUI_LIB_MACOS_SOURCES}
 )
