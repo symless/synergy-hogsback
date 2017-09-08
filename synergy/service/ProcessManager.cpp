@@ -255,6 +255,7 @@ ProcessManager::start (std::vector<std::string> command) {
         signals.emplace_back (
             onOutput.connect ([this](std::string const& line) {
                 if (contains (line, "local input detected")) {
+                    localInputDetected();
                 }
             }, boost::signals2::at_front)
         );

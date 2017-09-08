@@ -37,13 +37,33 @@ void CloudClient::init()
 void CloudClient::report(int screenId, const std::string &successfulIp, const std::string &failedIp)
 {
     static const std::string kUrlTarget = "/report";
-    HttpSession* httpSession = new HttpSession(m_ioService, kCloudServerHostname, kCloudServerPort);
+    HttpSession* httpSession = newHttpSession();
 
     tao::json::value root;
     root["src"] = m_userConfig->screenId();
     root["dest"] = screenId;
     root["successfulIpList"] = successfulIp;
     root["failedIpList"] = failedIp;
+
+
+    httpSession->post(kUrlTarget, tao::json::to_string(root));
+}
+
+void CloudClient::claimServer()
+{
+    static const std::string kUrlTarget = "/profile/server/claim";
+    HttpSession* httpSession = newHttpSession();
+
+    tao::json::value root;
+    root["screen_id"] = m_userConfig->screenId();
+    root["profile_id"] = m_userConfig->profileId();
+
+    httpSession->post(kUrlTarget, tao::json::to_string(root));
+}
+
+HttpSession* CloudClient::newHttpSession()
+{
+    HttpSession* httpSession = new HttpSession(m_ioService, kCloudServerHostname, kCloudServerPort);
 
     httpSession->addHeader("X-Auth-Token", m_userConfig->userToken());
 
@@ -57,5 +77,5 @@ void CloudClient::report(int screenId, const std::string &successfulIp, const st
         delete session;
     });
 
-    httpSession->post(kUrlTarget, tao::json::to_string(root));
+    return httpSession;
 }

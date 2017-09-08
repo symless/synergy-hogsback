@@ -19,6 +19,7 @@ public:
     void shutdown();
 
 private:
+    void setupCloudClientCalls();
     void provideRpcEndpoints();
     void provideCore();
     void provideAuthUpdate();

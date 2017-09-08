@@ -62,10 +62,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
         mainLog()->info("service started successfully");
     });
 
-    m_connectivityTester->newReportGenerated.connect(
-                [this](int screenId, std::string successfulIp, std::string failedIp){
-        m_cloudClient->report(screenId, successfulIp, failedIp);
-    });
+    setupCloudClientCalls();
 
     m_rpcManager->ready.connect([this]() { provideRpcEndpoints(); });
 
@@ -148,6 +145,18 @@ void ServiceWorker::shutdown()
     // Finish processing all of the remaining completion handlers
     m_ioService.poll();
     m_ioService.stop();
+}
+
+void ServiceWorker::setupCloudClientCalls()
+{
+    m_connectivityTester->newReportGenerated.connect(
+                [this](int screenId, std::string successfulIp, std::string failedIp){
+        m_cloudClient->report(screenId, successfulIp, failedIp);
+    });
+
+    m_processManager->localInputDetected.connect([this](){
+        m_cloudClient->claimServer();
+    });
 }
 
 void ServiceWorker::provideRpcEndpoints()

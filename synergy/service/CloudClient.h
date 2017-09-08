@@ -8,6 +8,7 @@
 #include <memory.h>
 
 class UserConfig;
+class HttpSession;
 
 class CloudClient
 {
@@ -17,11 +18,15 @@ public:
     void init();
 
     void report(int screenId, const std::string& successfulIp, const std::string& failedIp);
+    void claimServer();
 
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
 
     signal<void(std::string)> websocketMessageReceived;
+
+private:
+    HttpSession* newHttpSession();
 
 private:
     boost::asio::io_service& m_ioService;

@@ -33,6 +33,7 @@ public:
     signal<void(std::string const&)> onOutput;
     signal<void(std::string const&, ScreenStatus)> screenStatusChanged;
     signal<void(std::string const&, ErrorCode)> screenConnectionError;
+    signal<void()> localInputDetected;
 
 private:
     boost::asio::io_service& m_ioService;
