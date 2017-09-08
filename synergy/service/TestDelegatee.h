@@ -13,6 +13,7 @@ class TestDelegatee
 {
 public:
     TestDelegatee(boost::asio::io_service &io, int batchSize);
+    ~TestDelegatee();
 
     TestDelegatee(const TestDelegatee&) = delete;
     TestDelegatee(const TestDelegatee&&) = delete;

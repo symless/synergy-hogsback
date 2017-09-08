@@ -11,6 +11,13 @@ TestDelegatee::TestDelegatee(boost::asio::io_service &io,  int batchSize) :
 
 }
 
+TestDelegatee::~TestDelegatee()
+{
+    for (auto& tcpClient : m_tcpClients) {
+        tcpClient.release();
+    }
+}
+
 void TestDelegatee::start(std::vector<std::string> &ipList)
 {
     for (auto ip : ipList) {
