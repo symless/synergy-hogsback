@@ -22,5 +22,5 @@ OSXDirectoryManager::profileDir()
 boost::filesystem::path
 OSXDirectoryManager::systemLogDir()
 {
-    return "/Library/Logs/Synergy";
+    return profileDir();
 }
