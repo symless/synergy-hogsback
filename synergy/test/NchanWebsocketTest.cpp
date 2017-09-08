@@ -29,10 +29,11 @@ TEST_CASE("Nchan Websocket connections", "[Websocket]")
     });
 
     pubWebsocket.connected.connect(
-        [&pubWebsocket, &pubConnected]() {
+        [&pubWebsocket, &pubConnected, &subWebsocket]() {
             pubConnected = true;
             std::string pubStr("hello world");
             pubWebsocket.write(pubStr);
+            subWebsocket.connect("/synergy/sub/test");
         },
         boost::signals2::at_front
     );
@@ -51,7 +52,6 @@ TEST_CASE("Nchan Websocket connections", "[Websocket]")
     });
 
     pubWebsocket.connect("/synergy/pub/test");
-    subWebsocket.connect("/synergy/sub/test");
 
     ioService.run();
 
