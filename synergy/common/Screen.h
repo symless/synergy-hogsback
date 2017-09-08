@@ -10,42 +10,47 @@ using ScreenID = int64_t;
 
 class Screen final {
 public:
-    template <typename... Args>
-    using signal = boost::signals2::signal<Args...>;
+    friend class Profile;
+    class Snapshot;
+    static Screen fromJSONSnapshot(std::string const&);
 
     explicit Screen(ScreenID id) noexcept;
+
+    void id (ScreenID);
     ScreenID id() const;
-    void id (ScreenID id);
 
-    std::string name() const;
     void name (std::string);
+    std::string name() const;
 
-    int64_t x() const noexcept;
     void x (int64_t);
-
-    int64_t y() const noexcept;
     void y (int64_t);
+    int64_t x() const noexcept;
+    int64_t y() const noexcept;
 
-    int64_t width() const noexcept;
     void width (int64_t);
-
-    int64_t height() const noexcept;
     void height (int64_t);
+    int64_t width() const noexcept;
+    int64_t height() const noexcept;
 
+    void status(ScreenStatus);
     ScreenStatus status() const noexcept;
 
+    void apply (Snapshot const&);
+
 private:
-    ScreenID    m_id      = 0;
-    std::string m_name;
-    int64_t     m_x       = 0;
-    int64_t     m_y       = 0;
-    int64_t     m_width   = 0;
-    int64_t     m_height  = 0;
-    ScreenStatus m_status = ScreenStatus::kDisconnected;
+    Screen() = default;
+    ScreenID        m_id      = 0;
+    std::string     m_name;
+    int64_t         m_x       = 0;
+    int64_t         m_y       = 0;
+    int64_t         m_width   = 0;
+    int64_t         m_height  = 0;
+    ScreenStatus    m_status  = ScreenStatus::kDisconnected;
 
 public:
-   // signal<void(ScreenStatus)> onStatusChanged;
-   // signal<void(ErrorCode)> onConnectionError;
+    template <typename... Args>
+    using signal = boost::signals2::signal<Args...>;
+    // signal<void(ScreenStatus)> statusChanged;
 };
 
 #endif

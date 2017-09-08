@@ -1,3 +1,4 @@
+#pragma once
 #include <synergy/common/Screen.h>
 #include <cstdint>
 #include <string>
@@ -6,12 +7,11 @@
 
 class Profile final {
 public:
-    template <typename... Args>
-    using signal = boost::signals2::signal<Args...>;
+    class Snapshot;
+    static Profile fromJSONSnapshot (std::string const&);
 
     explicit Profile (int64_t id);
-    static Profile fromJSONSnapshot (std::string const&);
-    void merge (Profile);
+    void apply (Snapshot const&);
 
 private:
     Profile() = default;
@@ -22,6 +22,9 @@ private:
     std::vector<Screen> m_screens;
 
 public:
+    template <typename... Args>
+    using signal = boost::signals2::signal<Args...>;
+
     signal<void ()> layoutChanged;
     signal<void (std::vector<Screen> added, std::vector<Screen> removed)>
         screenSetChanged;
