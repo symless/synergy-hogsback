@@ -20,7 +20,7 @@ OSXDirectoryManager::profileDir()
 }
 
 boost::filesystem::path
-MSWindowsDirectoryManager::systemLogDir()
+OSXDirectoryManager::systemLogDir()
 {
     return "/Library/Logs/Synergy";
 }
