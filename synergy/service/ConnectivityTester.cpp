@@ -202,7 +202,7 @@ void ConnectivityTester::onTestDelegateeDone(std::map<std::string, bool> results
             std::string successfulIp = boost::algorithm::join(successfulIpList, ",");
             std::string failedIp = boost::algorithm::join(failedIpList, ",");
 
-            // TODO: report to cloud
+            newReportGenerated(*screenId, successfulIp, failedIp);
 
             // update connectivity results
             if (!successfulIp.empty()) {

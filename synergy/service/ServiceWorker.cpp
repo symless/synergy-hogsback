@@ -20,10 +20,10 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
     m_connectivityTester (std::make_unique<ConnectivityTester>(m_ioService)),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService)),
     m_userConfig(std::make_shared<UserConfig>()),
-    m_cloudClient (std::make_unique<CloudClient>(ioService))
+    m_cloudClient (std::make_unique<CloudClient>(ioService, m_userConfig))
 {
     m_userConfig->load();
-    m_cloudClient->init(*m_userConfig);
+    m_cloudClient->init();
 
     g_log.onLogLine.connect([this](std::string logLine) {
         auto server = m_rpcManager->server();
@@ -49,11 +49,22 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService) :
         server->publish ("synergy.profile.snapshot", std::move(json));
     });
 
+
     m_rpcManager->ready.connect([this]() {
         provideRpcEndpoints();
         mainLog()->info("service started successfully");
     });
+
+    m_connectivityTester->newReportGenerated.connect(
+                [this](int screenId, std::string successfulIp, std::string failedIp){
+        m_cloudClient->report(screenId, successfulIp, failedIp);
+    });
+
+    m_rpcManager->ready.connect([this]() { provideRpcEndpoints(); });
+
     m_rpcManager->start();
+
+    m_cloudClient->report(1, "successfulIp", "failedIp");
 }
 
 ServiceWorker::~ServiceWorker()
@@ -113,7 +124,7 @@ void ServiceWorker::provideAuthUpdate()
         m_userConfig->setProfileId(profileId);
         m_userConfig->setUserToken(std::move(userToken));
         m_userConfig->save();
-        m_cloudClient->init(*m_userConfig);
+        m_cloudClient->init();
     });
 }
 

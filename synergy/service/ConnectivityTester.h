@@ -23,6 +23,7 @@ public:
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
 
+    signal<void(int screenId, std::string successfulIp, std::string failedIp)> newReportGenerated;
     signal<void()> testBatchFinished;
 
     static const std::string testServerCertificate();

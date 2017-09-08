@@ -1,7 +1,6 @@
 #ifndef CLOUDCLIENT_H
 #define CLOUDCLIENT_H
 
-#include "synergy/service/HttpSession.h"
 #include "synergy/service/WebsocketSession.h"
 
 #include <boost/asio/io_service.hpp>
@@ -13,9 +12,11 @@ class UserConfig;
 class CloudClient
 {
 public:
-    CloudClient(boost::asio::io_service& ioService);
+    CloudClient(boost::asio::io_service& ioService, std::shared_ptr<UserConfig> userConfig);
 
-    void init(const UserConfig &userConfig);
+    void init();
+
+    void report(int screenId, const std::string& successfulIp, const std::string& failedIp);
 
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
@@ -24,7 +25,7 @@ public:
 
 private:
     boost::asio::io_service& m_ioService;
-    HttpSession m_httpSession;
+    std::shared_ptr<UserConfig> m_userConfig;
     WebsocketSession m_websocket;
 };
 
