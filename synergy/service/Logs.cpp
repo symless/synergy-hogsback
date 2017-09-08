@@ -1,5 +1,7 @@
 #include <synergy/service/Logs.h>
 
+#include <synergy/common/DirectoryManager.h>
+
 #include <iostream>
 
 Log g_log;
@@ -19,12 +21,15 @@ initMainLog()
 {
 #ifdef _WIN32
     auto console = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
-#else //ansi terminal colors
+#else // assume unix (linux and mac)
     auto console = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
 #endif
 
+    auto logDir = DirectoryManager::instance()->systemLogDir();
+    auto logPath = logDir / "synergy-service.log";
+
     auto rotating = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
-        "synergy-service.log", 1024 * 1024, 1);
+        logPath.string(), 1024 * 1024, 1);
 
     auto signal = std::make_shared<LogSignalSink>();
 
@@ -37,6 +42,9 @@ initMainLog()
     logger->set_pattern("[%Y-%m-%dT%T] %l: %v");
     logger->flush_on(spdlog::level::debug);
     logger->set_level(spdlog::level::debug);
+
+    logger->debug("service log path: {}", logPath.string());
+
     return logger;
 }
 
