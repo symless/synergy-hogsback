@@ -2,32 +2,24 @@
 #include <synergy/common/WampRouter.h>
 #include <synergy/common/WampServer.h>
 
-const char* const kLocalIpAddress = "127.0.0.1";
-const int kWampDefaultPort = 24888;
-
-RpcManager::RpcManager(boost::asio::io_service& ioService) :
-    m_ioService(ioService)
+RpcManager::RpcManager (boost::asio::io_service& ioService) :
+    m_ioService (ioService),
+    m_router (std::make_shared<WampRouter>(m_ioService)),
+    m_server (std::make_shared<WampServer>(m_ioService))
 {
-    m_router = std::make_shared<WampRouter>(m_ioService);
-    m_server = std::make_shared<WampServer>(m_ioService);
-
     m_router->ready.connect ([this]() {
-        m_ioService.post([this] () {
-            m_server->start(kLocalIpAddress, kWampDefaultPort);
-        });
+        m_ioService.post([this] () { m_server->start(ipAddress(), port()); });
     });
-
     m_server->ready.connect ([this]() { ready(); });
 }
 
-RpcManager::~RpcManager()
-{
-}
+RpcManager::~RpcManager() noexcept
+{}
 
 void
 RpcManager::start()
 {
-    m_router->start (kLocalIpAddress, kWampDefaultPort);
+    m_router->start (ipAddress(), port());
 }
 
 void
@@ -36,14 +28,19 @@ RpcManager::stop()
     m_router->stop();
 }
 
-const char *
-RpcManager::ipAddress() const
-{
-    return kLocalIpAddress;
+std::shared_ptr<WampServer>
+RpcManager::server() {
+    return m_server;
 }
 
-const int
+std::string
+RpcManager::ipAddress() const
+{
+    return "127.0.0.1";
+}
+
+int
 RpcManager::port() const
 {
-    return kWampDefaultPort;
+    return 24888;
 }

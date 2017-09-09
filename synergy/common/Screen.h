@@ -1,19 +1,56 @@
 #ifndef SYNERGY_COMMON_SCREEN_H
 #define SYNERGY_COMMON_SCREEN_H
 
+#include <synergy/common/ScreenStatus.h>
 #include <cstdint>
 #include <string>
+#include <boost/signals2.hpp>
 
 using ScreenID = int64_t;
 
 class Screen final {
 public:
-    ScreenID    id      = 0;
-    std::string name;
-    int64_t     x       = 0;
-    int64_t     y       = 0;
-    int64_t     width   = 0;
-    int64_t     height  = 0;
+    friend class Profile;
+    class Snapshot;
+    static Screen fromJSONSnapshot(std::string const&);
+
+    explicit Screen(ScreenID id) noexcept;
+
+    void id (ScreenID);
+    ScreenID id() const;
+
+    void name (std::string);
+    std::string name() const;
+
+    void x (int64_t);
+    void y (int64_t);
+    int64_t x() const noexcept;
+    int64_t y() const noexcept;
+
+    void width (int64_t);
+    void height (int64_t);
+    int64_t width() const noexcept;
+    int64_t height() const noexcept;
+
+    void status(ScreenStatus);
+    ScreenStatus status() const noexcept;
+
+    void apply (Snapshot const&);
+
+private:
+    Screen() = default;
+    ScreenID        m_id      = 0;
+    std::string     m_name;
+    int64_t         m_x       = 0;
+    int64_t         m_y       = 0;
+    int64_t         m_width   = 0;
+    int64_t         m_height  = 0;
+    ScreenStatus    m_status  = ScreenStatus::kDisconnected;
+
+public:
+    template <typename... Args>
+    using signal = boost::signals2::signal<Args...>;
+    // signal<void(ScreenStatus)> statusChanged;
 };
 
 #endif

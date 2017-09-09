@@ -13,25 +13,26 @@ class HttpSession;
 class CloudClient
 {
 public:
-    CloudClient(boost::asio::io_service& ioService, std::shared_ptr<UserConfig> userConfig);
-
-    void init();
-
     void report(int screenId, const std::string& successfulIp, const std::string& failedIp);
     void claimServer();
 
+    CloudClient (boost::asio::io_service& ioService,
+                 std::shared_ptr<UserConfig> userConfig);
+
+private:
+    void load(const UserConfig &userConfig);
+
+    HttpSession* newHttpSession();
+
+    boost::asio::io_service& m_ioService;
+    std::shared_ptr<UserConfig> m_userConfig;
+    WebsocketSession m_websocket;
+
+public:
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
 
     signal<void(std::string)> websocketMessageReceived;
-
-private:
-    HttpSession* newHttpSession();
-
-private:
-    boost::asio::io_service& m_ioService;
-    std::shared_ptr<UserConfig> m_userConfig;
-    WebsocketSession m_websocket;
 };
 
 #endif // CLOUDCLIENT_H

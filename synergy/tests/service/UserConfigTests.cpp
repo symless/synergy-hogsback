@@ -3,16 +3,8 @@
 #include "synergy/common/DirectoryManager.h"
 #include <boost/filesystem.hpp>
 
-TEST_CASE("User configuration settings", "[configuration]")
+TEST_CASE("User configuration settings", "[UserConfig]")
 {
-    // test configuration file
-#ifdef _WIN32
-    auto dir = DirectoryManager::instance()->systemAppDir();
-#else
-    auto dir = DirectoryManager::instance()->profileDir();
-#endif
-    std::string const testFilename = (dir / "synergy-test-user.cfg").string();
-
     // test default config
     UserConfig userConfig;
     REQUIRE(userConfig.debugLevel() == kInfo);
@@ -30,13 +22,12 @@ TEST_CASE("User configuration settings", "[configuration]")
     userConfig.setScreenId(5);
     userConfig.setDragAndDrop(true);
 
-    // save to file
-    boost::filesystem::remove(testFilename);
-    userConfig.save(testFilename);
+    std::stringstream stream;
+    userConfig.save(stream);
 
-    // initializaiton from previous config file
     UserConfig newUserConfig;
-    newUserConfig.load(testFilename);
+    stream.seekg(0, std::ios::beg);
+    newUserConfig.load(stream);
 
     REQUIRE(newUserConfig.debugLevel() == kDebug);
     REQUIRE(newUserConfig.userToken() == "TestToken");
@@ -44,7 +35,4 @@ TEST_CASE("User configuration settings", "[configuration]")
     REQUIRE(newUserConfig.profileId() == 1);
     REQUIRE(newUserConfig.screenId() == 5);
     REQUIRE(newUserConfig.dragAndDrop() == true);
-
-    // clean up
-    boost::filesystem::remove(testFilename);
 }

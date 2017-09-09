@@ -9,7 +9,7 @@
 
 static boost::signals2::signal<void()> testFinished;
 
-TEST_CASE("Secured TCP Connection test", "[tcp]")
+TEST_CASE("Secured TCP Connection test", "[SecuredTcp]")
 {
     const std::string kServerTestIp = "0.0.0.0";
     const std::string kLocalIp = "127.0.0.1";

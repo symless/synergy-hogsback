@@ -1,25 +1,23 @@
 #include "GlobalConfig.h"
-
 #include "ConfigParser.h"
 #include "DirectoryManager.h"
-
 #include <boost/filesystem.hpp>
 
-const char* kGlobalConfigFilename = "synergy-system.cfg";
+const char* const kGlobalConfigFilename = "synergy-system.cfg";
 
 GlobalConfig::GlobalConfig()
 {
-
 }
 
 std::string
 GlobalConfig::filename()
 {
     return (DirectoryManager::instance()->systemAppDir()
-                / kGlobalConfigFilename).string();
+            / kGlobalConfigFilename).string();
 }
 
-void GlobalConfig::load()
+void
+GlobalConfig::load()
 {
     ConfigParser parser = ConfigParser::parse_file(filename());
     m_lastProfileFilename = parser.get_value<std::string>("last-used-account.profile-dir");

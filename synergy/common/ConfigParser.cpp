@@ -73,6 +73,15 @@ ConfigParser::parse_memory (const char* const ptr, size_t const size) {
 }
 
 ConfigParser
+ConfigParser::parse_memory (std::istream& is) {
+    ConfigParser config;
+    is.imbue (std::locale::classic ());
+    cpptoml::parser parser (is);
+    config.impl_ = parser.parse ();
+    return config;
+}
+
+ConfigParser
 ConfigParser::parse_c_str (const char* const str) {
     return parse_memory (str, std::strlen (str));
 }
