@@ -95,27 +95,25 @@ void SecuredTcpServer::onAccept(SecuredTcpSession* session, boost::system::error
         delete session;
     }
     else {
-        session->connected.connect([this](SecuredTcpSession* session){
-            m_sessions.emplace_back(session);
-        });
-        session->connectFailed.connect([this](SecuredTcpSession* session){
-            delete session;
-        });
-
         session->stream().async_handshake(
             ssl::stream_base::server,
             std::bind(
                 &SecuredTcpServer::onSslHandshakeFinished,
                 this,
+                session,
                 std::placeholders::_1));
     }
 
     accept();
 }
 
-void SecuredTcpServer::onSslHandshakeFinished(errorCode ec)
+void SecuredTcpServer::onSslHandshakeFinished(SecuredTcpSession* session, errorCode ec)
 {
     if (ec) {
         connectFailed(this);
+        delete session;
+        return;
     }
+
+    m_sessions.emplace_back(session);
 }
