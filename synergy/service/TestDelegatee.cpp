@@ -1,5 +1,7 @@
 #include "TestDelegatee.h"
 
+#include <synergy/service/Logs.h>
+
 static const long kTimeoutSec = 3;
 static const std::string kDefaultConnectivityTestPort = "24810";
 
@@ -27,6 +29,14 @@ void TestDelegatee::start(std::vector<std::string> &ipList)
             [this](SecuredTcpClient* orginalSession) {
                 auto remoteIp = orginalSession->stream().lowest_layer().remote_endpoint().address().to_string();
                 m_results[remoteIp] = true;
+            },
+            boost::signals2::at_front
+        );
+
+        tcpClient->connectFailed.connect(
+            [this](SecuredTcpClient* orginalSession) {
+                auto remoteIp = orginalSession->stream().lowest_layer().remote_endpoint().address().to_string();
+                mainLog()->debug("failed to connect to test ip: {}", remoteIp);
             },
             boost::signals2::at_front
         );
