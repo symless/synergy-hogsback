@@ -34,7 +34,12 @@ public:
     void status(ScreenStatus);
     ScreenStatus status() const noexcept;
 
+    std::string successfulTestIp() const;
+    std::string failedTestIp() const;
+
     void apply (const ScreenSnapshot &ss);
+
+
 
 private:
     ScreenID        m_id      = 0;
@@ -44,6 +49,8 @@ private:
     int64_t         m_width   = 0;
     int64_t         m_height  = 0;
     ScreenStatus    m_status  = ScreenStatus::kDisconnected;
+    std::string     m_successfulTestIp;
+    std::string     m_failedTestIp;
 };
 
 #endif

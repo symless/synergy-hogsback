@@ -83,6 +83,12 @@ bool Profile::compare(Profile const& src)
                     screenStatusChanged(srcScreen.id());
                     different = true;
                 }
+
+                if (screen.successfulTestIp() != srcScreen.successfulTestIp() ||
+                    screen.failedTestIp() != srcScreen.failedTestIp()) {
+                    screenTestResultChanged(srcScreen.id(), srcScreen.successfulTestIp(), srcScreen.failedTestIp());
+                    different = true;
+                }
             }
         }
 

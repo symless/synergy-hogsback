@@ -75,8 +75,17 @@ Screen::status() const noexcept {
     return m_status;
 }
 
-void
+std::string Screen::successfulTestIp() const
+{
+    return m_successfulTestIp;
+}
 
+std::string Screen::failedTestIp() const
+{
+    return m_failedTestIp;
+}
+
+void
 Screen::apply(ScreenSnapshot const& ss)
 {
     m_id = ss.id;

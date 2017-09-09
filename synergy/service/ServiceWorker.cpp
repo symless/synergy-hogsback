@@ -50,6 +50,12 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
                 m_remoteProfile->serverChanged.connect([this](int64_t serverId){
                     m_cloudClient->claimServer(serverId);
                 });
+
+                m_remoteProfile->screenTestResultChanged.connect(
+                    [this](int64_t screenId, std::string successfulIp, std::string failedIp) {
+                        m_cloudClient->report(screenId, successfulIp, failedIp);
+                    }
+                );
             }
 
             m_localProfile->apply(*m_remoteProfile);

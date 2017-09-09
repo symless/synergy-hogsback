@@ -36,6 +36,7 @@ public:
     signal<void (int64_t)> screenNameChanged;
     signal<void (int64_t)> screenPositionChanged;
     signal<void (int64_t)> screenStatusChanged;
+    signal<void (int64_t, std::string, std::string)> screenTestResultChanged;
 
     signal<void (std::vector<Screen> added, std::vector<Screen> removed)>
         screenSetChanged;
