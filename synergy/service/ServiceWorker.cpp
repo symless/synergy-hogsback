@@ -22,10 +22,9 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
                              std::shared_ptr<UserConfig> userConfig) :
     m_ioService (ioService),
     m_userConfig (std::move(userConfig)),
-    m_activeProfile (std::make_shared<Profile>(m_userConfig->profileId())),
     m_rpcManager (std::make_unique<RpcManager>(m_ioService)),
     m_cloudClient (std::make_unique<CloudClient>(ioService, m_userConfig)),
-    m_processManager (std::make_unique<ProcessManager>(m_ioService, m_activeProfile)),
+    m_processManager (std::make_unique<ProcessManager>(m_ioService)),
     m_connectivityTester (std::make_unique<ConnectivityTester>(m_ioService)),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService))
 {
@@ -37,11 +36,11 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_cloudClient->websocketMessageReceived.connect([this](std::string json){
         try {
             // parse message
-            Profile profile = Profile::fromJsonSnapshot(json);
+            Profile profile = Profile::fromJSONSnapshot(json);
 
             // TODO: consider moving to ProcessManager::start?
             auto configPath = DirectoryManager::instance()->profileDir() / kCoreConfigFile;
-            createConfigFile(configPath.string(), profile.getScreens());
+            createConfigFile(configPath.string(), profile.screens());
 
             // notify connectivity tester
             // TODO: use new screen type from common library

@@ -1,13 +1,8 @@
 #include <synergy/common/Screen.h>
 
-Screen::Screen(ScreenID id) noexcept: m_id (id) {
-}
+#include <synergy/common/ScreenSnapshot.h>
 
-Screen
-Screen::fromJsonSnapshot(std::string const&)
-{
-    Screen screen;
-    return screen;
+Screen::Screen(ScreenID id) noexcept: m_id (id) {
 }
 
 ScreenID
@@ -81,6 +76,7 @@ Screen::status() const noexcept {
 }
 
 void
-Screen::apply(Snapshot const&) {
 
+Screen::apply(ScreenSnapshot const&)
+{
 }
