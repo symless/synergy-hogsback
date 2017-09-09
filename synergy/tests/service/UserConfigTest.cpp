@@ -3,7 +3,7 @@
 #include "synergy/common/DirectoryManager.h"
 #include <boost/filesystem.hpp>
 
-TEST_CASE("User configuration settings", "[configuration]")
+TEST_CASE("User configuration settings", "[UserConfig]")
 {
     // test configuration file
 #ifdef _WIN32
