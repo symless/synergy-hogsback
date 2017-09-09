@@ -20,7 +20,8 @@ public:
 
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
-    signal<void(SecuredTcpServer*)> connectFailed;
+    signal<void(SecuredTcpServer*)> startFailed;
+    signal<void(SecuredTcpServer*)> acceptFailed;
 
 private:
     void accept();
