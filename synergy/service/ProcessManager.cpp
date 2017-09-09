@@ -158,6 +158,17 @@ ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Pro
     m_ioService (io),
     m_localProfile(localProfile)
 {
+    m_localProfile->serverChanged.connect([this](int64_t serverId){
+        // TODO: check if we need to reconnect to the new server or switch to server mode, generate config file and start synergys
+    });
+
+    m_localProfile->screenPositionChanged.connect([this](int64_t){
+        // TODO: if we are the server, regenerate a config file and restart synergys
+    });
+
+    m_localProfile->screenSetChanged.connect([this](std::vector<Screen>, std::vector<Screen>){
+        // TODO: if we are the server, regenerate a config file and restart synergys
+    });
 }
 
 ProcessManager::~ProcessManager () noexcept {
