@@ -14,6 +14,7 @@ public:
     using value_type = boost::variant<std::string, int64_t, double, bool>;
 
     static ConfigParser parse_file (std::string const& path);
+    static ConfigParser parse_memory (std::istream& stream);
     static ConfigParser parse_memory (char const* buf, size_t size);
     static ConfigParser parse_c_str (char const* const str);
     ConfigParser get_section (char const*) const;

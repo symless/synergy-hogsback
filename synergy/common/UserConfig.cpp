@@ -4,7 +4,6 @@
 #include "DirectoryManager.h"
 
 #include <boost/filesystem.hpp>
-#include <cpptoml.h>
 #include <iostream>
 #include <fstream>
 
@@ -33,10 +32,22 @@ UserConfig::defaultFilePath()
 }
 
 void
+UserConfig::load(std::istream& outputStream)
+{
+    ConfigParser parser = ConfigParser::parse_memory(outputStream);
+    update(parser);
+}
+
+void
 UserConfig::load(std::string const& filepath)
 {
     ConfigParser parser = ConfigParser::parse_file(filepath);
+    update(parser);
+}
 
+void
+UserConfig::update(ConfigParser& parser)
+{
     auto authConfig = parser.get_section("auth");
     if (authConfig.isValid()) {
         m_userId = authConfig.get_value<int64_t>("user-id");
@@ -54,10 +65,9 @@ UserConfig::load(std::string const& filepath)
     updated();
 }
 
-void UserConfig::save(std::string const& filepath)
+void
+UserConfig::makeTable(std::shared_ptr<cpptoml::table>& root)
 {
-    std::shared_ptr<cpptoml::table> root = cpptoml::make_table();
-
     auto authTable = cpptoml::make_table();
     authTable->insert("user-id", m_userId);
     authTable->insert("user-token", m_userToken);
@@ -70,6 +80,25 @@ void UserConfig::save(std::string const& filepath)
 
     root->insert("auth", authTable);
     root->insert("profile", profileTable);
+}
+
+void
+UserConfig::save(std::ostream& inputStream)
+{
+    std::shared_ptr<cpptoml::table> root = cpptoml::make_table();
+    makeTable(root);
+
+    inputStream.imbue (std::locale::classic());
+    inputStream << *root;
+
+    updated();
+}
+
+void
+UserConfig::save(std::string const& filepath)
+{
+    std::shared_ptr<cpptoml::table> root = cpptoml::make_table();
+    makeTable(root);
 
     std::ofstream file;
     file.imbue (std::locale::classic());

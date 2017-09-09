@@ -5,6 +5,9 @@
 #include <boost/signals2/signal.hpp>
 #include <string>
 #include <cstdint>
+#include <third_party/cpptoml/include/cpptoml.h>
+
+class ConfigParser;
 
 class UserConfig final
 {
@@ -14,7 +17,9 @@ public:
 
     UserConfig();
     static std::string defaultFilePath();
+    void load (std::istream& outputStream);
     void load (std::string const& filepath = defaultFilePath());
+    void save (std::ostream& inputStream);
     void save (std::string const& filepath = defaultFilePath());
 
     /* Cloud config */
@@ -36,6 +41,10 @@ public:
 
     bool dragAndDrop() const;
     void setDragAndDrop(bool dragAndDrop);
+
+private:
+    void makeTable(std::shared_ptr<cpptoml::table>& root);
+    void update(ConfigParser& configParser);
 
 private:
     /* Cloud config */
