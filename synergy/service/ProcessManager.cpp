@@ -1,7 +1,6 @@
 #include <synergy/service/ProcessManager.h>
 
 #include <synergy/common/DirectoryManager.h>
-#include <synergy/common/Profile.h>
 #include <synergy/common/ConfigGen.h>
 #include <synergy/service/Logs.h>
 #include <boost/process.hpp>
