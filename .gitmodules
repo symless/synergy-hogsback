@@ -51,3 +51,6 @@
 [submodule "third_party/spdlog"]
 	path = third_party/spdlog
 	url = https://github.com/gabime/spdlog.git
+[submodule "third_party/FakeIt"]
+	path = third_party/FakeIt
+	url = https://github.com/eranpeer/FakeIt.git
