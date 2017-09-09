@@ -12,13 +12,6 @@ SecuredTcpClient::SecuredTcpClient(boost::asio::io_service &ioService, std::stri
     m_port(port),
     m_connecting(false)
 {
-    m_session.connected.connect([this](SecuredTcpSession*){
-        connected(this);
-    });
-
-    m_session.connectFailed.connect([this](SecuredTcpSession*){
-        connectFailed(this);
-    });
 }
 
 void SecuredTcpClient::connect()

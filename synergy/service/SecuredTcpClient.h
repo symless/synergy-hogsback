@@ -3,6 +3,8 @@
 
 #include "SecuredTcpSession.h"
 
+#include <boost/signals2.hpp>
+
 class SecuredTcpClient
 {
 public:

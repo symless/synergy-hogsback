@@ -68,6 +68,7 @@ void CloudClient::claimServer()
 
 HttpSession* CloudClient::newHttpSession()
 {
+    // TODO: add lifetime management or make http session reusable
     HttpSession* httpSession = new HttpSession(m_ioService, kCloudServerHostname, kCloudServerPort);
 
     httpSession->addHeader("X-Auth-Token", m_userConfig->userToken());

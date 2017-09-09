@@ -28,7 +28,11 @@ TEST_CASE("Secured TCP client connects to server", "[SecuredTcp]")
 
     SecuredTcpClient client(ioService, kLocalIp, kTestPort);
 
-    server.connectFailed.connect([](SecuredTcpServer*){
+    server.startFailed.connect([](SecuredTcpServer*){
+        testFinished();
+    });
+
+    server.acceptFailed.connect([](SecuredTcpServer*){
         testFinished();
     });
 

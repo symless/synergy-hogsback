@@ -41,6 +41,10 @@ UserConfig::load(std::istream& outputStream)
 void
 UserConfig::load(std::string const& filepath)
 {
+    if (!boost::filesystem::exists(filepath)) {
+        return;
+    }
+
     ConfigParser parser = ConfigParser::parse_file(filepath);
     update(parser);
 }

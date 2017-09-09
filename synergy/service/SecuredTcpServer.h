@@ -3,6 +3,8 @@
 
 #include "SecuredTcpSession.h"
 
+#include <boost/signals2.hpp>
+
 class SecuredTcpServer
 {
 public:
@@ -18,12 +20,13 @@ public:
 
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
-    signal<void(SecuredTcpServer*)> connectFailed;
+    signal<void(SecuredTcpServer*)> startFailed;
+    signal<void(SecuredTcpServer*)> acceptFailed;
 
 private:
     void accept();
     void onAccept(SecuredTcpSession *session, boost::system::error_code ec);
-    void onSslHandshakeFinished(errorCode ec);
+    void onSslHandshakeFinished(SecuredTcpSession *session, errorCode ec);
 
 private:
     boost::asio::io_service& m_ioService;

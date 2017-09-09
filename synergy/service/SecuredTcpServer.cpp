@@ -1,4 +1,5 @@
 #include "SecuredTcpServer.h"
+#include <synergy/service/Logs.h>
 
 SecuredTcpServer::SecuredTcpServer(boost::asio::io_service &ioService) :
     m_ioService(ioService),
@@ -15,17 +16,20 @@ void SecuredTcpServer::start()
                 std::stoi(m_port));
     m_acceptor.open(endpoint.protocol(), ec);
     if (ec) {
-        connectFailed(this);
+        mainLog()->debug("tcp server open error: {}", ec.message());
+        startFailed(this);
     }
 
     m_acceptor.bind(endpoint, ec);
     if (ec) {
-        connectFailed(this);
+        mainLog()->debug("tcp server bind error: {}", ec.message());
+        startFailed(this);
     }
 
     m_acceptor.listen(boost::asio::socket_base::max_connections, ec);
     if (ec) {
-        connectFailed(this);
+        mainLog()->debug("tcp server listen error: {}", ec.message());
+        startFailed(this);
     }
 
     accept();
@@ -92,30 +96,31 @@ void SecuredTcpServer::accept()
 void SecuredTcpServer::onAccept(SecuredTcpSession* session, boost::system::error_code ec)
 {
     if (ec) {
+        mainLog()->debug("tcp server accept error: {}", ec.message());
+        acceptFailed(this);
         delete session;
     }
     else {
-        session->connected.connect([this](SecuredTcpSession* session){
-            m_sessions.emplace_back(session);
-        });
-        session->connectFailed.connect([this](SecuredTcpSession* session){
-            delete session;
-        });
-
         session->stream().async_handshake(
             ssl::stream_base::server,
             std::bind(
                 &SecuredTcpServer::onSslHandshakeFinished,
                 this,
+                session,
                 std::placeholders::_1));
     }
 
     accept();
 }
 
-void SecuredTcpServer::onSslHandshakeFinished(errorCode ec)
+void SecuredTcpServer::onSslHandshakeFinished(SecuredTcpSession* session, errorCode ec)
 {
     if (ec) {
-        connectFailed(this);
+        mainLog()->debug("tcp server ssl handshake error: {}", ec.message());
+        acceptFailed(this);
+        delete session;
+        return;
     }
+
+    m_sessions.emplace_back(session);
 }

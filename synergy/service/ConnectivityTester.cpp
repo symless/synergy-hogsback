@@ -156,6 +156,15 @@ void ConnectivityTester::startTestServer()
                 ConnectivityTester::testServerCertificate(),
                 ConnectivityTester::testServerKey(),
                 ConnectivityTester::testServerDH());
+
+    m_testServer->startFailed.connect([](SecuredTcpServer*){
+        mainLog()->debug("failed to start connectivity test server");
+    });
+
+    m_testServer->acceptFailed.connect([](SecuredTcpServer*){
+        mainLog()->debug("failed to accept a connectivity test client");
+    });
+
     m_testServer->start();
 }
 
@@ -204,8 +213,14 @@ void ConnectivityTester::onTestDelegateeDone(std::map<std::string, bool> results
             std::string successfulIp = boost::algorithm::join(successfulIpList, ",");
             std::string failedIp = boost::algorithm::join(failedIpList, ",");
 
-            mainLog()->debug("successful report: dest = {}, ips = {}", *screenId, successfulIp);
-            mainLog()->debug("failed report: dest = {}, ips = {}", *screenId, failedIp);
+            if (!successfulIp.empty()) {
+                mainLog()->debug("successful report: dest = {}, ips = {}", *screenId, successfulIp);
+            }
+
+            if (!failedIp.empty()) {
+                mainLog()->debug("failed report: dest = {}, ips = {}", *screenId, failedIp);
+            }
+
             newReportGenerated(*screenId, successfulIp, failedIp);
 
             // update connectivity results

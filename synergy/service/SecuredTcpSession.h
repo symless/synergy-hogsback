@@ -5,7 +5,6 @@
 #include <boost/asio/ssl/stream.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/beast/core.hpp>
-#include <boost/signals2.hpp>
 
 using tcp = boost::asio::ip::tcp;
 namespace ssl = boost::asio::ssl;
@@ -19,12 +18,6 @@ public:
     virtual ~SecuredTcpSession();
 
     ssl::stream<tcp::socket>& stream();
-
-    template <typename... Args>
-    using signal = boost::signals2::signal<Args...>;
-
-    signal<void(SecuredTcpSession*)> connected;
-    signal<void(SecuredTcpSession*)> connectFailed;
 
 private:
     boost::asio::io_service& m_ioService;
