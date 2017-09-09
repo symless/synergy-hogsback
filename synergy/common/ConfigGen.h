@@ -3,6 +3,8 @@
 #include <vector>
 #include <ostream>
 
+const std::string kCoreConfigFile = "synergy.conf";
+
 std::vector<ScreenLinks>
 linkScreens (std::vector<Screen> const& screens);
 
@@ -16,3 +18,7 @@ printScreenLinks (std::ostream& os, ScreenLinkMap const& screen,
 
 void
 printConfig (std::ostream& os, std::vector<Screen> const& screens);
+
+void
+createConfigFile(const std::string& path,
+                 const std::vector<Screen>& screens);

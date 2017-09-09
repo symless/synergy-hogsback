@@ -2,7 +2,7 @@
 #include <synergy/service/json.hpp>
 
 Screen
-Screen::fromJSONSnapshot (std::string const& json) {
+Screen::fromJsonSnapshot (std::string const& json) {
     Screen screen;
     Snapshot snapshot;
     from_json (snapshot, json);

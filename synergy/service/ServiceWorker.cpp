@@ -1,6 +1,8 @@
 #include "ServiceWorker.h"
 
-#include "synergy/service/ProfileSnapshot.h"
+#include <synergy/common/ConfigGen.h>
+#include <synergy/common/DirectoryManager.h>
+#include <synergy/common/Profile.h>
 #include "synergy/service/ConnectivityTester.h"
 #include "synergy/service/CloudClient.h"
 #include <synergy/service/Logs.h>
@@ -33,23 +35,26 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     });
 
     m_cloudClient->websocketMessageReceived.connect([this](std::string json){
-        // parse message
-        ProfileSnapshot snapshot;
         try {
-            snapshot.parseJsonSnapshot(json);
-        }
-        catch (...) {
-            // TODO: log error
-            return;
-        }
+            // parse message
+            Profile profile = Profile::fromJsonSnapshot(json);
 
-        // notify connectivity tester
-        m_connectivityTester->testNewScreens(snapshot.getScreens());
+            // TODO: consider moving to ProcessManager::start?
+            auto configPath = DirectoryManager::instance()->profileDir() / kCoreConfigFile;
+            createConfigFile(configPath.string(), profile.getScreens());
 
-        // forward the message via rpc server
-        auto server = m_rpcManager->server();
-        g_lastProfileSnapshot = json;
-        server->publish ("synergy.profile.snapshot", std::move(json));
+            // notify connectivity tester
+            // TODO: use new screen type from common library
+            //m_connectivityTester->testNewScreens(snapshot.getScreens());
+
+            // forward the message via rpc server
+            auto server = m_rpcManager->server();
+            g_lastProfileSnapshot = json;
+            server->publish ("synergy.profile.snapshot", std::move(json));
+        }
+        catch (const std::exception& ex) {
+            mainLog()->error("failed to create profile from json: {}", ex.what());
+        }
     });
 
     m_rpcManager->ready.connect([this]() {

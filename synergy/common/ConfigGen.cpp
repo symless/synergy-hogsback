@@ -1,5 +1,7 @@
 #include <synergy/common/ConfigGen.h>
 
+#include <fstream>
+
 using boost::icl::interval;
 using boost::icl::interval_map;
 
@@ -286,4 +288,17 @@ printConfig (std::ostream& os, std::vector<Screen> const& screens) {
     os << "  " << "switchCorners = none" << std::endl;
     os << "  " << "switchCornerSize = 0" << std::endl;
     os << "end\n";
+}
+
+void
+createConfigFile(const std::string& path, const std::vector<Screen>& screens)
+{
+    std::ofstream file;
+    file.imbue (std::locale::classic());
+
+    file.open(path, std::ios::trunc | std::ios::out);
+
+    printConfig(file, screens);
+
+    file.close();
 }

@@ -1,4 +1,8 @@
 #include <synergy/service/ProcessManager.h>
+
+#include <synergy/common/DirectoryManager.h>
+#include <synergy/common/Profile.h>
+#include <synergy/common/ConfigGen.h>
 #include <synergy/service/Logs.h>
 #include <boost/process.hpp>
 #include <boost/process/async_pipe.hpp>
@@ -152,8 +156,9 @@ ProcessManagerImpl::shutdown() {
 }
 
 ProcessManager::ProcessManager (boost::asio::io_service& io,
-                                std::shared_ptr<Profile> profile)
-    : m_ioService (io) {
+                                std::shared_ptr<Profile> profile) :
+    m_ioService (io)
+{
 }
 
 ProcessManager::~ProcessManager () noexcept {

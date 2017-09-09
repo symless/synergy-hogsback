@@ -1,6 +1,7 @@
 #ifndef SYNERGY_SERVICE_PROCESSMANAGER_H
 #define SYNERGY_SERVICE_PROCESSMANAGER_H
 
+#include <synergy/common/Profile.h>
 #include <boost/asio.hpp>
 #include <boost/signals2.hpp>
 #include <memory>
@@ -8,7 +9,6 @@
 #include <string>
 
 class Screen;
-class Profile;
 class ProcessManagerImpl;
 
 class ProcessManager final {

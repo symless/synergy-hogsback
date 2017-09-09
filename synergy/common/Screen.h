@@ -12,7 +12,7 @@ class Screen final {
 public:
     friend class Profile;
     class Snapshot;
-    static Screen fromJSONSnapshot(std::string const&);
+    static Screen fromJsonSnapshot(std::string const&);
 
     explicit Screen(ScreenID id) noexcept;
 

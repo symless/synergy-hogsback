@@ -4,7 +4,7 @@ Screen::Screen(ScreenID id) noexcept: m_id (id) {
 }
 
 Screen
-Screen::fromJSONSnapshot(std::string const&)
+Screen::fromJsonSnapshot(std::string const&)
 {
     Screen screen;
     return screen;
@@ -78,4 +78,9 @@ Screen::status (ScreenStatus status) {
 ScreenStatus
 Screen::status() const noexcept {
     return m_status;
+}
+
+void
+Screen::apply(Snapshot const&) {
+
 }

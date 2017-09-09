@@ -3,7 +3,7 @@
 #include <synergy/service/json.hpp>
 
 Profile
-Profile::fromJSONSnapshot (std::string const& json) {
+Profile::fromJsonSnapshot (std::string const& json) {
     Profile profile;
     Snapshot snapshot;
     from_json (snapshot, json);

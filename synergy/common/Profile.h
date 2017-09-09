@@ -8,10 +8,11 @@
 class Profile final {
 public:
     class Snapshot;
-    static Profile fromJSONSnapshot (std::string const&);
+    static Profile fromJsonSnapshot (std::string const&);
 
     explicit Profile (int64_t id);
     void apply (Snapshot const&);
+    const std::vector<Screen>& getScreens() const;
 
 private:
     Profile() = default;
