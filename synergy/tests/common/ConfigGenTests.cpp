@@ -3,10 +3,10 @@
 #include <sstream>
 #include <iostream>
 
-TEST_CASE( "Core config generation works correctly", "[ConfigGen]" ) {
+TEST_CASE("Core config text is generated correctly", "[ConfigGen]" ) {
     std::vector<Screen> screens;
 
-    SECTION ("Trivial screen configurations") {
+    SECTION ("Simple screen configurations") {
         SECTION ("An empty screens list results in an empty screen links list") {
             auto links = linkScreens (screens);
             REQUIRE (links.empty());

@@ -6,7 +6,7 @@
 
 static boost::signals2::signal<void()> testFinished;
 
-TEST_CASE("Connectivity test report", "[ConnectivityTester]")
+TEST_CASE("Connectivity test finds a service", "[ConnectivityTester]")
 {
     std::string jsonMock = R"JSON({"profile":{"configVersion":0,"id":1,"name":"default","server":1},"screens":[{"id":1,"name":"foo","active":true,"ipList":"192.168.3.1,127.0.0.1","status":"connecting","x_pos":100,"y_pos":200},{"id":2,"name":"bar","active":true,"ipList":"192.168.1.1","status":"connecting","x_pos":200,"y_pos":200}]})JSON";
     ProfileSnapshot profileSnapshot;

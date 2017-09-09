@@ -3,7 +3,7 @@
 #include "synergy/common/DirectoryManager.h"
 #include <boost/filesystem.hpp>
 
-TEST_CASE("User configuration settings", "[UserConfig]")
+TEST_CASE("Config load can use saved settings", "[UserConfig]")
 {
     // test default config
     UserConfig userConfig;

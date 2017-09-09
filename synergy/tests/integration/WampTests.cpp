@@ -33,7 +33,7 @@ provideCoreTest(RpcManager& rpcManager)
     serverReady();
 }
 
-TEST_CASE("WAMP RPC calls", "[Wamp]")
+TEST_CASE("WAMP RPC core start call is recieved", "[Wamp]")
 {
     timeout = false;
     boost::asio::io_service ioService;
