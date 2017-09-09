@@ -198,7 +198,7 @@ printScreenLinks (std::ostream& os, std::vector<Screen> const& screens,
 void
 printScreenLinks (std::ostream& os, ScreenLinkMap const& screen,
                   std::vector<ScreenLinkMap> const& targets) {
-    os << screen->name() << ":\n";
+    os << "  " << screen->name() << ":\n";
 
     for (auto edge = 0; edge < 4; ++edge) {
         auto const& links = screen.edges()[edge];
@@ -222,7 +222,7 @@ printScreenLinks (std::ostream& os, ScreenLinkMap const& screen,
                     double dst_l = (lower - target->x()) * 100.0 / target->width();
                     double dst_u = (upper - target->x()) * 100.0 / target->width();
 
-                    os << "\t" << directionNames[edge]
+                    os << "    " << directionNames[edge]
                               << "(" << src_l << "," << src_u << ") = "
                               << target->name()
                               << "(" << dst_l << "," << dst_u << ")\n";
@@ -247,7 +247,7 @@ printScreenLinks (std::ostream& os, ScreenLinkMap const& screen,
                     double dst_l = (lower - target->y()) * 100.0 / target->height();
                     double dst_u = (upper - target->y()) * 100.0 / target->height();
 
-                    os << "\t" << directionNames[edge]
+                    os << "    " << directionNames[edge]
                               << "(" << src_l << "," << src_u << ") = "
                               << target->name()
                               << "(" << dst_l << "," << dst_u << ")\n";
@@ -259,12 +259,16 @@ printScreenLinks (std::ostream& os, ScreenLinkMap const& screen,
 
 void
 printConfig (std::ostream& os, std::vector<Screen> const& screens) {
-    os << "section: options\n";
-    os << "end\n\n";
 
     os << "section: screens\n";
     for (auto& screen: screens) {
-        os << screen.name() << ":\n";
+        os << "  " << screen.name() << ":\n";
+        os << "    " << "halfDuplexCapsLock = false" << std::endl;
+        os << "    " << "halfDuplexNumLock = false" << std::endl;
+        os << "    " << "halfDuplexScrollLock = false" << std::endl;
+        os << "    " << "xtestIsXineramaUnaware = false" << std::endl;
+        os << "    " << "switchCorners = none" << std::endl;
+        os << "    " << "switchCornerSize = 0" << std::endl;
     }
     os << "end\n\n";
 
@@ -274,4 +278,12 @@ printConfig (std::ostream& os, std::vector<Screen> const& screens) {
         printScreenLinks (os, screens, links, i);
     }
     os << "end\n\n";
+
+    os << "section: options\n";
+    os << "  " << "relativeMouseMoves = false" << std::endl;
+    os << "  " << "screenSaverSync = true" << std::endl;
+    os << "  " << "win32KeepForeground = false" << std::endl;
+    os << "  " << "switchCorners = none" << std::endl;
+    os << "  " << "switchCornerSize = 0" << std::endl;
+    os << "end\n";
 }
