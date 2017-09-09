@@ -24,7 +24,7 @@ removeLeft (Screen const& source, std::vector<ScreenLinkMap>& targets) {
     /* Remove potential targets to the left of source */
     targets.erase (
         std::remove_if (begin (targets), end(targets), [&source](auto& target) {
-            return (target->x + target->width) <= source.x;
+            return (target->x() + target->width()) <= source.x();
         }),
         end(targets)
     );
@@ -35,7 +35,7 @@ removeRight (Screen const& source, std::vector<ScreenLinkMap>& targets) {
     /* Remove potential targets to the right of source */
     targets.erase (
         std::remove_if (begin (targets), end(targets), [&source](auto& target) {
-            return target->x >= (source.x + source.width);
+            return target->x() >= (source.x() + source.width());
         }),
         end(targets)
     );
@@ -46,7 +46,7 @@ removeAbove (Screen const& source, std::vector<ScreenLinkMap>& targets) {
     /* Remove potential targets above the source */
     targets.erase (
         std::remove_if (begin (targets), end(targets), [&source](auto& target) {
-            return (target->y + target->height) <= source.y;
+            return (target->y() + target->height()) <= source.y();
         }),
         end(targets)
     );
@@ -57,7 +57,7 @@ removeBelow (Screen const& source, std::vector<ScreenLinkMap>& targets) {
     /* Remove potential targets below the source */
     targets.erase (
         std::remove_if (begin (targets), end(targets), [&source](auto& target) {
-            return target->y >= (source.y + source.height);
+            return target->y() >= (source.y() + source.height());
         }),
         end(targets)
     );
@@ -74,14 +74,14 @@ linkLeft (ScreenLinkMap const& source, std::vector<ScreenLinkMap> targets) {
      * left-most screens first, working right back toward the source).
      */
     std::sort (begin(targets), end(targets),
-               [](auto t1, auto t2) { return t1->x < t2->x; });
+               [](auto t1, auto t2) { return t1->x() < t2->x(); });
 
     for (auto& target : targets) {
         auto i = interval<int64_t>::closed (
-            std::max (source->y, target->y),
-            std::min (source->y + source->height, target->y + target->height)
+            std::max (source->y(), target->y()),
+            std::min (source->y() + source->height(), target->y() + target->height())
         );
-        source.edges()[int(Direction::Left)].set (make_pair (i, target->id));
+        source.edges()[int(Direction::Left)].set (make_pair (i, target->id()));
     }
 }
 
@@ -96,14 +96,15 @@ linkRight (ScreenLinkMap& source, std::vector<ScreenLinkMap> targets) {
      * right-most screens first, working left back toward the source).
      */
     std::sort (begin(targets), end(targets),
-               [](auto t1, auto t2) { return t1->x > t2->x; });
+               [](auto t1, auto t2) { return t1->x() > t2->x(); });
 
     for (auto& target : targets) {
         auto i = interval<int64_t>::closed (
-            std::max (source->y, target->y),
-            std::min (source->y + source->height, target->y + target->height)
+            std::max (source->y(), target->y()),
+            std::min (source->y() + source->height(),
+                        target->y() + target->height())
         );
-        source.edges()[int(Direction::Right)].set (make_pair (i, target->id));
+        source.edges()[int(Direction::Right)].set (make_pair (i, target->id()));
     }
 }
 
@@ -118,14 +119,15 @@ linkUp (ScreenLinkMap& source, std::vector<ScreenLinkMap> targets) {
      * top-most screens first, working down back toward the source).
      */
     std::sort (begin(targets), end(targets),
-               [](auto t1, auto t2) { return t1->y < t2->y; });
+               [](auto t1, auto t2) { return t1->y() < t2->y(); });
 
     for (auto& target : targets) {
         auto i = interval<int64_t>::closed (
-            std::max (source->x, target->x),
-            std::min (source->x + source->width, target->x + target->width)
+            std::max (source->x(), target->x()),
+            std::min (source->x() + source->width(),
+                      target->x() + target->width())
         );
-        source.edges()[int(Direction::Up)].set (make_pair (i, target->id));
+        source.edges()[int(Direction::Up)].set (make_pair (i, target->id()));
     }
 }
 
@@ -140,14 +142,15 @@ linkDown (ScreenLinkMap& source, std::vector<ScreenLinkMap> targets) {
      * bottom-most screens first, working up back toward the source).
      */
     std::sort (begin(targets), end(targets),
-               [](auto t1, auto t2) { return t1->y > t2->y; });
+               [](auto t1, auto t2) { return t1->y() > t2->y(); });
 
     for (auto& target : targets) {
         auto i = interval<int64_t>::closed (
-            std::max (source->x, target->x),
-            std::min (source->x + source->width, target->x + target->width)
+            std::max (source->x(), target->x()),
+            std::min (source->x() + source->width(),
+                      target->x() + target->width())
         );
-        source.edges()[int(Direction::Down)].set (make_pair (i, target->id));
+        source.edges()[int(Direction::Down)].set (make_pair (i, target->id()));
     }
 }
 
@@ -195,7 +198,7 @@ printScreenLinks (std::ostream& os, std::vector<Screen> const& screens,
 void
 printScreenLinks (std::ostream& os, ScreenLinkMap const& screen,
                   std::vector<ScreenLinkMap> const& targets) {
-    os << screen->name << ":\n";
+    os << screen->name() << ":\n";
 
     for (auto edge = 0; edge < 4; ++edge) {
         auto const& links = screen.edges()[edge];
@@ -206,22 +209,22 @@ printScreenLinks (std::ostream& os, ScreenLinkMap const& screen,
                 for (auto link : links) {
                     auto upper   = link.first.upper ();
                     auto lower   = link.first.lower ();
-                    double src_l = (lower - screen->x) * 100.0 / screen->width;
-                    double src_u = (upper - screen->x) * 100.0 / screen->width;
+                    double src_l = (lower - screen->x()) * 100.0 / screen->width();
+                    double src_u = (upper - screen->x()) * 100.0 / screen->width();
 
                     auto dest = std::find_if (
                         begin (targets), end (targets), [&](auto& screen) {
-                            return screen->id == link.second;
+                            return screen->id() == link.second;
                         });
 
                     assert (dest != end (targets));
                     auto& target = *dest;
-                    double dst_l = (lower - target->x) * 100.0 / target->width;
-                    double dst_u = (upper - target->x) * 100.0 / target->width;
+                    double dst_l = (lower - target->x()) * 100.0 / target->width();
+                    double dst_u = (upper - target->x()) * 100.0 / target->width();
 
                     os << "\t" << directionNames[edge]
                               << "(" << src_l << "," << src_u << ") = "
-                              << target->name
+                              << target->name()
                               << "(" << dst_l << "," << dst_u << ")\n";
                 }
                 break;
@@ -231,22 +234,22 @@ printScreenLinks (std::ostream& os, ScreenLinkMap const& screen,
                 for (auto link : links) {
                     auto upper   = link.first.upper ();
                     auto lower   = link.first.lower ();
-                    double src_l = (lower - screen->y) * 100.0 / screen->height;
-                    double src_u = (upper - screen->y) * 100.0 / screen->height;
+                    double src_l = (lower - screen->y()) * 100.0 / screen->height();
+                    double src_u = (upper - screen->y()) * 100.0 / screen->height();
 
                     auto dest = std::find_if (
                         begin (targets), end (targets), [&](auto& screen) {
-                            return screen->id == link.second;
+                            return screen->id() == link.second;
                         });
 
                     assert (dest != end (targets));
                     auto& target = *dest;
-                    double dst_l = (lower - target->y) * 100.0 / target->height;
-                    double dst_u = (upper - target->y) * 100.0 / target->height;
+                    double dst_l = (lower - target->y()) * 100.0 / target->height();
+                    double dst_u = (upper - target->y()) * 100.0 / target->height();
 
                     os << "\t" << directionNames[edge]
                               << "(" << src_l << "," << src_u << ") = "
-                              << target->name
+                              << target->name()
                               << "(" << dst_l << "," << dst_u << ")\n";
                 }
                 break;
@@ -261,7 +264,7 @@ printConfig (std::ostream& os, std::vector<Screen> const& screens) {
 
     os << "section: screens\n";
     for (auto& screen: screens) {
-        os << screen.name << ":\n";
+        os << screen.name() << ":\n";
     }
     os << "end\n\n";
 

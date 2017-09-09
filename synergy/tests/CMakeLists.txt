@@ -1,10 +1,10 @@
 project (synergy-tests CXX)
 cmake_minimum_required (VERSION 3.4)
 
-file(GLOB TEST_SOURCES "*.cpp")
+file(GLOB_RECURSE TEST_SOURCES "*.cpp")
 
-add_executable (${PROJECT_NAME}
-    ${TEST_SOURCES}
+# TODO: use lib instead of including sources
+set(SERVICE_SOURCES
     ../service/WebsocketSession.cpp
     ../service/SecuredTcpSession.cpp
     ../service/ProfileSnapshot.cpp
@@ -13,6 +13,11 @@ add_executable (${PROJECT_NAME}
     ../service/SecuredTcpClient.cpp
     ../service/SecuredTcpServer.cpp
     ../service/Logs.cpp
+)
+
+add_executable (${PROJECT_NAME}
+    ${TEST_SOURCES}
+    ${SERVICE_SOURCES}
 )
 
 target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC

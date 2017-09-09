@@ -205,6 +205,7 @@ void ConnectivityTester::onTestDelegateeDone(std::map<std::string, bool> results
             std::string failedIp = boost::algorithm::join(failedIpList, ",");
 
             mainLog()->debug("successful report: dest = {}, ips = {}", *screenId, successfulIp);
+            mainLog()->debug("failed report: dest = {}, ips = {}", *screenId, failedIp);
             newReportGenerated(*screenId, successfulIp, failedIp);
 
             // update connectivity results

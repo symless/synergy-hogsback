@@ -4,18 +4,17 @@
 #include "DirectoryManager.h"
 
 #include <boost/filesystem.hpp>
-#include <cpptoml.h>
 #include <iostream>
 #include <fstream>
 
 static const char* const kUserConfigFilename = "synergy-user.cfg";
 
 UserConfig::UserConfig():
-    m_debugLevel(kInfo),
-    m_userToken(""),
+    m_userToken(),
     m_userId(-1),
     m_profileId(-1),
     m_screenId(-1),
+    m_debugLevel(kInfo),
     m_dragAndDrop(false)
 {
 }
@@ -32,10 +31,23 @@ UserConfig::defaultFilePath()
     return filepath.string();
 }
 
-void UserConfig::load(std::string const& filepath)
+void
+UserConfig::load(std::istream& outputStream)
+{
+    ConfigParser parser = ConfigParser::parse_memory(outputStream);
+    update(parser);
+}
+
+void
+UserConfig::load(std::string const& filepath)
 {
     ConfigParser parser = ConfigParser::parse_file(filepath);
+    update(parser);
+}
 
+void
+UserConfig::update(ConfigParser& parser)
+{
     auto authConfig = parser.get_section("auth");
     if (authConfig.isValid()) {
         m_userId = authConfig.get_value<int64_t>("user-id");
@@ -47,14 +59,15 @@ void UserConfig::load(std::string const& filepath)
         m_profileId = profileConfig.get_value<int64_t>("profile-id");
         m_screenId = profileConfig.get_value<int64_t>("screen-id");
         m_dragAndDrop = profileConfig.get_value<bool>("drag-and-drop");
-        m_debugLevel = (DebugLevel)profileConfig.get_value<int64_t>("debug-level");
+        m_debugLevel = static_cast<DebugLevel>(profileConfig.get_value<int64_t>("debug-level"));
     }
+
+    updated();
 }
 
-void UserConfig::save(std::string const& filepath)
+void
+UserConfig::makeTable(std::shared_ptr<cpptoml::table>& root)
 {
-    std::shared_ptr<cpptoml::table> root = cpptoml::make_table();
-
     auto authTable = cpptoml::make_table();
     authTable->insert("user-id", m_userId);
     authTable->insert("user-token", m_userToken);
@@ -67,12 +80,33 @@ void UserConfig::save(std::string const& filepath)
 
     root->insert("auth", authTable);
     root->insert("profile", profileTable);
+}
+
+void
+UserConfig::save(std::ostream& inputStream)
+{
+    std::shared_ptr<cpptoml::table> root = cpptoml::make_table();
+    makeTable(root);
+
+    inputStream.imbue (std::locale::classic());
+    inputStream << *root;
+
+    updated();
+}
+
+void
+UserConfig::save(std::string const& filepath)
+{
+    std::shared_ptr<cpptoml::table> root = cpptoml::make_table();
+    makeTable(root);
 
     std::ofstream file;
     file.imbue (std::locale::classic());
     file.open (filepath, std::ios::trunc | std::ios::out);
     file << *root;
     file.close();
+
+    updated();
 }
 
 DebugLevel UserConfig::debugLevel() const

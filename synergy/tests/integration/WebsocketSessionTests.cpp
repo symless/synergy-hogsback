@@ -12,7 +12,7 @@ static const char* kPubSubServerPort = "8081";
 static boost::signals2::signal<void()> testFinished;
 static bool timeout;
 
-TEST_CASE("Nchan Websocket connections", "[Websocket]")
+TEST_CASE("Nchan Websocket connections", "[WebsocketSession]")
 {
     timeout = false;
     std::string subResult;

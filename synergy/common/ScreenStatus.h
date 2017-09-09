@@ -1,5 +1,5 @@
-#ifndef SCREENSTATUS
-#define SCREENSTATUS
+#ifndef SYNERGY_COMMON_SCREENSTATUS_H
+#define SYNERGY_COMMON_SCREENSTATUS_H
 
 #include <string>
 
@@ -11,10 +11,10 @@ enum class ScreenStatus: int {
     kConnectingWithError
 };
 
-static ScreenStatus
-stringToScreenStatus(std::string str)
+inline ScreenStatus
+stringToScreenStatus (std::string const& str)
 {
-    ScreenStatus status = ScreenStatus::kInactive;
+    ScreenStatus status;
 
     if (str == "Connected") {
         status = ScreenStatus::kConnected;
@@ -30,12 +30,14 @@ stringToScreenStatus(std::string str)
     }
     else if (str == "Inactive") {
         status = ScreenStatus::kInactive;
+    } else {
+        throw;
     }
 
     return status;
 }
 
-static std::string
+inline std::string
 screenStatusToString(ScreenStatus s)
 {
     switch(s) {
@@ -50,9 +52,6 @@ screenStatusToString(ScreenStatus s)
     case ScreenStatus::kConnectingWithError:
         return "ConnectingWithError";
     }
-
-    return "Inactive";
 }
 
-
-#endif // SCREENSTATUS
+#endif // SYNERGY_COMMON_SCREENSTATUS_H
