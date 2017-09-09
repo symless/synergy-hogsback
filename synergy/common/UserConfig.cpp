@@ -34,6 +34,10 @@ UserConfig::defaultFilePath()
 
 void UserConfig::load(std::string const& filepath)
 {
+    if (!boost::filesystem::exists(filepath)) {
+        return;
+    }
+
     ConfigParser parser = ConfigParser::parse_file(filepath);
 
     auto authConfig = parser.get_section("auth");
