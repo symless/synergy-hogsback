@@ -14,7 +14,7 @@ class CloudClient
 {
 public:
     void report(int screenId, const std::string& successfulIp, const std::string& failedIp);
-    void claimServer();
+    void claimServer(int64_t serverId);
 
     CloudClient (boost::asio::io_service& ioService,
                  std::shared_ptr<UserConfig> userConfig);

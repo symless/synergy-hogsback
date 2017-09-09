@@ -9,6 +9,8 @@ class Profile final {
 public:
     static Profile fromJSONSnapshot (std::string const&);
 
+    explicit Profile(int64_t id) noexcept;
+
     void apply (Profile const& src);
     bool compare (Profile const& src);
     void clone (Profile const& src);
@@ -24,6 +26,8 @@ public:
 
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
+
+    signal<void ()> modified;
 
     signal<void (int64_t)> idChanged;
     signal<void (std::string)> nameChanged;

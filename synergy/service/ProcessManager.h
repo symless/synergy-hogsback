@@ -13,7 +13,7 @@ class ProcessManagerImpl;
 
 class ProcessManager final {
 public:
-    explicit ProcessManager (boost::asio::io_service& io);
+    explicit ProcessManager (boost::asio::io_service& io, std::shared_ptr<Profile> localProfile);
     ProcessManager (ProcessManager const&) = delete;
     ProcessManager& operator= (ProcessManager const&) = delete;
     ~ProcessManager() noexcept;
@@ -33,6 +33,7 @@ public:
 private:
     boost::asio::io_service& m_ioService;
     std::shared_ptr<Screen> m_localScreen;
+    std::shared_ptr<Profile> m_localProfile;
     std::unique_ptr<ProcessManagerImpl> m_impl;
 };
 

@@ -155,8 +155,9 @@ ProcessManagerImpl::shutdown() {
     mainLog()->debug("core process stopped");
 }
 
-ProcessManager::ProcessManager (boost::asio::io_service& io) :
-    m_ioService (io)
+ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Profile> localProfile) :
+    m_ioService (io),
+    m_localProfile(localProfile)
 {
 }
 

@@ -25,6 +25,12 @@ Profile::fromJSONSnapshot (std::string const& json) {
     return profile;
 }
 
+Profile::Profile(int64_t id) noexcept :
+    m_id(id)
+{
+
+}
+
 void Profile::apply (Profile const& src)
 {
     if (compare(src)) {
@@ -124,6 +130,10 @@ int64_t Profile::id() const
 
 void Profile::setId(const int64_t &id)
 {
+    if (id != m_id) {
+        modified();
+    }
+
     m_id = id;
 }
 
@@ -134,6 +144,10 @@ int64_t Profile::version() const
 
 void Profile::setVersion(const int64_t &version)
 {
+    if (version != m_version) {
+        modified();
+    }
+
     m_version = version;
 }
 
@@ -144,6 +158,10 @@ int64_t Profile::server() const
 
 void Profile::setServer(const int64_t &server)
 {
+    if (server != m_server) {
+        modified();
+    }
+
     m_server = server;
 }
 

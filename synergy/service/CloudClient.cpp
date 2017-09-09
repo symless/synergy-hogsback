@@ -54,13 +54,13 @@ void CloudClient::report(int screenId, const std::string &successfulIp, const st
     httpSession->post(kUrlTarget, tao::json::to_string(root));
 }
 
-void CloudClient::claimServer()
+void CloudClient::claimServer(int64_t serverId)
 {
     static const std::string kUrlTarget = "/profile/server/claim";
     HttpSession* httpSession = newHttpSession();
 
     tao::json::value root;
-    root["screen_id"] = m_userConfig->screenId();
+    root["screen_id"] = serverId;
     root["profile_id"] = m_userConfig->profileId();
 
     httpSession->post(kUrlTarget, tao::json::to_string(root));
