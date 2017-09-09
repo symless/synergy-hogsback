@@ -37,13 +37,16 @@ public:
     std::string successfulTestIp() const;
     std::string failedTestIp() const;
 
+    std::string ipList() const;
+
+    bool active() const;
+
     void apply (const ScreenSnapshot &ss);
-
-
 
 private:
     ScreenID        m_id      = 0;
     std::string     m_name;
+    bool            m_active  = false;
     int64_t         m_x       = 0;
     int64_t         m_y       = 0;
     int64_t         m_width   = 0;
@@ -51,6 +54,7 @@ private:
     ScreenStatus    m_status  = ScreenStatus::kDisconnected;
     std::string     m_successfulTestIp;
     std::string     m_failedTestIp;
+    std::string     m_ipList;
 };
 
 #endif

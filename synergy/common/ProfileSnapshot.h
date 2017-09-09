@@ -1,5 +1,5 @@
 #pragma once
-#include <synergy/common/Profile.h>
+
 #include <synergy/common/ScreenSnapshot.h>
 #include <boost/fusion/adapted/struct/adapt_struct.hpp>
 

@@ -26,7 +26,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_rpcManager (std::make_unique<RpcManager>(m_ioService)),
     m_cloudClient (std::make_unique<CloudClient>(ioService, m_userConfig)),
     m_processManager (std::make_unique<ProcessManager>(m_ioService, m_localProfile)),
-    m_connectivityTester (std::make_unique<ConnectivityTester>(m_ioService)),
+    m_connectivityTester (std::make_unique<ConnectivityTester>(m_ioService, m_localProfile)),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService))
 {
     g_log.onLogLine.connect([this](std::string logLine) {

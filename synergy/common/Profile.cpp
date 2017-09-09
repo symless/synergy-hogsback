@@ -8,7 +8,12 @@ Profile
 Profile::fromJSONSnapshot (std::string const& json) {
     Profile profile;
     ProfileSnapshot snapshot;
+    try {
     from_json (snapshot, json);
+}
+    catch (std::exception& e) {
+        std::string test = e.what();
+    }
 
     profile.m_id = snapshot.id;
     profile.m_version = snapshot.configVersion;
@@ -71,6 +76,11 @@ bool Profile::compare(Profile const& src)
 
                 if (screen.name() != srcScreen.name()) {
                     screenNameChanged(srcScreen.id());
+                    different = true;
+                }
+
+                if (screen.active() != srcScreen.active()) {
+                    screenStatusChanged(srcScreen.id());
                     different = true;
                 }
 
