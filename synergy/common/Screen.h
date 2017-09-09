@@ -34,7 +34,7 @@ public:
     void status(ScreenStatus);
     ScreenStatus status() const noexcept;
 
-    void apply (const ScreenSnapshot &);
+    void apply (const ScreenSnapshot &ss);
 
 private:
     ScreenID        m_id      = 0;

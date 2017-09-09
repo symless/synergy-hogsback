@@ -77,6 +77,14 @@ Screen::status() const noexcept {
 
 void
 
-Screen::apply(ScreenSnapshot const&)
+Screen::apply(ScreenSnapshot const& ss)
 {
+    m_id = ss.id;
+    m_name = ss.name;
+    m_x = ss.x_pos;
+    m_y = ss.y_pos;
+    // TODO: hardcode width and height
+    m_width = 0;
+    m_height = 0;
+    m_status = stringToScreenStatus(ss.status);
 }
