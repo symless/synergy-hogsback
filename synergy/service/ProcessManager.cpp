@@ -154,19 +154,19 @@ ProcessManagerImpl::shutdown() {
     mainLog()->debug("core process stopped");
 }
 
-ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Profile> localProfile) :
+ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<ProfileConfig> localProfileConfig) :
     m_ioService (io),
-    m_localProfile(localProfile)
+    m_localProfileConfig(localProfileConfig)
 {
-    m_localProfile->serverChanged.connect([this](int64_t serverId){
+    m_localProfileConfig->profileServerChanged.connect([this](int64_t serverId){
         // TODO: check if we need to reconnect to the new server or switch to server mode, generate config file and start synergys
     });
 
-    m_localProfile->screenPositionChanged.connect([this](int64_t){
+    m_localProfileConfig->screenPositionChanged.connect([this](int64_t){
         // TODO: if we are the server, regenerate a config file and restart synergys
     });
 
-    m_localProfile->screenSetChanged.connect([this](std::vector<Screen>, std::vector<Screen>){
+    m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen>, std::vector<Screen>){
         // TODO: if we are the server, regenerate a config file and restart synergys
     });
 }

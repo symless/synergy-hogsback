@@ -9,15 +9,15 @@
 static const std::string kConnectivityTestIp = "0.0.0.0";
 static const std::string kConnectivityTestPort = "24810";
 
-ConnectivityTester::ConnectivityTester(boost::asio::io_service &io, std::shared_ptr<Profile> localProfile) :
+ConnectivityTester::ConnectivityTester(boost::asio::io_service &io, std::shared_ptr<ProfileConfig> localProfileConfig) :
     m_localHostname(boost::asio::ip::host_name()),
     m_testDelegatee(nullptr),
     m_ioService(io),
-    m_localProfile(localProfile)
+    m_localProfileConfig(localProfileConfig)
 {
     startTestServer();
 
-    m_localProfile->screenSetChanged.connect(
+    m_localProfileConfig->screenSetChanged.connect(
         [this](std::vector<Screen> added, std::vector<Screen> removed){
             testNewScreens(added);
         }

@@ -2,7 +2,7 @@
 
 #include <synergy/common/ConfigGen.h>
 #include <synergy/common/DirectoryManager.h>
-#include <synergy/common/Profile.h>
+#include <synergy/common/ProfileConfig.h>
 #include "synergy/service/ConnectivityTester.h"
 #include "synergy/service/CloudClient.h"
 #include <synergy/service/Logs.h>
@@ -22,11 +22,11 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
                              std::shared_ptr<UserConfig> userConfig) :
     m_ioService (ioService),
     m_userConfig (std::move(userConfig)),
-    m_localProfile (std::make_shared<Profile>(m_userConfig->profileId())),
+    m_localProfileConfig (std::make_shared<ProfileConfig>()),//m_userConfig->profileId()
     m_rpcManager (std::make_unique<RpcManager>(m_ioService)),
     m_cloudClient (std::make_unique<CloudClient>(ioService, m_userConfig)),
-    m_processManager (std::make_unique<ProcessManager>(m_ioService, m_localProfile)),
-    m_connectivityTester (std::make_unique<ConnectivityTester>(m_ioService, m_localProfile)),
+    m_processManager (std::make_unique<ProcessManager>(m_ioService, m_localProfileConfig)),
+    m_connectivityTester (std::make_unique<ConnectivityTester>(m_ioService, m_localProfileConfig)),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService))
 {
     g_log.onLogLine.connect([this](std::string logLine) {
@@ -37,32 +37,32 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_cloudClient->websocketMessageReceived.connect([this](std::string json){
         try {        
             // parse message
-            Profile profile = Profile::fromJSONSnapshot(json);
+            ProfileConfig profileConfig = ProfileConfig::fromJSONSnapshot(json);
 
-            if (m_remoteProfile) {
-                m_remoteProfile = std::make_shared<Profile>(m_userConfig->profileId());
-                m_remoteProfile->clone(profile);
+            if (m_remoteProfileConfig) {
+                m_remoteProfileConfig = std::make_shared<ProfileConfig>();
+                m_remoteProfileConfig->clone(profileConfig);
 
-                m_localProfile->modified.connect([this](){
-                    m_remoteProfile->compare(*m_localProfile);
+                m_localProfileConfig->modified.connect([this](){
+                    m_remoteProfileConfig->compare(*m_localProfileConfig);
                 });
 
-                m_remoteProfile->serverChanged.connect([this](int64_t serverId){
+                m_remoteProfileConfig->profileServerChanged.connect([this](int64_t serverId){
                     m_cloudClient->claimServer(serverId);
                 });
 
-                m_remoteProfile->screenTestResultChanged.connect(
+                m_remoteProfileConfig->screenTestResultChanged.connect(
                     [this](int64_t screenId, std::string successfulIp, std::string failedIp) {
                         m_cloudClient->report(screenId, successfulIp, failedIp);
                     }
                 );
             }
 
-            m_localProfile->apply(*m_remoteProfile);
+            m_localProfileConfig->apply(*m_remoteProfileConfig);
 
             // TODO: consider moving to ProcessManager::start?
             auto configPath = DirectoryManager::instance()->profileDir() / kCoreConfigFile;
-            createConfigFile(configPath.string(), profile.screens());
+            createConfigFile(configPath.string(), profileConfig.screens());
 
             // notify connectivity tester
             // TODO: use new screen type from common library

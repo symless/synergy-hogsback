@@ -8,7 +8,7 @@ class ProcessManager;
 class ConnectivityTester;
 class CloudClient;
 class UserConfig;
-class Profile;
+class ProfileConfig;
 
 class ServiceWorker final
 {
@@ -29,8 +29,8 @@ private:
 private:
     boost::asio::io_service&        m_ioService;
     std::shared_ptr<UserConfig>     m_userConfig;
-    std::shared_ptr<Profile>        m_remoteProfile;
-    std::shared_ptr<Profile>        m_localProfile;
+    std::shared_ptr<ProfileConfig>  m_remoteProfileConfig;
+    std::shared_ptr<ProfileConfig>  m_localProfileConfig;
     std::unique_ptr<RpcManager>     m_rpcManager;
     std::unique_ptr<CloudClient>    m_cloudClient;
     std::unique_ptr<ProcessManager> m_processManager;

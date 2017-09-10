@@ -1,7 +1,7 @@
 #ifndef SYNERGY_SERVICE_PROCESSMANAGER_H
 #define SYNERGY_SERVICE_PROCESSMANAGER_H
 
-#include <synergy/common/Profile.h>
+#include <synergy/common/ProfileConfig.h>
 #include <boost/asio.hpp>
 #include <boost/signals2.hpp>
 #include <memory>
@@ -13,7 +13,7 @@ class ProcessManagerImpl;
 
 class ProcessManager final {
 public:
-    explicit ProcessManager (boost::asio::io_service& io, std::shared_ptr<Profile> localProfile);
+    explicit ProcessManager (boost::asio::io_service& io, std::shared_ptr<ProfileConfig> localProfile);
     ProcessManager (ProcessManager const&) = delete;
     ProcessManager& operator= (ProcessManager const&) = delete;
     ~ProcessManager() noexcept;
@@ -33,7 +33,7 @@ public:
 private:
     boost::asio::io_service& m_ioService;
     std::shared_ptr<Screen> m_localScreen;
-    std::shared_ptr<Profile> m_localProfile;
+    std::shared_ptr<ProfileConfig> m_localProfileConfig;
     std::unique_ptr<ProcessManagerImpl> m_impl;
 };
 
