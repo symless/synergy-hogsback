@@ -430,11 +430,8 @@ void ProcessManager::startServer()
 
 void ProcessManager::startClient(int serverId)
 {
-    ProcessCommand pc;
-    pc.setLocalHostname(boost::asio::ip::host_name());
-
     auto screen = m_localProfileConfig->getScreen(serverId);
-    auto results = m_connectivityTester->getSuccessfulResults(serverId);
+    std::vector<std::string> results = m_connectivityTester->getSuccessfulResults(serverId);
 
     if (results.empty()) {
         if (screen.failedTestIp().empty()) {
@@ -445,6 +442,9 @@ void ProcessManager::startClient(int serverId)
         }
         return;
     }
+
+    ProcessCommand pc;
+    pc.setLocalHostname(boost::asio::ip::host_name());
 
     // TODO: instead of using first successful result, test each and find the best
     // address to connect to, and have a `bestAddress` (cloud should make this decision)
