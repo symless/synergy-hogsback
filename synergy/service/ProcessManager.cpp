@@ -412,25 +412,13 @@ void ProcessManager::startServer()
     start(command);
 }
 
-const Screen&
-ProcessManager::getScreen(int screenId) const
-{
-    for (auto const& screen : m_localProfileConfig->screens()) {
-        if (screen.id() == screenId) {
-            return screen;
-        }
-    }
-
-    throw std::runtime_error("Can't find screen with ID: " + screenId);
-}
-
 void ProcessManager::startClient(int serverId)
 {
     ProcessCommand pc;
     pc.setLocalHostname(boost::asio::ip::host_name());
 
     // TODO: get address from connectivity test based on screen
-    auto screen = getScreen(serverId);
+    auto screen = m_localProfileConfig->getScreen(serverId);
     std::string serverAddress = "?";
 
     pc.setServerAddress(serverAddress);

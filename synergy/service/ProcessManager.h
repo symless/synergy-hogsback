@@ -38,7 +38,6 @@ private:
     void writeConfigurationFile();
     void startServer();
     void startClient(int serverId);
-    const Screen& getScreen(int screenId) const;
 
 private:
     boost::asio::io_service& m_ioService;
