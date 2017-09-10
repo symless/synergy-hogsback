@@ -1,7 +1,10 @@
 #include <synergy/service/ProcessManager.h>
 
-#include <synergy/common/DirectoryManager.h>
 #include <synergy/common/ConfigGen.h>
+#include <synergy/common/DirectoryManager.h>
+#include <synergy/common/ProcessCommand.h>
+#include <synergy/common/ConfigGen.h>
+#include <synergy/common/UserConfig.h>
 #include <synergy/service/Logs.h>
 #include <boost/process.hpp>
 #include <boost/process/async_pipe.hpp>
@@ -154,20 +157,27 @@ ProcessManagerImpl::shutdown() {
     mainLog()->debug("core process stopped");
 }
 
-ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<ProfileConfig> localProfileConfig) :
+ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<UserConfig> userConfig, std::shared_ptr<ProfileConfig> localProfileConfig) :
     m_ioService (io),
-    m_localProfileConfig(localProfileConfig)
+    m_userConfig(userConfig),
+    m_localProfileConfig(localProfileConfig),
+    m_processMode(ProcessMode::kUnknown),
+    m_lastServerId(-1)
 {
     m_localProfileConfig->profileServerChanged.connect([this](int64_t serverId){
         // TODO: check if we need to reconnect to the new server or switch to server mode, generate config file and start synergys
     });
 
     m_localProfileConfig->screenPositionChanged.connect([this](int64_t){
-        // TODO: if we are the server, regenerate a config file and restart synergys
+        if (m_processMode == ProcessMode::kServer) {
+            startServer();
+        }
     });
 
     m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen>, std::vector<Screen>){
-        // TODO: if we are the server, regenerate a config file and restart synergys
+        if (m_processMode == ProcessMode::kServer) {
+            startServer();
+        }
     });
 }
 
@@ -348,4 +358,39 @@ ProcessManager::shutdown() {
         m_impl->shutdown();
         m_impl.reset();
     }
+}
+
+void ProcessManager::writeConfigurationFile()
+{
+    auto configPath = DirectoryManager::instance()->profileDir() / kCoreConfigFile;
+    createConfigFile(configPath.string(), m_localProfileConfig->screens());
+}
+
+void ProcessManager::startServer()
+{
+    writeConfigurationFile();
+
+    std::vector<std::string> cmd;
+
+    ProcessCommand pc;
+    pc.setLocalHostname(boost::asio::ip::host_name());
+    auto command = pc.print(true);
+
+    // TODO: convert from a string to a std::vector<std::string>
+    start(cmd);
+}
+
+void ProcessManager::startClient()
+{
+    std::vector<std::string> cmd;
+
+    ProcessCommand pc;
+    pc.setLocalHostname(boost::asio::ip::host_name());
+
+    // TODO: get actual server address
+    pc.setServerAddress("mock server address");
+    auto command = pc.print(false);
+
+    // TODO: convert from a string to a std::vector<std::string>
+    start(cmd);
 }
