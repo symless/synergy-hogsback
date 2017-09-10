@@ -12,7 +12,6 @@ set (SERVICE_SOURCES
     HttpSession.cpp
     WebsocketSession.cpp
     TerminationSignalListener.cpp
-    ProfileSnapshot.cpp
     ConnectivityTester.cpp
     TestDelegatee.cpp
     Logs.cpp

@@ -7,7 +7,6 @@ file(GLOB_RECURSE TEST_SOURCES "*.cpp")
 set(SERVICE_SOURCES
     ../service/WebsocketSession.cpp
     ../service/SecuredTcpSession.cpp
-    ../service/ProfileSnapshot.cpp
     ../service/ConnectivityTester.cpp
     ../service/TestDelegatee.cpp
     ../service/SecuredTcpClient.cpp
