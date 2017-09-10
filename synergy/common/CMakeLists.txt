@@ -21,6 +21,7 @@ set (COMMON_LIB_SOURCES
     Profile.cpp
     Screen.cpp
     ScreenLinks.cpp
+    ProcessCommand.cpp
     ${platform_sources}
 )
 
