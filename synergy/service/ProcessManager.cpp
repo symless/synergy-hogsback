@@ -166,55 +166,61 @@ ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Use
     m_proccessMode(ProcessMode::kUnknown),
     m_lastServerId(-1)
 {
-    m_localProfileConfig->profileServerChanged.connect([this](int64_t serverId){
-        switch (m_proccessMode) {
-        case ProcessMode::kServer: {
-            // when server changes from local screen to another screen
-            if (m_userConfig->screenId() != serverId) {
-               startClient(serverId);
+    m_localProfileConfig->profileServerChanged.connect([this](int64_t serverId) {
+        m_ioService.post([this, serverId] () {
+            switch (m_proccessMode) {
+            case ProcessMode::kServer: {
+                // when server changes from local screen to another screen
+                if (m_userConfig->screenId() != serverId) {
+                   startClient(serverId);
+                }
+
+                break;
+            }
+            case ProcessMode::kClient: {
+                // when local screen becomes the server
+                if (m_userConfig->screenId() == serverId) {
+                    writeConfigurationFile();
+                    startServer();
+                }
+                // when another screen, not local screen, claims to be the server
+                else if (m_lastServerId != serverId) {
+                    startClient(serverId);
+                }
+
+                break;
+            }
+            case ProcessMode::kUnknown: {
+                if (m_userConfig->screenId() == serverId) {
+                    writeConfigurationFile();
+                    startServer();
+                }
+                else {
+                    startClient(serverId);
+                }
+
+                break;
+            }
             }
 
-            break;
-        }
-        case ProcessMode::kClient: {
-            // when local screen becomes the server
-            if (m_userConfig->screenId() == serverId) {
-                writeConfigurationFile();
-                startServer();
-            }
-            // when another screen, not local screen, claims to be the server
-            else if (m_lastServerId != serverId) {
-                startClient(serverId);
-            }
-
-            break;
-        }
-        case ProcessMode::kUnknown: {
-            if (m_userConfig->screenId() == serverId) {
-                writeConfigurationFile();
-                startServer();
-            }
-            else {
-                startClient(serverId);
-            }
-
-            break;
-        }
-        }
-
-        m_lastServerId = serverId;
+            m_lastServerId = serverId;
+        });
     });
 
     m_localProfileConfig->screenPositionChanged.connect([this](int64_t){
-        if (m_proccessMode == ProcessMode::kServer) {
-            startServer();
-        }
+        m_ioService.post([this] () {
+            if (m_proccessMode == ProcessMode::kServer) {
+                startServer();
+            }
+        });
     });
 
     m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen>, std::vector<Screen>){
-        if (m_proccessMode == ProcessMode::kServer) {
-            startServer();
-        }
+        m_ioService.post([this] () {
+            if (m_proccessMode == ProcessMode::kServer) {
+                startServer();
+            }
+        });
     });
 
     m_connectivityTester->newReportGenerated.connect([this](int screenId, std::string successfulIp, std::string) {
