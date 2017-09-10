@@ -45,7 +45,7 @@ private:
     std::shared_ptr<UserConfig> m_userConfig;
     std::shared_ptr<ProfileConfig> m_localProfileConfig;
     std::unique_ptr<ProcessManagerImpl> m_impl;
-    ProcessMode m_processMode;
+    ProcessMode m_proccessMode;
     int m_lastServerId;
 };
 
