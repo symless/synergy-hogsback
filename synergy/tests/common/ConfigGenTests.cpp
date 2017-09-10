@@ -66,7 +66,7 @@ TEST_CASE("Core config text is generated correctly", "[ConfigGen]" ) {
         REQUIRE (expected == oss.str());
     }
 
-    SECTION ("Screen links part of config file") {
+    SECTION ("Screen links section of config file") {
         SECTION ("An empty screens list results in an empty screen links list") {
             auto links = linkScreens (screens);
             REQUIRE (links.empty());
@@ -80,13 +80,13 @@ TEST_CASE("Core config text is generated correctly", "[ConfigGen]" ) {
         REQUIRE (s1.x() == 0);
         REQUIRE (s1.y() == 0);
 
-        SECTION ("A single screen has no links") {
+        SECTION ("One screen with no links") {
             auto links = linkScreens (screens);
             REQUIRE (links.size() == 1);
             REQUIRE (links[0].empty());
         };
 
-        SECTION ("Tests with two screens of the same size") {
+        SECTION ("Two screens of the same size") {
             Screen s2 (2);
             s2.name ("Alice");
             s2.width (1920);
@@ -329,7 +329,7 @@ TEST_CASE("Core config text is generated correctly", "[ConfigGen]" ) {
             }
         }
 
-        SECTION ("Tests with three screens of the same size") {
+        SECTION ("Three screens of the same size") {
             Screen s2(2);
             s2.name ("Alice");
             s2.width (1920);
