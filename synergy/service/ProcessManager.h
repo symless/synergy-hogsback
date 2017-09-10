@@ -12,6 +12,7 @@
 class Screen;
 class UserConfig;
 class ProcessManagerImpl;
+class ConnectivityTester;
 
 class ProcessManager final {
 public:
@@ -32,7 +33,6 @@ public:
     signal<void()> onExit;
     signal<void()> onUnexpectedExit;
     signal<void(std::string const&)> onOutput;
-    signal<void()> localInputDetected;
 
 private:
     void writeConfigurationFile();
@@ -41,10 +41,10 @@ private:
 
 private:
     boost::asio::io_service& m_ioService;
-    std::shared_ptr<Screen> m_localScreen;
     std::shared_ptr<UserConfig> m_userConfig;
     std::shared_ptr<ProfileConfig> m_localProfileConfig;
     std::unique_ptr<ProcessManagerImpl> m_impl;
+    std::unique_ptr<ConnectivityTester> m_connectivityTester;
     ProcessMode m_proccessMode;
     int m_lastServerId;
 };

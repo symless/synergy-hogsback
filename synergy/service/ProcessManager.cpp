@@ -1,5 +1,6 @@
 #include <synergy/service/ProcessManager.h>
 
+#include <synergy/service/ConnectivityTester.h>
 #include <synergy/common/ConfigGen.h>
 #include <synergy/common/DirectoryManager.h>
 #include <synergy/common/ProcessCommand.h>
@@ -161,6 +162,7 @@ ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Use
     m_ioService (io),
     m_userConfig(userConfig),
     m_localProfileConfig(localProfileConfig),
+    m_connectivityTester (std::make_unique<ConnectivityTester>(m_ioService, m_localProfileConfig)),
     m_proccessMode(ProcessMode::kUnknown),
     m_lastServerId(-1)
 {
@@ -212,6 +214,14 @@ ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Use
     m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen>, std::vector<Screen>){
         if (m_proccessMode == ProcessMode::kServer) {
             startServer();
+        }
+    });
+
+    m_connectivityTester->newReportGenerated.connect([this](int screenId, std::string successfulIp, std::string) {
+        if (m_proccessMode == ProcessMode::kClient &&
+            m_lastServerId == screenId &&
+            !successfulIp.empty()) {
+            startClient(m_lastServerId);
         }
     });
 }
@@ -329,7 +339,7 @@ ProcessManager::start (std::vector<std::string> command) {
         signals.emplace_back (
             onOutput.connect ([this](std::string const& line) {
                 if (contains (line, "local input detected")) {
-                    localInputDetected();
+                    m_localProfileConfig->claimServer(m_userConfig->screenId());
                 }
             }, boost::signals2::at_front)
         );
@@ -417,12 +427,22 @@ void ProcessManager::startClient(int serverId)
     ProcessCommand pc;
     pc.setLocalHostname(boost::asio::ip::host_name());
 
-    // TODO: get address from connectivity test based on screen
     auto screen = m_localProfileConfig->getScreen(serverId);
-    std::string serverAddress = "?";
+    auto results = m_connectivityTester->getSuccessfulResults(serverId);
 
-    pc.setServerAddress(serverAddress);
+    if (results.empty()) {
+        if (screen.failedTestIp().empty()) {
+            mainLog()->error("Can't find server address, connectivity test has not run yet.");
+        }
+        else {
+            mainLog()->error("Server is not reachable, connectivity test failed.");
+        }
+        return;
+    }
+
+    // TODO: instead of using first successful result, test each and find the best
+    // address to connect to, and have a `bestAddress` (cloud should make this decision)
+    pc.setServerAddress(results[0]);
     auto command = pc.generate(false);
-
     start(command);
 }

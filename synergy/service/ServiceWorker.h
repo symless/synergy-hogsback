@@ -5,7 +5,6 @@
 
 class RpcManager;
 class ProcessManager;
-class ConnectivityTester;
 class CloudClient;
 class UserConfig;
 class ProfileConfig;
@@ -33,7 +32,6 @@ private:
     std::unique_ptr<RpcManager>     m_rpcManager;
     std::unique_ptr<CloudClient>    m_cloudClient;
     std::unique_ptr<ProcessManager> m_processManager;
-    std::unique_ptr<ConnectivityTester> m_connectivityTester;
     std::shared_ptr<boost::asio::io_service::work> m_work;
 };
 

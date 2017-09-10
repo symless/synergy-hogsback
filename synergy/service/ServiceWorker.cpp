@@ -1,7 +1,6 @@
 #include "ServiceWorker.h"
 
 #include <synergy/common/ProfileConfig.h>
-#include "synergy/service/ConnectivityTester.h"
 #include "synergy/service/CloudClient.h"
 #include <synergy/service/Logs.h>
 #include <synergy/common/UserConfig.h>
@@ -25,7 +24,6 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_rpcManager (std::make_unique<RpcManager>(m_ioService)),
     m_cloudClient (std::make_unique<CloudClient>(ioService, m_userConfig, m_remoteProfileConfig)),
     m_processManager (std::make_unique<ProcessManager>(m_ioService, m_userConfig, m_localProfileConfig)),
-    m_connectivityTester (std::make_unique<ConnectivityTester>(m_ioService, m_localProfileConfig)),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService))
 {
     g_log.onLogLine.connect([this](std::string logLine) {
