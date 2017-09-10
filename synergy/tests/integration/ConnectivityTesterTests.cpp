@@ -28,13 +28,19 @@ TEST_CASE("Connectivity test finds a service", "[ConnectivityTester]")
         testFinished();
     });
 
-    ProfileConfig profileConfig = ProfileConfig::fromJSONSnapshot(jsonMock);
-    localProfileConfig->apply(profileConfig);
+    try {
+        ProfileConfig profileConfig = ProfileConfig::fromJSONSnapshot(jsonMock);
+        localProfileConfig->apply(profileConfig);
 
-    ioService.run();
+        ioService.run();
 
-    std::vector<std::string> result = tester.getSuccessfulResults(1);
+        std::vector<std::string> result = tester.getSuccessfulResults(1);
 
-    REQUIRE(result.size() == 1);
-    REQUIRE(result[0] == "127.0.0.1");
+        REQUIRE(result.size() == 1);
+        REQUIRE(result[0] == "127.0.0.1");
+    }
+    catch (...) {
+        REQUIRE("Parsing JSON Okey" == "Parsing JSON failed");
+        return;
+    }
 }
