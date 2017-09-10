@@ -1,7 +1,5 @@
 #include "ServiceWorker.h"
 
-#include <synergy/common/ConfigGen.h>
-#include <synergy/common/DirectoryManager.h>
 #include <synergy/common/ProfileConfig.h>
 #include "synergy/service/ConnectivityTester.h"
 #include "synergy/service/CloudClient.h"
@@ -26,7 +24,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_localProfileConfig (std::make_shared<ProfileConfig>()),
     m_rpcManager (std::make_unique<RpcManager>(m_ioService)),
     m_cloudClient (std::make_unique<CloudClient>(ioService, m_userConfig, m_remoteProfileConfig)),
-    m_processManager (std::make_unique<ProcessManager>(m_ioService, m_localProfileConfig)),
+    m_processManager (std::make_unique<ProcessManager>(m_ioService, m_userConfig, m_localProfileConfig)),
     m_connectivityTester (std::make_unique<ConnectivityTester>(m_ioService, m_localProfileConfig)),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService))
 {
@@ -47,15 +45,6 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             m_remoteProfileConfig->clone(profileConfig);
             m_localProfileConfig->apply(*m_remoteProfileConfig);
 
-
-            // TODO: consider moving to ProcessManager::start?
-            auto configPath = DirectoryManager::instance()->profileDir() / kCoreConfigFile;
-            createConfigFile(configPath.string(), profileConfig.screens());
-
-            // notify connectivity tester
-            // TODO: use new screen type from common library
-            //m_connectivityTester->testNewScreens(snapshot.getScreens());
-
             // forward the message via rpc server
             auto server = m_rpcManager->server();
             g_lastProfileSnapshot = json;
@@ -70,8 +59,6 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         provideRpcEndpoints();
         mainLog()->info("service started successfully");
     });
-
-    setupCloudClientCalls();
 
     m_rpcManager->start();
 }
@@ -151,18 +138,6 @@ void ServiceWorker::shutdown()
     // Finish processing all of the remaining completion handlers
     m_ioService.poll();
     m_ioService.stop();
-}
-
-void ServiceWorker::setupCloudClientCalls()
-{
-    m_connectivityTester->newReportGenerated.connect(
-                [this](int screenId, std::string successfulIp, std::string failedIp){
-        m_cloudClient->report(screenId, successfulIp, failedIp);
-    });
-
-    m_processManager->localInputDetected.connect([this](){
-        m_cloudClient->claimServer(-1);
-    });
 }
 
 void ServiceWorker::provideRpcEndpoints()
