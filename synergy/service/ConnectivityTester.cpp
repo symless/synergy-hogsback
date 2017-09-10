@@ -9,60 +9,47 @@
 static const std::string kConnectivityTestIp = "0.0.0.0";
 static const std::string kConnectivityTestPort = "24810";
 
-ConnectivityTester::ConnectivityTester(boost::asio::io_service &io) :
+ConnectivityTester::ConnectivityTester(boost::asio::io_service &io, std::shared_ptr<Profile> localProfile) :
     m_localHostname(boost::asio::ip::host_name()),
     m_testDelegatee(nullptr),
-    m_ioService(io)
+    m_ioService(io),
+    m_localProfile(localProfile)
 {
     startTestServer();
+
+    m_localProfile->screenSetChanged.connect(
+        [this](std::vector<Screen> added, std::vector<Screen> removed){
+            testNewScreens(added);
+        }
+    );
 }
 
-void ConnectivityTester::testNewScreens(const std::vector<ProfileSnapshot::Screen> &screens)
+void ConnectivityTester::testNewScreens(std::vector<Screen> addedScreens)
 {
-    std::set<int> latestScreenIdSet;
     int testCaseBatchSize = 0;
-    for (ProfileSnapshot::Screen const& screen : screens) {
+    for (auto const& screen : addedScreens) {
         // skip inactive screens
-        if (!screen.active) {
+        if (!screen.active()) {
             continue;
         }
 
-        std::string screenName = screen.name;
-
         // skip local screen
-        if (screenName != m_localHostname) {
-            int screenId = screen.id;
-            latestScreenIdSet.insert(screenId);
-            std::set<int>::const_iterator i = m_screenIdSet.find(screenId);
-            // if this is a new screen and there is not a connectivity test running already
-            if (i == m_screenIdSet.end() && !m_testDelegatee) {
-                // get ip list
-                std::string ipList = screen.ipList;
-                if (ipList.empty()) {
-                    continue;
-                }
-                // combine screen id and ip list separated by comma
-                std::string testCase = std::to_string(screenId);
-                testCase += ',';
-                testCase += ipList;
-
-                // add connectivity test case
-                m_pendingTestCases.emplace_back(std::move(testCase));
-                testCaseBatchSize++;
-
-                // add into set
-                m_screenIdSet.insert(screenId);
+        if (screen.name() != m_localHostname) {
+            // get ip list
+            std::string ipList = screen.ipList();
+            if (ipList.empty()) {
+                continue;
             }
+            // combine screen id and ip list separated by comma
+            std::string testCase = std::to_string(screen.id());
+            testCase += ',';
+            testCase += ipList;
+
+            // add connectivity test case
+            m_pendingTestCases.emplace_back(std::move(testCase));
+            testCaseBatchSize++;
         }
     }
-
-    // remove inactive screen id
-    std::vector<int> result;
-    std::set_intersection(
-        latestScreenIdSet.begin(), latestScreenIdSet.end(),
-        m_screenIdSet.begin(), m_screenIdSet.end(),
-        std::back_inserter(result));
-    m_screenIdSet = std::move(std::set<int>(result.begin(), result.end()));
 
     // start connectivity test
     if (testCaseBatchSize > 0 && !m_testDelegatee) {

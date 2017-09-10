@@ -1,7 +1,6 @@
 #include <synergy/service/ProcessManager.h>
 
 #include <synergy/common/DirectoryManager.h>
-#include <synergy/common/Profile.h>
 #include <synergy/common/ConfigGen.h>
 #include <synergy/service/Logs.h>
 #include <boost/process.hpp>
@@ -155,10 +154,21 @@ ProcessManagerImpl::shutdown() {
     mainLog()->debug("core process stopped");
 }
 
-ProcessManager::ProcessManager (boost::asio::io_service& io,
-                                std::shared_ptr<Profile> profile) :
-    m_ioService (io)
+ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Profile> localProfile) :
+    m_ioService (io),
+    m_localProfile(localProfile)
 {
+    m_localProfile->serverChanged.connect([this](int64_t serverId){
+        // TODO: check if we need to reconnect to the new server or switch to server mode, generate config file and start synergys
+    });
+
+    m_localProfile->screenPositionChanged.connect([this](int64_t){
+        // TODO: if we are the server, regenerate a config file and restart synergys
+    });
+
+    m_localProfile->screenSetChanged.connect([this](std::vector<Screen>, std::vector<Screen>){
+        // TODO: if we are the server, regenerate a config file and restart synergys
+    });
 }
 
 ProcessManager::~ProcessManager () noexcept {

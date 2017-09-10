@@ -3,7 +3,7 @@
 #include <synergy/common/Screen.h>
 #include <boost/fusion/adapted/struct/adapt_struct.hpp>
 
-class Screen::Snapshot {
+class ScreenSnapshot {
 public:
     uint64_t        id;
     std::string     name;
@@ -15,7 +15,7 @@ public:
 };
 
 BOOST_FUSION_ADAPT_STRUCT(
-    Screen::Snapshot,
+    ScreenSnapshot,
     (uint64_t,      id)
     (std::string,   name)
     (uint64_t,      x_pos)

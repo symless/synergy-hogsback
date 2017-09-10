@@ -1,13 +1,8 @@
 #include <synergy/common/Screen.h>
 
-Screen::Screen(ScreenID id) noexcept: m_id (id) {
-}
+#include <synergy/common/ScreenSnapshot.h>
 
-Screen
-Screen::fromJsonSnapshot(std::string const&)
-{
-    Screen screen;
-    return screen;
+Screen::Screen(ScreenID id) noexcept: m_id (id) {
 }
 
 ScreenID
@@ -80,7 +75,37 @@ Screen::status() const noexcept {
     return m_status;
 }
 
-void
-Screen::apply(Snapshot const&) {
+std::string Screen::successfulTestIp() const
+{
+    return m_successfulTestIp;
+}
 
+std::string Screen::failedTestIp() const
+{
+    return m_failedTestIp;
+}
+
+std::string Screen::ipList() const
+{
+    return m_ipList;
+}
+
+bool Screen::active() const
+{
+    return m_active;
+}
+
+void
+Screen::apply(ScreenSnapshot const& ss)
+{
+    m_id = ss.id;
+    m_name = ss.name;
+    m_active = ss.active;
+    m_x = ss.x_pos;
+    m_y = ss.y_pos;
+    // TODO: hardcode width and height
+    m_width = 0;
+    m_height = 0;
+    m_status = stringToScreenStatus(ss.status);
+    m_ipList = ss.ipList;
 }

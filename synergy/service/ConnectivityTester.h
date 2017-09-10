@@ -1,8 +1,8 @@
 #ifndef CONNECTIVITYTESTER_H
 #define CONNECTIVITYTESTER_H
 
-#include "SecuredTcpServer.h"
-#include "ProfileSnapshot.h"
+#include <synergy/common/Profile.h>
+#include <synergy/service/SecuredTcpServer.h>
 
 #include <boost/asio.hpp>
 #include <boost/signals2.hpp>
@@ -15,9 +15,9 @@ class TestDelegatee;
 class ConnectivityTester final
 {
 public:
-    ConnectivityTester(boost::asio::io_service &io);
+    ConnectivityTester(boost::asio::io_service &io, std::shared_ptr<Profile> localProfile);
 
-    void testNewScreens(const std::vector<ProfileSnapshot::Screen>& screens);
+    void testNewScreens(std::vector<Screen> addedScreens);
     std::vector<std::string> getSuccessfulResults(int screenId) const;
 
     template <typename... Args>
@@ -38,13 +38,13 @@ private:
     boost::optional<int> extractScreenIdFromTestCase(std::string testCase);
 
 private:
-    std::set<int> m_screenIdSet;
     std::list<std::string> m_pendingTestCases;
     std::string m_localHostname;
     TestDelegatee* m_testDelegatee;
     boost::asio::io_service& m_ioService;
     std::unique_ptr<SecuredTcpServer> m_testServer;
     std::map<int, std::vector<std::string>> m_screenSuccessfulResults;
+    std::shared_ptr<Profile> m_localProfile;
 };
 
 #endif // CONNECTIVITYTESTER_H

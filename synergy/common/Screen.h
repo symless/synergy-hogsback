@@ -8,12 +8,11 @@
 
 using ScreenID = int64_t;
 
+class ScreenSnapshot;
+
 class Screen final {
 public:
-    friend class Profile;
-    class Snapshot;
-    static Screen fromJsonSnapshot(std::string const&);
-
+    Screen() = default;
     explicit Screen(ScreenID id) noexcept;
 
     void id (ScreenID);
@@ -35,22 +34,27 @@ public:
     void status(ScreenStatus);
     ScreenStatus status() const noexcept;
 
-    void apply (Snapshot const&);
+    std::string successfulTestIp() const;
+    std::string failedTestIp() const;
+
+    std::string ipList() const;
+
+    bool active() const;
+
+    void apply (const ScreenSnapshot &ss);
 
 private:
-    Screen() = default;
     ScreenID        m_id      = 0;
     std::string     m_name;
+    bool            m_active  = false;
     int64_t         m_x       = 0;
     int64_t         m_y       = 0;
     int64_t         m_width   = 0;
     int64_t         m_height  = 0;
     ScreenStatus    m_status  = ScreenStatus::kDisconnected;
-
-public:
-    template <typename... Args>
-    using signal = boost::signals2::signal<Args...>;
-    // signal<void(ScreenStatus)> statusChanged;
+    std::string     m_successfulTestIp;
+    std::string     m_failedTestIp;
+    std::string     m_ipList;
 };
 
 #endif
