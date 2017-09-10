@@ -1,26 +1,26 @@
 #pragma once
 
-#include <synergy/common/Screen.h>
-#include <boost/fusion/adapted/struct/adapt_struct.hpp>
+#include <synergy/service/json.hpp>
 
-class ScreenSnapshot {
-public:
-    uint64_t        id;
+#include <string>
+
+struct ScreenSnapshot {
+    int        id;
     std::string     name;
-    uint64_t        x_pos;
-    uint64_t        y_pos;
-    std::string     ipList;
-    std::string     status;
+    int        x_pos;
+    int        y_pos;
     bool            active;
+    std::string     status;
+    std::string     ipList;
 };
 
 BOOST_FUSION_ADAPT_STRUCT(
     ScreenSnapshot,
-    (uint64_t,      id)
+    (int,      id)
     (std::string,   name)
-    (uint64_t,      x_pos)
-    (uint64_t,      y_pos)
-    (std::string,   ipList)
-    (std::string,   status)
+    (int,      x_pos)
+    (int,      y_pos)
     (bool,          active)
+    (std::string,   status)
+    (std::string,   ipList)
 )

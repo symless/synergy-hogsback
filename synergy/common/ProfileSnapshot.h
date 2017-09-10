@@ -1,22 +1,20 @@
 #pragma once
 
-#include <synergy/common/ScreenSnapshot.h>
-#include <boost/fusion/adapted/struct/adapt_struct.hpp>
+#include <synergy/service/json.hpp>
 
-class ProfileSnapshot {
-public:
-    uint64_t    id;
-    uint64_t    configVersion;
-    uint64_t    server;
+#include <string>
+
+struct ProfileSnapshot {
+    int    id;
     std::string name;
-    std::vector<ScreenSnapshot> screens;
+    int    server;
+    int    configVersion;
 };
 
 BOOST_FUSION_ADAPT_STRUCT(
     ProfileSnapshot,
-    (uint64_t, id)
-    (uint64_t, configVersion)
-    (uint64_t, server)
+    (int, id)
     (std::string, name)
-    (std::vector<ScreenSnapshot>, screens)
+    (int, server)
+    (int, configVersion)
 );

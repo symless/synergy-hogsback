@@ -18,6 +18,7 @@ set (COMMON_LIB_SOURCES
     WampServer.cpp
     WampRouter.cpp
     ConfigGen.cpp
+    ProfileConfig.cpp
     Profile.cpp
     Screen.cpp
     ScreenLinks.cpp

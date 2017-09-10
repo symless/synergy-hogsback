@@ -11,6 +11,8 @@ using ScreenID = int64_t;
 class ScreenSnapshot;
 
 class Screen final {
+    friend class ProfileConfig;
+
 public:
     Screen() = default;
     explicit Screen(ScreenID id) noexcept;
