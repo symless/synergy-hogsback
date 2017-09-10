@@ -36,7 +36,7 @@ bool ProfileConfig::compare(ProfileConfig const& src)
 {
     bool different = false;
 
-    if (src.m_profile.m_version <= m_profile.m_version) {
+    if (src.m_profile.m_version < m_profile.m_version) {
         return different;
     }
 
@@ -132,4 +132,24 @@ void ProfileConfig::clone (ProfileConfig const& src)
 std::vector<Screen> ProfileConfig::screens() const
 {
     return m_screens;
+}
+
+void ProfileConfig::updateScreenTestResult(int screenId, std::string successfulIp, std::string failedIp)
+{
+    auto& screen = getScreen(screenId);
+    screen.m_successfulTestIp = successfulIp;
+    screen.m_failedTestIp = failedIp;
+
+    modified();
+}
+
+Screen& ProfileConfig::getScreen(int screenId)
+{
+    for (auto& screen : m_screens) {
+        if (screen.id() == screenId) {
+            return screen;
+        }
+    }
+
+    throw std::runtime_error("Can't find screen with ID: " + screenId);
 }

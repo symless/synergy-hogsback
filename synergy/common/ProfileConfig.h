@@ -32,10 +32,9 @@ public:
     signal<void (std::vector<Screen> added, std::vector<Screen> removed)>
         screenSetChanged;
 
-//private:
-//    ProfileConfig() = default;
-
     std::vector<Screen> screens() const;
+    void updateScreenTestResult(int screenId, std::string successfulIp, std::string failedIp);
+    Screen& getScreen(int screenId);
 
 private:
     Profile m_profile;

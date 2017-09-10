@@ -208,7 +208,7 @@ void ConnectivityTester::onTestDelegateeDone(std::map<std::string, bool> results
                 mainLog()->debug("failed report: dest = {}, ips = {}", *screenId, failedIp);
             }
 
-            newReportGenerated(*screenId, successfulIp, failedIp);
+            m_localProfileConfig->updateScreenTestResult(*screenId, successfulIp, failedIp);
 
             // update connectivity results
             if (!successfulIp.empty()) {
