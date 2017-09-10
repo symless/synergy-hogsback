@@ -1,5 +1,6 @@
 #include <synergy/service/CloudClient.h>
 
+#include <synergy/common/ProfileConfig.h>
 #include <synergy/service/HttpSession.h>
 #include <synergy/common/UserConfig.h>
 
@@ -12,13 +13,25 @@ static const char* kCloudServerHostname = "v1.api.cloud.symless.com";
 static const char* kCloudServerPort = "443";
 
 CloudClient::CloudClient(boost::asio::io_service& ioService,
-                         std::shared_ptr<UserConfig> userConfig) :
+                         std::shared_ptr<UserConfig> userConfig,
+                         std::shared_ptr<ProfileConfig> remoteProfileConfig) :
     m_ioService(ioService),
     m_userConfig (std::move(userConfig)),
-    m_websocket(ioService, kPubSubServerHostname, kPubSubServerPort)
+    m_websocket(ioService, kPubSubServerHostname, kPubSubServerPort),
+    m_remoteProfileConfig(remoteProfileConfig)
 {
     m_userConfig->updated.connect ([this]() { this->load (*m_userConfig); });
     load (*m_userConfig);
+
+    m_remoteProfileConfig->profileServerChanged.connect([this](int64_t serverId){
+        claimServer(serverId);
+    });
+
+    m_remoteProfileConfig->screenTestResultChanged.connect(
+        [this](int64_t screenId, std::string successfulIp, std::string failedIp) {
+            report(screenId, successfulIp, failedIp);
+        }
+    );
 
     m_websocket.messageReceived.connect([this](std::string msg) {
         websocketMessageReceived(std::move(msg));

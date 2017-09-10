@@ -9,6 +9,7 @@
 
 class UserConfig;
 class HttpSession;
+class ProfileConfig;
 
 class CloudClient
 {
@@ -17,7 +18,8 @@ public:
     void claimServer(int64_t serverId);
 
     CloudClient (boost::asio::io_service& ioService,
-                 std::shared_ptr<UserConfig> userConfig);
+                 std::shared_ptr<UserConfig> userConfig,
+                 std::shared_ptr<ProfileConfig> remoteProfileConfig);
 
 private:
     void load(const UserConfig &userConfig);
@@ -27,6 +29,7 @@ private:
     boost::asio::io_service& m_ioService;
     std::shared_ptr<UserConfig> m_userConfig;
     WebsocketSession m_websocket;
+    std::shared_ptr<ProfileConfig> m_remoteProfileConfig;
 
 public:
     template <typename... Args>

@@ -22,9 +22,10 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
                              std::shared_ptr<UserConfig> userConfig) :
     m_ioService (ioService),
     m_userConfig (std::move(userConfig)),
-    m_localProfileConfig (std::make_shared<ProfileConfig>()),//m_userConfig->profileId()
+    m_remoteProfileConfig (std::make_shared<ProfileConfig>()),
+    m_localProfileConfig (std::make_shared<ProfileConfig>()),
     m_rpcManager (std::make_unique<RpcManager>(m_ioService)),
-    m_cloudClient (std::make_unique<CloudClient>(ioService, m_userConfig)),
+    m_cloudClient (std::make_unique<CloudClient>(ioService, m_userConfig, m_remoteProfileConfig)),
     m_processManager (std::make_unique<ProcessManager>(m_ioService, m_localProfileConfig)),
     m_connectivityTester (std::make_unique<ConnectivityTester>(m_ioService, m_localProfileConfig)),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService))
@@ -34,31 +35,18 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         server->publish ("synergy.service.log", std::move(logLine));
     });
 
+    m_localProfileConfig->modified.connect([this](){
+        m_remoteProfileConfig->compare(*m_localProfileConfig);
+    });
+
     m_cloudClient->websocketMessageReceived.connect([this](std::string json){
         try {        
             // parse message
             ProfileConfig profileConfig = ProfileConfig::fromJSONSnapshot(json);
 
-            if (m_remoteProfileConfig) {
-                m_remoteProfileConfig = std::make_shared<ProfileConfig>();
-                m_remoteProfileConfig->clone(profileConfig);
-
-                m_localProfileConfig->modified.connect([this](){
-                    m_remoteProfileConfig->compare(*m_localProfileConfig);
-                });
-
-                m_remoteProfileConfig->profileServerChanged.connect([this](int64_t serverId){
-                    m_cloudClient->claimServer(serverId);
-                });
-
-                m_remoteProfileConfig->screenTestResultChanged.connect(
-                    [this](int64_t screenId, std::string successfulIp, std::string failedIp) {
-                        m_cloudClient->report(screenId, successfulIp, failedIp);
-                    }
-                );
-            }
-
+            m_remoteProfileConfig->clone(profileConfig);
             m_localProfileConfig->apply(*m_remoteProfileConfig);
+
 
             // TODO: consider moving to ProcessManager::start?
             auto configPath = DirectoryManager::instance()->profileDir() / kCoreConfigFile;
