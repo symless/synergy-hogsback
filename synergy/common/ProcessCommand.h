@@ -11,12 +11,11 @@ extern const std::string kClientCmd;
 class ProcessCommand
 {
 public:
-    std::string print(bool serverMode) const;
+    std::vector<std::string> generate(bool serverMode) const;
     void setServerAddress(const std::string& serverAddress);
     void setLocalHostname(const std::string& localHostname);
 
 private:
-    std::string arguments(bool serverMode) const;
     std::string wrapArg(const std::string& arg) const;
 
 private:

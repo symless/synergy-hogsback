@@ -4,7 +4,6 @@
 #include <synergy/common/ConfigGen.h>
 
 #include <boost/filesystem.hpp>
-#include <boost/algorithm/string/join.hpp>
 
 const std::string kCoreLogFile = "synergy.log";
 
@@ -17,24 +16,19 @@ const std::string kClientCmd = "synergyc";
 #endif
 
 std::string
-ProcessCommand::print(bool serverMode) const
-{
-    std::string program = serverMode ? kServerCmd : kClientCmd;
-    return program + " " + arguments(serverMode);
-}
-
-std::string
 ProcessCommand::wrapArg(const std::string& arg) const
 {
     return "\"" + arg + "\"";
 }
 
-std::string
-ProcessCommand::arguments(bool serverMode) const
+std::vector<std::string>
+ProcessCommand::generate(bool serverMode) const
 {
     auto profileDir = DirectoryManager::instance()->profileDir();
 
     std::vector<std::string> args;
+    args.push_back(serverMode ? kServerCmd : kClientCmd);
+
     args.push_back("-f");
     args.push_back("--no-tray");
 
@@ -76,7 +70,7 @@ ProcessCommand::arguments(bool serverMode) const
         args.push_back(wrapArg(m_serverAddress + ":24800"));
     }
 
-    return boost::algorithm::join(args, " ");
+    return args;
 }
 
 void
