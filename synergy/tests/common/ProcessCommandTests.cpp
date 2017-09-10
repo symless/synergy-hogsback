@@ -1,6 +1,7 @@
 #include <catch.hpp>
 #include <synergy/common/ProcessCommand.h>
 #include <synergy/common/DirectoryManager.h>
+#include <boost/algorithm/string/join.hpp>
 
 TEST_CASE("Process command and args generated correctly", "[ProcessCommand]")
 {
@@ -8,28 +9,30 @@ TEST_CASE("Process command and args generated correctly", "[ProcessCommand]")
     pc.setLocalHostname("mock local hostname");
 
     // TODO: stub out profile directory
-    std::string profileDir = DirectoryManager::instance()->profileDir().string();
+    auto profileDir = DirectoryManager::instance()->profileDir();
+    auto configPath = profileDir / "synergy.conf";
 
     SECTION("Server command line")
     {
-        auto command = pc.print(true);
-        REQUIRE(command ==
+        auto command = pc.generate(true);
+
+        REQUIRE(boost::algorithm::join(command, " ") ==
             kServerCmd + " -f --no-tray --debug DEBUG "
             "--name \"mock local hostname\" --enable-drag-drop "
-            "--profile-dir \"" + profileDir + "\" "
-            "--log synergy.log -c \"" + profileDir + "\\synergy.conf\" "
+            "--profile-dir \"" + profileDir.string() + "\" "
+            "--log synergy.log -c \"" + configPath.string() + "\" "
             "--address :24800");
     }
 
     SECTION("Client command line")
     {
         pc.setServerAddress("mock server address");
-        auto command = pc.print(false);
+        auto command = pc.generate(false);
 
-        REQUIRE(command ==
+        REQUIRE(boost::algorithm::join(command, " ") ==
             kClientCmd + " -f --no-tray --debug DEBUG "
             "--name \"mock local hostname\" --enable-drag-drop "
-            "--profile-dir \"" + profileDir + "\" "
+            "--profile-dir \"" + profileDir.string() + "\" "
             "--log synergy.log \"mock server address:24800\"");
     }
 }
