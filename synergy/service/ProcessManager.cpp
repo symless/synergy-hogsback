@@ -169,7 +169,7 @@ ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Use
         case ProcessMode::kServer: {
             // when server changes from local screen to another screen
             if (m_userConfig->screenId() != serverId) {
-                startClient();
+               startClient(serverId);
             }
 
             break;
@@ -182,7 +182,7 @@ ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Use
             }
             // when another screen, not local screen, claims to be the server
             else if (m_lastServerId != serverId) {
-                startClient();
+                startClient(serverId);
             }
 
             break;
@@ -193,7 +193,7 @@ ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Use
                 startServer();
             }
             else {
-                startClient();
+                startClient(serverId);
             }
 
             break;
@@ -405,27 +405,36 @@ void ProcessManager::startServer()
 {
     writeConfigurationFile();
 
-    std::vector<std::string> cmd;
-
     ProcessCommand pc;
     pc.setLocalHostname(boost::asio::ip::host_name());
-    auto command = pc.print(true);
+    auto command = pc.generate(true);
 
-    // TODO: convert from a string to a std::vector<std::string>
-    start(cmd);
+    start(command);
 }
 
-void ProcessManager::startClient()
+const Screen&
+ProcessManager::getScreen(int screenId) const
 {
-    std::vector<std::string> cmd;
+    for (auto const& screen : m_localProfileConfig->screens()) {
+        if (screen.id() == screenId) {
+            return screen;
+        }
+    }
 
+    throw std::runtime_error("Can't find screen with ID: " + screenId);
+}
+
+void ProcessManager::startClient(int serverId)
+{
     ProcessCommand pc;
     pc.setLocalHostname(boost::asio::ip::host_name());
 
-    // TODO: get actual server address
-    pc.setServerAddress("mock server address");
-    auto command = pc.print(false);
+    // TODO: get address from connectivity test based on screen
+    auto screen = getScreen(serverId);
+    std::string serverAddress = "?";
 
-    // TODO: convert from a string to a std::vector<std::string>
-    start(cmd);
+    pc.setServerAddress(serverAddress);
+    auto command = pc.generate(false);
+
+    start(command);
 }
