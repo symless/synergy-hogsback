@@ -14,10 +14,10 @@ TEST_CASE("Process command and args generated correctly", "[ProcessCommand]")
     {
         auto command = pc.print(true);
         REQUIRE(command ==
-            "synergys -f --no-tray --debug DEBUG "
+            kServerCmd + " -f --no-tray --debug DEBUG "
             "--name \"mock local hostname\" --enable-drag-drop "
             "--profile-dir \"" + profileDir + "\" "
-            "--log synergy.log -c \"" + profileDir + "/synergy.conf\" "
+            "--log synergy.log -c \"" + profileDir + "\\synergy.conf\" "
             "--address :24800");
     }
 
@@ -27,7 +27,7 @@ TEST_CASE("Process command and args generated correctly", "[ProcessCommand]")
         auto command = pc.print(false);
 
         REQUIRE(command ==
-            "synergyc -f --no-tray --debug DEBUG "
+            kClientCmd + " -f --no-tray --debug DEBUG "
             "--name \"mock local hostname\" --enable-drag-drop "
             "--profile-dir \"" + profileDir + "\" "
             "--log synergy.log \"mock server address:24800\"");
