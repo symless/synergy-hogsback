@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include <synergy/service/ConnectivityTester.h>
+#include "synergy/service/ConnectivityTester.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/signals2.hpp>
@@ -8,8 +8,9 @@ static boost::signals2::signal<void()> testFinished;
 
 TEST_CASE("Connectivity test finds a service", "[ConnectivityTester]")
 {
-    std::string jsonMock = R"JSON({"id":1,"configVersion":0,"server":1,"name":"default","screens":[{"id":1,"name":"foo","x_pos":100,"y_pos":200,"ipList":"192.168.3.1,127.0.0.1","status":"connecting","active":true},{"id":2,"name":"bar","x_pos":200,"y_pos":200,"ipList":"192.168.1.1","status":"connecting","active":true}]})JSON";
-    std::shared_ptr<Profile> profile = std::make_shared<Profile>(-1);
+    std::string jsonMock = R"JSON({"profile":{"configVersion":0,"id":1,"name":"default","server":1},"screens":[{"id":1,"name":"foo","active":true,"ipList":"192.168.3.1,127.0.0.1","status":"connecting","x_pos":100,"y_pos":200},{"id":2,"name":"bar","active":true,"ipList":"192.168.1.1","status":"connecting","x_pos":200,"y_pos":200}]})JSON";
+    ProfileSnapshot profileSnapshot;
+    profileSnapshot.parseJsonSnapshot(jsonMock);
 
     boost::asio::io_service ioService;
 
@@ -24,12 +25,12 @@ TEST_CASE("Connectivity test finds a service", "[ConnectivityTester]")
         testFinished();
     });
 
-    ConnectivityTester tester(ioService, profile);
+    ConnectivityTester tester(ioService);
     tester.testBatchFinished.connect([](){
         testFinished();
     });
 
-    profile->apply(Profile::fromJSONSnapshot(jsonMock));
+    tester.testNewScreens(profileSnapshot.getScreens());
 
     ioService.run();
 
