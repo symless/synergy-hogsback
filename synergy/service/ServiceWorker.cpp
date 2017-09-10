@@ -86,6 +86,11 @@ ServiceWorker::provideCore()
 
     server->provide ("synergy.profile.request",
                      [server](std::vector<std::string>& cmd) {
+        if (g_lastProfileSnapshot.empty()) {
+            mainLog()->error("can't send profile snapshot, not yet received from cloud");
+            return;
+        }
+
         mainLog()->debug("sending last profile snapshot");
         server->publish ("synergy.profile.snapshot", g_lastProfileSnapshot);
     });
