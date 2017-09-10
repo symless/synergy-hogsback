@@ -35,6 +35,7 @@ public:
     std::vector<Screen> screens() const;
     void updateScreenTestResult(int screenId, std::string successfulIp, std::string failedIp);
     Screen& getScreen(int screenId);
+    void claimServer(int serverId);
 
 private:
     Profile m_profile;
