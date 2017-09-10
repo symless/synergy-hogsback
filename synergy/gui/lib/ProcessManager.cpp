@@ -84,6 +84,7 @@ void ProcessManager::setActive(bool active)
 
 void ProcessManager::start()
 {
+    return;
     if (m_processMode == kUnknownMode) {
         return;
     }
