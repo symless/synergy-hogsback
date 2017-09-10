@@ -1,3 +1,5 @@
+#pragma once
+
 #include <synergy/common/Screen.h>
 #include <synergy/common/ScreenLinks.h>
 #include <vector>
