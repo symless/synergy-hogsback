@@ -151,7 +151,7 @@ Screen& ProfileConfig::getScreen(int screenId)
         }
     }
 
-    throw std::runtime_error("Can't find screen with ID: " + screenId);
+    throw std::runtime_error("Can't find screen with ID: " + std::to_string(screenId));
 }
 
 void ProfileConfig::claimServer(int serverId)
