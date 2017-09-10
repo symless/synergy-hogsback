@@ -4,6 +4,7 @@
 
 #include <string>
 
+// NOTE: be aware of the padding
 struct ProfileSnapshot {
     int    id;
     std::string name;
