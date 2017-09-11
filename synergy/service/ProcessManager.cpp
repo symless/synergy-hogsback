@@ -162,6 +162,19 @@ ProcessManagerImpl::shutdown()
     mainLog()->debug("core process stop completed");
 }
 
+std::string
+processModeToString(ProcessMode mode) {
+    switch (mode) {
+        case ProcessMode::kServer:
+            return "server";
+        case ProcessMode::kClient:
+            return "client";
+        case ProcessMode::kUnknown:
+            return "unknown";
+    }
+    return "";
+}
+
 ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<UserConfig> userConfig, std::shared_ptr<ProfileConfig> localProfileConfig) :
     m_ioService (io),
     m_userConfig(userConfig),
@@ -172,6 +185,10 @@ ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Use
 {
     m_localProfileConfig->profileServerChanged.connect([this](int64_t serverId) {
         m_ioService.post([this, serverId] () {
+
+            mainLog()->debug("handling local profile server changed, mode={} thisId={} serverId={} lastServerId={}",
+                processModeToString(m_proccessMode), m_userConfig->screenId(), serverId, m_lastServerId);
+
             switch (m_proccessMode) {
             case ProcessMode::kServer: {
                 // when server changes from local screen to another screen
@@ -211,6 +228,10 @@ ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Use
 
     m_localProfileConfig->screenPositionChanged.connect([this](int64_t){
         m_ioService.post([this] () {
+
+            mainLog()->debug("handling local profile screen position changed, mode={}",
+                processModeToString(m_proccessMode));
+
             if (m_proccessMode == ProcessMode::kServer) {
                 startServer();
             }
@@ -219,6 +240,10 @@ ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Use
 
     m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen>, std::vector<Screen>){
         m_ioService.post([this] () {
+
+            mainLog()->debug("handling local profile screen set changed, mode={}",
+                processModeToString(m_proccessMode));
+
             if (m_proccessMode == ProcessMode::kServer) {
                 startServer();
             }
@@ -226,6 +251,10 @@ ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Use
     });
 
     m_connectivityTester->newReportGenerated.connect([this](int screenId, std::string successfulIp, std::string) {
+
+        mainLog()->debug("handling new report from connectivity tester, screenId={} successfulIp={} lastServerId={}",
+            screenId, successfulIp, m_lastServerId);
+
         if (m_lastServerId == screenId &&
             !successfulIp.empty()) {
             startClient(m_lastServerId);
@@ -450,21 +479,14 @@ void ProcessManager::startClient(int serverId)
 
     auto screen = m_localProfileConfig->getScreen(serverId);
     std::vector<std::string> results = m_connectivityTester->getSuccessfulResults(serverId);
-    if (!results.empty()) {
-
-        // TODO: instead of using first successful result, test each and find the best
-        // address to connect to, and have a `bestAddress` (cloud should make this decision)
-        command.setServerAddress(results[0]);
-    }
-    else {
-        if (screen.failedTestIp().empty()) {
-            mainLog()->error("Can't find server address, connectivity test has not run yet.");
-        }
-        else {
-            mainLog()->error("Server is not reachable, connectivity test failed.");
-        }
+    if (results.empty()) {
+        mainLog()->error("aborting client start, no successful connectivity test results");
         return;
     }
+
+    // TODO: instead of using first successful result, test each and find the best
+    // address to connect to, and have a `bestAddress` (cloud should make this decision)
+    command.setServerAddress(results[0]);
 
     try {
         start(command.generate(false));
