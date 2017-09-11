@@ -421,19 +421,31 @@ void ProcessManager::startServer()
 {
     writeConfigurationFile();
 
-    ProcessCommand pc;
-    pc.setLocalHostname(boost::asio::ip::host_name());
-    auto command = pc.generate(true);
+    ProcessCommand command;
+    command.setLocalHostname(boost::asio::ip::host_name());
 
-    start(command);
+    try {
+        start(command.generate(true));
+    }
+    catch (const std::exception& ex) {
+        mainLog()->error("failed to start server core process: {}", ex.what());
+    }
 }
 
 void ProcessManager::startClient(int serverId)
 {
+    ProcessCommand command;
+    command.setLocalHostname(boost::asio::ip::host_name());
+
     auto screen = m_localProfileConfig->getScreen(serverId);
     std::vector<std::string> results = m_connectivityTester->getSuccessfulResults(serverId);
+    if (!results.empty()) {
 
-    if (results.empty()) {
+        // TODO: instead of using first successful result, test each and find the best
+        // address to connect to, and have a `bestAddress` (cloud should make this decision)
+        command.setServerAddress(results[0]);
+    }
+    else {
         if (screen.failedTestIp().empty()) {
             mainLog()->error("Can't find server address, connectivity test has not run yet.");
         }
@@ -443,12 +455,10 @@ void ProcessManager::startClient(int serverId)
         return;
     }
 
-    ProcessCommand pc;
-    pc.setLocalHostname(boost::asio::ip::host_name());
-
-    // TODO: instead of using first successful result, test each and find the best
-    // address to connect to, and have a `bestAddress` (cloud should make this decision)
-    pc.setServerAddress(results[0]);
-    auto command = pc.generate(false);
-    start(command);
+    try {
+        start(command.generate(false));
+    }
+    catch (const std::exception& ex) {
+        mainLog()->error("failed to start client core process: {}", ex.what());
+    }
 }
