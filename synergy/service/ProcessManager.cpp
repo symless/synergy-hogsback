@@ -419,6 +419,8 @@ void ProcessManager::writeConfigurationFile()
 
 void ProcessManager::startServer()
 {
+    mainLog()->debug("starting core server process");
+
     writeConfigurationFile();
 
     ProcessCommand command;
@@ -434,6 +436,8 @@ void ProcessManager::startServer()
 
 void ProcessManager::startClient(int serverId)
 {
+    mainLog()->debug("starting core client process");
+
     ProcessCommand command;
     command.setLocalHostname(boost::asio::ip::host_name());
 
