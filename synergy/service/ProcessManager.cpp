@@ -206,8 +206,6 @@ ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Use
                 break;
             }
             }
-
-            m_lastServerId = serverId;
         });
     });
 
@@ -228,8 +226,7 @@ ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Use
     });
 
     m_connectivityTester->newReportGenerated.connect([this](int screenId, std::string successfulIp, std::string) {
-        if (m_proccessMode == ProcessMode::kClient &&
-            m_lastServerId == screenId &&
+        if (m_lastServerId == screenId &&
             !successfulIp.empty()) {
             startClient(m_lastServerId);
         }
@@ -441,6 +438,7 @@ void ProcessManager::startServer()
     }
 
     m_proccessMode = ProcessMode::kServer;
+    m_lastServerId = m_userConfig->screenId();
 }
 
 void ProcessManager::startClient(int serverId)
@@ -476,4 +474,5 @@ void ProcessManager::startClient(int serverId)
     }
 
     m_proccessMode = ProcessMode::kClient;
+    m_lastServerId = serverId;
 }
