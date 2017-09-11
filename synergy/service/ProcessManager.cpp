@@ -454,6 +454,9 @@ void ProcessManager::startServer()
 {
     mainLog()->debug("starting core server process");
 
+    m_proccessMode = ProcessMode::kServer;
+    m_lastServerId = m_userConfig->screenId();
+
     writeConfigurationFile();
 
     ProcessCommand command;
@@ -465,14 +468,14 @@ void ProcessManager::startServer()
     catch (const std::exception& ex) {
         mainLog()->error("failed to start server core process: {}", ex.what());
     }
-
-    m_proccessMode = ProcessMode::kServer;
-    m_lastServerId = m_userConfig->screenId();
 }
 
 void ProcessManager::startClient(int serverId)
 {
     mainLog()->debug("starting core client process");
+
+    m_proccessMode = ProcessMode::kClient;
+    m_lastServerId = serverId;
 
     ProcessCommand command;
     command.setLocalHostname(boost::asio::ip::host_name());
@@ -494,7 +497,4 @@ void ProcessManager::startClient(int serverId)
     catch (const std::exception& ex) {
         mainLog()->error("failed to start client core process: {}", ex.what());
     }
-
-    m_proccessMode = ProcessMode::kClient;
-    m_lastServerId = serverId;
 }
