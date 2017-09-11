@@ -25,9 +25,7 @@ MSWindowsDirectoryManager::systemAppDir()
 boost::filesystem::path
 MSWindowsDirectoryManager::installedDir()
 {
-    TCHAR exePath[MAX_PATH];
-    GetModuleFileName(NULL, exePath, MAX_PATH);
-    return boost::filesystem::path (exePath).parent_path();
+    return g_programDir;
 }
 
 boost::filesystem::path

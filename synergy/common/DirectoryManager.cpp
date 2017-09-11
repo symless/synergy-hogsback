@@ -11,6 +11,8 @@
 #include "XWindowsDirectoryManager.h"
 #endif
 
+std::string g_programDir;
+
 DirectoryManager*
 DirectoryManager::instance()
 {

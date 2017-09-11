@@ -10,7 +10,7 @@ OSXDirectoryManager::systemAppDir()
 boost::filesystem::path
 OSXDirectoryManager::installedDir()
 {
-    return "/Applications/Synergy.app/Contents/MacOS";
+    return boost::filesystem::system_complete(argv[0]).remove_filename();
 }
 
 boost::filesystem::path

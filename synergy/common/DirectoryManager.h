@@ -15,4 +15,6 @@ public:
     virtual boost::filesystem::path systemLogDir() = 0;
 };
 
+extern std::string g_programDir;
+
 #endif // COMMONDIRECTORYMANAGER_H

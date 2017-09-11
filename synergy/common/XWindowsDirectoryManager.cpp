@@ -9,7 +9,7 @@ XWindowsDirectoryManager::systemAppDir()
 boost::filesystem::path
 XWindowsDirectoryManager::installedDir()
 {
-    return "/usr/bin";
+    return boost::filesystem::system_complete(argv[0]).remove_filename();
 }
 
 boost::filesystem::path
