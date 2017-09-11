@@ -333,6 +333,20 @@ void CloudClient::checkUpdate()
     });
 }
 
+void CloudClient::claimServer()
+{
+    QNetworkRequest req(m_claimServerUrl);
+    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
+
+    QJsonObject jsonObject;
+    jsonObject.insert("screen_id", qint64(m_screenId));
+    jsonObject.insert("profile_id", qint64(m_profileId));
+    QJsonDocument doc(jsonObject);
+
+    m_networkManager->post(req, doc.toJson());
+}
+
 void CloudClient::updateScreen(const Screen& screen)
 {
     QNetworkRequest req(m_updateScreenUrl);
@@ -520,6 +534,7 @@ void CloudClient::setUrls()
     m_identifyUrl = QString::fromStdString(m_cloudUri + "/user/identify");
     m_updateProfileConfigUrl = QString::fromStdString(m_cloudUri + "/profile/update"); // TODO: change to PUT to /profile/%1
     m_reportUrl = QString::fromStdString(m_cloudUri + "/report"); // TODO: change to POST to /user/connectivity-reports
+    m_claimServerUrl = QString::fromStdString(m_cloudUri + "/profile/server/claim"); // TODO: change to POST to /profile/%1/server
     m_updateScreenUrl = QString::fromStdString(m_cloudUri + "/screen/update"); // TODO: change to PUT to /screen/%1
     m_checkUpdateUrl = QString::fromStdString(m_cloudUri + "/update");
 }
