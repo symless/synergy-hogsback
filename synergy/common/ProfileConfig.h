@@ -36,7 +36,7 @@ public:
     void updateScreenTestResult(int screenId, std::string successfulIp, std::string failedIp);
     Screen& getScreen(int screenId);
     void claimServer(int serverId);
-    void poke(); // TODO: remove hack
+    void forceConnectivityTest(); // TODO: remove hack
 
 private:
     Profile m_profile;

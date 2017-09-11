@@ -96,8 +96,8 @@ ServiceWorker::provideCore()
         server->publish ("synergy.profile.snapshot", g_lastProfileSnapshot);
 
         // TODO: remove hack
-        mainLog()->debug("config ui opened, running connectivity test");
-        m_localProfileConfig->poke();
+        mainLog()->debug("config ui opened, forcing connectivity test");
+        m_localProfileConfig->forceConnectivityTest();
     });
 
     m_processManager->onOutput.connect(

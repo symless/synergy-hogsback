@@ -161,7 +161,7 @@ void ProfileConfig::claimServer(int serverId)
     modified();
 }
 
-void ProfileConfig::poke()
+void ProfileConfig::forceConnectivityTest()
 {
     /* HACK: when the config UI opens, it requests a profile snapshot,
      * this should trigger us to "poke" the profile and cause
