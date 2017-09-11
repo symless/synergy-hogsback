@@ -102,6 +102,7 @@ ProcessManagerImpl::start (ProcessManager& manager) {
         bp::std_out > m_outPipe,
         bp::std_err > m_errorPipe,
         bp::on_exit = [this, &manager](int exit, std::error_code const& ec){
+            mainLog()->debug("core process exited: code={}", exit);
             if (m_expectingExit) {
                 manager.onExit();
             } else {
@@ -135,14 +136,15 @@ ProcessManagerImpl::start (ProcessManager& manager) {
         })
     );
 
-    mainLog()->debug("core process started");
+    mainLog()->debug("core process started, id={}", m_process->id());
 }
 
 void
-ProcessManagerImpl::shutdown() {
-    auto& ioService = m_ioStrand.get_io_service();
-
+ProcessManagerImpl::shutdown()
+{
     mainLog()->debug("stopping core process");
+
+    auto& ioService = m_ioStrand.get_io_service();
 
     /* Cancel the standard stream I/O loops */
     m_outPipe.cancel();
@@ -277,9 +279,9 @@ ProcessManagerImpl::onScreenStatusChanged
 void
 ProcessManager::start (std::vector<std::string> command)
 {
-    mainLog()->debug("starting core process with command: {}", ba::join(command, " "));
-
     if (m_impl) {
+        mainLog()->debug("process already running, attempting to stop");
+
         m_impl->m_expectingExit = true;
         onExit.connect_extended ([this, &process = m_impl->m_process]
                                  (auto& connection) {
@@ -297,6 +299,8 @@ ProcessManager::start (std::vector<std::string> command)
         shutdown();
         assert (!m_impl);
     }
+
+    mainLog()->debug("starting core process with command: {}", ba::join(command, " "));
 
     auto const binary = getCommandBinaryName (command);
     auto const localScreenName = getCommandLocalScreenName (command);
@@ -435,6 +439,8 @@ void ProcessManager::startServer()
     catch (const std::exception& ex) {
         mainLog()->error("failed to start server core process: {}", ex.what());
     }
+
+    m_proccessMode = ProcessMode::kServer;
 }
 
 void ProcessManager::startClient(int serverId)
@@ -468,4 +474,6 @@ void ProcessManager::startClient(int serverId)
     catch (const std::exception& ex) {
         mainLog()->error("failed to start client core process: {}", ex.what());
     }
+
+    m_proccessMode = ProcessMode::kClient;
 }
