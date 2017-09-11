@@ -59,10 +59,12 @@ void ConnectivityTester::testNewScreens(std::vector<Screen> addedScreens)
 
 std::vector<std::string> ConnectivityTester::getSuccessfulResults(int screenId) const
 {
+    std::vector<std::string> results;
     auto it = m_screenSuccessfulResults.find(screenId);
     if (it != m_screenSuccessfulResults.end()) {
-        return it->second;
+        results = it->second;
     }
+    return results;
 }
 
 const std::string ConnectivityTester::testServerCertificate()
