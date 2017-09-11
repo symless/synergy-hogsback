@@ -3,7 +3,6 @@ cmake_minimum_required (VERSION 3.4)
 find_package (Qt5 COMPONENTS Test REQUIRED)
 
 set (GUI_TEST_SOURCES
-    ConfigFileManagerTest.cpp
     main.cpp
     ProcessCommandTest.cpp
     ScreenBBArrangementTest.cpp

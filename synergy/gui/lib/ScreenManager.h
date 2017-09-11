@@ -28,7 +28,6 @@ public:
 
     Q_INVOKABLE int getModelIndex(int x, int y);
     Q_INVOKABLE void moveModel(int index, int offsetX, int offsetY);
-    Q_INVOKABLE void updateConfigFile();
     Q_INVOKABLE bool removeScreen(QString name, bool notify = false);
     Q_INVOKABLE void onKeyPressed(const int key);
     Q_INVOKABLE bool addScreen(QString name);
@@ -52,7 +51,6 @@ signals:
 
 private:
     int processMode();
-    void startCoreProcess();
 
 private slots:
     void updateScreens(QByteArray reply);

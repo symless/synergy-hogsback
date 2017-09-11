@@ -4,7 +4,6 @@
 #include "ProcessManager.h"
 #include "LogManager.h"
 #include "ScreenBBArrangement.h"
-#include "ConfigFileManager.h"
 #include "ScreenListSnapshotManager.h"
 #include "AppConfig.h"
 #include "ProcessMode.h"
@@ -54,17 +53,6 @@ void ScreenManager::moveModel(int index, int offsetX, int offsetY)
     m_screenListModel->moveModel(index, offsetX, offsetY);
     m_arrangementStrategy->adjustModel(m_screenListModel, index);
     emit updateProfileConfig();
-
-    if (processMode() == kServerMode) {
-        startCoreProcess();
-    }
-}
-
-void ScreenManager::updateConfigFile()
-{
-    ConfigFileManager configFileManager(m_screenListModel,
-                            m_arrangementStrategy);
-    configFileManager.writeConfigurationFile();
 }
 
 void ScreenManager::printBoundingBoxInfo()
@@ -196,12 +184,6 @@ int ScreenManager::processMode()
     return m_processManager->processMode();
 }
 
-void ScreenManager::startCoreProcess()
-{
-    updateConfigFile();
-    m_processManager->start();
-}
-
 void ScreenManager::updateScreens(QByteArray reply)
 {
     bool updateLocalHost = false;
@@ -284,7 +266,6 @@ void ScreenManager::updateScreens(QByteArray reply)
     }
 
     if (newServerDetected) {
-        updateConfigFile();
         emit newServer(serverId);
         m_previousServerId = serverId;
 

@@ -10,7 +10,6 @@ set (GUI_LIB_SOURCES
     AccessibilityManager.cpp
     Common.cpp
     CloudClient.cpp
-    ConfigFileManager.cpp
     CoreInterface.cpp
     DebugLevelUtil.cpp
     DirectoryManager.cpp
