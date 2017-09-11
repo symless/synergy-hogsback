@@ -85,14 +85,19 @@ ServiceWorker::provideCore()
     });
 
     server->provide ("synergy.profile.request",
-                     [server](std::vector<std::string>& cmd) {
+                     [this](std::vector<std::string>& cmd) {
         if (g_lastProfileSnapshot.empty()) {
             mainLog()->error("can't send profile snapshot, not yet received from cloud");
             return;
         }
 
         mainLog()->debug("sending last profile snapshot");
+        auto server = m_rpcManager->server();
         server->publish ("synergy.profile.snapshot", g_lastProfileSnapshot);
+
+        // TODO: remove hack
+        mainLog()->debug("config ui opened, running connectivity test");
+        m_localProfileConfig->poke();
     });
 
     m_processManager->onOutput.connect(
