@@ -26,6 +26,8 @@ ConnectivityTester::ConnectivityTester(boost::asio::io_service &io, std::shared_
 
 void ConnectivityTester::testNewScreens(std::vector<Screen> addedScreens)
 {
+    mainLog()->debug("new screens adding, preparing connectivity test");
+
     int testCaseBatchSize = 0;
     for (auto const& screen : addedScreens) {
         // skip inactive screens
@@ -159,6 +161,8 @@ void ConnectivityTester::startTestServer()
 
 void ConnectivityTester::startTesting(int batchSize)
 {
+    mainLog()->debug("starting connectivity test");
+
     std::vector<std::string> testIpList;
     int i = 0;
     for (auto testCase : m_pendingTestCases) {
@@ -232,6 +236,7 @@ void ConnectivityTester::onTestDelegateeDone(std::map<std::string, bool> results
     delete m_testDelegatee;
     m_testDelegatee = nullptr;
 
+    mainLog()->debug("finished connectivity test");
     testBatchFinished();
 
     if (!m_pendingTestCases.empty()) {
