@@ -15,12 +15,6 @@ const std::string kServerCmd = "synergys";
 const std::string kClientCmd = "synergyc";
 #endif
 
-std::string
-ProcessCommand::wrapArg(const std::string& arg) const
-{
-    return "\"" + arg + "\"";
-}
-
 std::vector<std::string>
 ProcessCommand::generate(bool serverMode) const
 {
@@ -45,13 +39,13 @@ ProcessCommand::generate(bool serverMode) const
     }
 
     args.push_back("--name");
-    args.push_back(wrapArg(m_localHostname));
+    args.push_back(m_localHostname);
 
     // TODO: change features depending on edition
     args.push_back("--enable-drag-drop");
 
     args.push_back("--profile-dir");
-    args.push_back(wrapArg(profileDir.string()));
+    args.push_back(profileDir.string());
 
     // TODO: use constant
     args.push_back("--log");
@@ -61,7 +55,7 @@ ProcessCommand::generate(bool serverMode) const
         // configuration file
         auto configPath = profileDir / kCoreConfigFile;
         args.push_back("-c");
-        args.push_back(wrapArg(configPath.string()));
+        args.push_back(configPath.string());
 
         args.push_back("--address");
         args.push_back(":24800");
@@ -71,7 +65,7 @@ ProcessCommand::generate(bool serverMode) const
             throw std::runtime_error("Can't generate args, server IP/hostname missing.");
         }
 
-        args.push_back(wrapArg(m_serverAddress + ":24800"));
+        args.push_back(m_serverAddress + ":24800");
     }
 
     return args;

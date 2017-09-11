@@ -16,9 +16,6 @@ public:
     void setLocalHostname(const std::string& localHostname);
 
 private:
-    std::string wrapArg(const std::string& arg) const;
-
-private:
     std::string m_serverAddress;
     std::string m_localHostname;
 };
