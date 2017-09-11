@@ -86,8 +86,6 @@ void ScreenManager::setProcessManager(ProcessManager* processManager)
 
     m_processManager = processManager;
 
-    connect(this, &ScreenManager::newServer,
-            m_processManager, &ProcessManager::newServerDetected);
     connect(m_processManager, &ProcessManager::screenStatusChanged,
             this, &ScreenManager::onScreenStatusChanged);
     connect(m_processManager, &ProcessManager::screenError,
@@ -175,19 +173,9 @@ bool ScreenManager::removeScreen(QString name, bool notify)
     return result;
 }
 
-int ScreenManager::processMode()
-{
-    if (m_processManager == NULL) {
-        return kUnknownMode;
-    }
-
-    return m_processManager->processMode();
-}
-
 void ScreenManager::updateScreens(QByteArray reply)
 {
     bool updateLocalHost = false;
-    bool newServerDetected = false;
     int serverId = m_previousServerId;
 
     QJsonDocument doc = QJsonDocument::fromJson(reply);
@@ -202,10 +190,6 @@ void ScreenManager::updateScreens(QByteArray reply)
             }
             m_configVersion = configVersion;
             serverId = profileObject["server"].toInt();
-            if (m_previousServerId != serverId) {
-                // delay emitting the signal until we update all the screens
-                newServerDetected = true;
-            }
 
             QJsonArray screens = obj["screens"].toArray();
             QList<Screen> latestScreenList;
@@ -263,14 +247,6 @@ void ScreenManager::updateScreens(QByteArray reply)
         m_arrangementStrategy->addScreen(m_screenListModel, screen);
 
         emit updateProfileConfig();
-    }
-
-    if (newServerDetected) {
-        emit newServer(serverId);
-        m_previousServerId = serverId;
-
-        QPair<QString, ScreenStatus> p (m_localHostname, ScreenStatus::kConnecting);
-        onScreenStatusChanged(p);
     }
 }
 

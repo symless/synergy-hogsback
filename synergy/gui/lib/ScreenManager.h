@@ -49,9 +49,6 @@ signals:
     void newServer(int serverId);
     void localhostUnsubscribed();
 
-private:
-    int processMode();
-
 private slots:
     void updateScreens(QByteArray reply);
     void onUpdateProfileConfig();

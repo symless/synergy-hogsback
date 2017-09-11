@@ -4,7 +4,6 @@ find_package (Qt5 COMPONENTS Test REQUIRED)
 
 set (GUI_TEST_SOURCES
     main.cpp
-    ProcessCommandTest.cpp
     ScreenBBArrangementTest.cpp
     AutoTest.h
     mock/MockDirectoryManager.cpp

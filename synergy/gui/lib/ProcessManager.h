@@ -23,14 +23,6 @@ public:
     ProcessManager();
     ProcessManager(WampClient&);
     ~ProcessManager();
-    Q_INVOKABLE void start();
-    int processMode();
-    void setProcessMode(int mode);
-    bool active();
-    void setActive(bool active);
-
-    QString serverIp() const;
-    void setServerIp(const QString& serverIp);
 
 signals:
     void screenStatusChanged(QPair<QString, ScreenStatus>);
@@ -40,25 +32,11 @@ signals:
     void logServiceOutput(QString);
 
 public slots:
-    void newServerDetected(int serverId);
     void onRpcScreenStatusChanged(QString, int);
-
-private slots:
-    void exit(int exitCode, QProcess::ExitStatus);
-    void onLogCoreOutput(QString text);
     void onLogServiceOutput(QString text);
-    void logCoreError();
+    void onLogCoreOutput(QString text);
 
 private:
-    void startProcessOnWin();
-    void startProcess();
-
-private:
-    QProcess* m_process;
-    AppConfig* m_appConfig;
-    int m_processMode;
-    bool m_active;
-    QString m_serverIp;
     std::shared_ptr<WampClient> m_wampClient;
 };
 

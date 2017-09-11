@@ -10,7 +10,6 @@ set (GUI_LIB_SOURCES
     AccessibilityManager.cpp
     Common.cpp
     CloudClient.cpp
-    CoreInterface.cpp
     DebugLevelUtil.cpp
     DirectoryManager.cpp
     FontManager.cpp
@@ -19,7 +18,6 @@ set (GUI_LIB_SOURCES
     LogManager.cpp
     Profile.cpp
     ProfileListModel.cpp
-    ProcessCommand.cpp
     ProcessManager.cpp
     ScreenBBArrangement.cpp
     Screen.cpp

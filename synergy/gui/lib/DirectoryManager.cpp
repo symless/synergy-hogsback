@@ -1,6 +1,5 @@
 #include "DirectoryManager.h"
 
-#include "CoreInterface.h"
 #include "LogManager.h"
 
 #include <QStandardPaths>
