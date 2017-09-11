@@ -131,7 +131,7 @@ bool ScreenManager::addScreen(QString name)
         return false;
     }
 
-    Screen screen(name);
+    UIScreen screen(name);
     return m_arrangementStrategy->addScreen(m_screenListModel, screen);
 }
 
@@ -156,7 +156,7 @@ bool ScreenManager::removeScreen(QString name, bool notify)
 
     if (notify) {
         // get screen id
-        const Screen& s = m_screenListModel->getScreen(index);
+        const UIScreen& s = m_screenListModel->getScreen(index);
 
         // notify cloud
         if (s.id() != -1) {
@@ -164,7 +164,7 @@ bool ScreenManager::removeScreen(QString name, bool notify)
         }
     }
 
-    Screen screen(name);
+    UIScreen screen(name);
     bool result = m_arrangementStrategy->removeScreen(m_screenListModel,
                                             screen);
 
@@ -190,7 +190,7 @@ void ScreenManager::updateScreens(QByteArray reply)
             serverId = profileObject["server"].toInt();
 
             QJsonArray screens = obj["screens"].toArray();
-            QList<Screen> latestScreenList;
+            QList<UIScreen> latestScreenList;
             QSet<QString> latestScreenNameSet;
             foreach (QJsonValue const& v, screens) {
                 QJsonObject obj = v.toObject();
@@ -198,13 +198,13 @@ void ScreenManager::updateScreens(QByteArray reply)
                 latestScreenNameSet.insert(screenName);
                 int index = m_screenListModel->findScreen(screenName);
                 if (index != -1) {
-                    const Screen& s = m_screenListModel->getScreen(index);
+                    const UIScreen& s = m_screenListModel->getScreen(index);
                     if (s.locked()) {
                         continue;
                     }
                 }
 
-                Screen screen(screenName);
+                UIScreen screen(screenName);
                 screen.setId(obj["id"].toInt());
                 screen.setPosX(obj["x_pos"].toInt());
                 screen.setPosY(obj["y_pos"].toInt());
@@ -240,7 +240,7 @@ void ScreenManager::updateScreens(QByteArray reply)
 
     if (updateLocalHost) {
         removeScreen(m_localHostname);
-        Screen screen(m_localHostname);
+        UIScreen screen(m_localHostname);
         screen.setId(m_appConfig->screenId());
         m_arrangementStrategy->addScreen(m_screenListModel, screen);
 
@@ -256,7 +256,7 @@ void ScreenManager::onUpdateProfileConfig()
 
     QJsonArray screenArray;
 
-    for (Screen& s : m_screenListModel->getScreenList()) {
+    for (UIScreen& s : m_screenListModel->getScreenList()) {
         QJsonObject screenObject;
         screenObject.insert("id", s.id());
         screenObject.insert("x_pos", s.posX());
@@ -280,7 +280,7 @@ void ScreenManager::onScreenStatusChanged(QPair<QString, ScreenStatus> r)
     int index = m_screenListModel->findScreen(r.first);
     if (index != -1) {
         m_screenListModel->setScreenStatus(index, r.second);
-        const Screen& s = m_screenListModel->getScreen(index);
+        const UIScreen& s = m_screenListModel->getScreen(index);
 
         m_cloudClient->updateScreen(s);
     }
@@ -291,7 +291,7 @@ void ScreenManager::onScreenError(QString screenName, int errorCode)
     int index = m_screenListModel->findScreen(screenName);
     if (index != -1) {
         m_screenListModel->setScreenErrorCode(index, (ErrorCode)errorCode);
-        const Screen& s = m_screenListModel->getScreen(index);
+        const UIScreen& s = m_screenListModel->getScreen(index);
 
         m_cloudClient->updateScreen(s);
     }

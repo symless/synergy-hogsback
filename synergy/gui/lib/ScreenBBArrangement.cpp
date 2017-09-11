@@ -1,6 +1,6 @@
 #include "ScreenBBArrangement.h"
 
-#include "Screen.h"
+#include "UIScreen.h"
 #include "ScreenListModel.h"
 #include "LogManager.h"
 #include "Common.h"
@@ -22,7 +22,7 @@ ScreenBBArrangement::ScreenBBArrangement() :
 }
 
 bool ScreenBBArrangement::addScreen(ScreenListModel* screenListModel,
-								Screen& screen)
+								UIScreen& screen)
 {
 	calculateNewPos(screenListModel, screen);
 	screenListModel->addScreen(screen);
@@ -36,7 +36,7 @@ bool ScreenBBArrangement::addScreen(ScreenListModel* screenListModel,
 }
 
 bool ScreenBBArrangement::removeScreen(ScreenListModel* screenListModel,
-								Screen& screen)
+								UIScreen& screen)
 {
 	screenListModel->removeScreen(screen.name());
 	update(screenListModel);
@@ -99,8 +99,8 @@ void ScreenBBArrangement::adjustModel(ScreenListModel* screenListModel, int inde
 
 	// adjust it according to the whole bounding box
 	recalculateBoundingBox(screenListModel, index);
-	const Screen& original = screenListModel->getScreen(index);
-	Screen screen("temp");
+	const UIScreen& original = screenListModel->getScreen(index);
+	UIScreen screen("temp");
 	screen.setPosX(original.posX());
 	screen.setPosY(original.posY());
 	calculateNewPos(screenListModel, screen);
@@ -123,7 +123,7 @@ void ScreenBBArrangement::printDebugInfo()
 }
 
 void ScreenBBArrangement::calculateNewPos(ScreenListModel* screenListModel,
-								Screen& screen)
+								UIScreen& screen)
 {
 	int newPosX = m_scaledViewW / 2 - kScreenIconWidth / 2;
 	int newPosY = m_scaledViewH / 2 - kScreenIconHeight / 2;
@@ -240,7 +240,7 @@ QList<int> ScreenBBArrangement::getScreensNextTo(ScreenListModel* screenListMode
 									int index, Direction dir)
 {
 	QList<int> result;
-	Screen screen = screenListModel->getScreen(index);
+	UIScreen screen = screenListModel->getScreen(index);
 	int srcX = screen.posX();
 	int srcY = screen.posY();
 	int srcW = kScreenIconWidth;
@@ -276,7 +276,7 @@ QList<int> ScreenBBArrangement::getScreensNextTo(ScreenListModel* screenListMode
 
 	for (int i = 0; i < screenListModel->getScreenModeSize(); i++) {
 		if (i == index) continue;
-		Screen des = screenListModel->getScreen(i);
+		UIScreen des = screenListModel->getScreen(i);
 		if (collide(srcX, srcY, srcW, srcH, des.posX(), des.posY(),
 				kScreenIconWidth, kScreenIconHeight)) {
 			result.append(i);
@@ -307,7 +307,7 @@ void ScreenBBArrangement::recalculateBoundingBox(ScreenListModel* screenListMode
 	for (int i = 0; i < screenListModel->getScreenModeSize(); i++) {
 		if (i == ignoreIndex) continue;
 
-		const Screen& screen = screenListModel->getScreen(i);
+		const UIScreen& screen = screenListModel->getScreen(i);
 		int posX = screen.posX();
 		int posY = screen.posY();
 		m_topLeftX = m_topLeftX < posX ? m_topLeftX : posX;
@@ -373,7 +373,7 @@ void ScreenBBArrangement::snapToOthers(ScreenListModel* screenListModel, int ind
 					finalAdjustment.x(), finalAdjustment.y());
 }
 
-bool ScreenBBArrangement::collide(const Screen& src, const Screen& des) const
+bool ScreenBBArrangement::collide(const UIScreen& src, const UIScreen& des) const
 {
 	bool result = false;
 
@@ -405,11 +405,11 @@ QList<int> ScreenBBArrangement::collideWithOthers(ScreenListModel* screenListMod
 									int index) const
 {
 	QList<int> result;
-	const Screen screenSrc = screenListModel->getScreen(index);
+	const UIScreen screenSrc = screenListModel->getScreen(index);
 	for (int i = 0; i < screenListModel->getScreenModeSize(); i++) {
 		if (i == index) continue;
 
-		const Screen& screenDes = screenListModel->getScreen(i);
+		const UIScreen& screenDes = screenListModel->getScreen(i);
 		if (collide(screenSrc, screenDes)) {
 			result.append(i);
 		}

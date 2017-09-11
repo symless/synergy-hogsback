@@ -20,7 +20,7 @@ set (GUI_LIB_SOURCES
     ProfileListModel.cpp
     ProcessManager.cpp
     ScreenBBArrangement.cpp
-    Screen.cpp
+    UIScreen.cpp
     ScreenListModel.cpp
     ScreenListSnapshotManager.cpp
     ScreenManager.cpp

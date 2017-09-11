@@ -13,8 +13,8 @@ class LIB_SPEC ScreenBBArrangement : public IScreenArrangement
 public:
 	ScreenBBArrangement();
 
-	bool addScreen(ScreenListModel* screenListModel, Screen& screen);
-	bool removeScreen(ScreenListModel* screenListModel, Screen& screen);
+	bool addScreen(ScreenListModel* screenListModel, UIScreen& screen);
+	bool removeScreen(ScreenListModel* screenListModel, UIScreen& screen);
 	void setViewW(int w);
 	void setViewH(int h);
 	void adjustModel(ScreenListModel* screenListModel, int index);
@@ -28,12 +28,12 @@ public:
 private:
 	void setScaledViewW(int w);
 	void setScaledViewH(int h);
-	void calculateNewPos(ScreenListModel* screenListModel, Screen& screen);
+	void calculateNewPos(ScreenListModel* screenListModel, UIScreen& screen);
 	void recalculateBoundingBox(ScreenListModel* screenListModel,
 			int ignoreIndex = -1);
 	void adjustToCenter(ScreenListModel* screenListModel);
 	void snapToOthers(ScreenListModel* screenListModel, int index);
-	bool collide(const Screen& src, const Screen& des) const;
+	bool collide(const UIScreen& src, const UIScreen& des) const;
 	bool collide(const int srcX, const int srcY, const int srcW,
 			const int srcH, const int desX, const int desY, const int desW,
 			const int desH) const;

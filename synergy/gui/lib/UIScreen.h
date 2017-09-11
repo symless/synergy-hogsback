@@ -1,5 +1,4 @@
-#ifndef SCREEN_H
-#define SCREEN_H
+#pragma once
 
 #include "LibMacro.h"
 #include "synergy/common/ScreenStatus.h"
@@ -13,20 +12,21 @@ int qHash(ScreenStatus key, uint seed = 0) noexcept {
     return qHash(static_cast<int>(key), seed);
 }
 
-class LIB_SPEC Screen
+// TODO: Unify this with the Screen class in common
+class LIB_SPEC UIScreen
 {
 public:
     friend inline
-    uint qHash (Screen const& screen, uint seed = 0) noexcept {
+    uint qHash (UIScreen const& screen, uint seed = 0) noexcept {
         return qHash (screen.m_name, seed);
     }
 
     friend bool
-    operator== (Screen const& s1, Screen const& s2) noexcept {
+    operator== (UIScreen const& s1, UIScreen const& s2) noexcept {
         return (s1.m_name == s2.m_name && s1.m_id == s2.m_id);
     }
 
-	Screen(QString name = "");
+    UIScreen(QString name = "");
 
     int id() const;
     void setId(int id);
@@ -61,5 +61,3 @@ private:
     static QHash<ScreenStatus, QString> m_statusImages;
     ErrorCode m_lastErrorCode;
 };
-
-#endif // SCREEN_H

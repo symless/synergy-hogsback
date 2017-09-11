@@ -11,7 +11,7 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 class AppConfig;
-class Screen;
+class UIScreen;
 
 class LIB_SPEC CloudClient : public QObject
 {
@@ -35,7 +35,7 @@ public:
     void report(int destId, QString successfulIp, QString failedIp);
     void updateProfileConfig(QJsonDocument& doc);
     void claimServer();
-    void updateScreen(const Screen& screen);
+    void updateScreen(const UIScreen& screen);
     void uploadLogFile(QString filename);
     void receivedScreensInterface(QByteArray msg);
 
