@@ -118,9 +118,6 @@ void ScreenManager::onKeyPressed (int const key)
     switch (key) {
         case Qt::Key_F12:
             LogManager::debug(QString("disabled: claim to be server"));
-            //LogManager::debug(QString("claim to be server"));
-            //m_cloudClient->claimServer();
-            //startCoreProcess();
             break;
     }
 }
