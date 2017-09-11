@@ -36,6 +36,7 @@ private:
     std::vector<std::unique_ptr<SecuredTcpClient>> m_tcpClients;
     int m_batchSize;
     std::map<std::string, bool> m_results;
+    std::vector<boost::signals2::connection> m_signalConnections;
 };
 
 #endif // TESTDELEGATEE_H

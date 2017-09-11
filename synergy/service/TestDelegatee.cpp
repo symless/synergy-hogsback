@@ -18,6 +18,10 @@ TestDelegatee::~TestDelegatee()
     for (auto& tcpClient : m_tcpClients) {
         tcpClient.release();
     }
+
+    for (auto& connection : m_signalConnections) {
+        connection.disconnect();
+    }
 }
 
 void TestDelegatee::start(std::vector<std::string> &ipList)
@@ -25,14 +29,14 @@ void TestDelegatee::start(std::vector<std::string> &ipList)
     for (auto ip : ipList) {
         std::unique_ptr<SecuredTcpClient> tcpClient = std::make_unique<SecuredTcpClient>(m_ioService, ip, kDefaultConnectivityTestPort);
 
-        tcpClient->connected.connect(
+        m_signalConnections.emplace_back(tcpClient->connected.connect(
             [this](SecuredTcpClient* client) {
                 mainLog()->debug("connectivity test passed for {}:{}",
                     client->address(), client->port());
                 m_results[client->address()] = true;
             },
             boost::signals2::at_front
-        );
+        ));
 
         tcpClient->connectFailed.connect(
             [this](SecuredTcpClient* client) {
