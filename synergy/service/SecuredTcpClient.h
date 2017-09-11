@@ -21,6 +21,7 @@ public:
     signal<void(SecuredTcpClient*)> connectFailed;
 
     std::string address() const;
+    std::string port() const;
 
 private:
     void onResolveFinished(errorCode ec, tcp::resolver::iterator result);

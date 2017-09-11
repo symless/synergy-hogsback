@@ -34,8 +34,9 @@ void TestDelegatee::start(std::vector<std::string> &ipList)
         );
 
         tcpClient->connectFailed.connect(
-            [this](SecuredTcpClient*) {
-                mainLog()->debug("one connectivity test failed");
+            [this](SecuredTcpClient* client) {
+                mainLog()->debug("connectivity test failed for {}:{}",
+                    client->address(), client->port());
             },
             boost::signals2::at_front
         );

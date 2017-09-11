@@ -99,3 +99,8 @@ std::string SecuredTcpClient::address() const
 {
     return m_address;
 }
+
+std::string SecuredTcpClient::port() const
+{
+    return m_port;
+}
