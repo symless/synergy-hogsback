@@ -26,11 +26,10 @@ void TestDelegatee::start(std::vector<std::string> &ipList)
         std::unique_ptr<SecuredTcpClient> tcpClient = std::make_unique<SecuredTcpClient>(m_ioService, ip, kDefaultConnectivityTestPort);
 
         tcpClient->connected.connect(
-            [this](SecuredTcpClient* orginalSession) {
+            [this](SecuredTcpClient* client) {
                 mainLog()->debug("connectivity test passed for {}:{}",
                     client->address(), client->port());
-                auto remoteIp = orginalSession->stream().lowest_layer().remote_endpoint().address().to_string();
-                m_results[remoteIp] = true;
+                m_results[client->address()] = true;
             },
             boost::signals2::at_front
         );

@@ -15,7 +15,7 @@ class SecuredTcpSession
 {
 public:
     SecuredTcpSession(boost::asio::io_service& ioService,  boost::asio::ssl::context& context);
-    virtual ~SecuredTcpSession();
+    ~SecuredTcpSession();
 
     ssl::stream<tcp::socket>& stream();
 
