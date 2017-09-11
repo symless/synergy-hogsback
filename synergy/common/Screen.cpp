@@ -2,6 +2,9 @@
 
 #include <synergy/common/ScreenSnapshot.h>
 
+const int kScreenWidth = 86;
+const int kScreenHeight = 58;
+
 Screen::Screen(ScreenID id) noexcept: m_id (id) {
 }
 
@@ -103,9 +106,11 @@ Screen::apply(ScreenSnapshot const& ss)
     m_active = ss.active;
     m_x = ss.x_pos;
     m_y = ss.y_pos;
-    // TODO: hardcode width and height
-    m_width = 0;
-    m_height = 0;
+
+    // TODO: use actual resolution
+    m_width = kScreenWidth;
+    m_height = kScreenHeight;
+
     m_status = stringToScreenStatus(ss.status);
     m_ipList = ss.ipList;
 }
