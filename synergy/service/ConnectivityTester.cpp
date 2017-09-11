@@ -19,14 +19,22 @@ ConnectivityTester::ConnectivityTester(boost::asio::io_service &io, std::shared_
 
     m_localProfileConfig->screenSetChanged.connect(
         [this](std::vector<Screen> added, std::vector<Screen> removed){
-            testNewScreens(added);
+            if (added.size() > 0) {
+                testNewScreens(added);
+            }
+            else {
+                mainLog()->debug(
+                    "no new screens detected, skipping connectivity test");
+            }
         }
     );
 }
 
 void ConnectivityTester::testNewScreens(std::vector<Screen> addedScreens)
 {
-    mainLog()->debug("new screens adding, preparing connectivity test");
+    mainLog()->debug(
+        "new screens detected ({}), preparing connectivity test",
+        addedScreens.size());
 
     int testCaseBatchSize = 0;
     for (auto const& screen : addedScreens) {
@@ -236,6 +244,7 @@ void ConnectivityTester::onTestDelegateeDone(std::map<std::string, bool> results
     delete m_testDelegatee;
     m_testDelegatee = nullptr;
 
+    // TODO: wait for sockets to shut down and then call "finished"
     mainLog()->debug("finished connectivity test");
     testBatchFinished();
 
