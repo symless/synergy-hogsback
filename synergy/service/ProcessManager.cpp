@@ -22,9 +22,11 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <synergy/common/Screen.h>
+#include <boost/algorithm/string/join.hpp>
 
 namespace bp = boost::process;
 namespace bs = boost::system;
+namespace ba = boost::algorithm;
 using boost::optional;
 
 static const int kConnectingTimeout = 3;
@@ -273,8 +275,9 @@ ProcessManagerImpl::onScreenStatusChanged
 }
 
 void
-ProcessManager::start (std::vector<std::string> command) {
-    mainLog()->debug("starting core process");
+ProcessManager::start (std::vector<std::string> command)
+{
+    mainLog()->debug("starting core process with command: {}", ba::join(command, " "));
 
     if (m_impl) {
         m_impl->m_expectingExit = true;

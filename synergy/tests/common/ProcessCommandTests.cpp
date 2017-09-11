@@ -10,14 +10,17 @@ TEST_CASE("Process command and args generated correctly", "[ProcessCommand]")
 
     // TODO: stub out profile directory
     auto profileDir = DirectoryManager::instance()->profileDir();
+    auto installDir = DirectoryManager::instance()->installedDir();
     auto configPath = profileDir / "synergy.conf";
+    auto serverPath = installDir / kServerCmd;
+    auto clientPath = installDir / kClientCmd;
 
     SECTION("Server command line")
     {
         auto command = pc.generate(true);
 
         REQUIRE(boost::algorithm::join(command, " ") ==
-            kServerCmd + " -f --no-tray --debug DEBUG "
+            serverPath.string() + " -f --no-tray --debug DEBUG "
             "--name \"mock local hostname\" --enable-drag-drop "
             "--profile-dir \"" + profileDir.string() + "\" "
             "--log synergy.log -c \"" + configPath.string() + "\" "
@@ -30,7 +33,7 @@ TEST_CASE("Process command and args generated correctly", "[ProcessCommand]")
         auto command = pc.generate(false);
 
         REQUIRE(boost::algorithm::join(command, " ") ==
-            kClientCmd + " -f --no-tray --debug DEBUG "
+            clientPath.string() + " -f --no-tray --debug DEBUG "
             "--name \"mock local hostname\" --enable-drag-drop "
             "--profile-dir \"" + profileDir.string() + "\" "
             "--log synergy.log \"mock server address:24800\"");

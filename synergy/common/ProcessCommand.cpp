@@ -25,9 +25,13 @@ std::vector<std::string>
 ProcessCommand::generate(bool serverMode) const
 {
     auto profileDir = DirectoryManager::instance()->profileDir();
+    auto installedDir = DirectoryManager::instance()->installedDir();
 
     std::vector<std::string> args;
-    args.push_back(serverMode ? kServerCmd : kClientCmd);
+
+    std::string processName = serverMode ? kServerCmd : kClientCmd;
+    auto processPath = installedDir / processName;
+    args.push_back(processPath.string());
 
     args.push_back("-f");
     args.push_back("--no-tray");
