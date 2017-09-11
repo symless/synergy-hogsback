@@ -27,6 +27,8 @@ void TestDelegatee::start(std::vector<std::string> &ipList)
 
         tcpClient->connected.connect(
             [this](SecuredTcpClient* orginalSession) {
+                mainLog()->debug("connectivity test passed for {}:{}",
+                    client->address(), client->port());
                 auto remoteIp = orginalSession->stream().lowest_layer().remote_endpoint().address().to_string();
                 m_results[remoteIp] = true;
             },
