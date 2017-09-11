@@ -1,6 +1,6 @@
 #include "CloudClient.h"
 
-#include "Screen.h"
+#include "UIScreen.h"
 #include "LogManager.h"
 #include "VersionManager.h"
 #include "AppConfig.h"
@@ -347,7 +347,7 @@ void CloudClient::claimServer()
     m_networkManager->post(req, doc.toJson());
 }
 
-void CloudClient::updateScreen(const Screen& screen)
+void CloudClient::updateScreen(const UIScreen& screen)
 {
     QNetworkRequest req(m_updateScreenUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());

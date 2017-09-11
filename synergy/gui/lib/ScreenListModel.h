@@ -2,7 +2,7 @@
 #define SCREENlISTMODEL_H
 
 #include "LibMacro.h"
-#include "Screen.h"
+#include "UIScreen.h"
 #include <QAbstractListModel>
 
 class LIB_SPEC ScreenListModel : public QAbstractListModel
@@ -36,19 +36,19 @@ public:
 
     int findScreen(QString name);
     int findScreen(int screenId);
-    void addScreen(const Screen& screen);
+    void addScreen(const UIScreen& screen);
     void removeScreen(QString name);
     void getScreenPos(QString name, int& newPosX,int& newPosY);
     virtual void adjustAll(int disX, int disY);
     int getModelIndex(int x, int y);
     void moveModel(int index, int offsetX, int offsetY);
     int getScreenModeSize();
-    const Screen& getScreen(int index) const;
-    void update(const QList<Screen>& screens);
-    QSet<Screen> getScreenSet();
+    const UIScreen& getScreen(int index) const;
+    void update(const QList<UIScreen>& screens);
+    QSet<UIScreen> getScreenSet();
     float scale() const;
     void setScale(float s);
-    QList<Screen> getScreenList() const;
+    QList<UIScreen> getScreenList() const;
     void lockScreen(int index);
     void unlockScreen(int index);
     void setScreenStatus(int index, ScreenStatus status);
@@ -61,7 +61,7 @@ protected:
     QHash<int, QByteArray> roleNames() const;
 
 private:
-    QList<Screen> m_screens;
+    QList<UIScreen> m_screens;
     float m_scale;
 };
 

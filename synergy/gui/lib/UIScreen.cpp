@@ -1,8 +1,8 @@
-#include "Screen.h"
+#include "UIScreen.h"
 #include "LogManager.h"
 #include "Common.h"
 
-QHash<ScreenStatus, QString> Screen::m_statusImages = {
+QHash<ScreenStatus, QString> UIScreen::m_statusImages = {
     {ScreenStatus::kConnected, "qrc:/res/image/screen-active.png"},
     {ScreenStatus::kConnecting, "qrc:/res/image/screen-inactive.png"},
     {ScreenStatus::kConnectingWithError, "qrc:/res/image/screen-inactive.png"},
@@ -10,7 +10,7 @@ QHash<ScreenStatus, QString> Screen::m_statusImages = {
     {ScreenStatus::kInactive, "qrc:/res/image/screen-inactive.png"}
 };
 
-Screen::Screen(QString name) :
+UIScreen::UIScreen(QString name) :
     m_id(-1),
     m_posX(-1),
     m_posY(-1),
@@ -22,39 +22,39 @@ Screen::Screen(QString name) :
     m_statusImage = m_statusImages[m_status];
 }
 
-int Screen::posX() const
+int UIScreen::posX() const
 {
     return m_posX;
 }
 
-int Screen::posY() const
+int UIScreen::posY() const
 {
     return m_posY;
 }
 
-QString Screen::name() const
+QString UIScreen::name() const
 {
     return m_name;
 }
 
-QString Screen::statusImage() const
+QString UIScreen::statusImage() const
 {
     return m_statusImage;
 }
 
 QString
-Screen::lastErrorMessage() const
+UIScreen::lastErrorMessage() const
 {
     return  QString::fromStdString(getErrorMessage(m_lastErrorCode));
 }
 
 QString
-Screen::helpLink() const
+UIScreen::helpLink() const
 {
     return  QString::fromStdString(getHelpUrl(m_lastErrorCode));
 }
 
-void Screen::setPosX(int const x)
+void UIScreen::setPosX(int const x)
 {
     if ((x <= -kScreenIconWidth) || (x >= kDefaultViewWidth)) {
         LogManager::warning (QString("Attempted to set screen position x coordinate "
@@ -65,7 +65,7 @@ void Screen::setPosX(int const x)
     m_posX = x;
 }
 
-void Screen::setPosY(int const y)
+void UIScreen::setPosY(int const y)
 {
     if ((y <= -kScreenIconHeight) || (y >= kDefaultViewHeight)) {
         LogManager::warning (QString("Attempted to set screen position y coordinate "
@@ -75,54 +75,54 @@ void Screen::setPosY(int const y)
     m_posY = y;
 }
 
-void Screen::setName(QString n)
+void UIScreen::setName(QString n)
 {
     m_name = n;
 }
 
-void Screen::setStatus(ScreenStatus s)
+void UIScreen::setStatus(ScreenStatus s)
 {
     m_status = s;
     m_statusImage = m_statusImages[m_status];
 }
 
-void Screen::setStatus(QString s)
+void UIScreen::setStatus(QString s)
 {
     ScreenStatus status = stringToScreenStatus(s.toStdString());
     setStatus(status);
 }
 
-bool Screen::locked() const
+bool UIScreen::locked() const
 {
     return m_locked;
 }
 
-void Screen::setLocked(bool value)
+void UIScreen::setLocked(bool value)
 {
     m_locked = value;
 }
 
-ScreenStatus Screen::status() const
+ScreenStatus UIScreen::status() const
 {
     return m_status;
 }
 
-ErrorCode Screen::lastErrorCode() const
+ErrorCode UIScreen::lastErrorCode() const
 {
     return m_lastErrorCode;
 }
 
-void Screen::setLastErrorCode(const ErrorCode &lastErrorCode)
+void UIScreen::setLastErrorCode(const ErrorCode &lastErrorCode)
 {
     m_lastErrorCode = lastErrorCode;
 }
 
-int Screen::id() const
+int UIScreen::id() const
 {
     return m_id;
 }
 
-void Screen::setId(int id)
+void UIScreen::setId(int id)
 {
     m_id = id;
 }

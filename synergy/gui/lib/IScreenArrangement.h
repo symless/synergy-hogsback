@@ -6,7 +6,7 @@
 
 #include <QList>
 
-class Screen;
+class UIScreen;
 class ScreenListModel;
 
 class LIB_SPEC IScreenArrangement
@@ -14,8 +14,8 @@ class LIB_SPEC IScreenArrangement
 public:
 	virtual ~IScreenArrangement() { }
 
-	virtual bool addScreen(ScreenListModel* screenModel, Screen& screen) = 0;
-	virtual bool removeScreen(ScreenListModel* screenModel, Screen& screen) = 0;
+	virtual bool addScreen(ScreenListModel* screenModel, UIScreen& screen) = 0;
+	virtual bool removeScreen(ScreenListModel* screenModel, UIScreen& screen) = 0;
 	virtual void setViewW(int w) = 0;
 	virtual void setViewH(int h) = 0;
 	virtual void adjustModel(ScreenListModel* screenModel, int index) = 0;

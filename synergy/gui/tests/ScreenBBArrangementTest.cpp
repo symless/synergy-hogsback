@@ -13,7 +13,7 @@ void ScreenBBArrangementTest::calculateNewPos_firstNewScreen_addToTheCenter()
 {
     MockScreenModel screenListModel;
     ScreenBBArrangement arrangement;
-    Screen screen("mock");
+    UIScreen screen("mock");
     arrangement.calculateNewPos(&screenListModel, screen);
 
     QCOMPARE(screen.posX(), kDefaultViewWidth / 2 - kScreenIconWidth / 2);
@@ -25,7 +25,7 @@ void ScreenBBArrangementTest::calculateNewPos_firstExistScreen_noChangeInScreen(
     // this scenario should never happen
     MockScreenModel screenListModel;
     ScreenBBArrangement arrangement;
-    Screen screen("mock");
+    UIScreen screen("mock");
     screen.setPosX(0);
     screen.setPosY(0);
     arrangement.calculateNewPos(&screenListModel, screen);
@@ -43,7 +43,7 @@ void ScreenBBArrangementTest::calculateNewPos_newScreen_alignToLeft()
     arrangement.m_bottomRightX = kDefaultViewWidth / 2 +
             kScreenIconWidth / 2 + kScreenIconWidth;
     arrangement.m_bottomRightY = kDefaultViewHeight / 2 + kScreenIconHeight / 2;
-    Screen screen("mock");
+    UIScreen screen("mock");
     arrangement.calculateNewPos(&screenListModel, screen);
 
     QCOMPARE(screen.posX(), kDefaultViewWidth / 2 - kScreenIconWidth / 2 -
@@ -59,7 +59,7 @@ void ScreenBBArrangementTest::calculateNewPos_newScreen_alignToRight()
     arrangement.m_topLeftY = kDefaultViewHeight / 2 - kScreenIconHeight / 2;
     arrangement.m_bottomRightX = kDefaultViewWidth / 2 + kScreenIconWidth / 2;
     arrangement.m_bottomRightY = kDefaultViewHeight / 2 + kScreenIconHeight / 2;
-    Screen screen("mock");
+    UIScreen screen("mock");
     arrangement.calculateNewPos(&screenListModel, screen);
 
     QCOMPARE(screen.posX(), kDefaultViewWidth / 2 + kScreenIconWidth / 2);
@@ -77,7 +77,7 @@ void ScreenBBArrangementTest::calculateNewPos_newScreen_alignToUp()
             kScreenIconWidth / 2 + kScreenIconWidth;
     arrangement.m_bottomRightY = kDefaultViewHeight / 2 +
             kScreenIconHeight / 2 + kDefaultViewHeight;
-    Screen screen("mock");
+    UIScreen screen("mock");
     arrangement.calculateNewPos(&screenListModel, screen);
 
     QCOMPARE(screen.posX(), kDefaultViewWidth / 2 - kScreenIconWidth / 2);
@@ -95,7 +95,7 @@ void ScreenBBArrangementTest::calculateNewPos_newScreen_alignToDown()
     arrangement.m_bottomRightX = kDefaultViewWidth / 2 +
             kScreenIconWidth / 2 + kScreenIconWidth;
     arrangement.m_bottomRightY = kDefaultViewHeight / 2 + kScreenIconHeight / 2;
-    Screen screen("mock");
+    UIScreen screen("mock");
     arrangement.calculateNewPos(&screenListModel, screen);
 
     QCOMPARE(screen.posX(), kDefaultViewWidth / 2 - kScreenIconWidth / 2);
@@ -169,10 +169,10 @@ void ScreenBBArrangementTest::checkAdjustment_overScale_noScale()
 void ScreenBBArrangementTest::getScreensNextTo_nonexistOnLeft_emptyList()
 {
     MockScreenModel screenListModel;
-    Screen screen1("mock1");
+    UIScreen screen1("mock1");
     screen1.setPosX(0);
     screen1.setPosY(0);
-    Screen screen2("mock2");
+    UIScreen screen2("mock2");
     screen2.setPosX(kScreenIconWidth);
     screen2.setPosY(kScreenIconHeight);
     screenListModel.addScreen(screen1);
@@ -186,10 +186,10 @@ void ScreenBBArrangementTest::getScreensNextTo_nonexistOnLeft_emptyList()
 void ScreenBBArrangementTest::getScreensNextTo_oneExistOnLeft_listWithOneIndex()
 {
     MockScreenModel screenListModel;
-    Screen screen1("mock1");
+    UIScreen screen1("mock1");
     screen1.setPosX(kScreenIconWidth);
     screen1.setPosY(kScreenIconHeight - 1);
-    Screen screen2("mock2");
+    UIScreen screen2("mock2");
     screen2.setPosX(0);
     screen2.setPosY(0);
     screenListModel.addScreen(screen1);
@@ -204,10 +204,10 @@ void ScreenBBArrangementTest::getScreensNextTo_oneExistOnLeft_listWithOneIndex()
 void ScreenBBArrangementTest::getScreensNextTo_nonexistOnRight_emptyList()
 {
     MockScreenModel screenListModel;
-    Screen screen1("mock1");
+    UIScreen screen1("mock1");
     screen1.setPosX(0);
     screen1.setPosY(0);
-    Screen screen2("mock2");
+    UIScreen screen2("mock2");
     screen2.setPosX(kScreenIconWidth);
     screen2.setPosY(kScreenIconHeight);
     screenListModel.addScreen(screen1);
@@ -221,13 +221,13 @@ void ScreenBBArrangementTest::getScreensNextTo_nonexistOnRight_emptyList()
 void ScreenBBArrangementTest::getScreensNextTo_twoExistOnRight_listWithTwoIndices()
 {
     MockScreenModel screenListModel;
-    Screen screen1("mock1");
+    UIScreen screen1("mock1");
     screen1.setPosX(0);
     screen1.setPosY(0);
-    Screen screen2("mock2");
+    UIScreen screen2("mock2");
     screen2.setPosX(kScreenIconWidth);
     screen2.setPosY(kScreenIconHeight - 1);
-    Screen screen3("mock3");
+    UIScreen screen3("mock3");
     screen3.setPosX(kScreenIconWidth * 2);
     screen3.setPosY(kScreenIconHeight - 1);
     screenListModel.addScreen(screen1);
@@ -244,10 +244,10 @@ void ScreenBBArrangementTest::getScreensNextTo_twoExistOnRight_listWithTwoIndice
 void ScreenBBArrangementTest::getScreensNextTo_nonexistOnTop_emptyList()
 {
     MockScreenModel screenListModel;
-    Screen screen1("mock1");
+    UIScreen screen1("mock1");
     screen1.setPosX(0);
     screen1.setPosY(0);
-    Screen screen2("mock2");
+    UIScreen screen2("mock2");
     screen2.setPosX(kScreenIconWidth);
     screen2.setPosY(kScreenIconHeight);
     screenListModel.addScreen(screen1);
@@ -261,10 +261,10 @@ void ScreenBBArrangementTest::getScreensNextTo_nonexistOnTop_emptyList()
 void ScreenBBArrangementTest::getScreensNextTo_oneExistOnTop_listWithOneIndex()
 {
     MockScreenModel screenListModel;
-    Screen screen1("mock1");
+    UIScreen screen1("mock1");
     screen1.setPosX(kScreenIconWidth - 1);
     screen1.setPosY(kScreenIconHeight);
-    Screen screen2("mock2");
+    UIScreen screen2("mock2");
     screen2.setPosX(0);
     screen2.setPosY(0);
     screenListModel.addScreen(screen1);
@@ -279,10 +279,10 @@ void ScreenBBArrangementTest::getScreensNextTo_oneExistOnTop_listWithOneIndex()
 void ScreenBBArrangementTest::getScreensNextTo_nonexistOnBottom_emptyList()
 {
     MockScreenModel screenListModel;
-    Screen screen1("mock1");
+    UIScreen screen1("mock1");
     screen1.setPosX(0);
     screen1.setPosY(0);
-    Screen screen2("mock2");
+    UIScreen screen2("mock2");
     screen2.setPosX(kScreenIconWidth);
     screen2.setPosY(kScreenIconHeight);
     screenListModel.addScreen(screen1);
@@ -296,13 +296,13 @@ void ScreenBBArrangementTest::getScreensNextTo_nonexistOnBottom_emptyList()
 void ScreenBBArrangementTest::getScreensNextTo_twoExistOnBottom_listWithTwoIndices()
 {
     MockScreenModel screenListModel;
-    Screen screen1("mock1");
+    UIScreen screen1("mock1");
     screen1.setPosX(0);
     screen1.setPosY(0);
-    Screen screen2("mock2");
+    UIScreen screen2("mock2");
     screen2.setPosX(0);
     screen2.setPosY(kScreenIconHeight);
-    Screen screen3("mock3");
+    UIScreen screen3("mock3");
     screen3.setPosX(kScreenIconWidth - 1);
     screen3.setPosY(kScreenIconHeight * 2);
     screenListModel.addScreen(screen1);
@@ -319,7 +319,7 @@ void ScreenBBArrangementTest::getScreensNextTo_twoExistOnBottom_listWithTwoIndic
 void ScreenBBArrangementTest::recalculateBoundingBox_oneScreen_newBoundingBox()
 {
     MockScreenModel screenListModel;
-    Screen screen("mock");
+    UIScreen screen("mock");
     screen.setPosX(0);
     screen.setPosY(0);
     screenListModel.addScreen(screen);
@@ -335,10 +335,10 @@ void ScreenBBArrangementTest::recalculateBoundingBox_oneScreen_newBoundingBox()
 void ScreenBBArrangementTest::recalculateBoundingBox_twoScreen_newBoundingBox()
 {
     MockScreenModel screenListModel;
-    Screen screen1("mock1");
+    UIScreen screen1("mock1");
     screen1.setPosX(0);
     screen1.setPosY(0);
-    Screen screen2("mock2");
+    UIScreen screen2("mock2");
     screen2.setPosX(kScreenIconWidth);
     screen2.setPosY(kScreenIconHeight);
     screenListModel.addScreen(screen1);
@@ -367,7 +367,7 @@ void ScreenBBArrangementTest::recalculateBoundingBox_emptyModel_zeroBoundingBox(
 void ScreenBBArrangementTest::recalculateBoundingBox_skipOne_zeroBoundingBox()
 {
     MockScreenModel screenListModel;
-    Screen screen("mock");
+    UIScreen screen("mock");
     screen.setPosX(0);
     screen.setPosY(0);
     screenListModel.addScreen(screen);
@@ -383,10 +383,10 @@ void ScreenBBArrangementTest::recalculateBoundingBox_skipOne_zeroBoundingBox()
 void ScreenBBArrangementTest::recalculateBoundingBox_skipOneInTwo_zeroBoundingBox()
 {
     MockScreenModel screenListModel;
-    Screen screen1("mock1");
+    UIScreen screen1("mock1");
     screen1.setPosX(0);
     screen1.setPosY(0);
-    Screen screen2("mock2");
+    UIScreen screen2("mock2");
     screen2.setPosX(kScreenIconWidth);
     screen2.setPosY(kScreenIconHeight);
     screenListModel.addScreen(screen1);
@@ -403,7 +403,7 @@ void ScreenBBArrangementTest::recalculateBoundingBox_skipOneInTwo_zeroBoundingBo
 void ScreenBBArrangementTest::adjustToCenter_oneScreen_moveScreenToCenter()
 {
     MockScreenModel screenListModel;
-    Screen screen("mock");
+    UIScreen screen("mock");
     screen.setPosX(0);
     screen.setPosY(0);
     screenListModel.addScreen(screen);
@@ -457,10 +457,10 @@ void ScreenBBArrangementTest::collide_noOverlap_returnFalse()
 void ScreenBBArrangementTest::collideWithOthers_overlap_returOverlapList()
 {
     MockScreenModel screenListModel;
-    Screen screen1("mock1");
+    UIScreen screen1("mock1");
     screen1.setPosX(0);
     screen1.setPosY(0);
-    Screen screen2("mock2");
+    UIScreen screen2("mock2");
     screen2.setPosX(kScreenIconWidth - 1);
     screen2.setPosY(0);
     screenListModel.addScreen(screen1);
@@ -476,10 +476,10 @@ void ScreenBBArrangementTest::collideWithOthers_overlap_returOverlapList()
 void ScreenBBArrangementTest::collideWithOthers_noOverlap_emptyList()
 {
     MockScreenModel screenListModel;
-    Screen screen1("mock1");
+    UIScreen screen1("mock1");
     screen1.setPosX(0);
     screen1.setPosY(0);
-    Screen screen2("mock2");
+    UIScreen screen2("mock2");
     screen2.setPosX(kScreenIconWidth);
     screen2.setPosY(0);
     screenListModel.addScreen(screen1);
@@ -571,10 +571,10 @@ void ScreenBBArrangementTest::testSnapToOnAxis_outsideRightOutsideThreshold_retu
 void ScreenBBArrangementTest::calculateSnapping_onlyCloseToRight_snapToRight()
 {
     MockScreenModel screenListModel;
-    Screen screen1("mock1");
+    UIScreen screen1("mock1");
     screen1.setPosX(kScreenIconWidth + 3);
     screen1.setPosY(0);
-    Screen screen2("mock2");
+    UIScreen screen2("mock2");
     screen2.setPosX(0);
     screen2.setPosY(0);
     screenListModel.addScreen(screen1);
@@ -590,10 +590,10 @@ void ScreenBBArrangementTest::calculateSnapping_onlyCloseToRight_snapToRight()
 void ScreenBBArrangementTest::calculateSnapping_closeToRightMoreThanTop_snapToRight()
 {
     MockScreenModel screenListModel;
-    Screen screen1("mock1");
+    UIScreen screen1("mock1");
     screen1.setPosX(kScreenIconWidth + 3);
     screen1.setPosY(0);
-    Screen screen2("mock2");
+    UIScreen screen2("mock2");
     screen2.setPosX(0);
     screen2.setPosY(5);
     screenListModel.addScreen(screen1);
@@ -609,10 +609,10 @@ void ScreenBBArrangementTest::calculateSnapping_closeToRightMoreThanTop_snapToRi
 void ScreenBBArrangementTest::calculateSnapping_onlyCloseToLeft_snapToLeft()
 {
     MockScreenModel screenListModel;
-    Screen screen1("mock1");
+    UIScreen screen1("mock1");
     screen1.setPosX(0);
     screen1.setPosY(0);
-    Screen screen2("mock2");
+    UIScreen screen2("mock2");
     screen2.setPosX(kScreenIconWidth + 3);
     screen2.setPosY(0);
     screenListModel.addScreen(screen1);
@@ -628,10 +628,10 @@ void ScreenBBArrangementTest::calculateSnapping_onlyCloseToLeft_snapToLeft()
 void ScreenBBArrangementTest::calculateSnapping_closeToLeftMoreThanBottom_snapToLeft()
 {
     MockScreenModel screenListModel;
-    Screen screen1("mock1");
+    UIScreen screen1("mock1");
     screen1.setPosX(0);
     screen1.setPosY(0);
-    Screen screen2("mock2");
+    UIScreen screen2("mock2");
     screen2.setPosX(kScreenIconWidth + 3);
     screen2.setPosY(5);
     screenListModel.addScreen(screen1);
@@ -647,10 +647,10 @@ void ScreenBBArrangementTest::calculateSnapping_closeToLeftMoreThanBottom_snapTo
 void ScreenBBArrangementTest::calculateSnapping_onlyCloseToTop_snapToTop()
 {
     MockScreenModel screenListModel;
-    Screen screen1("mock1");
+    UIScreen screen1("mock1");
     screen1.setPosX(0);
     screen1.setPosY(0);
-    Screen screen2("mock2");
+    UIScreen screen2("mock2");
     screen2.setPosX(0);
     screen2.setPosY(kScreenIconHeight + 3);
     screenListModel.addScreen(screen1);
@@ -666,10 +666,10 @@ void ScreenBBArrangementTest::calculateSnapping_onlyCloseToTop_snapToTop()
 void ScreenBBArrangementTest::calculateSnapping_closeToTopMoreThanLeft_snapToTop()
 {
     MockScreenModel screenListModel;
-    Screen screen1("mock1");
+    UIScreen screen1("mock1");
     screen1.setPosX(0);
     screen1.setPosY(0);
-    Screen screen2("mock2");
+    UIScreen screen2("mock2");
     screen2.setPosX(5);
     screen2.setPosY(kScreenIconHeight + 3);
     screenListModel.addScreen(screen1);
@@ -685,10 +685,10 @@ void ScreenBBArrangementTest::calculateSnapping_closeToTopMoreThanLeft_snapToTop
 void ScreenBBArrangementTest::calculateSnapping_onlyCloseToBottom_snapToBottom()
 {
     MockScreenModel screenListModel;
-    Screen screen1("mock1");
+    UIScreen screen1("mock1");
     screen1.setPosX(0);
     screen1.setPosY(kScreenIconHeight + 3);
-    Screen screen2("mock2");
+    UIScreen screen2("mock2");
     screen2.setPosX(0);
     screen2.setPosY(0);
     screenListModel.addScreen(screen1);
@@ -704,10 +704,10 @@ void ScreenBBArrangementTest::calculateSnapping_onlyCloseToBottom_snapToBottom()
 void ScreenBBArrangementTest::calculateSnapping_closeToBottomMoreThanRight_snapToBottom()
 {
     MockScreenModel screenListModel;
-    Screen screen1("mock1");
+    UIScreen screen1("mock1");
     screen1.setPosX(5);
     screen1.setPosY(kScreenIconHeight + 3);
-    Screen screen2("mock2");
+    UIScreen screen2("mock2");
     screen2.setPosX(0);
     screen2.setPosY(0);
     screenListModel.addScreen(screen1);

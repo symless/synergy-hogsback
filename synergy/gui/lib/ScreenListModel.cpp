@@ -1,6 +1,6 @@
 #include "ScreenListModel.h"
 
-#include "Screen.h"
+#include "UIScreen.h"
 #include "Common.h"
 
 #include <QSet>
@@ -59,12 +59,12 @@ int ScreenListModel::getScreenModeSize()
     return m_screens.count();
 }
 
-const Screen& ScreenListModel::getScreen(int index) const
+const UIScreen& ScreenListModel::getScreen(int index) const
 {
     return m_screens[index];
 }
 
-void ScreenListModel::update(const QList<Screen>& screens)
+void ScreenListModel::update(const QList<UIScreen>& screens)
 {
     for (int i = 0; i < screens.count(); i++) {
         int r = findScreen(screens[i].name());
@@ -81,9 +81,9 @@ void ScreenListModel::update(const QList<Screen>& screens)
     }
 }
 
-QSet<Screen> ScreenListModel::getScreenSet()
+QSet<UIScreen> ScreenListModel::getScreenSet()
 {
-    return QSet<Screen>::fromList(m_screens);
+    return QSet<UIScreen>::fromList(m_screens);
 }
 
 int ScreenListModel::rowCount(const QModelIndex& parent) const {
@@ -96,7 +96,7 @@ QVariant ScreenListModel::data(const QModelIndex& index, int role) const
     if (index.row() < 0 || index.row() >= m_screens.count())
         return QVariant();
 
-    const Screen& screen = m_screens[index.row()];
+    const UIScreen& screen = m_screens[index.row()];
     if (role == kPosXRole)
         return screen.posX();
     else if (role == kPosYRole)
@@ -139,7 +139,7 @@ QHash<int, QByteArray> ScreenListModel::roleNames() const
     return roles;
 }
 
-QList<Screen> ScreenListModel::getScreenList() const
+QList<UIScreen> ScreenListModel::getScreenList() const
 {
     return m_screens;
 }
@@ -206,7 +206,7 @@ int ScreenListModel::findScreen(int screenId)
     return -1;
 }
 
-void ScreenListModel::addScreen(const Screen& screen)
+void ScreenListModel::addScreen(const UIScreen& screen)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     m_screens.append(screen);

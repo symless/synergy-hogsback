@@ -9,7 +9,7 @@ ScreenListSnapshotManager::ScreenListSnapshotManager(QObject* parent) :
 
 bool
 ScreenListSnapshotManager::exactMatch(
-            QSet<Screen> const& screens,
+            QSet<UIScreen> const& screens,
             SnapshotIndex& index) const
 {
     index = m_snapshots.find(screens);
@@ -22,9 +22,9 @@ ScreenListSnapshotManager::exactMatch(
     return found;
 }
 
-QList<Screen> ScreenListSnapshotManager::getSnapshot(SnapshotIndex index) const
+QList<UIScreen> ScreenListSnapshotManager::getSnapshot(SnapshotIndex index) const
 {
-    return QList<Screen>::fromSet(*index);
+    return QList<UIScreen>::fromSet(*index);
 }
 
 void ScreenListSnapshotManager::saveToFile()

@@ -1,7 +1,7 @@
 #ifndef SCREENLISTSNAPSHOT_H
 #define SCREENLISTSNAPSHOT_H
 
-#include "Screen.h"
+#include "UIScreen.h"
 
 #include <QObject>
 #include <QSet>
@@ -33,17 +33,17 @@ class ScreenListSnapshotManager : public QObject
 {
     Q_OBJECT
 public:
-    using SnapshotIndex = QSet<QSet<Screen>>::const_iterator;
+    using SnapshotIndex = QSet<QSet<UIScreen>>::const_iterator;
     explicit ScreenListSnapshotManager(QObject* parent = 0);
 
-    bool exactMatch(const QSet<Screen>& screenNames, SnapshotIndex& index) const;
-    QList<Screen> getSnapshot(SnapshotIndex) const;
+    bool exactMatch(const QSet<UIScreen>& screenNames, SnapshotIndex& index) const;
+    QList<UIScreen> getSnapshot(SnapshotIndex) const;
     void saveToFile();
     void loadFromFile();
     void saveSnapshot(ScreenListModel* screenListModel);
 
 private:
-    QSet<QSet<Screen>> m_snapshots;
+    QSet<QSet<UIScreen>> m_snapshots;
 };
 
 #endif // SCREENLISTSNAPSHOT_H
