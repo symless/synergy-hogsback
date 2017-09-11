@@ -9,7 +9,7 @@ XWindowsDirectoryManager::systemAppDir()
 boost::filesystem::path
 XWindowsDirectoryManager::installedDir()
 {
-    return boost::filesystem::system_complete(argv[0]).remove_filename();
+    return g_programDir;
 }
 
 boost::filesystem::path
