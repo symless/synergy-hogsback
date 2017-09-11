@@ -12,12 +12,8 @@ SecuredTcpSession::SecuredTcpSession(boost::asio::io_service& ioService, ssl::co
 
 SecuredTcpSession::~SecuredTcpSession()
 {
-    try {
-        m_stream.lowest_layer().shutdown(boost::asio::socket_base::shutdown_both);
-    }
-    catch (const std::exception& ex) {
-        mainLog()->error("unable to shutdown tcp session: {}", ex.what());
-    }
+    boost::system::error_code ec;
+    m_stream.shutdown(ec);
 }
 
 ssl::stream<tcp::socket>& SecuredTcpSession::stream()
