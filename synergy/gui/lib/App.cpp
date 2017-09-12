@@ -62,7 +62,11 @@ App::installService() {
 int
 App::run(int argc, char* argv[])
 {
-    DirectoryManager::instance()->init(argc, argv);
+    // cache the directory of this binary for installedDir
+    boost::filesystem::path selfPath = boost::filesystem::system_complete(argv[0]);
+    DirectoryManager::instance()->m_programDir = selfPath.remove_filename().string();
+    // TODO: figure out linux linker error and move boost path stuff back to init
+    //DirectoryManager::instance()->init(argc, argv);
 
     cxxopts::Options options("synergy2");
 
