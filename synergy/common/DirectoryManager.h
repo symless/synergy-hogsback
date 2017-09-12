@@ -15,7 +15,7 @@ public:
     virtual boost::filesystem::path profileDir() = 0;
     virtual boost::filesystem::path systemLogDir() = 0;
 
-protected:
+public:
 	std::string m_programDir;
 };
 
