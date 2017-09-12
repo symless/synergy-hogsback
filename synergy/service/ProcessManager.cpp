@@ -112,7 +112,7 @@ ProcessManagerImpl::start () {
         bp::std_out > m_outPipe,
         bp::std_err > m_errorPipe,
         bp::on_exit = [this](int exit, std::error_code const& ec){
-            mainLog()->debug("core process exited: code={}", exit);
+            mainLog()->debug("core process exited: code={} expected={}", exit, m_expectingExit);
             if (m_expectingExit) {
                 m_parent.expectedExit();
             } else {
@@ -168,8 +168,6 @@ ProcessManagerImpl::shutdown()
 
     m_process->terminate();
     ioService.poll();
-
-    mainLog()->debug("core process stop completed");
 }
 
 std::string
@@ -316,25 +314,9 @@ void
 ProcessManager::start (std::vector<std::string> command)
 {
     if (m_impl) {
-        mainLog()->debug("process already running, attempting to stop");
-
-        m_impl->m_expectingExit = true;
-        expectedExit.connect_extended(
-            [this, &process = m_impl->m_process](auto& connection) {
-
-            connection.disconnect();
-
-            if (process) {
-                process->join();
-            }
-            else {
-                mainLog()->error("can't join process, not initialized");
-            }
-
-            m_impl->m_expectingExit = false;
-        });
+        m_nextCommand = command;
         shutdown();
-        assert (!m_impl);
+        return;
     }
 
     mainLog()->debug("starting core process with command: {}", ba::join(command, " "));
@@ -448,10 +430,37 @@ ProcessManager::start (std::vector<std::string> command)
 
 void
 ProcessManager::shutdown() {
-    if (m_impl) {
-        m_impl->shutdown();
+
+    mainLog()->debug("process already running, attempting to stop");
+
+    assert(m_impl);
+    assert(!m_expectingExit);
+
+    m_impl->m_expectingExit = true;
+    expectedExit.connect_extended([this](auto& connection) {
+        connection.disconnect();
+
+        if (m_impl->m_process) {
+            m_impl->m_process->join();
+        }
+        else {
+            mainLog()->error("can't join process, not initialized");
+        }
+
+        m_impl->m_expectingExit = false;
+
+        // TODO: figure out how to stop qt freaking out when this is called
         m_impl.reset();
-    }
+
+        mainLog()->debug("core process shutdown complete");
+
+        if (!m_nextCommand.empty()) {
+            assert(!m_impl);
+            start(std::move(m_nextCommand));
+        }
+    });
+
+    m_impl->shutdown();
 }
 
 void ProcessManager::writeConfigurationFile()

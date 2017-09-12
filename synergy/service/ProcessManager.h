@@ -50,6 +50,7 @@ private:
     std::unique_ptr<ConnectivityTester> m_connectivityTester;
     ProcessMode m_proccessMode;
     int m_lastServerId;
+    std::vector<std::string> m_nextCommand;
 };
 
 #endif // SYNERGY_SERVICE_PROCESSMANAGER_H
