@@ -1,5 +1,6 @@
 #include "ProfileConfig.h"
 
+#include <synergy/service/Logs.h>
 #include <synergy/common/ProfileConfigSnapshot.h>"
 
 #include <synergy/service/json.hpp>
@@ -28,12 +29,20 @@ ProfileConfig ProfileConfig::fromJSONSnapshot(const std::string& json)
 void ProfileConfig::apply (ProfileConfig const& src)
 {
     if (compare(src)) {
+        mainLog()->debug("profile changed, storing local copy");
         clone(src);
+    }
+    else {
+        mainLog()->debug("profile has not changed, no action needed");
     }
 }
 
 bool ProfileConfig::compare(ProfileConfig const& src)
 {
+    mainLog()->debug(
+        "comparing profiles, this:(id={}, server={}) other:(id={}, server={})",
+        m_profile.id(), m_profile.server(), src.m_profile.id(), src.m_profile.server());
+
     bool different = false;
 
     if (src.m_profile.m_version < m_profile.m_version) {
