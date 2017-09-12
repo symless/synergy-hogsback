@@ -43,6 +43,19 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             m_remoteProfileConfig->clone(profileConfig);
             m_localProfileConfig->apply(*m_remoteProfileConfig);
 
+            // HACK: if no server, then use the first screen in the profile. this should
+            // really be done on the cloud server.
+            if (!m_localProfileConfig->hasServer()) {
+                mainLog()->debug("no server has been established yet, using first screen");
+                auto screens = m_localProfileConfig->screens();
+                if (!screens.empty()) {
+                    m_cloudClient->claimServer(screens[0].id());
+                }
+                else {
+                    mainLog()->error("can't choose a server, no screens in config");
+                }
+            }
+
             // forward the message via rpc server
             auto server = m_rpcManager->server();
             g_lastProfileSnapshot = json;

@@ -37,6 +37,7 @@ public:
     void updateScreenTestResult(int screenId, std::string successfulIp, std::string failedIp);
     Screen& getScreen(int screenId);
     void forceConnectivityTest(); // TODO: remove hack
+    bool hasServer() const { return m_profile.server() != -1; } // TODO: remove hack
 
 private:
     Profile m_profile;
