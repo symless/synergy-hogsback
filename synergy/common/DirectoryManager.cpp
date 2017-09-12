@@ -25,6 +25,13 @@ DirectoryManager::instance()
 #endif
     return impl;
 }
+void
+DirectoryManager::init(int argc, char* argv[])
+{
+    // cache the directory of this binary for installedDir
+    auto selfPath = boost::filesystem::system_complete(argv[0]);
+    m_programDir = selfPath.remove_filename().string();
+}
 
 boost::filesystem::path
 DirectoryManager::userDir()
