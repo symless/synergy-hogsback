@@ -230,8 +230,10 @@ void ConnectivityTester::onTestDelegateeDone(std::map<std::string, bool> results
             std::string successfulIp = boost::algorithm::join(successfulIpList, ",");
             std::string failedIp = boost::algorithm::join(failedIpList, ",");
 
+            // update connectivity results
             if (!successfulIp.empty()) {
                 mainLog()->debug("successful report: dest = {}, ips = {}", *screenId, successfulIp);
+                m_screenSuccessfulResults[*screenId] = successfulIpList;
             }
 
             if (!failedIp.empty()) {
@@ -240,11 +242,6 @@ void ConnectivityTester::onTestDelegateeDone(std::map<std::string, bool> results
 
             m_localProfileConfig->updateScreenTestResult(*screenId, successfulIp, failedIp);
             newReportGenerated(*screenId, successfulIp, failedIp);
-
-            // update connectivity results
-            if (!successfulIp.empty()) {
-                m_screenSuccessfulResults[*screenId] = successfulIpList;
-            }
         }
 
         testedCount++;
