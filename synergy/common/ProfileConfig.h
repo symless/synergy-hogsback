@@ -12,7 +12,7 @@ public:
     static ProfileConfig fromJSONSnapshot (std::string const&json);
 
     void apply (ProfileConfig const& src);
-    bool compare (ProfileConfig const& src);
+    bool compare (ProfileConfig const& target);
     void clone (ProfileConfig const& src);
 
     template <typename... Args>

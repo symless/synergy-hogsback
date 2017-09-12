@@ -37,81 +37,81 @@ void ProfileConfig::apply (ProfileConfig const& src)
     }
 }
 
-bool ProfileConfig::compare(ProfileConfig const& src)
+bool ProfileConfig::compare(ProfileConfig const& target)
 {
     mainLog()->debug(
         "comparing profiles, this:(id={}, server={}) other:(id={}, server={})",
-        m_profile.id(), m_profile.server(), src.m_profile.id(), src.m_profile.server());
+        m_profile.id(), m_profile.server(), target.m_profile.id(), target.m_profile.server());
 
     bool different = false;
 
-    if (src.m_profile.m_version < m_profile.m_version) {
+    if (target.m_profile.m_version < m_profile.m_version) {
 
         mainLog()->debug("profile version changed, abort compare");
         return different;
     }
 
-    if (src.m_profile.m_id != m_profile.m_id) {
+    if (target.m_profile.m_id != m_profile.m_id) {
         mainLog()->debug("profile id changed");
-        profileIdChanged(src.m_profile.m_id);
+        profileIdChanged(target.m_profile.m_id);
         different = true;
     }
 
-    if (src.m_profile.m_name != m_profile.m_name) {
+    if (target.m_profile.m_name != m_profile.m_name) {
         mainLog()->debug("profile name changed");
-        profileNameChanged(src.m_profile.m_name);
+        profileNameChanged(target.m_profile.m_name);
         different = true;
     }
 
-    if (src.m_profile.m_server != m_profile.m_server) {
+    if (target.m_profile.m_server != m_profile.m_server) {
         mainLog()->debug("profile server changed");
-        profileServerChanged(src.m_profile.m_server);
+        profileServerChanged(target.m_profile.m_server);
         different = true;
     }
 
     std::vector<Screen> added;
-    for (const auto& srcScreen: src.m_screens) {
+    for (const auto& targetScreen: target.m_screens) {
         bool found = false;
 
         for (auto& screen : m_screens) {
-            if (screen.m_id == srcScreen.m_id) {
+            if (screen.m_id == targetScreen.m_id) {
                 found = true;
 
-                if (screen.m_name != srcScreen.m_name) {
+                if (screen.m_name != targetScreen.m_name) {
                     mainLog()->debug("profile screen name changed");
-                    screenNameChanged(srcScreen.m_id);
+                    screenNameChanged(targetScreen.m_id);
                     different = true;
                 }
 
-                if (screen.m_active != srcScreen.m_active) {
+                if (screen.m_active != targetScreen.m_active) {
                     mainLog()->debug("profile screen status changed");
-                    screenStatusChanged(srcScreen.m_id);
+                    screenStatusChanged(targetScreen.m_id);
                     different = true;
                 }
 
-                if (screen.m_x != srcScreen.m_x || screen.m_y != srcScreen.m_y) {
+                if (screen.m_x != targetScreen.m_x || screen.m_y != targetScreen.m_y) {
                     mainLog()->debug("profile screen position changed");
-                    screenPositionChanged(srcScreen.m_id);
+                    screenPositionChanged(targetScreen.m_id);
                     different = true;
                 }
 
-                if (screen.m_status != srcScreen.m_status) {
+                if (screen.m_status != targetScreen.m_status) {
                     mainLog()->debug("profile screen status changed");
-                    screenStatusChanged(srcScreen.m_id);
+                    screenStatusChanged(targetScreen.m_id);
                     different = true;
                 }
 
-                if (screen.m_successfulTestIp != srcScreen.m_successfulTestIp ||
-                    screen.m_failedTestIp != srcScreen.m_failedTestIp) {
+                if (screen.m_successfulTestIp != targetScreen.m_successfulTestIp ||
+                    screen.m_failedTestIp != targetScreen.m_failedTestIp) {
                     mainLog()->debug("profile screen test result changed");
-                    screenTestResultChanged(srcScreen.m_id, srcScreen.m_successfulTestIp, srcScreen.m_failedTestIp);
+                    screenTestResultChanged(targetScreen.m_id, targetScreen.m_successfulTestIp, targetScreen.m_failedTestIp);
                     different = true;
                 }
             }
         }
 
         if (!found) {
-            added.push_back(srcScreen);
+            added.push_back(targetScreen);
         }
     }
 
@@ -119,7 +119,7 @@ bool ProfileConfig::compare(ProfileConfig const& src)
     for (const auto& screen: m_screens) {
         bool found = false;
 
-        for (auto& srcScreen : src.m_screens) {
+        for (auto& srcScreen : target.m_screens) {
             if (screen.m_id == srcScreen.m_id) {
                 found = true;
             }
