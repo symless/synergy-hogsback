@@ -58,6 +58,10 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         mainLog()->info("service started successfully");
     });
 
+    m_processManager->onLocalInput.connect([this](){
+        m_cloudClient->claimServer(m_userConfig->screenId());
+    });
+
     m_rpcManager->start();
 }
 

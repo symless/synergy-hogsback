@@ -33,6 +33,7 @@ public:
     signal<void()> onExit;
     signal<void()> onUnexpectedExit;
     signal<void(std::string const&)> onOutput;
+    signal<void()> onLocalInput;
 
 private:
     void writeConfigurationFile();

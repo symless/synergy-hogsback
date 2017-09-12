@@ -378,7 +378,7 @@ ProcessManager::start (std::vector<std::string> command)
         signals.emplace_back (
             onOutput.connect ([this](std::string const& line) {
                 if (contains (line, "local input detected")) {
-                    m_localProfileConfig->claimServer(m_userConfig->screenId());
+                    onLocalInput();
                 }
             }, boost::signals2::at_front)
         );

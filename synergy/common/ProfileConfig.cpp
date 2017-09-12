@@ -174,13 +174,6 @@ Screen& ProfileConfig::getScreen(int screenId)
     throw std::runtime_error("Can't find screen with ID: " + std::to_string(screenId));
 }
 
-void ProfileConfig::claimServer(int serverId)
-{
-    m_profile.m_server = serverId;
-
-    modified();
-}
-
 void ProfileConfig::forceConnectivityTest()
 {
     /* HACK: when the config UI opens, it requests a profile snapshot,
