@@ -12,13 +12,11 @@
 int
 main (int argc, char* argv[]) {
 
+    DirectoryManager::instance()->init(argc, argv);
+
     startCrashHandler();
 
     mainLog()->info("starting service...");
-
-    // cache the directory of this binary for installedDir
-    auto selfPath = boost::filesystem::system_complete(argv[0]);
-    g_programDir = selfPath.remove_filename().string();
 
     boost::asio::io_service ioService;
 

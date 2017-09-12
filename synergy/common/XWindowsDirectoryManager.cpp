@@ -9,7 +9,7 @@ XWindowsDirectoryManager::systemAppDir()
 boost::filesystem::path
 XWindowsDirectoryManager::installedDir()
 {
-    return g_programDir;
+    return m_programDir;
 }
 
 boost::filesystem::path

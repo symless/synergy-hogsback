@@ -11,10 +11,10 @@
 #include "AppConfig.h"
 #include "Hostname.h"
 #include "Common.h"
-
-#include <DirectoryManager.h>
+#include <synergy/common/DirectoryManager.h>
 #include <ProfileListModel.h>
 #include <ProfileManager.h>
+
 #include <QApplication>
 #include <QMessageBox>
 #include <QtQuick>
@@ -62,6 +62,8 @@ App::installService() {
 int
 App::run(int argc, char* argv[])
 {
+    DirectoryManager::instance()->init(argc, argv);
+
     cxxopts::Options options("synergy2");
 
     options.add_options()

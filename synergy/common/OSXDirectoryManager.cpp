@@ -10,7 +10,7 @@ OSXDirectoryManager::systemAppDir()
 boost::filesystem::path
 OSXDirectoryManager::installedDir()
 {
-    return g_programDir;
+    return m_programDir;
 }
 
 boost::filesystem::path
