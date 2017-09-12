@@ -434,7 +434,7 @@ ProcessManager::shutdown() {
     mainLog()->debug("process already running, attempting to stop");
 
     assert(m_impl);
-    assert(!m_expectingExit);
+    assert(!m_impl->m_expectingExit);
 
     m_impl->m_expectingExit = true;
     expectedExit.connect_extended([this](auto& connection) {
