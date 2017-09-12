@@ -46,20 +46,25 @@ bool ProfileConfig::compare(ProfileConfig const& src)
     bool different = false;
 
     if (src.m_profile.m_version < m_profile.m_version) {
+
+        mainLog()->debug("profile version changed, abort compare");
         return different;
     }
 
     if (src.m_profile.m_id != m_profile.m_id) {
+        mainLog()->debug("profile id changed");
         profileIdChanged(src.m_profile.m_id);
         different = true;
     }
 
     if (src.m_profile.m_name != m_profile.m_name) {
+        mainLog()->debug("profile name changed");
         profileNameChanged(src.m_profile.m_name);
         different = true;
     }
 
     if (src.m_profile.m_server != m_profile.m_server) {
+        mainLog()->debug("profile server changed");
         profileServerChanged(src.m_profile.m_server);
         different = true;
     }
@@ -73,27 +78,32 @@ bool ProfileConfig::compare(ProfileConfig const& src)
                 found = true;
 
                 if (screen.m_name != srcScreen.m_name) {
+                    mainLog()->debug("profile screen name changed");
                     screenNameChanged(srcScreen.m_id);
                     different = true;
                 }
 
                 if (screen.m_active != srcScreen.m_active) {
+                    mainLog()->debug("profile screen status changed");
                     screenStatusChanged(srcScreen.m_id);
                     different = true;
                 }
 
                 if (screen.m_x != srcScreen.m_x || screen.m_y != srcScreen.m_y) {
+                    mainLog()->debug("profile screen position changed");
                     screenPositionChanged(srcScreen.m_id);
                     different = true;
                 }
 
                 if (screen.m_status != srcScreen.m_status) {
+                    mainLog()->debug("profile screen status changed");
                     screenStatusChanged(srcScreen.m_id);
                     different = true;
                 }
 
                 if (screen.m_successfulTestIp != srcScreen.m_successfulTestIp ||
                     screen.m_failedTestIp != srcScreen.m_failedTestIp) {
+                    mainLog()->debug("profile screen test result changed");
                     screenTestResultChanged(srcScreen.m_id, srcScreen.m_successfulTestIp, srcScreen.m_failedTestIp);
                     different = true;
                 }
@@ -121,6 +131,7 @@ bool ProfileConfig::compare(ProfileConfig const& src)
     }
 
     if (!added.empty() || !removed.empty()) {
+        mainLog()->debug("profile screen set changed");
         screenSetChanged(added, removed);
         different = true;
     }
