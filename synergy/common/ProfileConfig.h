@@ -31,6 +31,7 @@ public:
 
     signal<void (std::vector<Screen> added, std::vector<Screen> removed)>
         screenSetChanged;
+    signal<void (Screen screen)> screenOnline;
 
     std::vector<Screen> screens() const;
     void updateScreenTestResult(int screenId, std::string successfulIp, std::string failedIp);

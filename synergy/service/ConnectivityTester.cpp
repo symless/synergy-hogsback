@@ -28,6 +28,14 @@ ConnectivityTester::ConnectivityTester(boost::asio::io_service &io, std::shared_
             }
         }
     );
+
+    m_localProfileConfig->screenOnline.connect(
+        [this](Screen screen){
+            std::vector<Screen> testScreen;
+            testScreen.emplace_back(std::move(screen));
+            testNewScreens(testScreen);
+        }
+    );
 }
 
 void ConnectivityTester::testNewScreens(std::vector<Screen> addedScreens)

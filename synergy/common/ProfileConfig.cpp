@@ -84,8 +84,11 @@ bool ProfileConfig::compare(ProfileConfig const& target)
                 }
 
                 if (screen.m_active != targetScreen.m_active) {
-                    mainLog()->debug("profile screen status changed");
-                    screenStatusChanged(targetScreen.m_id);
+                    if (targetScreen.m_active) {
+                        mainLog()->debug("profile screen active changed");
+                        screenOnline(targetScreen);
+                    }
+
                     different = true;
                 }
 
