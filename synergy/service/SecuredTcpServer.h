@@ -22,6 +22,8 @@ public:
     using signal = boost::signals2::signal<Args...>;
     signal<void(SecuredTcpServer*)> startFailed;
     signal<void(SecuredTcpServer*)> acceptFailed;
+    signal<void(SecuredTcpServer*)> started;
+    signal<void(SecuredTcpSession*, std::string)> accepted;
 
 private:
     void accept();

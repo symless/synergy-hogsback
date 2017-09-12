@@ -172,6 +172,14 @@ void ConnectivityTester::startTestServer()
         mainLog()->debug("failed to accept a connectivity test client");
     });
 
+    m_testServer->started.connect([](SecuredTcpServer*){
+        mainLog()->debug("connectivity test server started");
+    });
+
+    m_testServer->accepted.connect([](SecuredTcpSession* session, std::string address){
+        mainLog()->debug("connectivity test server accepted a new connection: {}", address);
+    });
+
     m_testServer->start();
 }
 

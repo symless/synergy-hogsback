@@ -33,6 +33,8 @@ void SecuredTcpServer::start()
     }
 
     accept();
+
+    started(this);
 }
 
 std::string SecuredTcpServer::address() const
@@ -121,6 +123,10 @@ void SecuredTcpServer::onSslHandshakeFinished(SecuredTcpSession* session, errorC
         delete session;
         return;
     }
+
+    auto address = session->stream().lowest_layer().remote_endpoint().address().to_string();
+
+    accepted(session, address);
 
     m_sessions.emplace_back(session);
 }
