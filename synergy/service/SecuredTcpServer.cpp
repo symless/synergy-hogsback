@@ -103,6 +103,9 @@ void SecuredTcpServer::onAccept(SecuredTcpSession* session, boost::system::error
         delete session;
     }
     else {
+        auto address = session->stream().lowest_layer().remote_endpoint().address().to_string();
+        mainLog()->debug("tcp server accepted connection, address={}", address);
+
         session->stream().async_handshake(
             ssl::stream_base::server,
             std::bind(
@@ -112,6 +115,8 @@ void SecuredTcpServer::onAccept(SecuredTcpSession* session, boost::system::error
                 std::placeholders::_1));
     }
 
+    // accept next client
+    mainLog()->debug("tcp server waiting for next client");
     accept();
 }
 
@@ -125,7 +130,7 @@ void SecuredTcpServer::onSslHandshakeFinished(SecuredTcpSession* session, errorC
     }
 
     auto address = session->stream().lowest_layer().remote_endpoint().address().to_string();
-
+    mainLog()->debug("tcp server ssl handshake finished, address={}", address);
     accepted(session, address);
 
     m_sessions.emplace_back(session);
