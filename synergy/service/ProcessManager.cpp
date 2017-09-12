@@ -456,7 +456,7 @@ ProcessManager::shutdown() {
 
         if (!m_nextCommand.empty()) {
             assert(!m_impl);
-            start(std::move(m_nextCommand));
+            this->start(std::move(m_nextCommand));
         }
     });
 
