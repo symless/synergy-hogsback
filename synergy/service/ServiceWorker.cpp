@@ -59,6 +59,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     });
 
     m_processManager->onLocalInput.connect([this](){
+        mainLog()->debug("local input detected, claiming this computer as server");
         m_cloudClient->claimServer(m_userConfig->screenId());
     });
 
