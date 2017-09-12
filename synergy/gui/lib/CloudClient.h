@@ -28,7 +28,6 @@ public:
     Q_INVOKABLE void unsubProfile(int screenId);
     Q_INVOKABLE void userProfiles();
     Q_INVOKABLE void checkUpdate();
-    Q_INVOKABLE void goOffline();
     Q_INVOKABLE QString serverHostname() const;
     Q_INVOKABLE QString loginClientId();
 

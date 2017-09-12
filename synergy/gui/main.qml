@@ -42,10 +42,6 @@ ApplicationWindow {
         }
     }
 
-    onClosing: {
-        CloudClient.goOffline()
-    }
-
     AccessibilityManager {
         id: accessibilityManager
     }
