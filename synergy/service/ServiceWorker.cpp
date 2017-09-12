@@ -58,7 +58,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         mainLog()->info("service started successfully");
     });
 
-    m_processManager->onLocalInput.connect([this](){
+    m_processManager->localInputDetected.connect([this](){
         m_cloudClient->claimServer(m_userConfig->screenId());
     });
 
@@ -104,26 +104,29 @@ ServiceWorker::provideCore()
         m_localProfileConfig->forceConnectivityTest();
     });
 
-    m_processManager->onOutput.connect(
+    m_processManager->output.connect(
         [server](std::string line) {
             server->publish ("synergy.core.log", std::move(line));
         }
     );
 
-//    m_processManager->screenStatusChanged.connect(
-//        [server](std::string const& screenName, ScreenStatus state) {
-//            server->publish ("synergy.screen.status", screenName, int(state));
-//        }
-//    );
+    m_processManager->screenStatusChanged.connect(
+        [server](std::string const& screenName, ScreenStatus state) {
+            server->publish ("synergy.screen.status", screenName, int(state));
+        }
+    );
 
-//    m_processManager->screenConnectionError.connect(
-//        [server](std::string const& screenName, ErrorCode ec) {
-//            server->publish ("synergy.screen.error", screenName,
-//                                (int)ec);
-//            server->publish ("synergy.screen.status", screenName,
-//                                (int)ScreenStatus::kConnectingWithError);
-//        }
-//    );
+    m_processManager->screenConnectionError.connect(
+        [server](std::string const& screenName) {
+
+            // TODO: get error code
+            int ec = 0;
+            server->publish ("synergy.screen.error", screenName,
+                                (int)ec);
+            server->publish ("synergy.screen.status", screenName,
+                                (int)ScreenStatus::kConnectingWithError);
+        }
+    );
 }
 
 void ServiceWorker::provideAuthUpdate()

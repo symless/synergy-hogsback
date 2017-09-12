@@ -30,10 +30,12 @@ public:
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
 
-    signal<void()> onExit;
-    signal<void()> onUnexpectedExit;
-    signal<void(std::string const&)> onOutput;
-    signal<void()> onLocalInput;
+    signal<void()> expectedExit;
+    signal<void()> unexpectedExit;
+    signal<void(const std::string& line)> output;
+    signal<void()> localInputDetected;
+    signal<void(const std::string& screenName)> screenConnectionError;
+    signal<void(const std::string& screenName, ScreenStatus state)> screenStatusChanged;
 
 private:
     void writeConfigurationFile();
