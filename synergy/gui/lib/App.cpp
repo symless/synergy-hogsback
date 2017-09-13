@@ -125,7 +125,6 @@ App::run(int argc, char* argv[])
     QApplication app(argc, argv);
 
     try {
-        throw std::runtime_error("test");
         startCrashHandler();
     }
     catch (const std::exception& ex) {
