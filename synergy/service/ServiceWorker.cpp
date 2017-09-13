@@ -32,6 +32,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     });
 
     m_localProfileConfig->modified.connect([this](){
+        mainLog()->debug("local profile modified, id={}", m_localProfileConfig->profileId());
         m_remoteProfileConfig->compare(*m_localProfileConfig);
     });
 

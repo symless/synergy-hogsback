@@ -38,6 +38,7 @@ public:
     Screen& getScreen(int screenId);
     void forceConnectivityTest(); // TODO: remove hack
     bool hasServer() const { return m_profile.server() != -1; } // TODO: remove hack
+    int profileId() const { return m_profile.id(); }
 
 private:
     Profile m_profile;
