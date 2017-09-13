@@ -5,7 +5,7 @@
 
 #include <synergy/service/json.hpp>
 
-ProfileConfig ProfileConfig::fromJSONSnapshot(const std::string& json)
+ProfileConfig ProfileConfig::fromJsonSnapshot(const std::string& json)
 {
     ProfileConfigSnapshot snapshot;
     from_json (snapshot, json);
@@ -40,13 +40,13 @@ void ProfileConfig::apply (ProfileConfig const& src)
 bool ProfileConfig::compare(ProfileConfig const& target)
 {
     mainLog()->debug(
-        "comparing profiles, this={} other={}",
-        m_profile.id(), target.m_profile.id());
+        "comparing profiles, id={} this=v{} other=v{}",
+        m_profile.id(), m_profile.m_version, target.m_profile.m_version);
 
     bool different = false;
 
     if (target.m_profile.m_version < m_profile.m_version) {
-        mainLog()->debug("profile version changed ({}->{}), abort compare",
+        mainLog()->debug("profile version is older ({} < {}), abort compare",
             m_profile.m_version, target.m_profile.m_version);
         return different;
     }
@@ -112,7 +112,7 @@ bool ProfileConfig::compare(ProfileConfig const& target)
 
                 if ((screen.m_successfulTestIp != targetScreen.m_successfulTestIp) ||
                     (screen.m_failedTestIp != targetScreen.m_failedTestIp)) {
-                    mainLog()->debug("profile screen test result changed, screenId={} success={}->{} failed={}->{}",
+                    mainLog()->debug("profile screen test result changed, screenId={} success=`{}`->`{}` failed=`{}`->`{}`",
                         screen.m_id, screen.m_successfulTestIp, targetScreen.m_successfulTestIp,
                         screen.m_failedTestIp, targetScreen.m_failedTestIp);
                     screenTestResultChanged(targetScreen.m_id, targetScreen.m_successfulTestIp, targetScreen.m_failedTestIp);

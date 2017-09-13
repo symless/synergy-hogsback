@@ -9,7 +9,7 @@
 class ProfileConfig final
 {
 public:
-    static ProfileConfig fromJSONSnapshot (std::string const&json);
+    static ProfileConfig fromJsonSnapshot (std::string const&json);
 
     void apply (ProfileConfig const& src);
     bool compare (ProfileConfig const& target);
@@ -38,6 +38,7 @@ public:
     Screen& getScreen(int screenId);
     void forceConnectivityTest(); // TODO: remove hack
     bool hasServer() const { return m_profile.server() != -1; } // TODO: remove hack
+    int profileId() const { return m_profile.id(); }
 
 private:
     Profile m_profile;

@@ -32,13 +32,14 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     });
 
     m_localProfileConfig->modified.connect([this](){
+        mainLog()->debug("local profile modified, id={}", m_localProfileConfig->profileId());
         m_remoteProfileConfig->compare(*m_localProfileConfig);
     });
 
     m_cloudClient->websocketMessageReceived.connect([this](std::string json){
         try {        
             // parse message
-            ProfileConfig profileConfig = ProfileConfig::fromJSONSnapshot(json);
+            ProfileConfig profileConfig = ProfileConfig::fromJsonSnapshot(json);
 
             m_remoteProfileConfig->clone(profileConfig);
             m_localProfileConfig->apply(*m_remoteProfileConfig);
@@ -57,9 +58,9 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             }
 
             // forward the message via rpc server
-            auto server = m_rpcManager->server();
+            auto rpcServer = m_rpcManager->server();
             g_lastProfileSnapshot = json;
-            server->publish ("synergy.profile.snapshot", std::move(json));
+            rpcServer->publish ("synergy.profile.snapshot", std::move(json));
         }
         catch (const std::exception& ex) {
             mainLog()->error("failed to create profile from json: {}", ex.what());
