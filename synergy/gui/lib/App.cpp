@@ -123,7 +123,17 @@ App::run(int argc, char* argv[])
     /* The crash handler must be started after QApplication is constructed,
      * because it depends on file paths that are unavailable until then. */
     QApplication app(argc, argv);
-    startCrashHandler();
+
+    try {
+        throw std::runtime_error("test");
+        startCrashHandler();
+    }
+    catch (const std::exception& ex) {
+        LogManager::error(QString("failed to start crash handler: %1").arg(ex.what()));
+    }
+    catch (...) {
+        LogManager::error(QString("failed to start crash handler: unknown error"));
+    }
 
     FontManager::loadAll();
 
