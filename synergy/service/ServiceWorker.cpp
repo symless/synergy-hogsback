@@ -37,33 +37,38 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     });
 
     m_cloudClient->websocketMessageReceived.connect([this](std::string json){
-        try {        
-            // parse message
+        try {
+            // parse json message and copy into remote profile config
             ProfileConfig profileConfig = ProfileConfig::fromJsonSnapshot(json);
-
             m_remoteProfileConfig->clone(profileConfig);
-            m_localProfileConfig->apply(*m_remoteProfileConfig);
-
-            // HACK: if no server, then use the first screen in the profile. this should
-            // really be done on the cloud server.
-            if (!m_localProfileConfig->hasServer()) {
-                mainLog()->debug("no server has been established yet, using first screen");
-                auto screens = m_localProfileConfig->screens();
-                if (!screens.empty()) {
-                    m_cloudClient->claimServer(screens[0].id());
-                }
-                else {
-                    mainLog()->error("can't choose a server, no screens in config");
-                }
-            }
-
-            // forward the message via rpc server
-            auto rpcServer = m_rpcManager->server();
-            g_lastProfileSnapshot = json;
-            rpcServer->publish ("synergy.profile.snapshot", std::move(json));
         }
         catch (const std::exception& ex) {
             mainLog()->error("failed to create profile from json: {}", ex.what());
+            return;
+        }
+
+        // store profile config (causes signals to be invoked)
+        m_localProfileConfig->apply(*m_remoteProfileConfig);
+
+        // save for future requests from config UI
+        // TODO: store json in profile config instead of global?
+        g_lastProfileSnapshot = json;
+
+        // forward the message via rpc server to config UI
+        auto rpcServer = m_rpcManager->server();
+        rpcServer->publish("synergy.profile.snapshot", std::move(json));
+
+        // HACK: if no server, then use the first screen in the profile. this should
+        // really be done on the cloud server.
+        if (!m_localProfileConfig->hasServer()) {
+            mainLog()->debug("no server has been established yet, using first screen");
+            auto screens = m_localProfileConfig->screens();
+            if (!screens.empty()) {
+                m_cloudClient->claimServer(screens[0].id());
+            }
+            else {
+                mainLog()->error("can't choose a server, no screens in config");
+            }
         }
     });
 
