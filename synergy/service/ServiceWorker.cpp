@@ -58,9 +58,9 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             }
 
             // forward the message via rpc server
-            auto server = m_rpcManager->server();
+            auto rpcServer = m_rpcManager->server();
             g_lastProfileSnapshot = json;
-            server->publish ("synergy.profile.snapshot", std::move(json));
+            rpcServer->publish ("synergy.profile.snapshot", std::move(json));
         }
         catch (const std::exception& ex) {
             mainLog()->error("failed to create profile from json: {}", ex.what());
