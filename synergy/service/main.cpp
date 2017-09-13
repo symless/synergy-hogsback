@@ -18,7 +18,15 @@ main (int argc, char* argv[]) {
     // TODO: figure out linux linker error and move boost path stuff back to init
     //DirectoryManager::instance()->init(argc, argv);
 
-    startCrashHandler();
+    try {
+        startCrashHandler();
+    }
+    catch (const std::exception& ex) {
+        mainLog()->error("failed to start crash handler: {}", ex.what());
+    }
+    catch (...) {
+        mainLog()->error("failed to start crash handler: unknown error");
+    }
 
     mainLog()->info("starting service...");
 
