@@ -30,7 +30,7 @@ TEST_CASE("Connectivity test finds a service", "[ConnectivityTester]")
     });
 
     try {
-        ProfileConfig profileConfig = ProfileConfig::fromJSONSnapshot(jsonMock);
+        ProfileConfig profileConfig = ProfileConfig::fromJsonSnapshot(jsonMock);
         localProfileConfig->apply(profileConfig);
 
         ioService.run();

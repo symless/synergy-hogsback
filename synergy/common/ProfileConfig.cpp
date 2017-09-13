@@ -5,7 +5,7 @@
 
 #include <synergy/service/json.hpp>
 
-ProfileConfig ProfileConfig::fromJSONSnapshot(const std::string& json)
+ProfileConfig ProfileConfig::fromJsonSnapshot(const std::string& json)
 {
     ProfileConfigSnapshot snapshot;
     from_json (snapshot, json);

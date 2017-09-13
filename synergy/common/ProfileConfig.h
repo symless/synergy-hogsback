@@ -9,7 +9,7 @@
 class ProfileConfig final
 {
 public:
-    static ProfileConfig fromJSONSnapshot (std::string const&json);
+    static ProfileConfig fromJsonSnapshot (std::string const&json);
 
     void apply (ProfileConfig const& src);
     bool compare (ProfileConfig const& target);

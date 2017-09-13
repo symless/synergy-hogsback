@@ -39,7 +39,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_cloudClient->websocketMessageReceived.connect([this](std::string json){
         try {        
             // parse message
-            ProfileConfig profileConfig = ProfileConfig::fromJSONSnapshot(json);
+            ProfileConfig profileConfig = ProfileConfig::fromJsonSnapshot(json);
 
             m_remoteProfileConfig->clone(profileConfig);
             m_localProfileConfig->apply(*m_remoteProfileConfig);
