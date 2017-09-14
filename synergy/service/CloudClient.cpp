@@ -7,8 +7,8 @@
 
 #include <tao/json.hpp>
 
-static const char* kPubSubServerHostname = "165.227.29.181";
-static const char* kPubSubServerPort = "8081";
+static const char* kPubSubServerHostname = "pubsub1.cloud.symless.com";
+static const char* kPubSubServerPort = "443";
 static const char* kSubTarget = "/synergy/sub/auth";
 static const char* kCloudServerHostname = "v1.api.cloud.symless.com";
 static const char* kCloudServerPort = "443";
