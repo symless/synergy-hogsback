@@ -275,11 +275,6 @@ ProcessManager::~ProcessManager () noexcept {
 }
 
 static std::string
-getCommandBinaryName (std::vector<std::string> const& command) {
-    return boost::filesystem::path (command[0]).stem().string();
-}
-
-static std::string
 getCommandLocalScreenName (std::vector<std::string> const& command) {
     auto nameArg = std::find (begin(command), end(command), "--name");
     if ((nameArg == end(command)) || (++nameArg == end(command))) {
@@ -314,6 +309,7 @@ void
 ProcessManager::start (std::vector<std::string> command)
 {
     if (m_impl) {
+        mainLog()->debug("core process already running, attempting to stop");
         m_nextCommand = command;
         shutdown();
         return;
@@ -321,14 +317,26 @@ ProcessManager::start (std::vector<std::string> command)
 
     mainLog()->debug("starting core process with command: {}", ba::join(command, " "));
 
-    auto const binary = getCommandBinaryName (command);
     auto const localScreenName = getCommandLocalScreenName (command);
+
+    std::string mode;
+    if (command.size() > 1) {
+        mode = command[1];
+        if ((mode != "--server") && (mode != "--client")) {
+            throw std::runtime_error("Invalid core process mode: " + mode);
+        }
+    }
+
+    if (mode.empty()) {
+        throw std::runtime_error("Unable to determine core process mode.");
+    }
 
     m_impl = std::make_unique<ProcessManagerImpl>(*this, m_ioService, std::move (command));
     auto& localState = m_impl->m_clients[localScreenName];
     using boost::algorithm::contains;
 
-    if (binary == "synergyc") {
+    if (mode == "--client") {
+
         localState = ScreenStatus::kDisconnected;
         auto& signals = m_impl->m_signals;
 
@@ -374,7 +382,9 @@ ProcessManager::start (std::vector<std::string> command)
                 }
             }, boost::signals2::at_front)
         );
-    } else {
+    }
+    else if (mode == "--server") {
+
         localState = ScreenStatus::kConnecting;
         auto& signals = m_impl->m_signals;
 
@@ -423,6 +433,9 @@ ProcessManager::start (std::vector<std::string> command)
             }, boost::signals2::at_front)
         );
     }
+    else {
+        throw std::runtime_error("Invalid core process mode: " + mode);
+    }
 
     screenStatusChanged(localScreenName, localState);
     m_impl->start();
@@ -431,12 +444,14 @@ ProcessManager::start (std::vector<std::string> command)
 void
 ProcessManager::shutdown() {
 
-    mainLog()->debug("process already running, attempting to stop");
+    if (!m_impl) {
+        mainLog()->debug("core process is not running, ignoring shutdown");
+        return;
+    }
 
-    assert(m_impl);
-    assert(!m_impl->m_expectingExit);
-
+    // control which exited event is invoked
     m_impl->m_expectingExit = true;
+
     expectedExit.connect_extended([this](auto& connection) {
         connection.disconnect();
 
@@ -446,8 +461,6 @@ ProcessManager::shutdown() {
         else {
             mainLog()->error("can't join process, not initialized");
         }
-
-        m_impl->m_expectingExit = false;
 
         // TODO: figure out how to stop qt freaking out when this is called
         m_impl.reset();
@@ -486,6 +499,8 @@ void ProcessManager::startServer()
     }
     catch (const std::exception& ex) {
         mainLog()->error("failed to start server core process: {}", ex.what());
+        m_impl.reset();
+        assert(!m_impl);
     }
 }
 
@@ -515,5 +530,7 @@ void ProcessManager::startClient(int serverId)
     }
     catch (const std::exception& ex) {
         mainLog()->error("failed to start client core process: {}", ex.what());
+        m_impl.reset();
+        assert(!m_impl);
     }
 }

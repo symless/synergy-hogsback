@@ -5,14 +5,13 @@
 
 #include <boost/filesystem.hpp>
 
-const std::string kCoreLogFile = "synergy.log";
+const std::string kCoreLogFile = "synergy-core.log";
+const std::string kCoreDebugLevel = "DEBUG";
 
 #ifdef _WIN32
-const std::string kServerCmd = "synergys.exe";
-const std::string kClientCmd = "synergyc.exe";
+const std::string kCoreProgram = "synergy-core.exe";
 #else
-const std::string kServerCmd = "synergys";
-const std::string kClientCmd = "synergyc";
+const std::string kCoreProgram = "synergy-core";
 #endif
 
 std::vector<std::string>
@@ -23,16 +22,20 @@ ProcessCommand::generate(bool serverMode) const
 
     std::vector<std::string> args;
 
-    std::string processName = serverMode ? kServerCmd : kClientCmd;
-    auto processPath = installedDir / processName;
-    args.push_back(processPath.string());
+    auto programPath = installedDir / kCoreProgram;
+    args.push_back(programPath.string());
+
+    if (serverMode) {
+        args.push_back("--server");
+    }
+    else {
+        args.push_back("--client");
+    }
 
     args.push_back("-f");
-    args.push_back("--no-tray");
 
-    // TODO: set debug level based on settings
     args.push_back("--debug");
-    args.push_back("DEBUG");
+    args.push_back(kCoreDebugLevel);
 
     if (m_localHostname.empty()) {
         throw std::runtime_error("Can't generate args, local hostname missing.");

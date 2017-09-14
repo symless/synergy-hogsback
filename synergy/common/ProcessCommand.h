@@ -5,8 +5,7 @@
 
 /* adapted version of the original gui command line gen class */
 
-extern const std::string kServerCmd;
-extern const std::string kClientCmd;
+extern const std::string kCoreProgram;
 
 class ProcessCommand
 {
