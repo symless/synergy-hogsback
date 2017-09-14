@@ -9,11 +9,6 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/"
 set (CMAKE_XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT "dwarf-with-dsym")
 
 #
-# Synergy Options
-#
-option (SYNERGY_DEVELOPER_MODE "Synergy: Turn on secret developer features" OFF)
-
-#
 # Synergy Version
 #
 include (cmake/Version.cmake)
