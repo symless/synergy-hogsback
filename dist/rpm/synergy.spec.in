@@ -25,12 +25,10 @@ systemctl start synergy.service
 
 %files
 %defattr(755,root,root,-)
-%{_bindir}/synergy2
-%{_bindir}/synergyc
-%{_bindir}/synergys
-%{_bindir}/synergyd
-%{_bindir}/syntool
-%attr(644,-,-) %{_datarootdir}/applications/synergy2.desktop
+%{_bindir}/synergy-config
+%{_bindir}/synergy-core
+%{_bindir}/synergy-service
+%attr(644,-,-) %{_datarootdir}/applications/synergy.desktop
 %attr(644,-,-) %{_datarootdir}/icons/synergy.svg
 %attr(644,-,-) %{_unitdir}/synergy.service
 
