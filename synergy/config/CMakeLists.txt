@@ -1,4 +1,4 @@
-project (synergy2 CXX)
+project (synergy-config CXX)
 cmake_minimum_required (VERSION 3.4)
 
 set (CMAKE_INCLUDE_CURRENT_DIR ON)

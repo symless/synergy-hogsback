@@ -16,11 +16,11 @@ std::string const kAppResourcePath (kAppPath + "/Contents/Resources");
 
 auto const kAppVersionFilePath = kAppResourcePath + "/Version.txt";
 
-std::string const kHelperName = "com.symless.synergy.v2.ServiceHelper";
+std::string const kHelperName = "com.symless.synergy.ServiceHelper";
 auto const kHelperPListPath = "/Library/LaunchDaemons/" + kHelperName + ".plist";
 auto const kHelperExecPath = "/Library/PrivilegedHelperTools/" + kHelperName;
 
-std::string const kServiceUserAgentFilename = "com.symless.synergy.v2.synergyd.plist";
+std::string const kServiceUserAgentFilename = "com.symless.synergy.synergy-service.plist";
 auto const kServiceUserAgentPListTargetPath = "/Library/LaunchAgents/" + kServiceUserAgentFilename;
 auto const kServiceUserAgentPListSourcePath = kAppResourcePath + "/" + kServiceUserAgentFilename;
 

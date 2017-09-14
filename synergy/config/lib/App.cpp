@@ -93,7 +93,7 @@ App::run(int argc, char* argv[])
 
     if (g_options.count("service")) {
         QProcess service;
-        QString cmd("/Applications/Synergy.app/Contents/MacOS/synergyd");
+        QString cmd("/Applications/Synergy.app/Contents/MacOS/synergy-service");
         QStringList args;
         service.start(cmd, args);
         service.waitForFinished(-1);
@@ -102,7 +102,7 @@ App::run(int argc, char* argv[])
 
     if (installService()) {
         QProcess serviceLoader;
-        QString cmd("launchctl load /Library/LaunchAgents/com.symless.synergy.v2.synergyd.plist");
+        QString cmd("launchctl load /Library/LaunchAgents/com.symless.synergy.synergy-service.plist");
         serviceLoader.start(cmd);
         serviceLoader.waitForFinished(5000);
     }
