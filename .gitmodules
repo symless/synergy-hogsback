@@ -1,3 +1,7 @@
+[submodule "synergy-core"]
+    path = synergy/core
+    url = https://github.com/symless/synergy-core.git
+    branch = master
 [submodule "fmt"]
     path = third_party/fmt
     url = https://github.com/fmtlib/fmt.git
@@ -7,9 +11,6 @@
 [submodule "cppzmq"]
     path = third_party/cppzmq
     url = https://github.com/zeromq/cppzmq.git
-[submodule "synergy"]
-    path = synergy/core
-    url = https://github.com/symless/synergy.git
 [submodule "libsodium"]
     path = third_party/libsodium
     url = https://github.com/jedisct1/libsodium.git
