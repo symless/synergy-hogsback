@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-        <string>com.symless.synergy.v2.synergyd</string>
+    <string>com.symless.synergy.v2.synergy-service</string>
     <key>LimitLoadToSessionType</key>
         <array>
             <string>System</string>
@@ -11,9 +11,9 @@
         </array>
     <key>KeepAlive</key>
     <true/>
-        <key>ProgramArguments</key>
+    <key>ProgramArguments</key>
     <array>
-            <string>/Applications/Synergy.app/Contents/MacOS/synergy2</string>
+            <string>/Applications/Synergy.app/Contents/MacOS/synergy-config</string>
             <string>--service</string>
     </array>
 </dict>

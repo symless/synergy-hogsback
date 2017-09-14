@@ -1,4 +1,4 @@
-project (synergyd CXX)
+project (synergy-service CXX)
 cmake_minimum_required (VERSION 3.4)
 
 set (SERVICE_SOURCES
