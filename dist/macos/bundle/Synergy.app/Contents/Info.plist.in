@@ -7,7 +7,7 @@
 	<key>CFBundleDisplayName</key>
 	<string>Synergy</string>
 	<key>CFBundleExecutable</key>
-	<string>synergy2</string>
+	<string>synergy</string>
 	<key>CFBundleIconFile</key>
 	<string>Synergy.icns</string>
 	<key>CFBundleIdentifier</key>
