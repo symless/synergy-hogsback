@@ -85,19 +85,18 @@
                 <?if $(var.Configuration) = "Debug" ?>
                     <File Source="$(var.BinPath)/synergys.pdb"/>
                     <File Source="$(var.BinPath)/synergyc.pdb"/>
-                    <File Source="$(var.BinPath)/syntool.pdb"/>
                     <File Source="C:\Program Files (x86)\Windows Kits\10\bin\$(var.Platform)\ucrt\ucrtbased.dll"/>
                 <?endif ?>
+                <File Source="$(var.BinPath)/synergy-core.exe"/>
                 <File Source="$(var.BinPath)/synergys.exe">
                     <fire:FirewallException Id="ServerFirewallException" IgnoreFailure="yes" Name="$(var.Name)" Scope="any"/>
                 </File>
                 <File Source="$(var.BinPath)/synergyc.exe"/>
-                <File Source="$(var.BinPath)/syntool.exe"/>
                 <File Source="$(var.BinPath)/synwinhk.dll"/>
                 <File Source="$(var.OpenSSLBinPath)/libeay32.dll"/>
                 <File Source="$(var.OpenSSLBinPath)/ssleay32.dll"/>
 
-                <File Source="$(var.BinPath)/synergyd.exe"/>
+                <File Source="$(var.BinPath)/synergy-service.exe"/>
                 <File Source="$(var.BinPath)/synergy-service-controller.exe" KeyPath="yes" />
 
                 <ServiceInstall
@@ -117,7 +116,7 @@
                     Start="install" Stop="both" Remove="uninstall" />
             </Component>
             <Component Guid="BAC8149B-6287-45BF-9C27-43D71ED40214" Id="Gui">
-                <File Id="GuiProgram" KeyPath="yes" Source="$(var.BinPath)/synergy2.exe">
+                <File Id="GuiProgram" KeyPath="yes" Source="$(var.BinPath)/synergy-config.exe">
                     <Shortcut Advertise="yes" Directory="ProgramMenuFolder" Icon="synergy.ico" Id="GuiShortcut" Name="$(var.Name) 2.0"/>
                     <fire:FirewallException Id="GuiFirewallException" IgnoreFailure="yes" Name="$(var.Name) 2.0" Scope="any"/>
                 </File>
