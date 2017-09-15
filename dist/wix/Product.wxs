@@ -85,19 +85,23 @@
                 <?if $(var.Configuration) = "Debug" ?>
                     <File Source="$(var.BinPath)/synergys.pdb"/>
                     <File Source="$(var.BinPath)/synergyc.pdb"/>
+                    <File Source="$(var.BinPath)/synergy-core.pdb"/>
+                    <File Source="$(var.BinPath)/synergy-service.pdb"/>
+                    <File Source="$(var.BinPath)/synergy-service-controller.pdb"/>
                     <File Source="C:\Program Files (x86)\Windows Kits\10\bin\$(var.Platform)\ucrt\ucrtbased.dll"/>
+                <?else ?>
+                    <File Source="$(var.TPBinPath)/crashpad/windows/crashpad_handler.exe"/>
                 <?endif ?>
-                <File Source="$(var.BinPath)/synergy-core.exe"/>
                 <File Source="$(var.BinPath)/synergys.exe">
                     <fire:FirewallException Id="ServerFirewallException" IgnoreFailure="yes" Name="$(var.Name)" Scope="any"/>
                 </File>
                 <File Source="$(var.BinPath)/synergyc.exe"/>
                 <File Source="$(var.BinPath)/synwinhk.dll"/>
-                <File Source="$(var.OpenSSLBinPath)/libeay32.dll"/>
-                <File Source="$(var.OpenSSLBinPath)/ssleay32.dll"/>
-
+                <File Source="$(var.BinPath)/synergy-core.exe"/>
                 <File Source="$(var.BinPath)/synergy-service.exe"/>
                 <File Source="$(var.BinPath)/synergy-service-controller.exe" KeyPath="yes" />
+                <File Source="$(var.OpenSSLBinPath)/libeay32.dll"/>
+                <File Source="$(var.OpenSSLBinPath)/ssleay32.dll"/>
 
                 <ServiceInstall
                     Id="ServiceInstall" Name="Synergy" DisplayName="$(var.Name)"
@@ -121,9 +125,7 @@
                     <fire:FirewallException Id="GuiFirewallException" IgnoreFailure="yes" Name="$(var.Name) 2.0" Scope="any"/>
                 </File>
                 <?if $(var.Configuration) = "Debug" ?>
-                    <File Source="$(var.BinPath)/synergy2.pdb"/>
-                <?else ?>
-                    <File Source="$(var.TPBinPath)/crashpad/windows/crashpad_handler.exe"/>
+                    <File Source="$(var.BinPath)/synergy-config.pdb"/>
                 <?endif ?>
             </Component>
         </ComponentGroup>
