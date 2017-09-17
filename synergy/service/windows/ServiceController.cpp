@@ -12,9 +12,8 @@
 
 static char* kServiceControllerName = "synergy-service-controller";
 static char* kServiceControllerDisplayName = "Synergy";
-static char* kServiceProcess = "synergyd.exe";
-static char* kServerProcess = "synergys.exe";
-static char* kClientProcess = "synergyc.exe";
+static char* kServiceProcess = "synergy-service.exe";
+static char* kCoreProcess = "synergy-core.exe";
 static char* kWinLogon = "winlogon.exe";
 static const UINT kExitCode = 0;
 
@@ -640,8 +639,8 @@ void ServiceController::stopAllUserProcesses()
 {
     std::vector<std::string> processes;
     processes.emplace_back(kServiceProcess);
-    processes.emplace_back(kServerProcess);
-    processes.emplace_back(kClientProcess);
+    processes.emplace_back(kCoreProcess);
+
     for (auto process : processes) {
         HANDLE processHandle = NULL;
         if (findProcessInSession(process.c_str(), &processHandle, getActiveSession())) {
