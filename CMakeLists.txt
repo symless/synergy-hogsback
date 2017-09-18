@@ -165,6 +165,7 @@ add_subdirectory (third_party)
 #
 # Packaging
 #
+set (SYNERGY_CORE_INSTALL ON CACHE BOOL "Configure Synergy Core install")
 macro (configure_files srcDir destDir)
     message (STATUS "Configuring directory ${destDir}")
     make_directory (${destDir})
