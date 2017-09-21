@@ -10,7 +10,7 @@ class WampRouter;
 class RpcManager final
 {
 public:
-    explicit RpcManager(boost::asio::io_service& ioService);
+    explicit RpcManager(boost::asio::io_service& ioService, std::string ipAddress = "127.0.0.1", int port = 24888);
     ~RpcManager() noexcept;
 
     void start();
@@ -26,6 +26,8 @@ private:
 
 public:
     boost::signals2::signal<void()> ready;
+    std::string m_ipAddress;
+    int m_port;
 };
 
 #endif // RPCMANAGER_H
