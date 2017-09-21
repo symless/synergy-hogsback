@@ -42,7 +42,7 @@ Rectangle {
     }
 
     Item {
-        id: configurationPage
+        id: configPage
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         width: parent.width
@@ -60,7 +60,7 @@ Rectangle {
 
         // background header
         Rectangle {
-            id: configurationPageBackgroundHeader
+            id: configPageBackgroundHeader
             anchors.top: parent.top
             width: parent.width
             height: dp(65)
@@ -85,8 +85,8 @@ Rectangle {
 
         // separator
         Rectangle {
-            id: configurationPageBackgroundSeparator
-            anchors.top: configurationPageBackgroundHeader.bottom
+            id: configPageBackgroundSeparator
+            anchors.top: configPageBackgroundHeader.bottom
             width: parent.width
             height: dp(5)
             color:"#96C13D"
@@ -96,7 +96,7 @@ Rectangle {
         // separator 2, which is coinciding with the saparator above in the beginning
         // when console expands out, this is at the bottom of the console
         Rectangle {
-            id: configurationPageBackgroundSeparator2
+            id: configPageBackgroundSeparator2
             anchors.top: logConsole.bottom
             width: parent.width
             height: logConsole.height > 0 ? dp(5) : 0
@@ -107,7 +107,7 @@ Rectangle {
         // log console
         Rectangle {
             id: logConsole
-            anchors.top: configurationPageBackgroundSeparator.bottom
+            anchors.top: configPageBackgroundSeparator.bottom
             width: parent.width
             height: 0
             color:"black"
@@ -167,8 +167,8 @@ Rectangle {
 
         // background
         Rectangle {
-            id: configurationPageBackground
-            anchors.top: configurationPageBackgroundSeparator.bottom
+            id: configPageBackground
+            anchors.top: configPageBackgroundSeparator.bottom
             width: parent.width
             anchors.bottom: parent.bottom
             color:"#3F95B8"
@@ -178,7 +178,7 @@ Rectangle {
         // configuration area
         ScrollView {
             id: screenArrangementScrollView
-            anchors.top: configurationPageBackgroundSeparator.bottom
+            anchors.top: configPageBackgroundSeparator.bottom
             anchors.bottom: parent.bottom
             width: parent.width
             z: 1
