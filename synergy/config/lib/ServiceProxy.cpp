@@ -1,0 +1,110 @@
+#include <synergy/config/lib/ServiceProxy.h>
+
+#include "ScreenListModel.h"
+#include "LogManager.h"
+#include "ProcessMode.h"
+#include "AppConfig.h"
+#include <synergy/common/WampClient.h>
+
+#include <QtNetwork>
+#include <QtGlobal>
+#include <iostream>
+#ifndef Q_OS_WIN
+#include <unistd.h>
+#endif
+
+ServiceProxy::ServiceProxy() :
+    m_wampClient(m_io)
+{
+    connect (this, &ServiceProxy::rpcScreenStatusChanged, this,
+             &ServiceProxy::onRpcScreenStatusChanged, Qt::QueuedConnection);
+
+    connect (this, &ServiceProxy::logCoreOutput, this,
+             &ServiceProxy::onLogCoreOutput, Qt::QueuedConnection);
+
+    connect (this, &ServiceProxy::logServiceOutput, this,
+             &ServiceProxy::onLogServiceOutput, Qt::QueuedConnection);
+
+    m_wampClient.connected.connect([&]() {
+        LogManager::debug(QString("connected to service"));
+
+        m_wampClient.subscribe ("synergy.profile.snapshot", [&](std::string json) {
+            QByteArray byteArray(json.c_str(), json.length());
+            emit receivedScreens(byteArray);
+        });
+
+        m_wampClient.subscribe ("synergy.core.log", [this](std::string line) {
+            emit logCoreOutput(QString::fromStdString(line));
+        });
+
+        m_wampClient.subscribe ("synergy.service.log", [this](std::string line) {
+            emit logServiceOutput(QString::fromStdString(line));
+        });
+
+        m_wampClient.subscribe ("synergy.screen.status",
+                              [this](std::string screenName, int status) {
+            emit rpcScreenStatusChanged(QString::fromStdString(screenName), status);
+        });
+
+        m_wampClient.subscribe ("synergy.screen.error",
+                              [this](std::string screenName, int errorCode) {
+            emit screenError(QString::fromStdString(screenName), errorCode);
+        });
+    });
+
+    m_wampClient.connecting.connect([&]() {
+        LogManager::debug(QString("connecting to service"));
+    });
+}
+
+void ServiceProxy::start()
+{
+    m_rpcThread = std::make_unique<std::thread>([this]{
+        m_wampClient.start("127.0.0.1", 24888);
+        m_io.run();
+    });
+}
+
+void ServiceProxy::join()
+{
+    // stop rpc
+    m_io.stop();
+    m_rpcThread->join();
+}
+
+ServiceProxy::~ServiceProxy()
+{
+}
+
+void
+ServiceProxy::onRpcScreenStatusChanged(QString name, int status)
+{
+    QPair<QString, ScreenStatus> r;
+    r.first = name;
+    r.second = (ScreenStatus)status;
+    emit screenStatusChanged(r);
+}
+
+void ServiceProxy::onLogCoreOutput(QString text)
+{
+    foreach(QString line, text.split(QRegExp("\r|\n|\r\n"))) {
+        if (!line.isEmpty()) {
+            LogManager::raw("[ Core    ] " + line);
+        }
+    }
+}
+
+WampClient&
+ServiceProxy::wampClient()
+{
+    return m_wampClient;
+}
+
+void ServiceProxy::onLogServiceOutput(QString text)
+{
+    foreach(QString line, text.split(QRegExp("\r|\n|\r\n"))) {
+        if (!line.isEmpty()) {
+            LogManager::raw("[ Service ] " + line);
+        }
+    }
+}

@@ -1,8 +1,8 @@
-#ifndef PROCESSMANAGER_H
-#define PROCESSMANAGER_H
+#pragma once
 
-#include "LibMacro.h"
-#include "synergy/common/ScreenStatus.h"
+#include <synergy/common/WampClient.h>
+#include <synergy/common/ScreenStatus.h>
+#include <synergy/config/lib/LibMacro.h>
 
 #include <boost/asio.hpp>
 #include <QQuickItem>
@@ -15,14 +15,18 @@ class ScreenListModel;
 class AppConfig;
 class WampClient;
 
-class LIB_SPEC ProcessManager : public QQuickItem
+class LIB_SPEC ServiceProxy : public QQuickItem
 {
     Q_OBJECT
 
 public:
-    ProcessManager();
-    ProcessManager(WampClient&);
-    ~ProcessManager();
+    ServiceProxy();
+    ~ServiceProxy();
+
+    void start();
+    void join();
+
+    WampClient& wampClient();
 
 signals:
     void screenStatusChanged(QPair<QString, ScreenStatus>);
@@ -30,6 +34,7 @@ signals:
     void screenError(QString, int);
     void logCoreOutput(QString);
     void logServiceOutput(QString);
+    void receivedScreens(QByteArray reply);
 
 public slots:
     void onRpcScreenStatusChanged(QString, int);
@@ -37,7 +42,7 @@ public slots:
     void onLogCoreOutput(QString text);
 
 private:
-    std::shared_ptr<WampClient> m_wampClient;
+    boost::asio::io_service m_io;
+    WampClient m_wampClient;
+    std::unique_ptr<std::thread> m_rpcThread;
 };
-
-#endif // PROCESSMANAGER_H

@@ -1,7 +1,7 @@
 #include "ScreenManager.h"
 
+#include <synergy/config/lib/ServiceProxy.h>
 #include "CloudClient.h"
-#include "ProcessManager.h"
 #include "LogManager.h"
 #include "ScreenBBArrangement.h"
 #include "ScreenListSnapshotManager.h"
@@ -25,9 +25,6 @@ ScreenManager::ScreenManager() :
     m_screenListSnapshotManager= new ScreenListSnapshotManager();
 
     m_cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
-
-    connect(m_cloudClient, SIGNAL(receivedScreens(QByteArray)), this,
-            SLOT(updateScreens(QByteArray)));
 
     connect(this, &ScreenManager::updateProfileConfig, this,
         &ScreenManager::onUpdateProfileConfig);
@@ -76,19 +73,21 @@ void ScreenManager::setScreenModel(ScreenListModel* screenListModel)
     }
 }
 
-void ScreenManager::setProcessManager(ProcessManager* processManager)
+void ScreenManager::setServiceProxy(ServiceProxy* serviceProxy)
 {
     // weirdly, this function gets called on exit. when this happens
-    // processManager is null, so don't do anything in this case.
-    if (processManager == nullptr) {
+    // serviceProxy is null, so don't do anything in this case.
+    if (serviceProxy == nullptr) {
         return;
     }
 
-    m_processManager = processManager;
+    m_serviceProxy = serviceProxy;
 
-    connect(m_processManager, &ProcessManager::screenStatusChanged,
+    connect(m_serviceProxy, SIGNAL(receivedScreens(QByteArray)),
+            this, SLOT(updateScreens(QByteArray)));
+    connect(m_serviceProxy, &ServiceProxy::screenStatusChanged,
             this, &ScreenManager::onScreenStatusChanged);
-    connect(m_processManager, &ProcessManager::screenError,
+    connect(m_serviceProxy, &ServiceProxy::screenError,
             this, &ScreenManager::onScreenError, Qt::QueuedConnection);
 }
 

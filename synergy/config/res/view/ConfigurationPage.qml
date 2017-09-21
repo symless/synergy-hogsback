@@ -22,7 +22,7 @@ Rectangle {
     ScreenManager {
         id: screenManager
         screenListModel: screenListModel
-        processManager: applicationWindow.processManager
+        serviceProxy: applicationWindow.serviceProxy
     }
 
     Connections {

@@ -399,11 +399,6 @@ void CloudClient::uploadLogFile(QString filename)
             this, SLOT  (onUploadProgress(qint64, qint64)));
 }
 
-void CloudClient::receivedScreensInterface(QByteArray msg)
-{
-    emit receivedScreens(msg);
-}
-
 void CloudClient::report(int destId, QString successfulIpList, QString failedIpList)
 {
     QNetworkRequest req(m_reportUrl);

@@ -1,11 +1,11 @@
 #include "App.h"
 
+#include <synergy/config/lib/ServiceProxy.h>
 #include "CloudClient.h"
 #include "ScreenListModel.h"
 #include "ScreenManager.h"
 #include "FontManager.h"
 #include "LogManager.h"
-#include "ProcessManager.h"
 #include "AccessibilityManager.h"
 #include "VersionManager.h"
 #include "AppConfig.h"
@@ -139,7 +139,7 @@ App::run(int argc, char* argv[])
     qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");
     qmlRegisterType<ScreenListModel>("com.synergy.gui", 1, 0, "ScreenListModel");
     qmlRegisterType<ScreenManager>("com.synergy.gui", 1, 0, "ScreenManager");
-    qmlRegisterType<ProcessManager>("com.synergy.gui", 1, 0, "ProcessManager");
+    qmlRegisterType<ServiceProxy>("com.synergy.gui", 1, 0, "ServiceProxy");
     qmlRegisterType<AccessibilityManager>("com.synergy.gui", 1, 0, "AccessibilityManager");
     qmlRegisterType<ProfileListModel>("com.synergy.gui", 1, 0, "ProfileListModel");
     qmlRegisterSingletonType<CloudClient>("com.synergy.gui", 1, 0, "CloudClient", CloudClient::instance);
@@ -153,10 +153,11 @@ App::run(int argc, char* argv[])
     LogManager::setQmlContext(engine.rootContext());
     LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
 
-    asio::io_service io;
-    WampClient wampClient (io);
+    ServiceProxy serviceProxy;
+    serviceProxy.start();
 
     CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
+    WampClient& wampClient = serviceProxy.wampClient();
 
     QObject::connect(cloudClient, &CloudClient::profileUpdated, [&wampClient](){
         AppConfig* appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
@@ -170,40 +171,19 @@ App::run(int argc, char* argv[])
         wampClient.call<void> ("synergy.profile.request");
     });
 
-    ProcessManager processManager (wampClient);
-
-    wampClient.connecting.connect([&]() {
-        LogManager::debug(QString("connecting to service"));
-    });
-
-    wampClient.connected.connect([&]() {
-        LogManager::debug(QString("connected to service"));
-        wampClient.subscribe ("synergy.profile.snapshot", [&](std::string json) {
-            QByteArray byteArray(json.c_str(), json.length());
-            cloudClient->receivedScreensInterface(byteArray);
-        });
-    });
-
-    std::thread rpcThread ([&]{
-        wampClient.start ("127.0.0.1", 24888);
-        io.run ();
-    });
-
     if (!g_options.count("disable-version-check")) {
         cloudClient->checkUpdate();
     }
 
     engine.rootContext()->setContextProperty
-        ("PixelPerPoint", QGuiApplication::primaryScreen()->physicalDotsPerInch() / 72);
+        ("kPixelPerPoint", QGuiApplication::primaryScreen()->physicalDotsPerInch() / 72);
     engine.rootContext()->setContextProperty
-        ("rpcProcessManager", static_cast<QObject*>(&processManager));
+        ("qmlServiceProxy", static_cast<QObject*>(&serviceProxy));
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     auto qtAppRet = app.exec();
 
-    // stop rpc
-    io.stop();
-    rpcThread.join();
+    serviceProxy.join();
 
     return qtAppRet;
 }

@@ -44,7 +44,6 @@ signals:
     void loginOk();
     void profileUpdated();
     void loginFail(QString error);
-    void receivedScreens(QByteArray reply);
     void receivedProfiles(QMap<QString, int>);
     void invalidAuth();
 

@@ -12,14 +12,14 @@ ApplicationWindow {
     minimumHeight: dp(450)
     title: qsTr("Synergy")
     signal keyReceived(int key)
-    property ProcessManager processManager: rpcProcessManager
+    property ServiceProxy serviceProxy: qmlServiceProxy
 
     function dp(v) {
-        return v * PixelPerPoint;
+        return v * kPixelPerPoint;
     }
 
     function op(dp) {
-        return dp / PixelPerPoint;
+        return dp / kPixelPerPoint;
     }
 
     Component.onCompleted: {
