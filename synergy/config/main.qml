@@ -13,6 +13,7 @@ ApplicationWindow {
     title: qsTr("Synergy")
     signal keyReceived(int key)
     property ServiceProxy serviceProxy: qmlServiceProxy
+    property ErrorView errorView: qmlErrorView
 
     function dp(v) {
         return v * kPixelPerPoint;

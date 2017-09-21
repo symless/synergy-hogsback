@@ -13,7 +13,7 @@
 
 class ScreenListModel;
 class AppConfig;
-class WampClient;
+class ErrorView;
 
 class LIB_SPEC ServiceProxy : public QQuickItem
 {
@@ -25,8 +25,9 @@ public:
 
     void start();
     void join();
-
     WampClient& wampClient();
+    std::shared_ptr<ErrorView> errorView() const;
+    void setErrorView(const std::shared_ptr<ErrorView>& errorView);
 
 signals:
     void screenStatusChanged(QPair<QString, ScreenStatus>);
@@ -45,4 +46,5 @@ private:
     boost::asio::io_service m_io;
     WampClient m_wampClient;
     std::unique_ptr<std::thread> m_rpcThread;
+    std::shared_ptr<ErrorView> m_errorView;
 };

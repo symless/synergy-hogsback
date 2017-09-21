@@ -1,6 +1,7 @@
 #include "App.h"
 
 #include <synergy/config/lib/ServiceProxy.h>
+#include <synergy/config/lib/ErrorView.h>
 #include "CloudClient.h"
 #include "ScreenListModel.h"
 #include "ScreenManager.h"
@@ -136,6 +137,7 @@ App::run(int argc, char* argv[])
 
     FontManager::loadAll();
 
+    qmlRegisterType<ErrorView>("com.synergy.gui", 1, 0, "ErrorView");
     qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");
     qmlRegisterType<ScreenListModel>("com.synergy.gui", 1, 0, "ScreenListModel");
     qmlRegisterType<ScreenManager>("com.synergy.gui", 1, 0, "ScreenManager");
@@ -153,7 +155,11 @@ App::run(int argc, char* argv[])
     LogManager::setQmlContext(engine.rootContext());
     LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
 
+    auto errorView = std::make_shared<ErrorView>();
+
     ServiceProxy serviceProxy;
+    serviceProxy.setErrorView(errorView);
+
     serviceProxy.start();
 
     CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
@@ -179,6 +185,8 @@ App::run(int argc, char* argv[])
         ("kPixelPerPoint", QGuiApplication::primaryScreen()->physicalDotsPerInch() / 72);
     engine.rootContext()->setContextProperty
         ("qmlServiceProxy", static_cast<QObject*>(&serviceProxy));
+    engine.rootContext()->setContextProperty
+        ("qmlErrorView", static_cast<QObject*>(errorView.get()));
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     auto qtAppRet = app.exec();

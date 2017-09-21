@@ -28,6 +28,7 @@ set (GUI_LIB_SOURCES
     ProfileListModel.cpp
     ProfileManager.cpp
     VersionManager.cpp
+    ErrorView.cpp
     ${GUI_LIB_MACOS_SOURCES}
 )
 

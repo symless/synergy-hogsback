@@ -19,6 +19,10 @@ Rectangle {
         id: screenListModel
     }
 
+    ErrorView {
+        id: errorView
+    }
+
     ScreenManager {
         id: screenManager
         screenListModel: screenListModel
@@ -167,12 +171,29 @@ Rectangle {
 
         // background
         Rectangle {
-            id: configPageBackground
+            id: configPageEnableBackground
             anchors.top: configPageBackgroundSeparator.bottom
             width: parent.width
             anchors.bottom: parent.bottom
             color:"#3F95B8"
+            //color:"#A9A9A9"
             z: 1
+        }
+
+        // disabled overlay
+        Rectangle {
+            id: configPageDisableOverlay
+            anchors.top: configPageBackgroundSeparator.bottom
+            width: parent.width
+            anchors.bottom: parent.bottom
+            color: "#A9A9A9"
+            opacity: 0.7
+            z: 2
+            //visible: false
+
+            MouseArea {
+                anchor.fill: parent
+            }
         }
 
         // configuration area

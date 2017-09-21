@@ -1,10 +1,11 @@
 #include <synergy/config/lib/ServiceProxy.h>
 
+#include <synergy/config/lib/ErrorView.h>
+#include <synergy/common/WampClient.h>
 #include "ScreenListModel.h"
 #include "LogManager.h"
 #include "ProcessMode.h"
 #include "AppConfig.h"
-#include <synergy/common/WampClient.h>
 
 #include <QtNetwork>
 #include <QtGlobal>
@@ -92,6 +93,16 @@ void ServiceProxy::onLogCoreOutput(QString text)
             LogManager::raw("[ Core    ] " + line);
         }
     }
+}
+
+std::shared_ptr<ErrorView> ServiceProxy::errorView() const
+{
+    return m_errorView;
+}
+
+void ServiceProxy::setErrorView(const std::shared_ptr<ErrorView> &errorView)
+{
+    m_errorView = errorView;
 }
 
 WampClient&
