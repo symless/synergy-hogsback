@@ -26,6 +26,10 @@ ServiceProxy::ServiceProxy() :
     connect (this, &ServiceProxy::logServiceOutput, this,
              &ServiceProxy::onLogServiceOutput, Qt::QueuedConnection);
 
+    m_wampClient.connecting.connect([&]() {
+        LogManager::debug(QString("connecting to service"));
+    });
+
     m_wampClient.connected.connect([&]() {
         LogManager::debug(QString("connected to service"));
 
@@ -51,10 +55,6 @@ ServiceProxy::ServiceProxy() :
                               [this](std::string screenName, int errorCode) {
             emit screenError(QString::fromStdString(screenName), errorCode);
         });
-    });
-
-    m_wampClient.connecting.connect([&]() {
-        LogManager::debug(QString("connecting to service"));
     });
 }
 

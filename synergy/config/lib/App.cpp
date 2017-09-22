@@ -159,7 +159,6 @@ App::run(int argc, char* argv[])
 
     ServiceProxy serviceProxy;
     serviceProxy.setErrorView(errorView);
-
     serviceProxy.start();
 
     CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
