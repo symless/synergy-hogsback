@@ -56,7 +56,28 @@ ServiceProxy::ServiceProxy() :
                               [this](std::string screenName, int errorCode) {
             emit screenError(QString::fromStdString(screenName), errorCode);
         });
+
+        m_wampClient.subscribe ("synergy.cloud.error.on", [this](int retryTimeout) {
+            LogManager::debug(QString("service cloud connection error"));
+            m_errorView->setRetryTimeout(retryTimeout);
+            m_errorView->setMode(ErrorViewMode::kCloudError);
+        });
+
+        m_wampClient.subscribe ("synergy.cloud.error.off", [this]() {
+            LogManager::debug(QString("service cloud connection recovered"));
+            m_errorView->setMode(ErrorViewMode::kNone);
+        });
     });
+/*
+    m_wampClient.connectionError.connect([&]() {
+        LogManager::debug(QString("service rpc connection error"));
+        m_errorView->setMode(ErrorViewMode::kServiceError);
+    });
+*/
+}
+
+ServiceProxy::~ServiceProxy()
+{
 }
 
 void ServiceProxy::start()
@@ -66,12 +87,23 @@ void ServiceProxy::start()
         m_io.run();
     });
 
-    m_demoTimer.expires_from_now(boost::posix_time::seconds(3));
+    m_demoTimer.expires_from_now(boost::posix_time::seconds(2));
     m_demoTimer.async_wait([this](const boost::system::error_code&){
-        m_errorView->setEnabled(true);
+        m_errorView->setMode(ErrorViewMode::kCloudError);
 
+        m_demoTimer.expires_from_now(boost::posix_time::seconds(2));
         m_demoTimer.async_wait([this](const boost::system::error_code&){
-            m_errorView->setEnabled(false);
+            m_errorView->setMode(ErrorViewMode::kNone);
+
+            m_demoTimer.expires_from_now(boost::posix_time::seconds(2));
+            m_demoTimer.async_wait([this](const boost::system::error_code&){
+                m_errorView->setMode(ErrorViewMode::kServiceError);
+
+                m_demoTimer.expires_from_now(boost::posix_time::seconds(2));
+                m_demoTimer.async_wait([this](const boost::system::error_code&){
+                    m_errorView->setMode(ErrorViewMode::kNone);
+                });
+            });
         });
     });
 }
@@ -83,10 +115,6 @@ void ServiceProxy::join()
     m_rpcThread->join();
 }
 
-ServiceProxy::~ServiceProxy()
-{
-}
-
 void
 ServiceProxy::onRpcScreenStatusChanged(QString name, int status)
 {
@@ -96,7 +124,8 @@ ServiceProxy::onRpcScreenStatusChanged(QString name, int status)
     emit screenStatusChanged(r);
 }
 
-void ServiceProxy::onLogCoreOutput(QString text)
+void
+ServiceProxy::onLogCoreOutput(QString text)
 {
     foreach(QString line, text.split(QRegExp("\r|\n|\r\n"))) {
         if (!line.isEmpty()) {
@@ -105,12 +134,14 @@ void ServiceProxy::onLogCoreOutput(QString text)
     }
 }
 
-std::shared_ptr<ErrorView> ServiceProxy::errorView() const
+std::shared_ptr<ErrorView>
+ServiceProxy::errorView() const
 {
     return m_errorView;
 }
 
-void ServiceProxy::setErrorView(const std::shared_ptr<ErrorView> &errorView)
+void
+ServiceProxy::setErrorView(const std::shared_ptr<ErrorView> &errorView)
 {
     m_errorView = errorView;
 }
@@ -121,7 +152,8 @@ ServiceProxy::wampClient()
     return m_wampClient;
 }
 
-void ServiceProxy::onLogServiceOutput(QString text)
+void
+ServiceProxy::onLogServiceOutput(QString text)
 {
     foreach(QString line, text.split(QRegExp("\r|\n|\r\n"))) {
         if (!line.isEmpty()) {
