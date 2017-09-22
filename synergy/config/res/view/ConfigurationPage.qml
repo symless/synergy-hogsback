@@ -19,10 +19,6 @@ Rectangle {
         id: screenListModel
     }
 
-    ErrorView {
-        id: errorView
-    }
-
     ScreenManager {
         id: screenManager
         screenListModel: screenListModel
@@ -175,8 +171,7 @@ Rectangle {
             anchors.top: configPageBackgroundSeparator.bottom
             width: parent.width
             anchors.bottom: parent.bottom
-            color:"#3F95B8"
-            //color:"#A9A9A9"
+            color: applicationWindow.errorView.enabled ? "#A9A9A9" : "#3F95B8"
             z: 1
         }
 
@@ -189,10 +184,10 @@ Rectangle {
             color: "#A9A9A9"
             opacity: 0.7
             z: 2
-            //visible: false
+            visible: applicationWindow.errorView.enabled
 
             MouseArea {
-                anchor.fill: parent
+                anchors.fill: parent
             }
         }
 

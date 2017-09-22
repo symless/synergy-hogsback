@@ -16,4 +16,5 @@ void
 ErrorView::setEnabled(bool enabled)
 {
     m_enabled = enabled;
+    emit enabledChanged();
 }

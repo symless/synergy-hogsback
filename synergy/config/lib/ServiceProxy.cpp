@@ -15,7 +15,8 @@
 #endif
 
 ServiceProxy::ServiceProxy() :
-    m_wampClient(m_io)
+    m_wampClient(m_io),
+    m_demoTimer(m_io)
 {
     connect (this, &ServiceProxy::rpcScreenStatusChanged, this,
              &ServiceProxy::onRpcScreenStatusChanged, Qt::QueuedConnection);
@@ -63,6 +64,15 @@ void ServiceProxy::start()
     m_rpcThread = std::make_unique<std::thread>([this]{
         m_wampClient.start("127.0.0.1", 24888);
         m_io.run();
+    });
+
+    m_demoTimer.expires_from_now(boost::posix_time::seconds(3));
+    m_demoTimer.async_wait([this](const boost::system::error_code&){
+        m_errorView->setEnabled(true);
+
+        m_demoTimer.async_wait([this](const boost::system::error_code&){
+            m_errorView->setEnabled(false);
+        });
     });
 }
 
