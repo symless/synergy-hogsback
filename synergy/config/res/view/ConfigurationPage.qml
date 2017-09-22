@@ -93,17 +93,6 @@ Rectangle {
             z: 1
         }
 
-        // separator 2, which is coinciding with the saparator above in the beginning
-        // when console expands out, this is at the bottom of the console
-        Rectangle {
-            id: configPageBackgroundSeparator2
-            anchors.top: logConsole.bottom
-            width: parent.width
-            height: logConsole.height > 0 ? dp(5) : 0
-            color:"#96C13D"
-            z: 3
-        }
-
         // log console
         Rectangle {
             id: logConsole
@@ -165,20 +154,30 @@ Rectangle {
             }
         }
 
-        // background
+        // separator for log console, at the bottom of the log console
+        Rectangle {
+            id: logConsoleSeparator
+            anchors.top: logConsole.bottom
+            width: parent.width
+            height: logConsole.height > 0 ? dp(5) : 0
+            color:"#96C13D"
+            z: 3
+        }
+
+        // background for config area
         Rectangle {
             id: configPageEnableBackground
-            anchors.top: configPageBackgroundSeparator.bottom
+            anchors.top: logConsoleSeparator.bottom
             width: parent.width
             anchors.bottom: parent.bottom
-            color: applicationWindow.errorView.enabled ? "#A9A9A9" : "#3F95B8"
+            color: applicationWindow.errorView.enabled ? errorOverlay.color : "#3F95B8"
             z: 1
         }
 
-        // disabled overlay
+        // error overlay with mouse trap
         Rectangle {
-            id: configPageDisableOverlay
-            anchors.top: configPageBackgroundSeparator.bottom
+            id: errorOverlay
+            anchors.top: errorMessage.bottom
             width: parent.width
             anchors.bottom: parent.bottom
             color: "#A9A9A9"
@@ -191,10 +190,53 @@ Rectangle {
             }
         }
 
+        // error overlay with mouse trap
+        Rectangle {
+            id: errorMessage
+            anchors.top: logConsoleSeparator.bottom
+            width: parent.width
+            height: dp(22)
+            color: "#FFF1E1"
+            visible: applicationWindow.errorView.enabled
+            z: 1
+
+            // error message
+            Text {
+                id: errorMessageText
+                text: applicationWindow.errorView.message
+                color: "#8C4A00"
+                font.pixelSize: dp(12)
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.bottom: parent.bottom
+                anchors.margins: dp(5)
+            }
+
+            // error retry link
+            Text {
+                id: errorRetryLink
+                text: "Retry"
+                font.underline: true
+                color: errorMessageText.color
+                font.pixelSize: errorMessageText.font.pixelSize
+                anchors.top: parent.top
+                anchors.left: errorMessageText.right
+                anchors.margins: errorMessageText.anchors.margins
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.LeftButton
+                    onClicked: {
+                        applicationWindow.errorView.retry()
+                    }
+                }
+            }
+        }
+
         // configuration area
         ScrollView {
             id: screenArrangementScrollView
-            anchors.top: configPageBackgroundSeparator.bottom
+            anchors.top: errorMessage.bottom
             anchors.bottom: parent.bottom
             width: parent.width
             z: 1

@@ -3,23 +3,14 @@
 #include <synergy/config/lib/LogManager.h>
 
 ErrorView::ErrorView(QObject *parent) :
-    QObject(parent),
-    m_enabled(false)
+    QObject(parent)
 {
 }
 
 bool
 ErrorView::enabled() const
 {
-    return m_enabled;
-}
-
-void
-ErrorView::setEnabled(bool enabled)
-{
-    LogManager::debug(QString("error overlay enabled=%1").arg(enabled));
-    m_enabled = enabled;
-    emit enabledChanged();
+    return m_mode != ErrorViewMode::kNone;
 }
 
 
@@ -33,7 +24,7 @@ void
 ErrorView::setMode(const ErrorViewMode &mode)
 {
     m_mode = mode;
-    setEnabled(mode != ErrorViewMode::kNone);
+    emit modeChanged();
 }
 
 int
@@ -46,4 +37,24 @@ void
 ErrorView::setRetryTimeout(int retryTimeout)
 {
     m_retryTimeout = retryTimeout;
+}
+
+void
+ErrorView::retry()
+{
+    LogManager::debug("retry!");
+    setMode(ErrorViewMode::kNone);
+}
+
+QString
+ErrorView::message() const
+{
+    switch (m_mode) {
+    case ErrorViewMode::kCloudError:
+        return "Cloud error";
+    case ErrorViewMode::kServiceError:
+        return "Service error";
+    default:
+        return "";
+    }
 }

@@ -89,20 +89,15 @@ void ServiceProxy::start()
 
     m_demoTimer.expires_from_now(boost::posix_time::seconds(2));
     m_demoTimer.async_wait([this](const boost::system::error_code&){
-        m_errorView->setMode(ErrorViewMode::kCloudError);
+        m_errorView->setMode(ErrorViewMode::kServiceError);
 
-        m_demoTimer.expires_from_now(boost::posix_time::seconds(2));
+        m_demoTimer.expires_from_now(boost::posix_time::seconds(1));
         m_demoTimer.async_wait([this](const boost::system::error_code&){
             m_errorView->setMode(ErrorViewMode::kNone);
 
-            m_demoTimer.expires_from_now(boost::posix_time::seconds(2));
+            m_demoTimer.expires_from_now(boost::posix_time::seconds(1));
             m_demoTimer.async_wait([this](const boost::system::error_code&){
-                m_errorView->setMode(ErrorViewMode::kServiceError);
-
-                m_demoTimer.expires_from_now(boost::posix_time::seconds(2));
-                m_demoTimer.async_wait([this](const boost::system::error_code&){
-                    m_errorView->setMode(ErrorViewMode::kNone);
-                });
+                m_errorView->setMode(ErrorViewMode::kCloudError);
             });
         });
     });
