@@ -16,7 +16,6 @@
 #include <ProfileListModel.h>
 #include <ProfileManager.h>
 
-#include <QApplication>
 #include <QMessageBox>
 #include <QtQuick>
 #include <QQmlApplicationEngine>
@@ -63,6 +62,8 @@ App::installService() {
 int
 App::run(int argc, char* argv[])
 {
+    std::vector<std::string> arguments(argv, argv + argc);
+
     // cache the directory of this binary for installedDir
     boost::filesystem::path selfPath = boost::filesystem::system_complete(argv[0]);
     DirectoryManager::instance()->m_programDir = selfPath.remove_filename().string();
@@ -159,6 +160,11 @@ App::run(int argc, char* argv[])
 
     auto errorView = std::make_shared<ErrorView>();
     serviceProxy.setErrorView(errorView);
+    QObject::connect(errorView.get(), &ErrorView::retryRequested, [&](ErrorViewMode mode){
+        if (mode == ErrorViewMode::kServiceError) {
+            restart(app, arguments);
+        }
+    });
 
     CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
     WampClient& wampClient = serviceProxy.wampClient();
@@ -197,4 +203,25 @@ App::run(int argc, char* argv[])
     serviceProxy.join();
 
     return qtAppRet;
+}
+
+void
+App::restart(QApplication& app, std::vector<std::string> argsVector)
+{
+    // restart the app when there's a service rpc connection error.
+    QString path = QString::fromStdString(argsVector.front());
+
+    // for some reason app.arguments() only returns 1 arg.
+    QStringList args;
+    foreach (std::string argStr, argsVector) {
+        QString arg = QString::fromStdString(argStr);
+        if (arg != path) {
+            args << arg;
+        }
+    }
+
+    // HACK: quit and relaunch with same args
+    LogManager::debug(QString("restarting app with: %1 %2").arg(path).arg(args.join(" ")));
+    app.quit();
+    QProcess::startDetached(path, args);
 }

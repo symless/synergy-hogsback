@@ -42,8 +42,7 @@ ErrorView::setRetryTimeout(int retryTimeout)
 void
 ErrorView::retry()
 {
-    LogManager::debug("retry!");
-    setMode(ErrorViewMode::kNone);
+    retryRequested(m_mode);
 }
 
 QString
@@ -51,9 +50,9 @@ ErrorView::message() const
 {
     switch (m_mode) {
     case ErrorViewMode::kCloudError:
-        return "Cloud error";
+        return "An error occurred while connecting to the config service.";
     case ErrorViewMode::kServiceError:
-        return "Service error";
+        return "An error occurred while connecting to the background service.";
     default:
         return "";
     }

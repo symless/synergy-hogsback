@@ -28,6 +28,7 @@ public:
 
 signals:
     void modeChanged();
+    void retryRequested(ErrorViewMode mode);
 
 public slots:
 
