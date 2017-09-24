@@ -76,8 +76,14 @@ public:
         auto task = std::make_shared<boost::packaged_task<Result()>> (
             [this, fun, args_tup = std::make_tuple (std::forward<Args>(args)...)]() mutable {
                 return m_session->call (fun, std::move(args_tup), m_defaultCallOptions).then
-                    (m_executor, [](boost::future<autobahn::wamp_call_result> result) {
-                        return WampCallHelper<Result>::getReturnValue (result.get());
+                    (m_executor, [&](boost::future<autobahn::wamp_call_result> result) {
+                        try {
+                            return WampCallHelper<Result>::getReturnValue (result.get());
+                        }
+                        catch (const std::exception& e) {
+                            std::cerr << e.what() << std::endl;
+                            connectionError();
+                        }
                     }
                 );
             }
@@ -108,6 +114,7 @@ public:
 
     boost::signals2::signal<void()> connected;
     boost::signals2::signal<void()> connecting;
+    boost::signals2::signal<void()> connectionError;
 
 private:
     void connect();
@@ -117,8 +124,6 @@ private:
     std::shared_ptr<autobahn::wamp_session> m_session;
     std::shared_ptr<autobahn::wamp_transport> m_transport;
     autobahn::wamp_call_options m_defaultCallOptions;
-    boost::asio::deadline_timer m_retryTimer;
-    bool m_started = false;
 };
 
 

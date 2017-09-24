@@ -7,6 +7,7 @@
 #include "ProcessMode.h"
 #include "AppConfig.h"
 
+#include <boost/asio/deadline_timer.hpp>
 #include <QtNetwork>
 #include <QtGlobal>
 #include <iostream>
@@ -14,9 +15,11 @@
 #include <unistd.h>
 #endif
 
+const int timeoutSeconds = 5;
+
 ServiceProxy::ServiceProxy() :
     m_wampClient(m_io),
-    m_demoTimer(m_io)
+    m_testTimer(m_io)
 {
     connect (this, &ServiceProxy::rpcScreenStatusChanged, this,
              &ServiceProxy::onRpcScreenStatusChanged, Qt::QueuedConnection);
@@ -27,8 +30,22 @@ ServiceProxy::ServiceProxy() :
     connect (this, &ServiceProxy::logServiceOutput, this,
              &ServiceProxy::onLogServiceOutput, Qt::QueuedConnection);
 
+
+    m_wampClient.connectionError.connect([&]() {
+        LogManager::debug(QString("service rpc connection error"));
+        m_errorView->setMode(ErrorViewMode::kServiceError);
+    });
+
     m_wampClient.connecting.connect([&]() {
         LogManager::debug(QString("connecting to service"));
+
+        // HACK: during the initial autobahn rpc connection, it sometimes fails silently
+        // without telling us. so we can force a timeout by calling an rpc function.
+        m_testTimer.expires_from_now(boost::posix_time::seconds(timeoutSeconds));
+        m_testTimer.async_wait([&](auto const& ec) {
+            // TODO: use something more arbitrary like "hello"?
+            m_wampClient.call<void> ("synergy.profile.request");
+        });
     });
 
     m_wampClient.connected.connect([&]() {
@@ -57,23 +74,17 @@ ServiceProxy::ServiceProxy() :
             emit screenError(QString::fromStdString(screenName), errorCode);
         });
 
-        m_wampClient.subscribe ("synergy.cloud.error.on", [this](int retryTimeout) {
+        m_wampClient.subscribe ("synergy.cloud.offline", [this](int retryTimeout) {
             LogManager::debug(QString("service cloud connection error"));
             m_errorView->setRetryTimeout(retryTimeout);
             m_errorView->setMode(ErrorViewMode::kCloudError);
         });
 
-        m_wampClient.subscribe ("synergy.cloud.error.off", [this]() {
+        m_wampClient.subscribe ("synergy.cloud.online", [this]() {
             LogManager::debug(QString("service cloud connection recovered"));
             m_errorView->setMode(ErrorViewMode::kNone);
         });
     });
-/*
-    m_wampClient.connectionError.connect([&]() {
-        LogManager::debug(QString("service rpc connection error"));
-        m_errorView->setMode(ErrorViewMode::kServiceError);
-    });
-*/
 }
 
 ServiceProxy::~ServiceProxy()
@@ -85,21 +96,6 @@ void ServiceProxy::start()
     m_rpcThread = std::make_unique<std::thread>([this]{
         m_wampClient.start("127.0.0.1", 24888);
         m_io.run();
-    });
-
-    m_demoTimer.expires_from_now(boost::posix_time::seconds(2));
-    m_demoTimer.async_wait([this](const boost::system::error_code&){
-        m_errorView->setMode(ErrorViewMode::kServiceError);
-
-        m_demoTimer.expires_from_now(boost::posix_time::seconds(1));
-        m_demoTimer.async_wait([this](const boost::system::error_code&){
-            m_errorView->setMode(ErrorViewMode::kNone);
-
-            m_demoTimer.expires_from_now(boost::posix_time::seconds(1));
-            m_demoTimer.async_wait([this](const boost::system::error_code&){
-                m_errorView->setMode(ErrorViewMode::kCloudError);
-            });
-        });
     });
 }
 

@@ -165,15 +165,14 @@ App::run(int argc, char* argv[])
     WampClient& wampClient = serviceProxy.wampClient();
 
     QObject::connect(cloudClient, &CloudClient::profileUpdated, [&wampClient](){
-        AppConfig* appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
-        wampClient.call<void> ("synergy.auth.update",
-                               appConfig->userId(),
-                               appConfig->screenId(),
-                               appConfig->profileId(),
-                               appConfig->userToken().toStdString());
-
-        LogManager::debug("requesting profile snapshot");
-        wampClient.call<void> ("synergy.profile.request");
+        wampClient.connected.connect([&]() {
+            AppConfig* appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
+            wampClient.call<void> ("synergy.auth.update",
+                                   appConfig->userId(),
+                                   appConfig->screenId(),
+                                   appConfig->profileId(),
+                                   appConfig->userToken().toStdString());
+        });
     });
 
     if (!g_options.count("disable-version-check")) {
