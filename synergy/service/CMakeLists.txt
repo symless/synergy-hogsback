@@ -14,13 +14,12 @@ set (SERVICE_SOURCES
     TerminationSignalListener.cpp
     ConnectivityTester.cpp
     TestDelegatee.cpp
-    Logs.cpp
+    ServiceLogs.cpp
 )
 
 add_executable (${PROJECT_NAME} ${SERVICE_SOURCES})
 
 target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
-    ${fmt_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
 )
 
@@ -60,7 +59,6 @@ target_compile_definitions (${PROJECT_NAME}
 )
 
 target_link_libraries (${PROJECT_NAME}
-    fmt
     commonlib
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}

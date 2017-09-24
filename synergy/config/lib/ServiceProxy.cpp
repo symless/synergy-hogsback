@@ -32,7 +32,6 @@ ServiceProxy::ServiceProxy() :
 
 
     m_wampClient.connectionError.connect([&]() {
-        LogManager::debug(QString("service rpc connection error"));
         m_errorView->setMode(ErrorViewMode::kServiceError);
     });
 

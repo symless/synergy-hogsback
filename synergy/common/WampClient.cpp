@@ -38,7 +38,7 @@ WampClient::connect()
         catch (const std::exception& e) {
             // BUG: when the connection fails, this only sometimes gets hit.
             // could be caused by a race condition? perhaps related to the cloud?
-            std::cerr << e.what() << std::endl;
+            commonLog()->error("rpc connect failed: {}", e.what());
             connectionError();
             return;
         }
@@ -48,7 +48,7 @@ WampClient::connect()
                 started.get();
             }
             catch (const std::exception& e) {
-                std::cerr << e.what() << std::endl;
+                commonLog()->error("rpc start failed: {}", e.what());
                 connectionError();
                 return;
             }
@@ -59,7 +59,7 @@ WampClient::connect()
                     this->connected();
                 }
                 catch (const std::exception& e) {
-                    std::cerr << e.what() << std::endl;
+                    commonLog()->error("rpc join failed: {}", e.what());
                     connectionError();
                     return;
                 }

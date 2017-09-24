@@ -6,7 +6,7 @@
 #include <synergy/common/ProcessCommand.h>
 #include <synergy/common/ConfigGen.h>
 #include <synergy/common/UserConfig.h>
-#include <synergy/service/Logs.h>
+#include <synergy/service/ServiceLogs.h>
 #include <boost/process.hpp>
 #include <boost/process/async_pipe.hpp>
 #include <boost/asio/read_until.hpp>
@@ -112,7 +112,7 @@ ProcessManagerImpl::start () {
         bp::std_out > m_outPipe,
         bp::std_err > m_errorPipe,
         bp::on_exit = [this](int exit, std::error_code const& ec){
-            mainLog()->debug("core process exited: code={} expected={}", exit, m_expectingExit);
+            serviceLog()->debug("core process exited: code={} expected={}", exit, m_expectingExit);
             if (m_expectingExit) {
                 m_parent.expectedExit();
             } else {
@@ -146,13 +146,13 @@ ProcessManagerImpl::start () {
         })
     );
 
-    mainLog()->debug("core process started, id={}", m_process->id());
+    serviceLog()->debug("core process started, id={}", m_process->id());
 }
 
 void
 ProcessManagerImpl::shutdown()
 {
-    mainLog()->debug("stopping core process");
+    serviceLog()->debug("stopping core process");
 
     auto& ioService = m_ioStrand.get_io_service();
 
@@ -194,7 +194,7 @@ ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Use
     m_localProfileConfig->profileServerChanged.connect([this](int64_t serverId) {
         m_ioService.post([this, serverId] () {
 
-            mainLog()->debug("handling local profile server changed, mode={} thisId={} serverId={} lastServerId={}",
+            serviceLog()->debug("handling local profile server changed, mode={} thisId={} serverId={} lastServerId={}",
                 processModeToString(m_proccessMode), m_userConfig->screenId(), serverId, m_lastServerId);
 
             switch (m_proccessMode) {
@@ -237,7 +237,7 @@ ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Use
     m_localProfileConfig->screenPositionChanged.connect([this](int64_t){
         m_ioService.post([this] () {
 
-            mainLog()->debug("handling local profile screen position changed, mode={}",
+            serviceLog()->debug("handling local profile screen position changed, mode={}",
                 processModeToString(m_proccessMode));
 
             if (m_proccessMode == ProcessMode::kServer) {
@@ -249,7 +249,7 @@ ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Use
     m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen>, std::vector<Screen>){
         m_ioService.post([this] () {
 
-            mainLog()->debug("handling local profile screen set changed, mode={}",
+            serviceLog()->debug("handling local profile screen set changed, mode={}",
                 processModeToString(m_proccessMode));
 
             if (m_proccessMode == ProcessMode::kServer) {
@@ -260,7 +260,7 @@ ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Use
 
     m_connectivityTester->newReportGenerated.connect([this](int screenId, std::string successfulIp, std::string) {
 
-        mainLog()->debug("handling new report from connectivity tester, screenId={} successfulIp={} lastServerId={}",
+        serviceLog()->debug("handling new report from connectivity tester, screenId={} successfulIp={} lastServerId={}",
             screenId, successfulIp, m_lastServerId);
 
         if (m_lastServerId == screenId &&
@@ -309,13 +309,13 @@ void
 ProcessManager::start (std::vector<std::string> command)
 {
     if (m_impl) {
-        mainLog()->debug("core process already running, attempting to stop");
+        serviceLog()->debug("core process already running, attempting to stop");
         m_nextCommand = command;
         shutdown();
         return;
     }
 
-    mainLog()->debug("starting core process with command: {}", ba::join(command, " "));
+    serviceLog()->debug("starting core process with command: {}", ba::join(command, " "));
 
     auto const localScreenName = getCommandLocalScreenName (command);
 
@@ -445,7 +445,7 @@ void
 ProcessManager::shutdown() {
 
     if (!m_impl) {
-        mainLog()->debug("core process is not running, ignoring shutdown");
+        serviceLog()->debug("core process is not running, ignoring shutdown");
         return;
     }
 
@@ -459,13 +459,13 @@ ProcessManager::shutdown() {
             m_impl->m_process->join();
         }
         else {
-            mainLog()->error("can't join process, not initialized");
+            serviceLog()->error("can't join process, not initialized");
         }
 
         // TODO: figure out how to stop qt freaking out when this is called
         m_impl.reset();
 
-        mainLog()->debug("core process shutdown complete");
+        serviceLog()->debug("core process shutdown complete");
 
         if (!m_nextCommand.empty()) {
             assert(!m_impl);
@@ -484,7 +484,7 @@ void ProcessManager::writeConfigurationFile()
 
 void ProcessManager::startServer()
 {
-    mainLog()->debug("starting core server process");
+    serviceLog()->debug("starting core server process");
 
     m_proccessMode = ProcessMode::kServer;
     m_lastServerId = m_userConfig->screenId();
@@ -498,7 +498,7 @@ void ProcessManager::startServer()
         start(command.generate(true));
     }
     catch (const std::exception& ex) {
-        mainLog()->error("failed to start server core process: {}", ex.what());
+        serviceLog()->error("failed to start server core process: {}", ex.what());
         m_impl.reset();
         assert(!m_impl);
     }
@@ -506,7 +506,7 @@ void ProcessManager::startServer()
 
 void ProcessManager::startClient(int serverId)
 {
-    mainLog()->debug("starting core client process");
+    serviceLog()->debug("starting core client process");
 
     m_proccessMode = ProcessMode::kClient;
     m_lastServerId = serverId;
@@ -517,7 +517,7 @@ void ProcessManager::startClient(int serverId)
     auto screen = m_localProfileConfig->getScreen(serverId);
     std::vector<std::string> results = m_connectivityTester->getSuccessfulResults(serverId);
     if (results.empty()) {
-        mainLog()->error("aborting client start, no successful connectivity test results");
+        serviceLog()->error("aborting client start, no successful connectivity test results");
         return;
     }
 
@@ -529,7 +529,7 @@ void ProcessManager::startClient(int serverId)
         start(command.generate(false));
     }
     catch (const std::exception& ex) {
-        mainLog()->error("failed to start client core process: {}", ex.what());
+        serviceLog()->error("failed to start client core process: {}", ex.what());
         m_impl.reset();
         assert(!m_impl);
     }

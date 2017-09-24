@@ -1,6 +1,6 @@
 #include "TestDelegatee.h"
 
-#include <synergy/service/Logs.h>
+#include <synergy/service/ServiceLogs.h>
 
 static const long kTimeoutSec = 3;
 static const std::string kDefaultConnectivityTestPort = "24810";
@@ -31,7 +31,7 @@ void TestDelegatee::start(std::vector<std::string> &ipList)
 
         m_signalConnections.emplace_back(tcpClient->connected.connect(
             [this](SecuredTcpClient* client) {
-                mainLog()->debug("connectivity test passed for {}:{}",
+                serviceLog()->debug("connectivity test passed for {}:{}",
                     client->address(), client->port());
                 m_results[client->address()] = true;
             },
@@ -40,7 +40,7 @@ void TestDelegatee::start(std::vector<std::string> &ipList)
 
         tcpClient->connectFailed.connect(
             [this](SecuredTcpClient* client) {
-                mainLog()->debug("connectivity test failed for {}:{}",
+                serviceLog()->debug("connectivity test failed for {}:{}",
                     client->address(), client->port());
             },
             boost::signals2::at_front

@@ -1,4 +1,4 @@
-#include <synergy/service/Logs.h>
+#include <synergy/service/ServiceLogs.h>
 
 #include <synergy/common/DirectoryManager.h>
 
@@ -6,20 +6,20 @@
 
 using namespace boost;
 
-Log g_log;
+Log g_serviceLog;
 
 class LogSignalSink : public spdlog::sinks::sink
 {
     void log(const spdlog::details::log_msg& logLine) override
     {
-        g_log.onLogLine(logLine.formatted.str());
+        g_serviceLog.onLogLine(logLine.formatted.str());
     }
 
     void flush() { }
 };
 
 static auto
-initMainLog()
+initServiceLog()
 {
     std::vector<spdlog::sink_ptr> sinks;
 
@@ -72,8 +72,8 @@ initMainLog()
 }
 
 std::shared_ptr<spdlog::logger> const&
-mainLog() noexcept
+serviceLog() noexcept
 {
-    static auto log = initMainLog();
+    static auto log = initServiceLog();
     return log;
 }

@@ -100,6 +100,11 @@ include_directories (BEFORE SYSTEM third_party/json/include)
 include_directories (BEFORE SYSTEM third_party/cxxopts/include)
 
 #
+# fmt
+#
+include_directories (BEFORE SYSTEM third_party/fmt)
+
+#
 # spdlog
 #
 include_directories (BEFORE SYSTEM third_party/spdlog/include)

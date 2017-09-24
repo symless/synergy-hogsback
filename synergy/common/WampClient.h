@@ -3,6 +3,7 @@
 
 #include "WampUtility.h"
 
+#include <synergy/common/Logs.h>
 #include <autobahn/autobahn.hpp>
 // TODO: Figure out why AsioExecutor has to be included after autobahn
 #include <synergy/common/AsioExecutor.h>
@@ -81,7 +82,7 @@ public:
                             return WampCallHelper<Result>::getReturnValue (result.get());
                         }
                         catch (const std::exception& e) {
-                            std::cerr << e.what() << std::endl;
+                            commonLog()->error("failed to call `{}`: {}", fun, e.what());
                             connectionError();
                         }
                     }

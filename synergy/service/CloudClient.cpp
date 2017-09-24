@@ -1,6 +1,6 @@
 #include <synergy/service/CloudClient.h>
 
-#include <synergy/service/Logs.h>
+#include <synergy/service/ServiceLogs.h>
 #include <synergy/common/ProfileConfig.h>
 #include <synergy/service/HttpSession.h>
 #include <synergy/common/UserConfig.h>
@@ -71,7 +71,7 @@ void CloudClient::report(int screenId, const std::string &successfulIp, const st
 void CloudClient::claimServer(int64_t serverId)
 {
     auto profileId = m_userConfig->profileId();
-    mainLog()->debug("sending claim server message, serverId={} profileId={}", serverId, profileId);
+    serviceLog()->debug("sending claim server message, serverId={} profileId={}", serverId, profileId);
 
     static const std::string kUrlTarget = "/profile/server/claim";
     HttpSession* httpSession = newHttpSession();

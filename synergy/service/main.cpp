@@ -3,7 +3,7 @@
 #include <synergy/common/DirectoryManager.h>
 #include <synergy/service/ServiceWorker.h>
 #include <synergy/service/TerminationSignalListener.h>
-#include <synergy/service/Logs.h>
+#include <synergy/service/ServiceLogs.h>
 #include <boost/asio/io_service.hpp>
 #include <cstdlib>
 #include <exception>
@@ -22,13 +22,13 @@ main (int argc, char* argv[]) {
         startCrashHandler();
     }
     catch (const std::exception& ex) {
-        mainLog()->error("failed to start crash handler: {}", ex.what());
+        serviceLog()->error("failed to start crash handler: {}", ex.what());
     }
     catch (...) {
-        mainLog()->error("failed to start crash handler: unknown error");
+        serviceLog()->error("failed to start crash handler: unknown error");
     }
 
-    mainLog()->info("starting service...");
+    serviceLog()->info("starting service...");
 
     boost::asio::io_service ioService;
 

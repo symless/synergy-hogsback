@@ -1,6 +1,6 @@
 #include "HttpSession.h"
 
-#include <synergy/service/Logs.h>
+#include <synergy/service/ServiceLogs.h>
 #include <boost/asio/connect.hpp>
 
 static const int kHttpVersion = 11;
@@ -79,7 +79,7 @@ void HttpSession::setupRequest(http::verb method, const std::string &target, con
 void HttpSession::onWriteFinished(errorCode ec)
 {
     if (ec) {
-        mainLog()->debug("http session write error: {}", ec.message());
+        serviceLog()->debug("http session write error: {}", ec.message());
         requestFailed(this, ec.message());
         return;
     }
@@ -97,13 +97,13 @@ void HttpSession::onWriteFinished(errorCode ec)
 void HttpSession::onReadFinished(errorCode ec)
 {
     if (ec) {
-        mainLog()->debug("http session read error: {}", ec.message());
+        serviceLog()->debug("http session read error: {}", ec.message());
         requestFailed(this, ec.message());
         return;
     }
 
     if (m_response.result() != http::status::ok) {
-        mainLog()->debug("invalid http request: {}", m_response.body);
+        serviceLog()->debug("invalid http request: {}", m_response.body);
         requestFailed(this, m_response.body);
         return;
     }

@@ -57,7 +57,6 @@ add_executable (${PROJECT_NAME} WIN32
 
 target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
     lib
-    ${fmt_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
 )
 

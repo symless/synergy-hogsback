@@ -2,7 +2,7 @@
 
 #include <synergy/common/ProfileConfig.h>
 #include "synergy/service/CloudClient.h"
-#include <synergy/service/Logs.h>
+#include <synergy/service/ServiceLogs.h>
 #include <synergy/common/UserConfig.h>
 #include <synergy/common/RpcManager.h>
 #include <synergy/common/WampServer.h>
@@ -26,13 +26,18 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_processManager (std::make_unique<ProcessManager>(m_ioService, m_userConfig, m_localProfileConfig)),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService))
 {
-    g_log.onLogLine.connect([this](std::string logLine) {
+    g_serviceLog.onLogLine.connect([this](std::string logLine) {
+        auto server = m_rpcManager->server();
+        server->publish ("synergy.service.log", std::move(logLine));
+    });
+
+    g_commonLog.onLogLine.connect([this](std::string logLine) {
         auto server = m_rpcManager->server();
         server->publish ("synergy.service.log", std::move(logLine));
     });
 
     m_localProfileConfig->modified.connect([this](){
-        mainLog()->debug("local profile modified, id={}", m_localProfileConfig->profileId());
+        serviceLog()->debug("local profile modified, id={}", m_localProfileConfig->profileId());
         m_remoteProfileConfig->compare(*m_localProfileConfig);
     });
 
@@ -43,7 +48,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             m_remoteProfileConfig->clone(profileConfig);
         }
         catch (const std::exception& ex) {
-            mainLog()->error("failed to create profile from json: {}", ex.what());
+            serviceLog()->error("failed to create profile from json: {}", ex.what());
             return;
         }
 
@@ -61,24 +66,24 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         // HACK: if no server, then use the first screen in the profile. this should
         // really be done on the cloud server.
         if (!m_localProfileConfig->hasServer()) {
-            mainLog()->debug("no server has been established yet, using first screen");
+            serviceLog()->debug("no server has been established yet, using first screen");
             auto screens = m_localProfileConfig->screens();
             if (!screens.empty()) {
                 m_cloudClient->claimServer(screens[0].id());
             }
             else {
-                mainLog()->error("can't choose a server, no screens in config");
+                serviceLog()->error("can't choose a server, no screens in config");
             }
         }
     });
 
     m_rpcManager->ready.connect([this]() {
         provideRpcEndpoints();
-        mainLog()->info("service started successfully");
+        serviceLog()->info("service started successfully");
     });
 
     m_processManager->localInputDetected.connect([this](){
-        mainLog()->debug("local input detected, claiming this computer as server");
+        serviceLog()->debug("local input detected, claiming this computer as server");
         m_cloudClient->claimServer(m_userConfig->screenId());
     });
 
@@ -111,16 +116,16 @@ ServiceWorker::provideCore()
     server->provide ("synergy.profile.request",
                      [this](std::vector<std::string>& cmd) {
         if (g_lastProfileSnapshot.empty()) {
-            mainLog()->error("can't send profile snapshot, not yet received from cloud");
+            serviceLog()->error("can't send profile snapshot, not yet received from cloud");
             return;
         }
 
-        mainLog()->debug("sending last profile snapshot");
+        serviceLog()->debug("sending last profile snapshot");
         auto server = m_rpcManager->server();
         server->publish ("synergy.profile.snapshot", g_lastProfileSnapshot);
 
         // TODO: remove hack
-        mainLog()->debug("config ui opened, forcing connectivity test");
+        serviceLog()->debug("config ui opened, forcing connectivity test");
         m_localProfileConfig->forceConnectivityTest();
     });
 
@@ -177,10 +182,10 @@ void ServiceWorker::shutdown()
 
 void ServiceWorker::provideRpcEndpoints()
 {
-    mainLog()->debug("creating rpc endpoints");
+    serviceLog()->debug("creating rpc endpoints");
 
     provideCore();
     provideAuthUpdate();
 
-    mainLog()->debug("rpc endpoints created");
+    serviceLog()->debug("rpc endpoints created");
 }

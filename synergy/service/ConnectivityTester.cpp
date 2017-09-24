@@ -1,7 +1,7 @@
 #include "ConnectivityTester.h"
 
 #include <synergy/service/TestDelegatee.h>
-#include <synergy/service/Logs.h>
+#include <synergy/service/ServiceLogs.h>
 
 #include <boost/algorithm/string.hpp>
 #include <algorithm>
@@ -23,7 +23,7 @@ ConnectivityTester::ConnectivityTester(boost::asio::io_service &io, std::shared_
                 testNewScreens(added);
             }
             else {
-                mainLog()->debug(
+                serviceLog()->debug(
                     "no new screens detected, skipping connectivity test");
             }
         }
@@ -40,7 +40,7 @@ ConnectivityTester::ConnectivityTester(boost::asio::io_service &io, std::shared_
 
 void ConnectivityTester::testNewScreens(std::vector<Screen> addedScreens)
 {
-    mainLog()->debug(
+    serviceLog()->debug(
         "new screens detected ({}), preparing connectivity test",
         addedScreens.size());
 
@@ -165,19 +165,19 @@ void ConnectivityTester::startTestServer()
                 ConnectivityTester::testServerDH());
 
     m_testServer->startFailed.connect([](SecuredTcpServer*){
-        mainLog()->debug("failed to start connectivity test server");
+        serviceLog()->debug("failed to start connectivity test server");
     });
 
     m_testServer->acceptFailed.connect([](SecuredTcpServer*){
-        mainLog()->debug("failed to accept a connectivity test client");
+        serviceLog()->debug("failed to accept a connectivity test client");
     });
 
     m_testServer->started.connect([](SecuredTcpServer*){
-        mainLog()->debug("connectivity test server started");
+        serviceLog()->debug("connectivity test server started");
     });
 
     m_testServer->accepted.connect([](SecuredTcpSession* session, std::string address){
-        mainLog()->debug("connectivity test server accepted a new connection: {}", address);
+        serviceLog()->debug("connectivity test server accepted a new connection: {}", address);
     });
 
     m_testServer->start();
@@ -185,7 +185,7 @@ void ConnectivityTester::startTestServer()
 
 void ConnectivityTester::startTesting(int batchSize)
 {
-    mainLog()->debug("starting connectivity test");
+    serviceLog()->debug("starting connectivity test");
 
     std::vector<std::string> testIpList;
     int i = 0;
@@ -232,12 +232,12 @@ void ConnectivityTester::onTestDelegateeDone(std::map<std::string, bool> results
 
             // update connectivity results
             if (!successfulIp.empty()) {
-                mainLog()->debug("successful report: dest = {}, ips = {}", *screenId, successfulIp);
+                serviceLog()->debug("successful report: dest = {}, ips = {}", *screenId, successfulIp);
                 m_screenSuccessfulResults[*screenId] = successfulIpList;
             }
 
             if (!failedIp.empty()) {
-                mainLog()->debug("failed report: dest = {}, ips = {}", *screenId, failedIp);
+                serviceLog()->debug("failed report: dest = {}, ips = {}", *screenId, failedIp);
             }
 
             m_localProfileConfig->updateScreenTestResult(*screenId, successfulIp, failedIp);
@@ -258,7 +258,7 @@ void ConnectivityTester::onTestDelegateeDone(std::map<std::string, bool> results
     m_testDelegatee = nullptr;
 
     // TODO: wait for sockets to shut down and then call "finished"
-    mainLog()->debug("finished connectivity test");
+    serviceLog()->debug("finished connectivity test");
     testBatchFinished();
 
     if (!m_pendingTestCases.empty()) {
