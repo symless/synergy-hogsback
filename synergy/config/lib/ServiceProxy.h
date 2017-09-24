@@ -47,5 +47,4 @@ private:
     WampClient m_wampClient;
     std::unique_ptr<std::thread> m_rpcThread;
     std::shared_ptr<ErrorView> m_errorView;
-    boost::asio::deadline_timer m_testTimer;
 };

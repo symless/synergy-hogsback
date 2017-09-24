@@ -23,6 +23,7 @@ private:
     void provideRpcEndpoints();
     void provideCore();
     void provideAuthUpdate();
+    void provideProfileRequest();
 
 private:
     boost::asio::io_service&        m_ioService;

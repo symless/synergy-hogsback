@@ -19,6 +19,8 @@
 
 namespace {
 
+const int kKeepAliveIntervalSec = 5;
+
 template <typename R>
 struct WampCallHelper {
     template <typename Result> static
@@ -81,8 +83,13 @@ public:
                         try {
                             return WampCallHelper<Result>::getReturnValue (result.get());
                         }
-                        catch (const std::exception& e) {
-                            commonLog()->error("failed to call `{}`: {}", fun, e.what());
+                        catch (...) {
+                            if (std::string(fun) == std::string(kKeepAliveFunction)) {
+                                commonLog()->debug("rpc keep alive failed");
+                            }
+                            else {
+                                commonLog()->error("rpc function call failed: {}", std::string(fun));
+                            }
                             connectionError();
                         }
                     }
@@ -119,12 +126,14 @@ public:
 
 private:
     void connect();
+    void keepAlive();
 
 private:
     boost::executors::executor_adaptor<AsioExecutor> m_executor;
     std::shared_ptr<autobahn::wamp_session> m_session;
     std::shared_ptr<autobahn::wamp_transport> m_transport;
     autobahn::wamp_call_options m_defaultCallOptions;
+    boost::asio::deadline_timer m_keepAliveTimer;
 };
 
 

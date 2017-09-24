@@ -113,22 +113,6 @@ ServiceWorker::provideCore()
         m_processManager->start (std::move (cmd));
     });
 
-    server->provide ("synergy.profile.request",
-                     [this](std::vector<std::string>& cmd) {
-        if (g_lastProfileSnapshot.empty()) {
-            serviceLog()->error("can't send profile snapshot, not yet received from cloud");
-            return;
-        }
-
-        serviceLog()->debug("sending last profile snapshot");
-        auto server = m_rpcManager->server();
-        server->publish ("synergy.profile.snapshot", g_lastProfileSnapshot);
-
-        // TODO: remove hack
-        serviceLog()->debug("config ui opened, forcing connectivity test");
-        m_localProfileConfig->forceConnectivityTest();
-    });
-
     m_processManager->output.connect(
         [server](std::string line) {
             server->publish ("synergy.core.log", std::move(line));
@@ -154,7 +138,8 @@ ServiceWorker::provideCore()
     );
 }
 
-void ServiceWorker::provideAuthUpdate()
+void
+ServiceWorker::provideAuthUpdate()
 {
     auto server = m_rpcManager->server();
 
@@ -166,6 +151,29 @@ void ServiceWorker::provideAuthUpdate()
         m_userConfig->setProfileId(profileId);
         m_userConfig->setUserToken(std::move(userToken));
         m_userConfig->save();
+    });
+}
+
+void
+ServiceWorker::provideProfileRequest()
+{
+    auto server = m_rpcManager->server();
+
+    server->provide ("synergy.profile.request",
+                     [this](std::vector<std::string>& cmd) {
+
+        if (g_lastProfileSnapshot.empty()) {
+            serviceLog()->error("can't send profile snapshot, not yet received from cloud");
+            return;
+        }
+
+        serviceLog()->debug("sending last profile snapshot");
+        auto server = m_rpcManager->server();
+        server->publish ("synergy.profile.snapshot", g_lastProfileSnapshot);
+
+        // TODO: remove hack
+        serviceLog()->debug("config ui opened, forcing connectivity test");
+        m_localProfileConfig->forceConnectivityTest();
     });
 }
 
@@ -186,6 +194,7 @@ void ServiceWorker::provideRpcEndpoints()
 
     provideCore();
     provideAuthUpdate();
+    provideProfileRequest();
 
     serviceLog()->debug("rpc endpoints created");
 }

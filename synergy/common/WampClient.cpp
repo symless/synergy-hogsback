@@ -5,7 +5,8 @@ static bool const debug = true;
 
 WampClient::WampClient(boost::asio::io_service& io):
     m_executor(io),
-    m_session(std::make_shared<autobahn::wamp_session>(ioService(), debug))
+    m_session(std::make_shared<autobahn::wamp_session>(ioService(), debug)),
+    m_keepAliveTimer(io)
 {
     m_defaultCallOptions.set_timeout(std::chrono::seconds(2));
 }
@@ -30,6 +31,7 @@ void
 WampClient::connect()
 {
     connecting();
+
     m_transport->connect().then(m_executor, [&](boost::future<void> connected) {
 
         try {
@@ -65,5 +67,17 @@ WampClient::connect()
                 }
             });
         });
+    });
+
+    keepAlive();
+}
+
+void
+WampClient::keepAlive()
+{
+    m_keepAliveTimer.expires_from_now(boost::posix_time::seconds(kKeepAliveIntervalSec));
+    m_keepAliveTimer.async_wait([&](auto const& ec) {
+        this->call<void>(kKeepAliveFunction);
+        this->keepAlive();
     });
 }

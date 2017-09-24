@@ -15,11 +15,8 @@
 #include <unistd.h>
 #endif
 
-const int timeoutSeconds = 5;
-
 ServiceProxy::ServiceProxy() :
-    m_wampClient(m_io),
-    m_testTimer(m_io)
+    m_wampClient(m_io)
 {
     connect (this, &ServiceProxy::rpcScreenStatusChanged, this,
              &ServiceProxy::onRpcScreenStatusChanged, Qt::QueuedConnection);
@@ -37,14 +34,6 @@ ServiceProxy::ServiceProxy() :
 
     m_wampClient.connecting.connect([&]() {
         LogManager::debug(QString("connecting to service"));
-
-        // HACK: during the initial autobahn rpc connection, it sometimes fails silently
-        // without telling us. so we can force a timeout by calling an rpc function.
-        m_testTimer.expires_from_now(boost::posix_time::seconds(timeoutSeconds));
-        m_testTimer.async_wait([&](auto const& ec) {
-            // TODO: use something more arbitrary like "hello"?
-            m_wampClient.call<void> ("synergy.profile.request");
-        });
     });
 
     m_wampClient.connected.connect([&]() {
@@ -83,6 +72,9 @@ ServiceProxy::ServiceProxy() :
             LogManager::debug(QString("service cloud connection recovered"));
             m_errorView->setMode(ErrorViewMode::kNone);
         });
+
+        LogManager::debug("requesting profile snapshot");
+        m_wampClient.call<void> ("synergy.profile.request");
     });
 }
 

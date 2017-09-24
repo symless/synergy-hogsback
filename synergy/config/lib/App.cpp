@@ -155,17 +155,18 @@ App::run(int argc, char* argv[])
     LogManager::setQmlContext(engine.rootContext());
     LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
 
-    auto errorView = std::make_shared<ErrorView>();
-
     ServiceProxy serviceProxy;
+
+    auto errorView = std::make_shared<ErrorView>();
     serviceProxy.setErrorView(errorView);
-    serviceProxy.start();
 
     CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
     WampClient& wampClient = serviceProxy.wampClient();
 
     QObject::connect(cloudClient, &CloudClient::profileUpdated, [&wampClient](){
+        // only handle after connected, otherwise it'll trigger connection error
         wampClient.connected.connect([&]() {
+            // TODO: is this actually needed or even called any more?
             AppConfig* appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
             wampClient.call<void> ("synergy.auth.update",
                                    appConfig->userId(),
@@ -174,6 +175,10 @@ App::run(int argc, char* argv[])
                                    appConfig->userToken().toStdString());
         });
     });
+
+    // service proxy start must happen after the cloud client connect
+    // and wamp connect handler (above) has been connected
+    serviceProxy.start();
 
     if (!g_options.count("disable-version-check")) {
         cloudClient->checkUpdate();

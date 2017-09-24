@@ -11,6 +11,9 @@ struct make_tuple {
         return std::make_tuple (std::forward<Args>(args)...);
     }
 };
+
+const char* kKeepAliveFunction = "synergy.network.noop";
+
 }
 
 #endif // WAMPUTILITY_H
