@@ -9,7 +9,8 @@
 #include <synergy/common/WampRouter.h>
 #include <synergy/common/ScreenStatus.h>
 #include <synergy/common/Profile.h>
-#include "ProcessManager.h"
+#include <synergy/service/ProcessManager.h>
+
 #include <boost/asio.hpp>
 #include <iostream>
 
@@ -21,18 +22,19 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_userConfig (std::move(userConfig)),
     m_remoteProfileConfig (std::make_shared<ProfileConfig>()),
     m_localProfileConfig (std::make_shared<ProfileConfig>()),
-    m_rpcManager (std::make_unique<RpcManager>(m_ioService)),
+    m_rpc (std::make_unique<RpcManager>(m_ioService)),
     m_cloudClient (std::make_unique<CloudClient>(ioService, m_userConfig, m_remoteProfileConfig)),
     m_processManager (std::make_unique<ProcessManager>(m_ioService, m_userConfig, m_localProfileConfig)),
-    m_work (std::make_shared<boost::asio::io_service::work>(ioService))
+    m_work (std::make_shared<boost::asio::io_service::work>(ioService)),
+    m_testTimer(ioService)
 {
     g_serviceLog.onLogLine.connect([this](std::string logLine) {
-        auto server = m_rpcManager->server();
+        auto server = m_rpc->server();
         server->publish ("synergy.service.log", std::move(logLine));
     });
 
     g_commonLog.onLogLine.connect([this](std::string logLine) {
-        auto server = m_rpcManager->server();
+        auto server = m_rpc->server();
         server->publish ("synergy.service.log", std::move(logLine));
     });
 
@@ -60,7 +62,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         g_lastProfileSnapshot = json;
 
         // forward the message via rpc server to config UI
-        auto rpcServer = m_rpcManager->server();
+        auto rpcServer = m_rpc->server();
         rpcServer->publish("synergy.profile.snapshot", std::move(json));
 
         // HACK: if no server, then use the first screen in the profile. this should
@@ -77,9 +79,8 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         }
     });
 
-    m_rpcManager->ready.connect([this]() {
+    m_rpc->ready.connect([this]() {
         provideRpcEndpoints();
-        serviceLog()->info("service started successfully");
     });
 
     m_processManager->localInputDetected.connect([this](){
@@ -87,7 +88,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         m_cloudClient->claimServer(m_userConfig->screenId());
     });
 
-    m_rpcManager->start();
+    m_rpc->start();
 }
 
 ServiceWorker::~ServiceWorker()
@@ -104,9 +105,34 @@ ServiceWorker::start()
 }
 
 void
+ServiceWorker::shutdown()
+{
+    m_processManager->shutdown();
+    m_rpc->stop();
+    m_work.reset();
+
+    // Finish processing all of the remaining completion handlers
+    m_ioService.poll();
+    m_ioService.stop();
+}
+
+void
+ServiceWorker::provideRpcEndpoints()
+{
+    serviceLog()->debug("creating rpc endpoints");
+
+    provideCore();
+    provideAuthUpdate();
+    provideProfileRequest();
+    provideCloud();
+
+    serviceLog()->debug("rpc endpoints created");
+}
+
+void
 ServiceWorker::provideCore()
 {
-    auto server = m_rpcManager->server();
+    auto server = m_rpc->server();
 
     server->provide ("synergy.core.start",
                      [this](std::vector<std::string>& cmd) {
@@ -141,11 +167,10 @@ ServiceWorker::provideCore()
 void
 ServiceWorker::provideAuthUpdate()
 {
-    auto server = m_rpcManager->server();
+    m_rpc->server()->provide(
+        "synergy.auth.update",
+        [this](int userId, int screenId, int profileId, std::string userToken) {
 
-    server->provide ("synergy.auth.update",
-                     [this](int userId, int screenId, int profileId,
-                     std::string userToken) {
         m_userConfig->setUserId(userId);
         m_userConfig->setScreenId(screenId);
         m_userConfig->setProfileId(profileId);
@@ -157,18 +182,17 @@ ServiceWorker::provideAuthUpdate()
 void
 ServiceWorker::provideProfileRequest()
 {
-    auto server = m_rpcManager->server();
-
-    server->provide ("synergy.profile.request",
-                     [this](std::vector<std::string>& cmd) {
+    m_rpc->server()->provide(
+        "synergy.profile.request",
+        [this](std::vector<std::string>& cmd) {
 
         if (g_lastProfileSnapshot.empty()) {
             serviceLog()->error("can't send profile snapshot, not yet received from cloud");
             return;
         }
 
+        auto server = m_rpc->server();
         serviceLog()->debug("sending last profile snapshot");
-        auto server = m_rpcManager->server();
         server->publish ("synergy.profile.snapshot", g_lastProfileSnapshot);
 
         // TODO: remove hack
@@ -177,24 +201,17 @@ ServiceWorker::provideProfileRequest()
     });
 }
 
-void ServiceWorker::shutdown()
+void
+ServiceWorker::provideCloud()
 {
-    m_processManager->shutdown();
-    m_rpcManager->stop();
-    m_work.reset();
+    m_rpc->server()->provide(
+        "synergy.cloud.retry", [this]() {
 
-    // Finish processing all of the remaining completion handlers
-    m_ioService.poll();
-    m_ioService.stop();
-}
+        // serviceLog()->debug("retrying cloud connection");
 
-void ServiceWorker::provideRpcEndpoints()
-{
-    serviceLog()->debug("creating rpc endpoints");
+        // TODO: wire up to cloud client
 
-    provideCore();
-    provideAuthUpdate();
-    provideProfileRequest();
-
-    serviceLog()->debug("rpc endpoints created");
+        // m_rpc->server()->publish("synergy.cloud.online");
+        // m_rpc->server()->publish("synergy.cloud.offline", retryCountdownSeconds);
+    });
 }

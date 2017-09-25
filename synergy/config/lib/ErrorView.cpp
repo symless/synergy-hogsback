@@ -8,11 +8,16 @@ ErrorView::ErrorView(QObject *parent) :
 }
 
 bool
-ErrorView::enabled() const
+ErrorView::visible() const
 {
     return m_mode != ErrorViewMode::kNone;
 }
 
+bool
+ErrorView::retrying() const
+{
+    return m_retrying;
+}
 
 ErrorViewMode
 ErrorView::mode() const
@@ -24,6 +29,7 @@ void
 ErrorView::setMode(const ErrorViewMode &mode)
 {
     m_mode = mode;
+    m_retrying = false;
     emit modeChanged();
 }
 
@@ -42,6 +48,7 @@ ErrorView::setRetryTimeout(int retryTimeout)
 void
 ErrorView::retry()
 {
+    m_retrying = true;
     retryRequested(m_mode);
 }
 

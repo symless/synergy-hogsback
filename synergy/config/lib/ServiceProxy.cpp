@@ -126,6 +126,12 @@ void
 ServiceProxy::setErrorView(const std::shared_ptr<ErrorView> &errorView)
 {
     m_errorView = errorView;
+
+    QObject::connect(errorView.get(), &ErrorView::retryRequested, [&](ErrorViewMode mode){
+        if (mode == ErrorViewMode::kCloudError) {
+            m_wampClient.call<void>("synergy.cloud.retry");
+        }
+    });
 }
 
 WampClient&

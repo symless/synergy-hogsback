@@ -15,10 +15,12 @@ class ErrorView : public QObject
 public:
     explicit ErrorView(QObject *parent = 0);
 
-    Q_PROPERTY(bool enabled READ enabled NOTIFY modeChanged)
+    Q_PROPERTY(bool visible READ visible NOTIFY modeChanged)
+    Q_PROPERTY(bool retrying READ retrying NOTIFY retryRequested)
     Q_PROPERTY(QString message READ message NOTIFY modeChanged)
 
-    bool enabled() const;
+    bool visible() const;
+    bool retrying() const;
     ErrorViewMode mode() const;
     void setMode(const ErrorViewMode &mode);
     int retryTimeout() const;
@@ -35,4 +37,5 @@ public slots:
 private:
     ErrorViewMode m_mode = ErrorViewMode::kNone;
     int m_retryTimeout = -1;
+    bool m_retrying = false;
 };

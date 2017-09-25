@@ -170,7 +170,7 @@ Rectangle {
             anchors.top: logConsoleSeparator.bottom
             width: parent.width
             anchors.bottom: parent.bottom
-            color: applicationWindow.errorView.enabled ? errorOverlay.color : "#3F95B8"
+            color: applicationWindow.errorView.visible ? errorOverlay.color : "#3F95B8"
             z: 1
         }
 
@@ -183,7 +183,7 @@ Rectangle {
             color: "#A9A9A9"
             opacity: 0.7
             z: 2
-            visible: applicationWindow.errorView.enabled
+            visible: applicationWindow.errorView.visible
 
             MouseArea {
                 anchors.fill: parent
@@ -197,7 +197,7 @@ Rectangle {
             width: parent.width
             height: dp(22)
             color: "#FFF1E1"
-            visible: applicationWindow.errorView.enabled
+            visible: applicationWindow.errorView.visible
             z: 1
 
             // error message
@@ -217,19 +217,34 @@ Rectangle {
                 id: errorRetryLink
                 text: "Retry"
                 font.underline: true
-                color: errorMessageText.color
                 font.pixelSize: errorMessageText.font.pixelSize
+                color: errorMessageText.color
                 anchors.top: parent.top
                 anchors.left: errorMessageText.right
                 anchors.margins: errorMessageText.anchors.margins
+                visible: !applicationWindow.errorView.retrying
 
                 MouseArea {
                     anchors.fill: parent
                     acceptedButtons: Qt.LeftButton
+                    cursorShape: Qt.PointingHandCursor
                     onClicked: {
                         applicationWindow.errorView.retry()
                     }
                 }
+            }
+
+            // error retrying text
+            Text {
+                id: errorRetryingText
+                text: "Retrying..."
+                font.italic: true
+                font.pixelSize: errorMessageText.font.pixelSize
+                color: errorMessageText.color
+                anchors.top: parent.top
+                anchors.left: errorMessageText.right
+                anchors.margins: errorMessageText.anchors.margins
+                visible: applicationWindow.errorView.retrying
             }
         }
 
