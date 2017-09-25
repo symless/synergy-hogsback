@@ -16,7 +16,7 @@ public:
     explicit ErrorView(QObject *parent = 0);
 
     Q_PROPERTY(bool visible READ visible NOTIFY modeChanged)
-    Q_PROPERTY(bool retrying READ retrying NOTIFY retryRequested)
+    Q_PROPERTY(bool retrying READ retrying NOTIFY retryingChanged)
     Q_PROPERTY(QString message READ message NOTIFY modeChanged)
 
     bool visible() const;
@@ -26,8 +26,12 @@ public:
     Q_INVOKABLE void retry();
     QString message() const;
 
+private:
+    void setRetrying(bool retrying);
+
 signals:
     void modeChanged();
+    void retryingChanged();
     void retryRequested(ErrorViewMode mode);
 
 public slots:

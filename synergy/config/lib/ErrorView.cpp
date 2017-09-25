@@ -19,6 +19,13 @@ ErrorView::retrying() const
     return m_retrying;
 }
 
+void
+ErrorView::setRetrying(bool retrying)
+{
+    m_retrying = retrying;
+    retryingChanged();
+}
+
 ErrorViewMode
 ErrorView::mode() const
 {
@@ -29,14 +36,14 @@ void
 ErrorView::setMode(const ErrorViewMode &mode)
 {
     m_mode = mode;
-    m_retrying = false;
+    setRetrying(false);
     emit modeChanged();
 }
 
 void
 ErrorView::retry()
 {
-    m_retrying = true;
+    setRetrying(true);
     retryRequested(m_mode);
 }
 

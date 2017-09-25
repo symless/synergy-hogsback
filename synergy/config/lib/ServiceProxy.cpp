@@ -33,11 +33,14 @@ ServiceProxy::ServiceProxy() :
     });
 
     m_wampClient.connecting.connect([&]() {
-        LogManager::debug(QString("connecting to service"));
+        LogManager::debug(QString("connecting to background service"));
     });
 
     m_wampClient.connected.connect([&]() {
-        LogManager::debug(QString("connected to service"));
+        LogManager::debug("connected to background service");
+
+        LogManager::debug("saying hello to background service");
+        m_wampClient.call<void>("synergy.hello");
 
         m_wampClient.subscribe ("synergy.profile.snapshot", [&](std::string json) {
             QByteArray byteArray(json.c_str(), json.length());
@@ -71,9 +74,6 @@ ServiceProxy::ServiceProxy() :
             LogManager::debug(QString("service cloud connection recovered"));
             m_errorView->setMode(ErrorViewMode::kNone);
         });
-
-        LogManager::debug("requesting profile snapshot");
-        m_wampClient.call<void> ("synergy.profile.request");
     });
 }
 
