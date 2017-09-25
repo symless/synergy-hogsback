@@ -14,6 +14,11 @@ SecuredTcpClient::SecuredTcpClient(boost::asio::io_service &ioService, std::stri
 {
 }
 
+SecuredTcpClient::~SecuredTcpClient()
+{
+    serviceLog()->debug("tcp client destroyed");
+}
+
 void SecuredTcpClient::connect()
 {
     if (m_connecting) {
@@ -21,13 +26,11 @@ void SecuredTcpClient::connect()
         return;
     }
 
-    m_resolver.async_resolve(
-        {m_address, m_port},
-        std::bind(
-            &SecuredTcpClient::onResolveFinished,
-            this,
-            std::placeholders::_1,
-                    std::placeholders::_2));
+    // resolve syncronously due to a bug in boost where
+    // m_resolver.cancel doesn't trigger abort.
+    errorCode ec;
+    auto result = m_resolver.resolve({m_address, m_port}, ec);
+    onResolveFinished(ec, result);
 }
 
 ssl::stream<tcp::socket> &SecuredTcpClient::stream()
