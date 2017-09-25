@@ -1,7 +1,7 @@
 #include <synergy/common/WampClient.h>
 #include <iostream>
 
-static bool const debug = true;
+static bool const debug = false;
 
 WampClient::WampClient(boost::asio::io_service& io):
     m_executor(io),
