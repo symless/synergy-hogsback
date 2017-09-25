@@ -74,7 +74,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     });
 
     m_cloudClient->websocketConnected.connect([this](){
-        serviceLog()->error("cloud client connected");
+        serviceLog()->debug("cloud client connected");
         m_rpc->server()->publish("synergy.cloud.online");
     });
 
