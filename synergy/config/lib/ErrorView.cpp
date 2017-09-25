@@ -33,18 +33,6 @@ ErrorView::setMode(const ErrorViewMode &mode)
     emit modeChanged();
 }
 
-int
-ErrorView::retryTimeout() const
-{
-    return m_retryTimeout;
-}
-
-void
-ErrorView::setRetryTimeout(int retryTimeout)
-{
-    m_retryTimeout = retryTimeout;
-}
-
 void
 ErrorView::retry()
 {

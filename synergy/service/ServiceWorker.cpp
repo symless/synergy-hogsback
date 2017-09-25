@@ -198,6 +198,13 @@ ServiceWorker::provideProfileRequest()
         // TODO: remove hack
         serviceLog()->debug("config ui opened, forcing connectivity test");
         m_localProfileConfig->forceConnectivityTest();
+
+        /*
+        m_testTimer.expires_from_now(boost::posix_time::seconds(2));
+        m_testTimer.async_wait([&](auto const& ec) {
+            m_rpc->server()->publish("synergy.cloud.offline");
+        });
+        */
     });
 }
 
@@ -211,7 +218,11 @@ ServiceWorker::provideCloud()
 
         // TODO: wire up to cloud client
 
-        // m_rpc->server()->publish("synergy.cloud.online");
-        // m_rpc->server()->publish("synergy.cloud.offline", retryCountdownSeconds);
+        /*
+        m_testTimer.expires_from_now(boost::posix_time::seconds(2));
+        m_testTimer.async_wait([&](auto const& ec) {
+            m_rpc->server()->publish("synergy.cloud.online");
+        });
+        */
     });
 }

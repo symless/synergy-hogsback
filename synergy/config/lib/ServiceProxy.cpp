@@ -62,9 +62,8 @@ ServiceProxy::ServiceProxy() :
             emit screenError(QString::fromStdString(screenName), errorCode);
         });
 
-        m_wampClient.subscribe ("synergy.cloud.offline", [this](int retryTimeout) {
+        m_wampClient.subscribe ("synergy.cloud.offline", [this]() {
             LogManager::debug(QString("service cloud connection error"));
-            m_errorView->setRetryTimeout(retryTimeout);
             m_errorView->setMode(ErrorViewMode::kCloudError);
         });
 

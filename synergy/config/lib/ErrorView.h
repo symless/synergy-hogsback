@@ -23,8 +23,6 @@ public:
     bool retrying() const;
     ErrorViewMode mode() const;
     void setMode(const ErrorViewMode &mode);
-    int retryTimeout() const;
-    void setRetryTimeout(int value);
     Q_INVOKABLE void retry();
     QString message() const;
 
@@ -36,6 +34,5 @@ public slots:
 
 private:
     ErrorViewMode m_mode = ErrorViewMode::kNone;
-    int m_retryTimeout = -1;
     bool m_retrying = false;
 };
