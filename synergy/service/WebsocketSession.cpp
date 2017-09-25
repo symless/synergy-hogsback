@@ -123,6 +123,14 @@ WebsocketSession::reconnect(bool now)
 }
 
 void
+WebsocketSession::reconnectOnError()
+{
+    m_connecting = false;
+    connectionError();
+    reconnect();
+}
+
+void
 WebsocketSession::write(std::string& message)
 {
     if (m_connected) {
@@ -174,8 +182,7 @@ WebsocketSession::onTcpClientConnectFailed()
         m_tcpClient.reset();
 
         serviceLog()->debug("websocket connect failed");
-        connectionError();
-        reconnect();
+        reconnectOnError();
     }
 }
 
@@ -184,8 +191,7 @@ WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
 {
     if (ec) {
         serviceLog()->debug("websocket handshake error: {}", ec.message());
-        connectionError();
-        reconnect();
+        reconnectOnError();
         return;
     }
 
@@ -207,22 +213,20 @@ void
 WebsocketSession::onReadFinished(errorCode ec)
 {
     if (ec) {
+        serviceLog()->debug("websocket read error: {}", ec.message());
+
         if (ec == boost::asio::error::timed_out) {
-            serviceLog()->debug("websocket connection timeout");
-            m_connecting = false;
-            m_connected = false;
-            connectionError();
-            reconnect();
+            serviceLog()->warn("websocket connection timeout");
+            reconnectOnError();
+        }
+        else if (ec == boost::asio::error::connection_aborted) {
+            serviceLog()->warn("websocket connection aborted");
+            reconnectOnError();
         }
         else if (ec == boost::asio::ssl::error::stream_errors::stream_truncated) {
-            serviceLog()->debug("websocket connection shutdown ungracefully");
-            m_connecting = false;
-            m_connected = false;
-            connectionError();
-            reconnect();
+            serviceLog()->warn("websocket connection stream truncated");
+            reconnectOnError();
         }
-
-        serviceLog()->debug("websocket read error: {}", ec.message());
         return;
     }
 

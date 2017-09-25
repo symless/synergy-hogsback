@@ -45,6 +45,7 @@ private:
 
     void close() noexcept;
     void setTcpKeepAliveTimeout();
+    void reconnectOnError();
 
 private:
     boost::beast::multi_buffer m_readBuffer;
