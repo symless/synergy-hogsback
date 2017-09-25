@@ -162,6 +162,7 @@ App::run(int argc, char* argv[])
     serviceProxy.setErrorView(errorView);
     QObject::connect(errorView.get(), &ErrorView::retryRequested, [&](ErrorViewMode mode){
         if (mode == ErrorViewMode::kServiceError) {
+            // restart the app when there's a service rpc connection error.
             restart(app, arguments);
         }
     });
@@ -208,7 +209,6 @@ App::run(int argc, char* argv[])
 void
 App::restart(QApplication& app, std::vector<std::string> argsVector)
 {
-    // restart the app when there's a service rpc connection error.
     QString path = QString::fromStdString(argsVector.front());
 
     // for some reason app.arguments() only returns 1 arg.
