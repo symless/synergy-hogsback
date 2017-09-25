@@ -214,19 +214,7 @@ WebsocketSession::onReadFinished(errorCode ec)
 {
     if (ec) {
         serviceLog()->debug("websocket read error {}: {}", ec.value(), ec.message());
-
-        if (ec == boost::asio::error::timed_out) {
-            serviceLog()->warn("websocket connection timeout");
-            reconnectOnError();
-        }
-        else if (ec == boost::asio::error::connection_aborted) {
-            serviceLog()->warn("websocket connection aborted");
-            reconnectOnError();
-        }
-        else if (ec == boost::asio::ssl::error::stream_errors::stream_truncated) {
-            serviceLog()->warn("websocket connection stream truncated");
-            reconnectOnError();
-        }
+        reconnectOnError();
         return;
     }
 
