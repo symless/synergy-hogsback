@@ -34,13 +34,20 @@ main (int argc, char* argv[]) {
 
     auto userConfig = std::make_shared<UserConfig>();
     userConfig->load();
-    ServiceWorker serviceWorker(ioService, userConfig);
 
-    TerminationSignalListener signalListener(ioService);
-    signalListener.setHandler([&serviceWorker] () {
-        serviceWorker.shutdown();
-    });
+    try {
+        ServiceWorker serviceWorker(ioService, userConfig);
 
-    serviceWorker.start();
-    return EXIT_SUCCESS;
+        TerminationSignalListener signalListener(ioService);
+        signalListener.setHandler([&serviceWorker] () {
+            serviceWorker.shutdown();
+        });
+
+        serviceWorker.start();
+        return EXIT_SUCCESS;
+    }
+    catch (const std::exception& ex) {
+        serviceLog()->error("service worker failed: {}", ex.what());
+        return EXIT_FAILURE;
+    }
 }
