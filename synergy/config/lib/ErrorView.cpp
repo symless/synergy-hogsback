@@ -49,11 +49,11 @@ QString
 ErrorView::message() const
 {
     switch (m_mode) {
-    case ErrorViewMode::kCloudError:
-        return "An error occurred while connecting to the config service.";
-    case ErrorViewMode::kServiceError:
-        return "An error occurred while connecting to the background service.";
-    default:
-        return "";
+        case ErrorViewMode::kCloudError:
+            return "There was a problem connecting to the auto-config service.";
+        case ErrorViewMode::kServiceError:
+            return "There was a problem connecting to the background service.";
+        default:
+            return "";
     }
 }
