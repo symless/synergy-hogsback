@@ -37,20 +37,38 @@ CloudClient::CloudClient(boost::asio::io_service& ioService,
     m_websocket.messageReceived.connect([this](std::string msg) {
         websocketMessageReceived(std::move(msg));
     });
+
+    m_websocket.connected.connect([this]() {
+        websocketConnected();
+    });
+
+    m_websocket.disconnected.connect([this]() {
+        websocketDisconnected();
+    });
+
+    m_websocket.connectionError.connect([this]() {
+        websocketConnectionError();
+    });
 }
 
 void
 CloudClient::load(UserConfig const& userConfig)
 {
+    static auto lastProfileId = -1;
     auto const profileId = userConfig.profileId();
-    if (profileId != -1) {
+    if (profileId != lastProfileId) {
         m_websocket.addHeader("X-Channel-Id", std::to_string(profileId));
         m_websocket.addHeader("X-Auth-Token", userConfig.userToken());
 
         if (!m_websocket.isConnected()) {
             m_websocket.connect(kSubTarget);
         }
+        else {
+            m_websocket.reconnect();
+        }
     }
+
+    lastProfileId = profileId;
 }
 
 void CloudClient::report(int screenId, const std::string &successfulIp, const std::string &failedIp)
@@ -81,6 +99,18 @@ void CloudClient::claimServer(int64_t serverId)
     root["profile_id"] = profileId;
 
     httpSession->post(kUrlTarget, tao::json::to_string(root));
+}
+
+void
+CloudClient::reconnectWebsocket()
+{
+    m_websocket.reconnect(true);
+}
+
+bool
+CloudClient::isWebsocketConnected()
+{
+    return m_websocket.isConnected();
 }
 
 HttpSession* CloudClient::newHttpSession()

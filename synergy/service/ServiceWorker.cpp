@@ -79,6 +79,16 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         }
     });
 
+    m_cloudClient->websocketConnected.connect([this](){
+        serviceLog()->error("cloud client connected");
+        m_rpc->server()->publish("synergy.cloud.online");
+    });
+
+    m_cloudClient->websocketConnectionError.connect([this](){
+        serviceLog()->error("cloud client connection error");
+        m_rpc->server()->publish("synergy.cloud.offline");
+    });
+
     m_rpc->ready.connect([this]() {
         provideRpcEndpoints();
     });
@@ -122,8 +132,8 @@ ServiceWorker::provideRpcEndpoints()
     serviceLog()->debug("creating rpc endpoints");
 
     provideCore();
-    provideAuthUpdate();
-    provideProfileRequest();
+    provideAuth();
+    provideHello();
     provideCloud();
 
     serviceLog()->debug("rpc endpoints created");
@@ -165,7 +175,7 @@ ServiceWorker::provideCore()
 }
 
 void
-ServiceWorker::provideAuthUpdate()
+ServiceWorker::provideAuth()
 {
     m_rpc->server()->provide(
         "synergy.auth.update",
@@ -180,31 +190,29 @@ ServiceWorker::provideAuthUpdate()
 }
 
 void
-ServiceWorker::provideProfileRequest()
+ServiceWorker::provideHello()
 {
     m_rpc->server()->provide(
-        "synergy.profile.request",
+        "synergy.hello",
         [this](std::vector<std::string>& cmd) {
 
-        if (g_lastProfileSnapshot.empty()) {
-            serviceLog()->error("can't send profile snapshot, not yet received from cloud");
-            return;
-        }
+        serviceLog()->debug("saying hello to config ui");
 
-        auto server = m_rpc->server();
-        serviceLog()->debug("sending last profile snapshot");
-        server->publish ("synergy.profile.snapshot", g_lastProfileSnapshot);
+        if (!g_lastProfileSnapshot.empty()) {
+            serviceLog()->debug("sending last profile snapshot");
+            m_rpc->server()->publish ("synergy.profile.snapshot", g_lastProfileSnapshot);
+        }
+        else {
+            serviceLog()->error("can't send profile snapshot, not yet received from cloud");
+        }
 
         // TODO: remove hack
         serviceLog()->debug("config ui opened, forcing connectivity test");
         m_localProfileConfig->forceConnectivityTest();
 
-        /*
-        m_testTimer.expires_from_now(boost::posix_time::seconds(2));
-        m_testTimer.async_wait([&](auto const& ec) {
+        if (!m_cloudClient->isWebsocketConnected()) {
             m_rpc->server()->publish("synergy.cloud.offline");
-        });
-        */
+        }
     });
 }
 
@@ -214,15 +222,7 @@ ServiceWorker::provideCloud()
     m_rpc->server()->provide(
         "synergy.cloud.retry", [this]() {
 
-        // serviceLog()->debug("retrying cloud connection");
-
-        // TODO: wire up to cloud client
-
-        /*
-        m_testTimer.expires_from_now(boost::posix_time::seconds(2));
-        m_testTimer.async_wait([&](auto const& ec) {
-            m_rpc->server()->publish("synergy.cloud.online");
-        });
-        */
+        serviceLog()->debug("retrying cloud connection");
+        m_cloudClient->reconnectWebsocket();
     });
 }

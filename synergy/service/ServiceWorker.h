@@ -23,8 +23,8 @@ public:
 private:
     void provideRpcEndpoints();
     void provideCore();
-    void provideAuthUpdate();
-    void provideProfileRequest();
+    void provideAuth();
+    void provideHello();
     void provideCloud();
 
 private:
