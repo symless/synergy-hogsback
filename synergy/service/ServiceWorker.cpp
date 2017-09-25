@@ -25,14 +25,8 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_rpc (std::make_unique<RpcManager>(m_ioService)),
     m_cloudClient (std::make_unique<CloudClient>(ioService, m_userConfig, m_remoteProfileConfig)),
     m_processManager (std::make_unique<ProcessManager>(m_ioService, m_userConfig, m_localProfileConfig)),
-    m_work (std::make_shared<boost::asio::io_service::work>(ioService)),
-    m_testTimer(ioService)
+    m_work (std::make_shared<boost::asio::io_service::work>(ioService))
 {
-    g_serviceLog.onLogLine.connect([this](std::string logLine) {
-        auto server = m_rpc->server();
-        server->publish ("synergy.service.log", std::move(logLine));
-    });
-
     g_commonLog.onLogLine.connect([this](std::string logLine) {
         auto server = m_rpc->server();
         server->publish ("synergy.service.log", std::move(logLine));
@@ -91,6 +85,17 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
 
     m_rpc->ready.connect([this]() {
         provideRpcEndpoints();
+
+        m_logSender = g_serviceLog.onLogLine.connect([this](std::string logLine) {
+            try {
+                auto server = m_rpc->server();
+                server->publish ("synergy.service.log", std::move(logLine));
+            }
+            catch (const std::exception& ex) {
+                m_logSender.disconnect();
+                serviceLog()->error("failed to send log to config ui: {}", ex.what());
+            }
+        });
     });
 
     m_processManager->localInputDetected.connect([this](){

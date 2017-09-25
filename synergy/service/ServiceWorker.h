@@ -2,7 +2,7 @@
 #define SERVICEWORKER_H
 
 #include <boost/asio/io_service.hpp>
-#include <boost/asio/deadline_timer.hpp>
+#include <boost/signals2.hpp>
 
 class RpcManager;
 class ProcessManager;
@@ -36,7 +36,7 @@ private:
     std::unique_ptr<CloudClient>    m_cloudClient;
     std::unique_ptr<ProcessManager> m_processManager;
     std::shared_ptr<boost::asio::io_service::work> m_work;
-    boost::asio::deadline_timer m_testTimer;
+    boost::signals2::connection m_logSender;
 };
 
 #endif // SERVICEWORKER_H
