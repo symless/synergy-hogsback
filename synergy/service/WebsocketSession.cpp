@@ -190,7 +190,7 @@ void
 WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
 {
     if (ec) {
-        serviceLog()->debug("websocket handshake error: {}", ec.message());
+        serviceLog()->debug("websocket handshake error {}: {}", ec.value(), ec.message());
         reconnectOnError();
         return;
     }
@@ -213,7 +213,7 @@ void
 WebsocketSession::onReadFinished(errorCode ec)
 {
     if (ec) {
-        serviceLog()->debug("websocket read error: {}", ec.message());
+        serviceLog()->debug("websocket read error {}: {}", ec.value(), ec.message());
 
         if (ec == boost::asio::error::timed_out) {
             serviceLog()->warn("websocket connection timeout");
@@ -251,7 +251,7 @@ void
 WebsocketSession::onWriteFinished(errorCode ec)
 {
     if (ec) {
-        serviceLog()->debug("websocket write error: {}", ec.message());
+        serviceLog()->debug("websocket write error {}: {}", ec.value(), ec.message());
     }
 }
 
@@ -259,7 +259,7 @@ void
 WebsocketSession::onDisconnectFinished(errorCode ec)
 {
     if (ec) {
-        serviceLog()->debug("websocket disconnect error: {}", ec.message());
+        serviceLog()->debug("websocket disconnect error {}: {}", ec.value(), ec.message());
     }
 
     m_connecting = false;
