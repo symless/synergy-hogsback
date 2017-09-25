@@ -17,11 +17,20 @@
 #include <errno.h>
 #endif
 
-static const long kMinReconnectDelaySec = 20; //3;
-static const long kMaxReconnectDelaySec = 20;
-static const unsigned int kTcpKeepAliveIdleSec = 10;//120; // 2 mins
-static const unsigned int kTcpKeepAliveIntervalSec = 10;
-static const unsigned int kTcpKeepAliveCount = 2; //10; // default value on Windows
+// randomly reconnect between this min and max.
+static const long kMinReconnectDelaySec = 1;
+static const long kMaxReconnectDelaySec = 10;
+
+// user should wait no more than 5 seconds before realizing the connection is down.
+static const unsigned int kTcpKeepAliveIdleSec = 5;
+
+// once we've had a failure, try frequently to fail quickly (so the user isn't
+// waiting around for ages wondering what's going on.
+static const unsigned int kTcpKeepAliveIntervalSec = 1;
+
+// claim the connection is down after this number of keep alive retries.
+// BUG: this is hard coded to 10 seconds on windows (we can't change it).
+static const unsigned int kTcpKeepAliveCount = 2;
 
 WebsocketSession::WebsocketSession(boost::asio::io_service &ioService,
         const std::string& hostname,
@@ -46,6 +55,11 @@ WebsocketSession::~WebsocketSession()
 void
 WebsocketSession::connect(const std::string target)
 {
+    if (m_connecting) {
+        serviceLog()->warn("already connecting websocket");
+    }
+
+    m_connecting = true;
     m_target = target;
 
     m_tcpClient->connected.connect(
@@ -95,7 +109,10 @@ WebsocketSession::reconnect(bool now)
 
     m_reconnectTimer.cancel();
     m_reconnectTimer.expires_from_now(boost::posix_time::seconds(reconnectDelay));
-    m_reconnectTimer.async_wait([this](const boost::system::error_code&) {
+    m_reconnectTimer.async_wait([this](const boost::system::error_code& ec) {
+        if (ec == boost::asio::error::operation_aborted) {
+            return;
+        }
         serviceLog()->debug("retrying websocket connection now");
 
         m_tcpClient.reset(new SecuredTcpClient(m_ioService, m_hostname, m_port));
@@ -172,6 +189,7 @@ WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
         return;
     }
 
+    m_connecting = false;
     m_connected = true;
     connected();
     serviceLog()->debug("websocket connected");
@@ -191,12 +209,14 @@ WebsocketSession::onReadFinished(errorCode ec)
     if (ec) {
         if (ec == boost::asio::error::timed_out) {
             serviceLog()->debug("websocket connection timeout");
+            m_connecting = false;
             m_connected = false;
             connectionError();
             reconnect();
         }
         else if (ec == boost::asio::ssl::error::stream_errors::stream_truncated) {
             serviceLog()->debug("websocket connection shutdown ungracefully");
+            m_connecting = false;
             m_connected = false;
             connectionError();
             reconnect();
@@ -238,6 +258,7 @@ WebsocketSession::onDisconnectFinished(errorCode ec)
         serviceLog()->debug("websocket disconnect error: {}", ec.message());
     }
 
+    m_connecting = false;
     m_connected = false;
     disconnected();
     serviceLog()->debug("websocket disconnected");
@@ -249,6 +270,7 @@ void WebsocketSession::close() noexcept
         serviceLog()->debug("closing existing websocket connection");
         errorCode ec;
         m_websocket->close(websocket::close_code::normal, ec);
+        m_connecting = false;
         m_connected = false;
     }
 }

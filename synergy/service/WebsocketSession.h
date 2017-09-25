@@ -57,6 +57,7 @@ private:
     boost::asio::io_service& m_ioService;
     std::string m_hostname;
     std::string m_port;
+    bool m_connecting = false;
 };
 
 #endif // WEBSOCKETSESSION_H
