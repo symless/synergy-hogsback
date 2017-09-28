@@ -133,14 +133,6 @@ Rectangle {
                         }
                     }
 
-                    MenuItem {
-                        text: "&Send log"
-                        shortcut: "Alt+S"
-                        onTriggered: {
-                            LogManager.uploadLogFile()
-                        }
-                    }
-
                     style: MenuStyle {
                         font.family: sample.font.family
                         font.pixelSize: sample.font.pixelSize
@@ -166,12 +158,30 @@ Rectangle {
 
         // background for config area
         Rectangle {
-            id: configPageEnableBackground
+            id: configPageBackground
             anchors.top: logConsoleSeparator.bottom
             width: parent.width
             anchors.bottom: parent.bottom
             color: applicationWindow.errorView.visible ? errorOverlay.color : "#3F95B8"
             z: 1
+
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.RightButton
+                onClicked: configPageMenu.popup()
+            }
+
+            Menu {
+                id: configPageMenu
+
+                MenuItem {
+                    text: "&Send log"
+                    shortcut: "Alt+S"
+                    onTriggered: {
+                        LogManager.uploadLogFile()
+                    }
+                }
+            }
         }
 
         // error overlay with mouse trap
