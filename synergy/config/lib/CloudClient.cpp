@@ -227,6 +227,7 @@ void CloudClient::onUploadLogFileFinished(QNetworkReply *reply)
 
         if (success) {
             QString msg = obj["message"].toString();
+            uploadLogFileSuccess(msg);
             LogManager::info(msg);
         }
     }

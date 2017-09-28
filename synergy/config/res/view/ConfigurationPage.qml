@@ -1,6 +1,7 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
+import QtQuick.Dialogs 1.2
 
 import com.synergy.gui 1.0
 
@@ -178,7 +179,7 @@ Rectangle {
                     text: "&Send log"
                     shortcut: "Alt+S"
                     onTriggered: {
-                        LogManager.uploadLogFile()
+                        applicationWindow.logManager.uploadLogFile()
                     }
                 }
             }
@@ -255,6 +256,74 @@ Rectangle {
                 anchors.left: errorMessageText.right
                 anchors.margins: errorMessageText.anchors.margins
                 visible: applicationWindow.errorView.retrying
+            }
+        }
+
+        // log upload banner
+        Rectangle {
+            id: logUploadBanner
+            anchors.top: logConsoleSeparator.bottom
+            width: parent.width
+            height: dp(22)
+            color: "#D6E5FF"
+            visible: applicationWindow.logManager.dialogVisible
+            z: 1
+
+            // log upload message
+            Text {
+                id: logUploadText
+                text: applicationWindow.logManager.dialogText
+                color: "#0644A8"
+                font.pixelSize: dp(12)
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.bottom: parent.bottom
+                anchors.margins: dp(5)
+            }
+
+            // log upload url
+            Text {
+                id: logUploadUrl
+                text: applicationWindow.logManager.dialogUrl
+                color: "#0644A8"
+                font.pixelSize: dp(12)
+                anchors.top: parent.top
+                anchors.left: logUploadText.right
+                anchors.bottom: parent.bottom
+                anchors.margins: dp(5)
+                visible: applicationWindow.logManager.dialogUrl !== ""
+
+                onLinkActivated: {
+                    applicationWindow.logManager.dismissDialog()
+                    Qt.openUrlExternally(link)
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    acceptedButtons: Qt.NoButton
+                }
+            }
+
+            //  log upload dismiss link
+            Text {
+                id: logUploadLink
+                text: "Dismiss"
+                font.underline: true
+                font.pixelSize: logUploadText.font.pixelSize
+                color: logUploadText.color
+                anchors.top: parent.top
+                anchors.left: logUploadUrl.right
+                anchors.margins: logUploadText.anchors.margins
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.LeftButton
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        applicationWindow.logManager.dismissDialog()
+                    }
+                }
             }
         }
 

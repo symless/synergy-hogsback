@@ -46,6 +46,7 @@ signals:
     void loginFail(QString error);
     void receivedProfiles(QMap<QString, int>);
     void invalidAuth();
+    void uploadLogFileSuccess(QString url);
 
 private slots:
     void onGetIdentifyFinished(QNetworkReply* reply);

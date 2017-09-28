@@ -145,14 +145,14 @@ App::run(int argc, char* argv[])
     qmlRegisterType<ServiceProxy>("com.synergy.gui", 1, 0, "ServiceProxy");
     qmlRegisterType<AccessibilityManager>("com.synergy.gui", 1, 0, "AccessibilityManager");
     qmlRegisterType<ProfileListModel>("com.synergy.gui", 1, 0, "ProfileListModel");
+    qmlRegisterType<LogManager>("com.synergy.gui", 1, 0, "LogManager");
     qmlRegisterSingletonType<CloudClient>("com.synergy.gui", 1, 0, "CloudClient", CloudClient::instance);
     qmlRegisterSingletonType<ProfileManager>("com.synergy.gui", 1, 0, "ProfileManager", ProfileManager::instance);
     qmlRegisterSingletonType<AppConfig>("com.synergy.gui", 1, 0, "AppConfig", AppConfig::instance);
     qmlRegisterSingletonType<VersionManager>("com.synergy.gui", 1, 0, "VersionManager", VersionManager::instance);
-    qmlRegisterSingletonType<LogManager>("com.synergy.gui", 1, 0, "LogManager", LogManager::instance);
 
     QQmlApplicationEngine engine;
-    LogManager::instance();
+    LogManager* logManager = qobject_cast<LogManager*>(LogManager::instance());
     LogManager::setQmlContext(engine.rootContext());
     LogManager::info(QString("log filename: %1").arg(LogManager::logFilename()));
 
@@ -168,6 +168,11 @@ App::run(int argc, char* argv[])
     });
 
     CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
+
+    QObject::connect(cloudClient, &CloudClient::uploadLogFileSuccess, [&](QString url){
+        logManager->setDialogUrl(url);
+    });
+
     WampClient& wampClient = serviceProxy.wampClient();
 
     QObject::connect(cloudClient, &CloudClient::profileUpdated, [&wampClient](){
@@ -197,6 +202,8 @@ App::run(int argc, char* argv[])
         ("qmlServiceProxy", static_cast<QObject*>(&serviceProxy));
     engine.rootContext()->setContextProperty
         ("qmlErrorView", static_cast<QObject*>(errorView.get()));
+    engine.rootContext()->setContextProperty
+        ("qmlLogManager", static_cast<QObject*>(logManager));
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     auto qtAppRet = app.exec();
