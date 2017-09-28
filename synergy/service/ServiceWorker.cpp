@@ -138,6 +138,7 @@ ServiceWorker::provideRpcEndpoints()
 
     provideCore();
     provideAuth();
+    provideSnapshot();
     provideHello();
     provideCloud();
 
@@ -194,14 +195,11 @@ ServiceWorker::provideAuth()
     });
 }
 
-void
-ServiceWorker::provideHello()
+void ServiceWorker::provideSnapshot()
 {
     m_rpc->server()->provide(
-        "synergy.hello",
-        [this](std::vector<std::string>& cmd) {
-
-        serviceLog()->debug("saying hello to config ui");
+        "synergy.snapshot.request",
+        [this]() {
 
         if (!g_lastProfileSnapshot.empty()) {
             serviceLog()->debug("sending last profile snapshot");
@@ -210,6 +208,17 @@ ServiceWorker::provideHello()
         else {
             serviceLog()->error("can't send profile snapshot, not yet received from cloud");
         }
+    });
+}
+
+void
+ServiceWorker::provideHello()
+{
+    m_rpc->server()->provide(
+        "synergy.hello",
+        [this](std::vector<std::string>& cmd) {
+
+        serviceLog()->debug("saying hello to config ui");
 
         // TODO: remove hack
         serviceLog()->debug("config ui opened, forcing connectivity test");

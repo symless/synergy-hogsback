@@ -89,6 +89,8 @@ void ScreenManager::setServiceProxy(ServiceProxy* serviceProxy)
             this, &ScreenManager::onScreenStatusChanged);
     connect(m_serviceProxy, &ServiceProxy::screenError,
             this, &ScreenManager::onScreenError, Qt::QueuedConnection);
+
+    m_serviceProxy->requestProfileSnapshot();
 }
 
 void ScreenManager::setViewWidth(int w)

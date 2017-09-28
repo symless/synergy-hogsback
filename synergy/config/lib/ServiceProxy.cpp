@@ -133,6 +133,13 @@ ServiceProxy::setErrorView(const std::shared_ptr<ErrorView> &errorView)
     });
 }
 
+void ServiceProxy::requestProfileSnapshot()
+{
+    if (m_wampClient.isConnected()) {
+        m_wampClient.call<void>("synergy.snapshot.request");
+    }
+}
+
 WampClient&
 ServiceProxy::wampClient()
 {

@@ -24,6 +24,7 @@ private:
     void provideRpcEndpoints();
     void provideCore();
     void provideAuth();
+    void provideSnapshot();
     void provideHello();
     void provideCloud();
 
