@@ -6,9 +6,15 @@ static bool const debug = false;
 WampClient::WampClient(boost::asio::io_service& io):
     m_executor(io),
     m_session(std::make_shared<autobahn::wamp_session>(ioService(), debug)),
-    m_keepAliveTimer(io)
+    m_keepAliveTimer(io),
+    m_connected(false)
 {
     m_defaultCallOptions.set_timeout(std::chrono::seconds(2));
+}
+
+bool WampClient::isConnected() const
+{
+    return m_connected;
 }
 
 void
@@ -59,6 +65,7 @@ WampClient::connect()
                 try {
                     joined.get();
                     this->connected();
+                    m_connected = true;
                 }
                 catch (const std::exception& e) {
                     commonLog()->error("rpc join failed: {}", e.what());

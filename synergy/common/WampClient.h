@@ -70,6 +70,8 @@ public:
         return m_executor.underlying_executor().get_io_service();
     }
 
+    bool isConnected() const;
+
     template <typename Result, typename... Args>
     boost::future<Result>
     call (char const* const fun, Args&&... args) {
@@ -134,6 +136,7 @@ private:
     std::shared_ptr<autobahn::wamp_transport> m_transport;
     autobahn::wamp_call_options m_defaultCallOptions;
     boost::asio::deadline_timer m_keepAliveTimer;
+    bool m_connected;
 };
 
 

@@ -123,6 +123,14 @@ WebsocketSession::reconnect(bool now)
 }
 
 void
+WebsocketSession::reconnectOnError()
+{
+    m_connecting = false;
+    connectionError();
+    reconnect();
+}
+
+void
 WebsocketSession::write(std::string& message)
 {
     if (m_connected) {
@@ -174,8 +182,7 @@ WebsocketSession::onTcpClientConnectFailed()
         m_tcpClient.reset();
 
         serviceLog()->debug("websocket connect failed");
-        connectionError();
-        reconnect();
+        reconnectOnError();
     }
 }
 
@@ -183,9 +190,8 @@ void
 WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
 {
     if (ec) {
-        serviceLog()->debug("websocket handshake error: {}", ec.message());
-        connectionError();
-        reconnect();
+        serviceLog()->debug("websocket handshake error {}: {}", ec.value(), ec.message());
+        reconnectOnError();
         return;
     }
 
@@ -207,22 +213,8 @@ void
 WebsocketSession::onReadFinished(errorCode ec)
 {
     if (ec) {
-        if (ec == boost::asio::error::timed_out) {
-            serviceLog()->debug("websocket connection timeout");
-            m_connecting = false;
-            m_connected = false;
-            connectionError();
-            reconnect();
-        }
-        else if (ec == boost::asio::ssl::error::stream_errors::stream_truncated) {
-            serviceLog()->debug("websocket connection shutdown ungracefully");
-            m_connecting = false;
-            m_connected = false;
-            connectionError();
-            reconnect();
-        }
-
-        serviceLog()->debug("websocket read error: {}", ec.message());
+        serviceLog()->debug("websocket read error {}: {}", ec.value(), ec.message());
+        reconnectOnError();
         return;
     }
 
@@ -247,7 +239,7 @@ void
 WebsocketSession::onWriteFinished(errorCode ec)
 {
     if (ec) {
-        serviceLog()->debug("websocket write error: {}", ec.message());
+        serviceLog()->debug("websocket write error {}: {}", ec.value(), ec.message());
     }
 }
 
@@ -255,7 +247,7 @@ void
 WebsocketSession::onDisconnectFinished(errorCode ec)
 {
     if (ec) {
-        serviceLog()->debug("websocket disconnect error: {}", ec.message());
+        serviceLog()->debug("websocket disconnect error {}: {}", ec.value(), ec.message());
     }
 
     m_connecting = false;

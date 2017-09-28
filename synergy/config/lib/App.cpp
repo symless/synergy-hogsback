@@ -176,16 +176,22 @@ App::run(int argc, char* argv[])
     WampClient& wampClient = serviceProxy.wampClient();
 
     QObject::connect(cloudClient, &CloudClient::profileUpdated, [&wampClient](){
-        // only handle after connected, otherwise it'll trigger connection error
-        wampClient.connected.connect([&]() {
-            // TODO: is this actually needed or even called any more?
+        // TODO: review this, this is essentially from a http call, probably should be in server
+        auto authUpdateFunc = [&wampClient]() {
             AppConfig* appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
             wampClient.call<void> ("synergy.auth.update",
                                    appConfig->userId(),
                                    appConfig->screenId(),
                                    appConfig->profileId(),
                                    appConfig->userToken().toStdString());
-        });
+        };
+
+        if (wampClient.isConnected()) {
+            authUpdateFunc();
+        }
+        else {
+            wampClient.connected.connect(authUpdateFunc);
+        }
     });
 
     // service proxy start must happen after the cloud client connect
