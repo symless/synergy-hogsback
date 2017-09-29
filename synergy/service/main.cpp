@@ -9,14 +9,32 @@
 #include <exception>
 #include <iostream>
 
+void
+loadInstallDir(const char* argv0)
+{
+#ifdef BOOST_OS_LINUX
+    char buffer[1024] = {0};
+    ssize_t size = readlink("/proc/self/exe", buffer, sizeof(buffer));
+    if (size == 0 || size == sizeof(buffer)) {
+        return;
+    }
+    std::string path(buffer, size);
+    boost::system::error_code ec;
+    auto selfPath = boost::filesystem::canonical(
+        path, boost::filesystem::current_path(), ec);
+#else
+    auto selfPath = boost::filesystem::system_complete(argv0);
+#endif
+
+    DirectoryManager::instance()->m_programDir = selfPath.remove_filename().string();
+    serviceLog()->debug("install dir: {}", DirectoryManager::instance()->m_programDir);
+}
+
 int
 main (int argc, char* argv[]) {
 
     // cache the directory of this binary for installedDir
-    boost::filesystem::path selfPath = boost::filesystem::system_complete(argv[0]);
-    DirectoryManager::instance()->m_programDir = selfPath.remove_filename().string();
-    // TODO: figure out linux linker error and move boost path stuff back to init
-    //DirectoryManager::instance()->init(argc, argv);
+    loadInstallDir(argv[0]);
 
     try {
         startCrashHandler();
