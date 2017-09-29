@@ -12,7 +12,7 @@
 void
 loadInstallDir(const char* argv0)
 {
-#ifdef BOOST_OS_LINUX
+#ifdef __linux__
     char buffer[1024] = {0};
     ssize_t size = readlink("/proc/self/exe", buffer, sizeof(buffer));
     if (size == 0 || size == sizeof(buffer)) {
