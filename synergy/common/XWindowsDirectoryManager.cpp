@@ -15,7 +15,7 @@ XWindowsDirectoryManager::installedDir()
 boost::filesystem::path
 XWindowsDirectoryManager::profileDir()
 {
-    return userDir() / ".config" / "synergy";
+    return userDir() / ".config" / "Symless" / "Synergy";
 }
 
 boost::filesystem::path
