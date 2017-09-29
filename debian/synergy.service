@@ -7,7 +7,7 @@ Type=simple
 Restart=always
 RestartSec=0
 SyslogLevel=err
-ExecStart=/usr/bin/synergyd
+ExecStart=/usr/bin/synergy-service
 
 [Install]
 WantedBy=multi-user.target
