@@ -70,7 +70,7 @@ App::run(int argc, char* argv[])
     // TODO: figure out linux linker error and move boost path stuff back to init
     //DirectoryManager::instance()->init(argc, argv);
 
-    cxxopts::Options options("synergy2");
+    cxxopts::Options options("synergy-config");
 
     options.add_options()
       ("help", "Print command line argument help")
