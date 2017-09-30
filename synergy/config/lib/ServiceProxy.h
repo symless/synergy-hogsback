@@ -28,6 +28,7 @@ public:
     WampClient& wampClient();
     std::shared_ptr<ErrorView> errorView() const;
     void setErrorView(const std::shared_ptr<ErrorView>& errorView);
+    void requestProfileSnapshot();
 
 signals:
     void screenStatusChanged(QPair<QString, ScreenStatus>);
