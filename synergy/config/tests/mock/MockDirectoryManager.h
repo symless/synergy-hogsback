@@ -10,7 +10,7 @@ public:
 
     QString profileDir();
     QString configFileDir();
-    QString installedDir();
+    QString installDir();
 };
 
 #endif // MOCKDIRECTORYMANAGER_H

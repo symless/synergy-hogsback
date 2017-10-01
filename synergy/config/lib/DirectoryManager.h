@@ -16,7 +16,7 @@ public:
     virtual QString profileDir() const;
     virtual QString crashDumpDir() const;
     virtual QString configFileDir() const;
-    virtual QString installedDir() const;
+    virtual QString installDir() const;
 };
 
 #endif // DIRECTORYMANAGER_H

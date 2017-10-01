@@ -463,7 +463,7 @@ HANDLE ServiceController::getElevateTokenInSession(DWORD sessionId, LPSECURITY_A
 
 void ServiceController::startSynergyServiceAsUser(HANDLE userToken, LPSECURITY_ATTRIBUTES sa)
 {
-    auto const command = (DirectoryManager::instance()->installedDir()  / kServiceProcess).string();
+    auto const command = (DirectoryManager::instance()->installDir()  / kServiceProcess).string();
 
     PROCESS_INFORMATION processInfo;
     ZeroMemory(&processInfo, sizeof(PROCESS_INFORMATION));

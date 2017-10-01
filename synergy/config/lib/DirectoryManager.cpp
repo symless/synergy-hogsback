@@ -47,7 +47,7 @@ GUIDirectoryManager::configFileDir() const
 }
 
 QString
-GUIDirectoryManager::installedDir() const
+GUIDirectoryManager::installDir() const
 {
     return QCoreApplication::applicationDirPath();
 }
