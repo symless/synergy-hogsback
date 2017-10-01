@@ -73,7 +73,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 find_package (OpenSSL REQUIRED)
-include_directories (${OPENSSL_INCLUDE_DIR})
+include_directories (BEFORE SYSTEM ${OPENSSL_INCLUDE_DIR})
 
 #
 # libsodium
@@ -115,7 +115,7 @@ add_definitions (-DSPDLOG_FMT_EXTERNAL=1)
 #
 set (Msgpack_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/msgpack-c/include")
 add_definitions (-DMSGPACK_DEFAULT_API_VERSION=1)
-include_directories (${Msgpack_INCLUDE_DIR})
+include_directories (BEFORE SYSTEM ${Msgpack_INCLUDE_DIR})
 
 #
 # Google Crashpad
@@ -142,7 +142,7 @@ set (Boost_USE_MULTITHREADED    ON)
 find_package (Boost 1.55 REQUIRED COMPONENTS system date_time filesystem regex
                                              thread chrono)
 include_directories (BEFORE SYSTEM ${Boost_INCLUDE_DIRS})
-include_directories (BEFORE "${CMAKE_SOURCE_DIR}/third_party/callable_traits/include")
+include_directories (BEFORE SYSTEM "${CMAKE_SOURCE_DIR}/third_party/callable_traits/include")
 
 # Enable the latest version of Boost Thread (default as of 1.64.0 is 2)
 add_definitions (-DBOOST_THREAD_VERSION=5)
@@ -154,13 +154,13 @@ add_definitions (-DBOOST_THREAD_PROVIDES_EXECUTORS)
 # Beast
 #
 set (Beast_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/beast/include")
-include_directories(${Beast_INCLUDE_DIR})
+include_directories(BEFORE SYSTEM ${Beast_INCLUDE_DIR})
 
 #
 # Autobahn
 #
 set (Autobahn_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/autobahn-cpp")
-include_directories(${Autobahn_INCLUDE_DIR})
+include_directories(BEFORE SYSTEM ${Autobahn_INCLUDE_DIR})
 
 #
 # CMake Dependencies

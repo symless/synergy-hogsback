@@ -35,6 +35,7 @@ set (Bonefish_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/bonefish/src")
 set (Cpptoml_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/cpptoml/include")
 
 include_directories (
+    BEFORE SYSTEM
     ${Bonefish_INCLUDE_DIR}
     ${Cpptoml_INCLUDE_DIR}
 )
