@@ -16,11 +16,10 @@ public:
 
 protected:
     virtual boost::filesystem::path userDir();
+    std::string argv0() const;
 
 private:
     std::string m_argv0 = "";
 };
-
-
 
 #endif // COMMONDIRECTORYMANAGER_H

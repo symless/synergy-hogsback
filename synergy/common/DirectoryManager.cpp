@@ -67,3 +67,9 @@ boost::filesystem::path
 DirectoryManager::crashDumpDir() {
     return profileDir() / "dumps";
 }
+
+std::string
+DirectoryManager::argv0() const
+{
+    return m_argv0;
+}
