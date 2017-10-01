@@ -34,7 +34,6 @@ DirectoryManager::init(const std::string& argv0)
     installDir();
 
     std::vector<boost::filesystem::path> paths;
-    paths.push_back(userDir());
     paths.push_back(crashDumpDir());
     paths.push_back(systemAppDir());
     paths.push_back(profileDir());

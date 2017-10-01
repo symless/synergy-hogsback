@@ -32,11 +32,11 @@ XWindowsDirectoryManager::profileDir()
      * remember the last user id"
      */
     //return userDir() / ".config" / "Symless" / "Synergy";
-    return "/var/synergy";
+    return "/var/lib/synergy";
 }
 
 boost::filesystem::path
 XWindowsDirectoryManager::systemLogDir()
 {
-    return "/var/log";
+    return "/var/log/synergy";
 }
