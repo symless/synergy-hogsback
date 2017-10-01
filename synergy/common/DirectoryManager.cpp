@@ -1,17 +1,18 @@
-#include "DirectoryManager.h"
+#include <synergy/common/DirectoryManager.h>
+
+//#include <synergy/common/Logs.h>
 
 #include <cstdlib>
 #include <stdexcept>
+#include <vector>
 
 #ifdef _WIN32
-#include "MSWindowsDirectoryManager.h"
+#include <synergy/common/MSWindowsDirectoryManager.h>
 #elif __APPLE__
-#include "OSXDirectoryManager.h"
+#include <synergy/common/OSXDirectoryManager.h>
 #else
-#include "XWindowsDirectoryManager.h"
+#include <synergy/common/XWindowsDirectoryManager.h>
 #endif
-
-std::string g_programDir;
 
 DirectoryManager*
 DirectoryManager::instance()
@@ -27,8 +28,30 @@ DirectoryManager::instance()
 }
 
 void
-DirectoryManager::init(int argc, char* argv[])
+DirectoryManager::init(const std::string& argv0)
 {
+    m_argv0 = argv0;
+    installDir();
+
+    std::vector<boost::filesystem::path> paths;
+    paths.push_back(userDir());
+    paths.push_back(crashDumpDir());
+    paths.push_back(systemAppDir());
+    paths.push_back(profileDir());
+    paths.push_back(systemLogDir());
+
+    for (auto path : paths) {
+
+        boost::system::error_code ec;
+        if (!boost::filesystem::exists(path, ec)) {
+            boost::filesystem::create_directories(path, ec);
+        }
+
+        if (ec) {
+            throw boost::system::system_error(
+                ec, "Failed to persist directory: " + path.string());
+        }
+    }
 }
 
 boost::filesystem::path
@@ -43,14 +66,5 @@ DirectoryManager::userDir()
 
 boost::filesystem::path
 DirectoryManager::crashDumpDir() {
-    auto path = profileDir() / "dumps";
-    boost::system::error_code ec;
-    if (!boost::filesystem::exists (path, ec) && !ec) {
-        boost::filesystem::create_directories (path, ec);
-    }
-    if (ec) {
-        throw boost::system::system_error(ec, "Couldn't verify crash dump "
-                                              "directory");
-    }
-    return path;
+    return profileDir() / "dumps";
 }

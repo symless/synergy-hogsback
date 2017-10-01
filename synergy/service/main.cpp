@@ -9,32 +9,22 @@
 #include <exception>
 #include <iostream>
 
-void
-loadInstallDir(const char* argv0)
-{
-#ifdef __linux__
-    char buffer[1024] = {0};
-    ssize_t size = readlink("/proc/self/exe", buffer, sizeof(buffer));
-    if (size == 0 || size == sizeof(buffer)) {
-        return;
-    }
-    std::string path(buffer, size);
-    boost::system::error_code ec;
-    auto selfPath = boost::filesystem::canonical(
-        path, boost::filesystem::current_path(), ec);
-#else
-    auto selfPath = boost::filesystem::system_complete(argv0);
-#endif
-
-    DirectoryManager::instance()->m_programDir = selfPath.remove_filename().string();
-    serviceLog()->debug("install dir: {}", DirectoryManager::instance()->m_programDir);
-}
-
 int
-main (int argc, char* argv[]) {
-
-    // cache the directory of this binary for installedDir
-    loadInstallDir(argv[0]);
+main (int argc, char* argv[])
+{
+    try {
+        DirectoryManager::instance()->init(argv[0]);
+        auto installDir = DirectoryManager::instance()->installDir().string();
+        serviceLog()->debug("install dir: {}", installDir);
+    }
+    catch (const std::exception& ex) {
+        serviceLog()->error("failed to init dirs: {}", ex.what());
+        return EXIT_FAILURE;
+    }
+    catch (...) {
+        serviceLog()->error("failed to init dirs: unknown error");
+        return EXIT_FAILURE;
+    }
 
     try {
         startCrashHandler();
@@ -46,14 +36,15 @@ main (int argc, char* argv[]) {
         serviceLog()->error("failed to start crash handler: unknown error");
     }
 
-    serviceLog()->info("starting service...");
-
-    boost::asio::io_service ioService;
-
-    auto userConfig = std::make_shared<UserConfig>();
-    userConfig->load();
 
     try {
+        serviceLog()->info("starting service...");
+
+        boost::asio::io_service ioService;
+
+        auto userConfig = std::make_shared<UserConfig>();
+        userConfig->load();
+
         ServiceWorker serviceWorker(ioService, userConfig);
 
         TerminationSignalListener signalListener(ioService);
@@ -65,7 +56,11 @@ main (int argc, char* argv[]) {
         return EXIT_SUCCESS;
     }
     catch (const std::exception& ex) {
-        serviceLog()->error("service worker failed: {}", ex.what());
+        serviceLog()->error("failed to start service: {}", ex.what());
+        return EXIT_FAILURE;
+    }
+    catch (...) {
+        serviceLog()->error("failed to start service: unknown error");
         return EXIT_FAILURE;
     }
 }

@@ -1,5 +1,6 @@
 #include "App.h"
 
+#include <synergy/common/DirectoryManager.h>
 #include <synergy/config/lib/ServiceProxy.h>
 #include <synergy/config/lib/ErrorView.h>
 #include "CloudClient.h"
@@ -12,7 +13,6 @@
 #include "AppConfig.h"
 #include "Hostname.h"
 #include "Common.h"
-#include <synergy/common/DirectoryManager.h>
 #include <ProfileListModel.h>
 #include <ProfileManager.h>
 
@@ -43,7 +43,8 @@ App::App(bool (*installServiceHelper)())
 #ifdef Q_OS_OSX
 
 bool
-App::installService() {
+App::installService()
+{
     if (!boost::filesystem::exists
             ("/Library/LaunchDaemons/com.symless.synergy.v2.ServiceHelper.plist")) {
         std::clog << "Service helper not installed, installing...\n";
@@ -63,12 +64,6 @@ int
 App::run(int argc, char* argv[])
 {
     std::vector<std::string> arguments(argv, argv + argc);
-
-    // cache the directory of this binary for installedDir
-    boost::filesystem::path selfPath = boost::filesystem::system_complete(argv[0]);
-    DirectoryManager::instance()->m_programDir = selfPath.remove_filename().string();
-    // TODO: figure out linux linker error and move boost path stuff back to init
-    //DirectoryManager::instance()->init(argc, argv);
 
     cxxopts::Options options("synergy-config");
 
@@ -125,6 +120,20 @@ App::run(int argc, char* argv[])
     /* The crash handler must be started after QApplication is constructed,
      * because it depends on file paths that are unavailable until then. */
     QApplication app(argc, argv);
+
+    try {
+        DirectoryManager::instance()->init(argv[0]);
+        auto installDir = DirectoryManager::instance()->installDir().string();
+        LogManager::debug(QString("install dir: %1").arg(installDir.c_str()));
+    }
+    catch (const std::exception& ex) {
+        LogManager::error(QString("failed to init dirs: %1").arg(ex.what()));
+        return EXIT_FAILURE;
+    }
+    catch (...) {
+        LogManager::error("failed to init dirs: unknown error");
+        return EXIT_FAILURE;
+    }
 
     try {
         startCrashHandler();

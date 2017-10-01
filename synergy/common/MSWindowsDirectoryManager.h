@@ -7,7 +7,7 @@ class MSWindowsDirectoryManager final : public DirectoryManager
 {
 public:
     boost::filesystem::path systemAppDir() override;
-    boost::filesystem::path installedDir() override;
+    boost::filesystem::path installDir() override;
     boost::filesystem::path profileDir() override;
     boost::filesystem::path systemLogDir() override;
 };

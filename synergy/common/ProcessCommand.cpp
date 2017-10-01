@@ -18,11 +18,11 @@ std::vector<std::string>
 ProcessCommand::generate(bool serverMode) const
 {
     auto profileDir = DirectoryManager::instance()->profileDir();
-    auto installedDir = DirectoryManager::instance()->installedDir();
+    auto installDir = DirectoryManager::instance()->installDir();
 
     std::vector<std::string> args;
 
-    auto programPath = installedDir / kCoreProgram;
+    auto programPath = installDir / kCoreProgram;
     args.push_back(programPath.string());
 
     if (serverMode) {

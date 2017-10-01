@@ -10,7 +10,7 @@ TEST_CASE("Process command and args generated correctly", "[ProcessCommand]")
 
     // TODO: stub out profile directory
     auto profileDir = DirectoryManager::instance()->profileDir();
-    auto installDir = DirectoryManager::instance()->installedDir();
+    auto installDir = DirectoryManager::instance()->installDir();
     auto configPath = profileDir / "synergy.conf";
     auto corePath = installDir / kCoreProgram;
 

@@ -41,7 +41,7 @@ include_directories (
 )
 
 add_library (commonlib ${COMMON_LIB_SOURCES})
-target_link_libraries(commonlib bonefish fmt)
+target_link_libraries(commonlib ${Boost_LIBRARIES} bonefish fmt)
 
 if (WIN32)
     target_link_libraries (commonlib Wtsapi32)
