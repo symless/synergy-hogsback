@@ -15,10 +15,11 @@ public:
     virtual boost::filesystem::path profileDir() = 0;
     virtual boost::filesystem::path systemLogDir() = 0;
 
+protected:
+    std::string argv0() const;
+
 private:
     std::string m_argv0 = "";
 };
-
-
 
 #endif // COMMONDIRECTORYMANAGER_H
