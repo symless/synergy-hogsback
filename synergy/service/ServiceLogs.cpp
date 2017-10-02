@@ -57,7 +57,7 @@ initServiceLog()
     sinks.push_back(signal);
 
     auto logger = std::make_shared<spdlog::logger>("main", begin(sinks), end(sinks));
-    logger->set_pattern("[%Y-%m-%dT%T] %l: %v");
+    logger->set_pattern("[ Service ] [%Y-%m-%dT%T] %l: %v");
     logger->flush_on(spdlog::level::debug);
     logger->set_level(spdlog::level::debug);
 
@@ -71,9 +71,36 @@ initServiceLog()
     return logger;
 }
 
+static auto
+initCoreLog()
+{
+    std::vector<spdlog::sink_ptr> sinks;
+
+#ifdef _WIN32
+    auto console = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
+#else // assume unix (linux and mac)
+    auto console = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
+#endif
+    sinks.push_back(console);
+
+    auto logger = std::make_shared<spdlog::logger>("main", begin(sinks), end(sinks));
+    logger->set_pattern("[ Core    ] [%Y-%m-%dT%T] %l: %v");
+    logger->flush_on(spdlog::level::debug);
+    logger->set_level(spdlog::level::debug);
+
+    return logger;
+}
+
 std::shared_ptr<spdlog::logger> const&
 serviceLog() noexcept
 {
     static auto log = initServiceLog();
+    return log;
+}
+
+std::shared_ptr<spdlog::logger> const&
+coreLog() noexcept
+{
+    static auto log = initCoreLog();
     return log;
 }

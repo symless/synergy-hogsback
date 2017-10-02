@@ -331,7 +331,8 @@ CoreProcess::start (std::vector<std::string> command)
         throw std::runtime_error("Unable to determine core process mode.");
     }
 
-    m_impl = std::make_unique<CoreProcessImpl>(*this, m_ioService, std::move (command));
+    m_impl = std::make_unique<CoreProcessImpl>(*this, m_ioService, command);
+
     auto& localState = m_impl->m_clients[localScreenName];
     using boost::algorithm::contains;
 
@@ -493,6 +494,7 @@ void CoreProcess::startServer()
 
     ProcessCommand command;
     command.setLocalHostname(boost::asio::ip::host_name());
+    command.setRunAsUid(m_runAsUid);
 
     try {
         start(command.generate(true));
@@ -513,6 +515,7 @@ void CoreProcess::startClient(int serverId)
 
     ProcessCommand command;
     command.setLocalHostname(boost::asio::ip::host_name());
+    command.setRunAsUid(m_runAsUid);
 
     auto screen = m_localProfileConfig->getScreen(serverId);
     std::vector<std::string> results = m_connectivityTester->getSuccessfulResults(serverId);
@@ -533,4 +536,10 @@ void CoreProcess::startClient(int serverId)
         m_impl.reset();
         assert(!m_impl);
     }
+}
+
+void
+CoreProcess::setRunAsUid(const std::string& runAsUid)
+{
+    m_runAsUid = runAsUid;
 }

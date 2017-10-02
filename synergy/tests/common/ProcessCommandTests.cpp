@@ -11,8 +11,10 @@ TEST_CASE("Process command and args generated correctly", "[ProcessCommand]")
     // TODO: stub out profile directory
     auto profileDir = DirectoryManager::instance()->profileDir();
     auto installDir = DirectoryManager::instance()->installDir();
+    auto systemLogDir = DirectoryManager::instance()->systemLogDir();
     auto configPath = profileDir / "synergy.conf";
     auto corePath = installDir / kCoreProgram;
+    auto logPath = systemLogDir / kCoreLogFile;
 
     SECTION("Server command line")
     {
@@ -20,10 +22,12 @@ TEST_CASE("Process command and args generated correctly", "[ProcessCommand]")
 
         // TODO: test each element instead of using string join
         REQUIRE(boost::algorithm::join(command, " ") ==
-            corePath.string() + " --server -f --debug DEBUG "
+            corePath.string() + " --server -f "
+            "--debug " + kCoreDebugLevel + " "
             "--name mock local hostname --enable-drag-drop "
             "--profile-dir " + profileDir.string() + " "
-            "--log synergy-core.log -c " + configPath.string() + " "
+            "--log " + logPath.string() + " "
+            "-c " + configPath.string() + " "
             "--address :24800");
     }
 
@@ -34,9 +38,11 @@ TEST_CASE("Process command and args generated correctly", "[ProcessCommand]")
 
         // TODO: test each element instead of using string join
         REQUIRE(boost::algorithm::join(command, " ") ==
-            corePath.string() + " --client -f --debug DEBUG "
+            corePath.string() + " --client -f "
+            "--debug " + kCoreDebugLevel + " "
             "--name mock local hostname --enable-drag-drop "
             "--profile-dir " + profileDir.string() + " "
-            "--log synergy-core.log mock server address:24800");
+            "--log " + logPath.string() + " "
+            "mock server address:24800");
     }
 }

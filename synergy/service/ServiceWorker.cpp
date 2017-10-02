@@ -103,6 +103,17 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         m_cloudClient->claimServer(m_userConfig->screenId());
     });
 
+#if __linux__
+    std::string coreUid = m_userConfig->systemUid();
+    if (!coreUid.empty()) {
+        serviceLog()->debug("setting core uid from config: {}", coreUid);
+        m_coreProcess->setRunAsUid(coreUid);
+    }
+    else {
+        serviceLog()->debug("core uid is unknown");
+    }
+#endif
+
     m_rpc->start();
 }
 
@@ -150,13 +161,16 @@ ServiceWorker::provideCore()
 {
     auto server = m_rpc->server();
 
-    server->provide ("synergy.core.start",
-                     [this](std::vector<std::string>& cmd) {
-        m_coreProcess->start (std::move (cmd));
+    server->provide ("synergy.core.set_uid",
+        [this](std::string uid) {
+        serviceLog()->debug("setting core uid from rpc: {}", uid);
+        m_userConfig->setSystemUid(uid);
+        m_coreProcess->setRunAsUid(uid);
     });
 
     m_coreProcess->output.connect(
         [server](std::string line) {
+            coreLog()->debug(line);
             server->publish ("synergy.core.log", std::move(line));
         }
     );
@@ -215,8 +229,7 @@ void
 ServiceWorker::provideHello()
 {
     m_rpc->server()->provide(
-        "synergy.hello",
-        [this](std::vector<std::string>& cmd) {
+        "synergy.hello", [this]() {
 
         serviceLog()->debug("saying hello to config ui");
 

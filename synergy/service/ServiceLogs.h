@@ -5,3 +5,4 @@
 extern Log g_serviceLog;
 
 std::shared_ptr<spdlog::logger> const& serviceLog() noexcept;
+std::shared_ptr<spdlog::logger> const& coreLog() noexcept;

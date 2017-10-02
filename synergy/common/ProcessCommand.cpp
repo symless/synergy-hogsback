@@ -5,9 +5,6 @@
 
 #include <boost/filesystem.hpp>
 
-const std::string kCoreLogFile = "synergy-core.log";
-const std::string kCoreDebugLevel = "DEBUG";
-
 #ifdef _WIN32
 const std::string kCoreProgram = "synergy-core.exe";
 #else
@@ -34,6 +31,17 @@ ProcessCommand::generate(bool serverMode) const
 
     args.push_back("-f");
 
+#ifdef __linux__
+    // for use on linux, tell the core process what user id it should run as.
+    // this is a simple way to allow the core process to talk to X. this avoids
+    // the "WARNING: primary screen unavailable: unable to open screen" error.
+    // a better way would be to use xauth cookie and dbus to get access to X.
+    if (!m_runAsUid.empty()) {
+        args.push_back("--run-as-uid");
+        args.push_back(m_runAsUid);
+    }
+#endif
+
     args.push_back("--debug");
     args.push_back(kCoreDebugLevel);
 
@@ -50,9 +58,9 @@ ProcessCommand::generate(bool serverMode) const
     args.push_back("--profile-dir");
     args.push_back(profileDir.string());
 
-    // TODO: use constant
+    auto logPath = DirectoryManager::instance()->systemLogDir() / kCoreLogFile;
     args.push_back("--log");
-    args.push_back(kCoreLogFile);
+    args.push_back(logPath.string());
 
     if (serverMode) {
         // configuration file
@@ -84,4 +92,9 @@ void
 ProcessCommand::setLocalHostname(const std::string& localHostname)
 {
     m_localHostname = localHostname;
+}
+
+void ProcessCommand::setRunAsUid(const std::string& runAsUid)
+{
+    m_runAsUid = runAsUid;
 }

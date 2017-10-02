@@ -42,6 +42,9 @@ public:
     bool dragAndDrop() const;
     void setDragAndDrop(bool dragAndDrop);
 
+    std::string systemUid() const;
+    void setSystemUid(const std::string &systemUid);
+
 private:
     void makeTable(std::shared_ptr<cpptoml::table>& root);
     void update(ConfigParser& configParser);
@@ -52,6 +55,7 @@ private:
     int64_t m_userId;
     int64_t m_profileId;
     int64_t m_screenId;
+    std::string m_systemUid = "";
 
     /* Process options */
     DebugLevel m_debugLevel = kInfo;

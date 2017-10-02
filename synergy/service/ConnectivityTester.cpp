@@ -156,6 +156,8 @@ const std::string ConnectivityTester::testServerDH()
 
 void ConnectivityTester::startTestServer()
 {
+    serviceLog()->debug("starting connectivity test server");
+
     m_testServer.reset(new SecuredTcpServer(m_ioService));
     m_testServer->setAddress(kConnectivityTestIp);
     m_testServer->setPort(kConnectivityTestPort);

@@ -66,7 +66,22 @@ UserConfig::update(ConfigParser& parser)
         m_debugLevel = static_cast<DebugLevel>(profileConfig.get_value<int64_t>("debug-level"));
     }
 
+    auto systemConfig = parser.get_section("system");
+    if (systemConfig.isValid()) {
+        m_systemUid = systemConfig.get_value<std::string>("uid");
+    }
+
     updated();
+}
+
+std::string UserConfig::systemUid() const
+{
+    return m_systemUid;
+}
+
+void UserConfig::setSystemUid(const std::string &systemUid)
+{
+    m_systemUid = systemUid;
 }
 
 void
@@ -82,8 +97,12 @@ UserConfig::makeTable(std::shared_ptr<cpptoml::table>& root)
     profileTable->insert("drag-and-drop", m_dragAndDrop);
     profileTable->insert("debug-level", (int)m_debugLevel);
 
+    auto systemTable = cpptoml::make_table();
+    systemTable->insert("uid", m_systemUid);
+
     root->insert("auth", authTable);
     root->insert("profile", profileTable);
+    root->insert("system", systemTable);
 }
 
 void

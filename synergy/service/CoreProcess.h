@@ -36,6 +36,7 @@ public:
     signal<void()> localInputDetected;
     signal<void(const std::string& screenName)> screenConnectionError;
     signal<void(const std::string& screenName, ScreenStatus state)> screenStatusChanged;
+    void setRunAsUid(const std::string& runAsUid);
 
 private:
     void writeConfigurationFile();
@@ -51,6 +52,7 @@ private:
     ProcessMode m_proccessMode;
     int m_lastServerId;
     std::vector<std::string> m_nextCommand;
+    std::string m_runAsUid = "";
 };
 
 #endif // SYNERGY_SERVICE_PROCESSMANAGER_H

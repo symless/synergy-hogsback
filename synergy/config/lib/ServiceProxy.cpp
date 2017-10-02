@@ -33,7 +33,7 @@ ServiceProxy::ServiceProxy() :
     });
 
     m_wampClient.connecting.connect([&]() {
-        LogManager::debug(QString("connecting to background service"));
+        LogManager::debug("connecting to background service");
     });
 
     m_wampClient.connected.connect([&]() {
@@ -41,6 +41,16 @@ ServiceProxy::ServiceProxy() :
 
         LogManager::debug("saying hello to background service");
         m_wampClient.call<void>("synergy.hello");
+
+#if __linux__
+        // for use on linux, tell the core process what user id it should run as.
+        // this is a simple way to allow the core process to talk to X. this avoids
+        // the "WARNING: primary screen unavailable: unable to open screen" error.
+        // a better way would be to use xauth cookie and dbus to get access to X.
+        std::string uid = std::to_string(getuid());
+        LogManager::debug(QString("sending uid to service: %1").arg(uid.c_str()));
+        m_wampClient.call<void>("synergy.core.set_uid", uid);
+#endif
 
         m_wampClient.subscribe ("synergy.profile.snapshot", [&](std::string json) {
             QByteArray byteArray(json.c_str(), json.length());
