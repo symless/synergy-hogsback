@@ -1,4 +1,5 @@
 #include "XWindowsDirectoryManager.h"
+#include <fmt/format.h>
 
 boost::filesystem::path
 XWindowsDirectoryManager::systemAppDir()
@@ -10,10 +11,10 @@ boost::filesystem::path
 XWindowsDirectoryManager::installDir()
 {
     char buffer[1024] = {0};
-    const char* processFile = "/proc/self/exe";
+    auto processFile = "/proc/self/exe";
     ssize_t size = readlink(processFile, buffer, sizeof(buffer));
-    if (size == 0 || size == sizeof(buffer)) {
-        throw std::runtime_error("Could not read process info from: " + std::string(processFile));
+    if (size <= 0 || size == sizeof(buffer)) {
+        throw std::runtime_error(fmt::format("Could not read process info from: {0}", processFile));
     }
 
     std::string pathString(buffer, size);
