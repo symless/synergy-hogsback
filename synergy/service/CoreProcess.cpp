@@ -1,4 +1,4 @@
-#include <synergy/service/ProcessManager.h>
+#include <synergy/service/CoreProcess.h>
 
 #include <synergy/service/ConnectivityTester.h>
 #include <synergy/common/ConfigGen.h>

@@ -9,7 +9,7 @@
 #include <synergy/common/WampRouter.h>
 #include <synergy/common/ScreenStatus.h>
 #include <synergy/common/Profile.h>
-#include <synergy/service/ProcessManager.h>
+#include <synergy/service/CoreProcess.h>
 
 #include <boost/asio.hpp>
 #include <iostream>

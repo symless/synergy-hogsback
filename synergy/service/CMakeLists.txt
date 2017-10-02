@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.4)
 
 set (SERVICE_SOURCES
     main.cpp
-    ProcessManager.cpp
+    CoreProcess.cpp
     ServiceWorker.cpp
     CloudClient.cpp
     SecuredTcpSession.cpp
