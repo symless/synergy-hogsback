@@ -165,7 +165,7 @@ void ConnectivityTester::startTestServer()
                 ConnectivityTester::testServerDH());
 
     m_testServer->startFailed.connect([](SecuredTcpServer*){
-        serviceLog()->debug("failed to start connectivity test server");
+        throw std::runtime_error("Failed to start connectivity test server.");
     });
 
     m_testServer->acceptFailed.connect([](SecuredTcpServer*){
