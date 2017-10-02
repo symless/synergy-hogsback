@@ -10,8 +10,8 @@ OSXDirectoryManager::systemAppDir()
 boost::filesystem::path
 OSXDirectoryManager::installDir()
 {
-    auto selfPath = boost::filesystem::system_complete(argv0());
-    return selfPath.remove_filename().string();
+    auto path = boost::filesystem::system_complete(argv0());
+    return path.remove_filename().string();
 }
 
 boost::filesystem::path

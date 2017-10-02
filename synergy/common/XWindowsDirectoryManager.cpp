@@ -10,16 +10,18 @@ boost::filesystem::path
 XWindowsDirectoryManager::installDir()
 {
     char buffer[1024] = {0};
-    ssize_t size = readlink("/proc/self/exe", buffer, sizeof(buffer));
+    const char* processFile = "/proc/self/exe";
+    ssize_t size = readlink(processFile, buffer, sizeof(buffer));
     if (size == 0 || size == sizeof(buffer)) {
-        throw std::runtime_error("Could not ");
+        throw std::runtime_error("Could not read process info from: " + std::string(processFile));
     }
 
-    std::string path(buffer, size);
+    std::string pathString(buffer, size);
 
     boost::system::error_code ec;
-    return boost::filesystem::canonical(
-        path, boost::filesystem::current_path(), ec);
+    auto path = boost::filesystem::canonical(
+        pathString, boost::filesystem::current_path(), ec);
+    return path.remove_filename().string();
 }
 
 boost::filesystem::path
