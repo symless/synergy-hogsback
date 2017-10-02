@@ -36,10 +36,10 @@ std::unique_ptr<T> make_unique (Args&&... args) {
     return std::unique_ptr<T>(new T (std::forward<Args>(args)...));
 }
 
-class ProcessManagerImpl {
+class CoreProcessImpl {
 public:
-    ProcessManagerImpl (
-        ProcessManager& parent,
+    CoreProcessImpl (
+        CoreProcess& parent,
         boost::asio::io_service& io,
         std::vector<std::string> command)
         :
@@ -73,12 +73,12 @@ public:
     optional<bp::child> m_process;
 
 private:
-    ProcessManager& m_parent;
+    CoreProcess& m_parent;
 };
 
 template <typename Strand, typename Pipe, typename Buffer, typename Line>
 static void
-asyncReadLines (ProcessManager& manager, Strand& strand, Pipe& pipe,
+asyncReadLines (CoreProcess& manager, Strand& strand, Pipe& pipe,
                 Buffer& buffer, Line& line, bs::error_code const& ec,
                 std::size_t const bytes) {
     std::istream stream (&buffer);
@@ -102,7 +102,7 @@ asyncReadLines (ProcessManager& manager, Strand& strand, Pipe& pipe,
 }
 
 void
-ProcessManagerImpl::start () {
+CoreProcessImpl::start () {
     assert (!m_command.empty());
     assert (!m_process);
 
@@ -150,7 +150,7 @@ ProcessManagerImpl::start () {
 }
 
 void
-ProcessManagerImpl::shutdown()
+CoreProcessImpl::shutdown()
 {
     serviceLog()->debug("stopping core process");
 
@@ -183,7 +183,7 @@ processModeToString(ProcessMode mode) {
     return "";
 }
 
-ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<UserConfig> userConfig, std::shared_ptr<ProfileConfig> localProfileConfig) :
+CoreProcess::CoreProcess (boost::asio::io_service& io, std::shared_ptr<UserConfig> userConfig, std::shared_ptr<ProfileConfig> localProfileConfig) :
     m_ioService (io),
     m_userConfig(userConfig),
     m_localProfileConfig(localProfileConfig),
@@ -270,7 +270,7 @@ ProcessManager::ProcessManager (boost::asio::io_service& io, std::shared_ptr<Use
     });
 }
 
-ProcessManager::~ProcessManager () noexcept {
+CoreProcess::~CoreProcess () noexcept {
     shutdown();
 }
 
@@ -284,7 +284,7 @@ getCommandLocalScreenName (std::vector<std::string> const& command) {
 }
 
 void
-ProcessManagerImpl::onScreenStatusChanged
+CoreProcessImpl::onScreenStatusChanged
 (std::string const& screenName, ScreenStatus const status) {
     auto& timer = m_connectionTimer;
     if (status == ScreenStatus::kConnecting) {
@@ -306,7 +306,7 @@ ProcessManagerImpl::onScreenStatusChanged
 }
 
 void
-ProcessManager::start (std::vector<std::string> command)
+CoreProcess::start (std::vector<std::string> command)
 {
     if (m_impl) {
         serviceLog()->debug("core process already running, attempting to stop");
@@ -331,7 +331,7 @@ ProcessManager::start (std::vector<std::string> command)
         throw std::runtime_error("Unable to determine core process mode.");
     }
 
-    m_impl = std::make_unique<ProcessManagerImpl>(*this, m_ioService, std::move (command));
+    m_impl = std::make_unique<CoreProcessImpl>(*this, m_ioService, std::move (command));
     auto& localState = m_impl->m_clients[localScreenName];
     using boost::algorithm::contains;
 
@@ -442,7 +442,7 @@ ProcessManager::start (std::vector<std::string> command)
 }
 
 void
-ProcessManager::shutdown() {
+CoreProcess::shutdown() {
 
     if (!m_impl) {
         serviceLog()->debug("core process is not running, ignoring shutdown");
@@ -476,13 +476,13 @@ ProcessManager::shutdown() {
     m_impl->shutdown();
 }
 
-void ProcessManager::writeConfigurationFile()
+void CoreProcess::writeConfigurationFile()
 {
     auto configPath = DirectoryManager::instance()->profileDir() / kCoreConfigFile;
     createConfigFile(configPath.string(), m_localProfileConfig->screens());
 }
 
-void ProcessManager::startServer()
+void CoreProcess::startServer()
 {
     serviceLog()->debug("starting core server process");
 
@@ -504,7 +504,7 @@ void ProcessManager::startServer()
     }
 }
 
-void ProcessManager::startClient(int serverId)
+void CoreProcess::startClient(int serverId)
 {
     serviceLog()->debug("starting core client process");
 

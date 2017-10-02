@@ -11,17 +11,17 @@
 
 class Screen;
 class UserConfig;
-class ProcessManagerImpl;
+class CoreProcessImpl;
 class ConnectivityTester;
 
-class ProcessManager final {
+class CoreProcess final {
 public:
-    explicit ProcessManager (boost::asio::io_service& io,
+    explicit CoreProcess (boost::asio::io_service& io,
                              std::shared_ptr<UserConfig> userConfig,
                              std::shared_ptr<ProfileConfig> localProfileConfig);
-    ProcessManager (ProcessManager const&) = delete;
-    ProcessManager& operator= (ProcessManager const&) = delete;
-    ~ProcessManager() noexcept;
+    CoreProcess (CoreProcess const&) = delete;
+    CoreProcess& operator= (CoreProcess const&) = delete;
+    ~CoreProcess() noexcept;
 
     void start (std::vector<std::string> command);
     void shutdown();
@@ -46,7 +46,7 @@ private:
     boost::asio::io_service& m_ioService;
     std::shared_ptr<UserConfig> m_userConfig;
     std::shared_ptr<ProfileConfig> m_localProfileConfig;
-    std::unique_ptr<ProcessManagerImpl> m_impl;
+    std::unique_ptr<CoreProcessImpl> m_impl;
     std::unique_ptr<ConnectivityTester> m_connectivityTester;
     ProcessMode m_proccessMode;
     int m_lastServerId;

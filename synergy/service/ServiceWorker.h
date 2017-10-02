@@ -5,7 +5,7 @@
 #include <boost/signals2.hpp>
 
 class RpcManager;
-class ProcessManager;
+class CoreProcess;
 class CloudClient;
 class UserConfig;
 class ProfileConfig;
@@ -35,7 +35,7 @@ private:
     std::shared_ptr<ProfileConfig>  m_localProfileConfig;
     std::unique_ptr<RpcManager>     m_rpc;
     std::unique_ptr<CloudClient>    m_cloudClient;
-    std::unique_ptr<ProcessManager> m_processManager;
+    std::unique_ptr<CoreProcess> m_coreProcess;
     std::shared_ptr<boost::asio::io_service::work> m_work;
     boost::signals2::connection m_logSender;
 };

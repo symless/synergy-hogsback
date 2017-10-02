@@ -24,7 +24,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_localProfileConfig (std::make_shared<ProfileConfig>()),
     m_rpc (std::make_unique<RpcManager>(m_ioService)),
     m_cloudClient (std::make_unique<CloudClient>(ioService, m_userConfig, m_remoteProfileConfig)),
-    m_processManager (std::make_unique<ProcessManager>(m_ioService, m_userConfig, m_localProfileConfig)),
+    m_coreProcess (std::make_unique<CoreProcess>(m_ioService, m_userConfig, m_localProfileConfig)),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService))
 {
     g_commonLog.onLogLine.connect([this](std::string logLine) {
@@ -98,7 +98,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         });
     });
 
-    m_processManager->localInputDetected.connect([this](){
+    m_coreProcess->localInputDetected.connect([this](){
         serviceLog()->debug("local input detected, claiming this computer as server");
         m_cloudClient->claimServer(m_userConfig->screenId());
     });
@@ -122,7 +122,7 @@ ServiceWorker::start()
 void
 ServiceWorker::shutdown()
 {
-    m_processManager->shutdown();
+    m_coreProcess->shutdown();
     m_rpc->stop();
     m_work.reset();
 
@@ -152,22 +152,22 @@ ServiceWorker::provideCore()
 
     server->provide ("synergy.core.start",
                      [this](std::vector<std::string>& cmd) {
-        m_processManager->start (std::move (cmd));
+        m_coreProcess->start (std::move (cmd));
     });
 
-    m_processManager->output.connect(
+    m_coreProcess->output.connect(
         [server](std::string line) {
             server->publish ("synergy.core.log", std::move(line));
         }
     );
 
-    m_processManager->screenStatusChanged.connect(
+    m_coreProcess->screenStatusChanged.connect(
         [server](std::string const& screenName, ScreenStatus state) {
             server->publish ("synergy.screen.status", screenName, int(state));
         }
     );
 
-    m_processManager->screenConnectionError.connect(
+    m_coreProcess->screenConnectionError.connect(
         [server](std::string const& screenName) {
 
             // TODO: get error code
