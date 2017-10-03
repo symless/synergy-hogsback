@@ -7,7 +7,7 @@
 #include <algorithm>
 
 static const std::string kConnectivityTestIp = "0.0.0.0";
-static const std::string kConnectivityTestPort = "24810";
+static const std::string kConnectivityTestPort = "24801";
 
 ConnectivityTester::ConnectivityTester(boost::asio::io_service &io, std::shared_ptr<ProfileConfig> localProfileConfig) :
     m_localHostname(boost::asio::ip::host_name()),
