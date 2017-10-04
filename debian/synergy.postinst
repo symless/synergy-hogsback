@@ -2,3 +2,5 @@
 chmod 777 /var/log/synergy
 chmod 777 /var/lib/synergy
 chmod 777 /etc/synergy
+
+#DEBHELPER#
