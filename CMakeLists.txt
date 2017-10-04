@@ -220,12 +220,12 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif()
 
 #
-# Linux RPM
+# Linux RPM and DEB
 #
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     configure_files (${CMAKE_CURRENT_SOURCE_DIR}/dist/rpm ${CMAKE_BINARY_DIR}/rpm)
-    install(FILES synergy/core/res/synergy.svg DESTINATION share/icons)
-    install(FILES synergy/core/res/synergy.desktop DESTINATION share/applications)
+    install(FILES res/synergy.svg DESTINATION share/icons)
+    install(FILES res/synergy.desktop DESTINATION share/applications)
 endif()
 
 include_directories (.)
