@@ -138,7 +138,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     }
 
     m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen> added, std::vector<Screen>){
-        m_ioService.post([this, &added] () {
+        m_ioService.post([this, added] () {
             for (const auto& screen : added) {
                 std::vector<std::string> ipList;
                 boost::split(ipList, screen.ipList(), boost::is_any_of(","));
