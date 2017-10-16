@@ -9,6 +9,7 @@
 #include <synergy/common/WampRouter.h>
 #include <synergy/common/ScreenStatus.h>
 #include <synergy/common/Profile.h>
+#include <synergy/common/NetworkParameters.h>
 #include <synergy/service/CoreProcess.h>
 
 #include <boost/asio.hpp>
@@ -16,10 +17,6 @@
 #include <iostream>
 
 std::string g_lastProfileSnapshot;
-
-static int const kServerPort        = 24800; // core server port
-static int const kServerProxyPort   = 24801;
-static int const kNodePort       = 24802;
 
 ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
                              std::shared_ptr<UserConfig> userConfig) :

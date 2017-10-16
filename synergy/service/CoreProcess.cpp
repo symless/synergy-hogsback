@@ -6,6 +6,8 @@
 #include <synergy/common/ConfigGen.h>
 #include <synergy/common/UserConfig.h>
 #include <synergy/service/ServiceLogs.h>
+#include <synergy/common/NetworkParameters.h>
+
 #include <boost/process.hpp>
 #include <boost/process/async_pipe.hpp>
 #include <boost/asio/read_until.hpp>
@@ -499,8 +501,7 @@ void CoreProcess::startClient(int serverId)
     command.setLocalHostname(boost::asio::ip::host_name());
     command.setRunAsUid(m_runAsUid);
 
-    // TODO: remove magic string
-    command.setServerAddress("127.0.0.1:24801");
+    command.setServerAddress(kServerProxyEndpoint);
 
     try {
         start(command.generate(false));
