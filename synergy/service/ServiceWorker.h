@@ -1,6 +1,10 @@
 #ifndef SERVICEWORKER_H
 #define SERVICEWORKER_H
 
+#include <synergy/service/router/Router.hpp>
+#include <synergy/service/router/ClientProxy.hpp>
+#include <synergy/service/router/ServerProxy.hpp>
+
 #include <boost/asio/io_service.hpp>
 #include <boost/signals2.hpp>
 
@@ -35,7 +39,10 @@ private:
     std::shared_ptr<ProfileConfig>  m_localProfileConfig;
     std::unique_ptr<RpcManager>     m_rpc;
     std::unique_ptr<CloudClient>    m_cloudClient;
-    std::unique_ptr<CoreProcess> m_coreProcess;
+    std::unique_ptr<CoreProcess>    m_coreProcess;
+    Router                          m_router;
+    ServerProxy                     m_serverProxy;
+    ClientProxy                     m_clientProxy;
     std::shared_ptr<boost::asio::io_service::work> m_work;
     boost::signals2::connection m_logSender;
 };

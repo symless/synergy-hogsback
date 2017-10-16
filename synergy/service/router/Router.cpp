@@ -121,9 +121,8 @@ Router::add (tcp::endpoint endpoint) {
     });
 }
 
-Router::Router (asio::io_service& io, uint32_t const id, std::string name,
-                int const port)
-    : acceptor_ (io), hello_timer_ (io), id_ (id), name_ (std::move (name)) {
+Router::Router (asio::io_service& io, int const port)
+    : acceptor_ (io), hello_timer_ (io) {
 
     tcp::endpoint endpoint (ip::address (), port);
     acceptor_.open (endpoint.protocol ());
@@ -140,10 +139,13 @@ Router::Router (asio::io_service& io, uint32_t const id, std::string name,
 }
 
 void
-Router::start () {
+Router::start (uint32_t const id, std::string name) {
     if (running_) {
         return;
     }
+
+    id_ = id;
+    name_ = name;
 
     running_ = true;
 

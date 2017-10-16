@@ -50,11 +50,10 @@ class Router final {
 public:
     friend class MessageHandler;
 
-    Router (asio::io_service& io, uint32_t const id, std::string name,
-            int port);
+    Router (asio::io_service& io, int port);
 
     auto id() const noexcept { return id_; }
-    void start ();
+    void start (const uint32_t id, std::string name);
     void shutdown ();
     void add (tcp::endpoint endpoint);
     void add (std::vector<tcp::endpoint> const& endpoints);

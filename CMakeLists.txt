@@ -140,7 +140,7 @@ set (Boost_USE_STATIC_LIBS      ON)
 set (Boost_USE_STATIC_RUNTIME   OFF)
 set (Boost_USE_MULTITHREADED    ON)
 find_package (Boost 1.55 REQUIRED COMPONENTS system date_time filesystem regex
-                                             thread chrono)
+                                             thread chrono coroutine context)
 include_directories (BEFORE SYSTEM ${Boost_INCLUDE_DIRS})
 include_directories (BEFORE SYSTEM "${CMAKE_SOURCE_DIR}/third_party/callable_traits/include")
 

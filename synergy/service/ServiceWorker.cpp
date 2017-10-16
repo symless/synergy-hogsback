@@ -1,7 +1,7 @@
 #include "ServiceWorker.h"
 
 #include <synergy/common/ProfileConfig.h>
-#include "synergy/service/CloudClient.h"
+#include <synergy/service/CloudClient.h>
 #include <synergy/service/ServiceLogs.h>
 #include <synergy/common/UserConfig.h>
 #include <synergy/common/RpcManager.h>
@@ -16,6 +16,10 @@
 
 std::string g_lastProfileSnapshot;
 
+static int const kServerPort        = 24800; // core server port
+static int const kServerProxyPort   = 24801;
+static int const kNodePort       = 24802;
+
 ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
                              std::shared_ptr<UserConfig> userConfig) :
     m_ioService (ioService),
@@ -25,6 +29,9 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_rpc (std::make_unique<RpcManager>(m_ioService)),
     m_cloudClient (std::make_unique<CloudClient>(ioService, m_userConfig, m_remoteProfileConfig)),
     m_coreProcess (std::make_unique<CoreProcess>(m_ioService, m_userConfig, m_localProfileConfig)),
+    m_router (ioService, kNodePort),
+    m_serverProxy (ioService, m_router, kServerProxyPort),
+    m_clientProxy (ioService, m_router, kServerPort),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService))
 {
     g_commonLog.onLogLine.connect([this](std::string logLine) {
@@ -115,6 +122,22 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
 #endif
 
     m_rpc->start();
+
+    if (m_userConfig->screenId() != -1) {
+        m_router.start (m_userConfig->screenId(), boost::asio::ip::host_name());
+        m_serverProxy.start ();
+        m_clientProxy.start ();
+    }
+    else {
+        m_userConfig->updated.connect_extended ([this](const auto& connection) {
+            // TODO: there is race condition here between router is ready and core is running
+            m_router.start (m_userConfig->screenId(), boost::asio::ip::host_name());
+            m_serverProxy.start ();
+            m_clientProxy.start ();
+
+            connection.disconnect();
+        });
+    }
 }
 
 ServiceWorker::~ServiceWorker()
