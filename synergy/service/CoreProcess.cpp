@@ -30,11 +30,6 @@ using boost::optional;
 
 static const int kConnectingTimeout = 3;
 
-template <typename T, typename... Args> static inline
-std::unique_ptr<T> make_unique (Args&&... args) {
-    return std::unique_ptr<T>(new T (std::forward<Args>(args)...));
-}
-
 class CoreProcessImpl {
 public:
     CoreProcessImpl (
