@@ -72,7 +72,7 @@ public:
             *stream_,
             asio::mutable_buffers_1 (&header, sizeof (header)),
             [this](auto&&... args) {
-                return read_chunk (std::forward<decltype (args)> (args)...);
+                return this->read_chunk (std::forward<decltype (args)> (args)...);
             },
             ctx[ec_]);
 
@@ -105,7 +105,7 @@ public:
             *stream_,
             asio::buffer (buffer_.data (), buffer_.size ()),
             [this](auto&&... args) {
-                return read_chunk (std::forward<decltype (args)> (args)...);
+                return this->read_chunk (std::forward<decltype (args)> (args)...);
             },
             ctx[ec_]);
 
@@ -132,7 +132,7 @@ public:
             *stream_,
             asio::buffer (const_cast<char*> (body.data ()), body.size ()),
             [this](auto&&... args) {
-                return read_chunk (std::forward<decltype (args)> (args)...);
+                return this->read_chunk (std::forward<decltype (args)> (args)...);
             },
             ctx[ec_]);
 
@@ -152,7 +152,7 @@ public:
         message.body_ = make_variant_of_nth<Message::Body> (
             header.type, &success, [this, &header, &success, ctx](auto&& body) {
                 read_size_ = header.size;
-                success    = read_body (body, ctx);
+                success    = this->read_body (body, ctx);
                 return std::move (body);
             });
 

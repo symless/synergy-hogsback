@@ -64,7 +64,7 @@ Connection::start () {
             }
 
             std::cout << fmt::format (
-                "Router: Connection {} terminated receive loop\n", id ());
+                "Router: Connection {} terminated receive loop\n", this->id ());
         });
 }
 

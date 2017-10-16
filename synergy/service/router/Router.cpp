@@ -107,7 +107,7 @@ Router::add (tcp::endpoint endpoint) {
 
             std::cout << fmt::format ("Router: Successfully connected to {}\n",
                                       endpoint);
-            add (std::move (socket));
+            this->add (std::move (socket));
             return;
         }
 
