@@ -12,7 +12,6 @@
 class Screen;
 class UserConfig;
 class CoreProcessImpl;
-class ConnectivityTester;
 
 class CoreProcess final {
 public:
@@ -48,7 +47,6 @@ private:
     std::shared_ptr<UserConfig> m_userConfig;
     std::shared_ptr<ProfileConfig> m_localProfileConfig;
     std::unique_ptr<CoreProcessImpl> m_impl;
-    std::unique_ptr<ConnectivityTester> m_connectivityTester;
     ProcessMode m_proccessMode;
     int m_lastServerId;
     std::vector<std::string> m_nextCommand;

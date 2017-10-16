@@ -1,6 +1,5 @@
 #include <synergy/service/CoreProcess.h>
 
-#include <synergy/service/ConnectivityTester.h>
 #include <synergy/common/ConfigGen.h>
 #include <synergy/common/DirectoryManager.h>
 #include <synergy/common/ProcessCommand.h>
@@ -187,7 +186,6 @@ CoreProcess::CoreProcess (boost::asio::io_service& io, std::shared_ptr<UserConfi
     m_ioService (io),
     m_userConfig(userConfig),
     m_localProfileConfig(localProfileConfig),
-    m_connectivityTester (std::make_unique<ConnectivityTester>(m_ioService, m_localProfileConfig)),
     m_proccessMode(ProcessMode::kUnknown),
     m_lastServerId(-1)
 {
@@ -256,17 +254,6 @@ CoreProcess::CoreProcess (boost::asio::io_service& io, std::shared_ptr<UserConfi
                 startServer();
             }
         });
-    });
-
-    m_connectivityTester->newReportGenerated.connect([this](int screenId, std::string successfulIp, std::string) {
-
-        serviceLog()->debug("handling new report from connectivity tester, screenId={} successfulIp={} lastServerId={}",
-            screenId, successfulIp, m_lastServerId);
-
-        if (m_lastServerId == screenId &&
-            !successfulIp.empty()) {
-            startClient(m_lastServerId);
-        }
     });
 }
 
@@ -517,16 +504,8 @@ void CoreProcess::startClient(int serverId)
     command.setLocalHostname(boost::asio::ip::host_name());
     command.setRunAsUid(m_runAsUid);
 
-    auto screen = m_localProfileConfig->getScreen(serverId);
-    std::vector<std::string> results = m_connectivityTester->getSuccessfulResults(serverId);
-    if (results.empty()) {
-        serviceLog()->error("aborting client start, no successful connectivity test results");
-        return;
-    }
-
-    // TODO: instead of using first successful result, test each and find the best
-    // address to connect to, and have a `bestAddress` (cloud should make this decision)
-    command.setServerAddress(results[0]);
+    // TODO: remove magic string
+    command.setServerAddress("127.0.0.1:24801");
 
     try {
         start(command.generate(false));

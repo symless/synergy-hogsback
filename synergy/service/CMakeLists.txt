@@ -12,8 +12,6 @@ set (SERVICE_SOURCES
     HttpSession.cpp
     WebsocketSession.cpp
     TerminationSignalListener.cpp
-    ConnectivityTester.cpp
-    TestDelegatee.cpp
     ServiceLogs.cpp
 )
 
@@ -60,6 +58,7 @@ target_compile_definitions (${PROJECT_NAME}
 
 target_link_libraries (${PROJECT_NAME}
     commonlib
+    router
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
     ${OPENSSL_LIBS}
