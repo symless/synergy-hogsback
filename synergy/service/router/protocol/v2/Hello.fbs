@@ -1,0 +1,23 @@
+namespace synergy.protocol.v2.fb;
+
+enum OS: ubyte {
+    Unknown = 0,
+    Linux   = 64,
+    macOS   = 128,
+    Windows = 192
+}
+
+table Version {
+    major_num: ubyte;
+    minor_num: ubyte;
+    patch_num: ubyte;
+    tag: string;
+    revision: string;
+}
+
+table Hello {
+    id: uint;
+    name: string;
+    version: Version;
+    os: OS;
+}

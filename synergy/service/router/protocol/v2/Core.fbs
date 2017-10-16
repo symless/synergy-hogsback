@@ -1,0 +1,5 @@
+namespace synergy.protocol.v2.fb;
+
+table CoreMessage {
+    data: [ubyte];
+}

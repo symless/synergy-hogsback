@@ -72,6 +72,9 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     install(FILES ${CMAKE_SOURCE_DIR}/debian/synergy.service DESTINATION lib/systemd/system)
 endif()
 
+
+add_subdirectory (router)
+
 if (WIN32)
 add_subdirectory (windows)
 endif()

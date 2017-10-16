@@ -163,6 +163,12 @@ set (Autobahn_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/autobahn-cpp")
 include_directories(BEFORE SYSTEM ${Autobahn_INCLUDE_DIR})
 
 #
+# Flatbuffers
+#
+set (Flatbuffers_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/flatbuffers/include")
+include_directories(BEFORE SYSTEM ${Flatbuffers_INCLUDE_DIR})
+
+#
 # CMake Dependencies
 #
 add_subdirectory (third_party)
