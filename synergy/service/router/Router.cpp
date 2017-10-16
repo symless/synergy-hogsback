@@ -6,6 +6,7 @@
 #include <iostream>
 #include <iterator>
 #include <tuple>
+#include <sstream>
 
 static int const kConnectRetryLimit     = 10;
 static auto const kConnectTimeout       = std::chrono::seconds (5);
@@ -16,8 +17,17 @@ static int const kDestRouteLimit = 3;
 
 static std::string
 comma_separate (std::vector<uint32_t> const& path) {
-    // Fix this
-    return "Fix this";
+    if (path.empty()) {
+        return std::string();
+    }
+    std::ostringstream oss;
+    auto it = begin(path);
+    oss << *it++;
+    while (it != end(path)) {
+        oss << ",";
+        oss << *it++;
+    }
+    return oss.str();
 }
 
 void
