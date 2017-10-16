@@ -76,7 +76,7 @@ ProcessCommand::generate(bool serverMode) const
             throw std::runtime_error("Can't generate args, server IP/hostname missing.");
         }
 
-        args.push_back(m_serverAddress + ":24800");
+        args.push_back(m_serverAddress);
     }
 
     return args;
