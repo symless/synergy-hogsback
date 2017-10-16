@@ -12,6 +12,7 @@
 #include <synergy/service/CoreProcess.h>
 
 #include <boost/asio.hpp>
+#include <boost/algorithm/string.hpp>
 #include <iostream>
 
 std::string g_lastProfileSnapshot;
@@ -138,6 +139,20 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             connection.disconnect();
         });
     }
+
+    m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen> added, std::vector<Screen>){
+        m_ioService.post([this, &added] () {
+            for (const auto& screen : added) {
+                std::vector<std::string> ipList;
+                boost::split(ipList, screen.ipList(), boost::is_any_of(","));
+
+                for(const auto& ipStr : ipList) {
+                    ip::address ip = ip::address::from_string (ipStr);
+                    m_router.add(tcp::endpoint (ip, kNodePort));
+                }
+            }
+        });
+    });
 }
 
 ServiceWorker::~ServiceWorker()
