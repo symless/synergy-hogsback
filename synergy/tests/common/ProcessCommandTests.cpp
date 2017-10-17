@@ -43,6 +43,6 @@ TEST_CASE("Process command and args generated correctly", "[ProcessCommand]")
             "--name mock local hostname --enable-drag-drop "
             "--profile-dir " + profileDir.string() + " "
             "--log " + logPath.string() + " "
-            "mock server address:24800");
+            "mock server address");
     }
 }
