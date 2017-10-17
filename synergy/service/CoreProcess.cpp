@@ -183,7 +183,7 @@ CoreProcess::CoreProcess (boost::asio::io_service& io, std::shared_ptr<UserConfi
     m_ioService (io),
     m_userConfig(userConfig),
     m_localProfileConfig(localProfileConfig),
-    m_proccessMode(ProcessMode::kServer),
+    m_proccessMode(ProcessMode::kUnknown),
     m_currentServerId(-1)
 {
     m_localProfileConfig->profileServerChanged.connect([this](int64_t serverId) {
