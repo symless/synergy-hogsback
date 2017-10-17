@@ -83,11 +83,11 @@ ServiceProxy::ServiceProxy() :
         });
 
         m_wampClient.subscribe ("synergy.cloud.offline", [this]() {
-            emit rpcCloudOnline();
+            emit rpcCloudOffline();
         });
 
         m_wampClient.subscribe ("synergy.cloud.online", [this]() {
-            emit rpcCloudOffline();
+            emit rpcCloudOnline();
         });
     });
 }
