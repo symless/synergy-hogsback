@@ -204,7 +204,6 @@ CoreProcess::CoreProcess (boost::asio::io_service& io, std::shared_ptr<UserConfi
             case ProcessMode::kClient: {
                 // when local screen becomes the server
                 if (m_userConfig->screenId() == serverId) {
-                    writeConfigurationFile();
                     startServer();
                 }
                 // when another screen, not local screen, claims to be the server
@@ -216,7 +215,6 @@ CoreProcess::CoreProcess (boost::asio::io_service& io, std::shared_ptr<UserConfi
             }
             case ProcessMode::kUnknown: {
                 if (m_userConfig->screenId() == serverId) {
-                    writeConfigurationFile();
                     startServer();
                 }
                 else {
