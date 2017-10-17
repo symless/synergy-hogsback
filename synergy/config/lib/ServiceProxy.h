@@ -42,6 +42,10 @@ signals:
     void rpcCloudOnline();
 
 public slots:
+    // TODO: figure out how to get rid of double signals hack
+    // as wamp is running in a different thread, when it emits
+    // signals it needs to first catch it in main thread then
+    // emit another signal from main thread
     void onRpcReceivedScreens(QString);
     void onRpcScreenStatusChanged(QString, int);
     void onLogServiceOutput(QString text);
