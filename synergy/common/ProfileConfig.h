@@ -11,8 +11,6 @@ class ProfileConfig final
 public:
     static ProfileConfig fromJsonSnapshot (std::string const&json);
 
-    ProfileConfig();
-
     void apply (ProfileConfig const& src);
     bool compare (ProfileConfig const& target);
     void clone (ProfileConfig const& src);
