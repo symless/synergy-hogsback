@@ -185,7 +185,7 @@ App::run(int argc, char* argv[])
     WampClient& wampClient = serviceProxy.wampClient();
 
     QObject::connect(cloudClient, &CloudClient::profileUpdated, [&wampClient](){
-        // TODO: review this, this is essentially from a http call, probably should be in server
+        // TODO: review this, this is essentially from a http call, probably should be in service
         auto authUpdateFunc = [&wampClient]() {
             AppConfig* appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
             wampClient.call<void> ("synergy.auth.update",
