@@ -119,6 +119,10 @@ ClientProxyConnection::start (ClientProxy& proxy) {
 
             // TODO: cleanup connections in ClientProxy
             if (ec) {
+                if (ec == boost::asio::error::connection_reset) {
+                    break;
+                }
+
                 throw boost::system::system_error (ec, ec.message ());
             }
 
@@ -129,6 +133,10 @@ ClientProxyConnection::start (ClientProxy& proxy) {
                               asio::transfer_exactly (size),
                               ctx[ec]);
             if (ec) {
+                if (ec == boost::asio::error::connection_reset) {
+                    break;
+                }
+
                 throw boost::system::system_error (ec, ec.message ());
             }
 
