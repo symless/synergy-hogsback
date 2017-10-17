@@ -291,8 +291,6 @@ void CloudClient::onSwitchProfileFinished(QNetworkReply* reply)
         return;
     }
 
-    int64_t originalProfileId = m_profileId;
-
     m_screenId = screen.toInt();
     m_profileId = profile.toInt();
 
