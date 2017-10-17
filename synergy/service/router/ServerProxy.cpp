@@ -11,6 +11,7 @@
 #include <boost/asio/write.hpp>
 #include <boost/endian/conversion.hpp>
 #include <cstdint>
+#include <synergy/service/ServiceLogs.h>
 
 struct ServerProxyMessageHandler {
     explicit ServerProxyMessageHandler (ServerProxy& proxy): proxy_(proxy) {}
@@ -110,7 +111,7 @@ ServerProxyConnection::start (ServerProxy& proxy) {
         std::vector<unsigned char> buffer;
         buffer.reserve (64 * 1024);
 
-        std::cout << "sending hello to core client" << std::endl;
+        routerLog()->debug ("sending hello to core client");
 
         /* Get the ball rolling */
         synergy::protocol::v1::HelloMessage hello;
@@ -141,20 +142,20 @@ ServerProxyConnection::start (ServerProxy& proxy) {
                               ctx[ec]);
             if (ec) {
                 // TODO: detect disconnect and remove this connection from array
-                std::cout << ec.message() << std::endl;
+                routerLog()->debug ("Error reading from core client: {}", ec.message());
                 break;
             }
 
             boost::endian::big_to_native_inplace (size);
-            std::cout << size << std::endl;
             buffer.resize (size);
+
             asio::async_read (socket_,
                               asio::buffer (buffer),
                               asio::transfer_exactly (size),
                               ctx[ec]);
             if (ec) {
                 // TODO: detect disconnect and remove this connection from array
-                std::cout << ec.message() << std::endl;
+                routerLog()->debug ("Error reading from core client: {}", ec.message());
                 break;
             }
 

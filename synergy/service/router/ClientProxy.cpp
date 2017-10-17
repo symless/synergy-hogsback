@@ -11,6 +11,7 @@
 #include <boost/asio/write.hpp>
 #include <boost/endian/conversion.hpp>
 #include <cstdint>
+#include <synergy/service/ServiceLogs.h>
 
 class ClientProxyMessageHandler {
 public:
@@ -122,7 +123,6 @@ ClientProxyConnection::start (ClientProxy& proxy) {
             }
 
             boost::endian::big_to_native_inplace (size);
-            std::cout << size << std::endl;
             buffer.resize (size);
             asio::async_read (socket_,
                               asio::buffer (buffer),
@@ -165,7 +165,8 @@ ClientProxyMessageHandler::operator()(Message const& message, int32_t source) co
 void
 ClientProxyMessageHandler::handle(ProxyClientConnect const& pcc, int32_t source) const
 {
-    std::cout << "ClientProxy: received client connection for " << pcc.screen << " from screen " << source  << "\n";
+    routerLog()->info ("ClientProxy: received client connection for {} from screen",
+                       pcc.screen, source);
 
     auto& connections = proxy().connections_;
     auto it = std::find_if (begin(connections), end(connections), [source](auto& connection) {
@@ -185,7 +186,7 @@ void ClientProxyMessageHandler::handle(const CoreMessage& cm, int32_t source) co
     });
 
     if (it == end (connections)) {
-        std::cout << "ClientProxy: received core message from client " << source << ", but server has not established a connect to that client\n";
+        routerLog()->info ("ClientProxy: received core message from client {}, but server has not established a connect to that client", source);
         return;
     }
 
