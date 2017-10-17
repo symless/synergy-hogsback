@@ -6,6 +6,7 @@
 #include <iostream>
 #include <iterator>
 #include <tuple>
+#include <synergy/service/ServiceLogs.h>
 #include <sstream>
 
 static int const kConnectRetryLimit     = 10;
@@ -44,7 +45,7 @@ Router::add (tcp::endpoint endpoint) {
         return;
     }
 
-    std::cout << "Router: Adding " << endpoint << "\n";
+    routerLog()->info ("Adding {}", endpoint);
     known_peers_.push_back (endpoint);
 
     /* Connect thread */
@@ -61,8 +62,8 @@ Router::add (tcp::endpoint endpoint) {
                 return;
             }
 
-            std::cout << fmt::format (
-                "Router: Connecting to {} (attempt {}/{})\n",
+            routerLog()->info (
+                "Connecting to {} (attempt {}/{})",
                 endpoint,
                 attempt,
                 kConnectRetryLimit);
@@ -85,21 +86,21 @@ Router::add (tcp::endpoint endpoint) {
 
             if (ec == asio::error::operation_aborted) {
                 if (!timed_out) {
-                    std::cout << fmt::format (
-                        "Router: Aborting connection to {}\n", endpoint);
+                    routerLog()->info (
+                        "Aborting connection to {}", endpoint);
                     return;
                 }
             }
 
             if (ec == asio::error::connection_refused) {
-                std::cout << fmt::format ("Router: Connection to {} refused\n",
+                routerLog()->info ("Connection to {} refused",
                                           endpoint);
             } else if ((ec == asio::error::timed_out) || timed_out) {
-                std::cout << fmt::format (
-                    "Router: Connection to {} timed out\n", endpoint);
+                routerLog()->info (
+                    "Connection to {} timed out", endpoint);
             } else if (ec == asio::error::host_unreachable) {
-                std::cout << fmt::format (
-                    "Router: Connection to {} failed. Host is unreachable\n",
+                routerLog()->info (
+                    "Connection to {} failed. Host is unreachable",
                     endpoint);
             } else if (ec) {
                 throw boost::system::system_error (ec, ec.message ());
@@ -115,13 +116,13 @@ Router::add (tcp::endpoint endpoint) {
                 continue;
             }
 
-            std::cout << fmt::format ("Router: Successfully connected to {}\n",
+            routerLog()->info ("Successfully connected to {}",
                                       endpoint);
             this->add (std::move (socket));
             return;
         }
 
-        std::cout << fmt::format ("Router: Gave up trying to connect to {}\n",
+        routerLog()->info ("Gave up trying to connect to {}",
                                   endpoint);
 
         auto it = std::find (begin(known_peers_), end(known_peers_), endpoint);
@@ -145,7 +146,7 @@ Router::Router (asio::io_service& io, int const port)
     set_tcp_socket_buffer_sizes (acceptor_, ec);
     acceptor_.listen ();
 
-    std::cout << fmt::format ("Router: ID = {}, Name = '{}'\n", id_, name_);
+    routerLog()->info ("ID = {}, Name = '{}'", id_, name_);
 }
 
 void
@@ -172,8 +173,8 @@ Router::start (uint32_t const id, std::string name) {
                 throw boost::system::system_error (ec);
             }
 
-            std::cout << fmt::format (
-                "Router: Accepted connection from router {}\n",
+            routerLog()->info (
+                "Accepted connection from router {}",
                 socket.remote_endpoint ());
             add (std::move (socket));
         }
@@ -207,7 +208,7 @@ Router::start (uint32_t const id, std::string name) {
             }
         }
 
-        std::cout << "Router: Hello loop terminated\n";
+        routerLog()->info ("Hello loop terminated");
     });
 }
 
@@ -233,17 +234,17 @@ Router::get_known_routes () {
 void
 Router::dump_table () {
     if (route_table_.empty ()) {
-        std::cout << "Router: Route table is empty\n";
+        routerLog()->info ("Route table is empty");
         return;
     } else {
-        std::cout << "Router: Route table contents:\n";
+        routerLog()->info ("Route table contents:");
     }
 
     int route_n = 0;
     for (auto& route : route_table_) {
         ++route_n;
-        std::cout << fmt::format (
-            "Router:    Route {}: dest {}, cost {}, path [{}]\n",
+        routerLog()->info (
+            "   Route {}: dest {}, cost {}, path [{}]",
             route_n,
             route.dest,
             route.cost,
@@ -266,14 +267,13 @@ private:
 
 void MessageHandler::operator()(HelloMessage &hello, std::shared_ptr<Connection> source) const
 {
-    std::cout << fmt::format ("Router: Received hello from '{}'"
-                              " (id: {})\n",
+    routerLog()->info ("Received hello from '{}' (id: {})",
                               hello.name,
                               hello.id);
     if (hello.id == router_->id()) {
-        std::cout << fmt::format (
-            "Router: Received own hello message. Closing connection "
-            "{}\n",
+        routerLog()->info (
+            "Received own hello message. Closing connection "
+            "{}",
             source->id ());
         router_->remove (std::move (source));
         return;
@@ -282,21 +282,21 @@ void MessageHandler::operator()(HelloMessage &hello, std::shared_ptr<Connection>
 
 void MessageHandler::operator()(UnknownMessage & message, std::shared_ptr<Connection> source) const
 {
-    std::cout << "Received an unknown message" << std::endl;
+    routerLog()->info ("Received an unknown message");
 }
 
 void MessageHandler::operator()(RouteAdvertisement &ra, std::shared_ptr<Connection> source) const
 {
-    std::cout << fmt::format (
-        "Router: Received route advertisement from router {}\n",
+    routerLog()->info (
+        "Received route advertisement from router {}",
         ra.sender);
     router_->integrate (ra, std::move (source));
 }
 
 void MessageHandler::operator()(RouteRevocation &rr, std::shared_ptr<Connection> source) const
 {
-    std::cout << fmt::format (
-        "Router: Received {} dead routes from router {}\n",
+    routerLog()->info (
+        "Received {} dead routes from router {}",
         rr.routes.size (),
         rr.sender);
     router_->integrate (rr, std::move (source));
@@ -370,8 +370,8 @@ Router::integrate (Route route, std::shared_ptr<Connection> source) {
 
         route_limit_reached = ((rank_higher - rank_lower) == kDestRouteLimit);
         if (route_limit_reached) {
-            std::cout << fmt::format (
-                "Router:    Route limit reached for dest {}\n", route.dest);
+            routerLog()->info (
+                "   Route limit reached for dest {}", route.dest);
         }
     }
 
@@ -387,14 +387,14 @@ Router::integrate (Route route, std::shared_ptr<Connection> source) {
         if ((rank_installed >= rank_lower) && (rank_installed <= rank_higher)) {
             auto bumped = std::prev (existing_routes.second);
 
-            std::cout << fmt::format (
-                "Router:    Removed route: dest {}, cost {}, path [{}]\n",
+            routerLog()->info (
+                "   Removed route: dest {}, cost {}, path [{}]",
                 bumped->dest,
                 bumped->cost,
                 comma_separate (bumped->path));
 
-            std::cout << fmt::format (
-                "Router:   ... to make way for: dest {}, cost {}, path [{}]\n",
+            routerLog()->info (
+                "  ... to make way for: dest {}, cost {}, path [{}]",
                 installed.first->dest,
                 installed.first->cost,
                 comma_separate (installed.first->path));
@@ -411,13 +411,13 @@ Router::integrate (Route route, std::shared_ptr<Connection> source) {
 void
 Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
     if (rr.sender == id_) {
-        std::cout << fmt::format ("Router: Received own route revocation. "
-                                  "This indicates a loop. Ignoring\n");
+        routerLog()->info (" Received own route revocation. "
+                                  "This indicates a loop. Ignoring");
         return;
     }
 
-    std::cout << fmt::format (
-        "Router: Removing dead routes received from router {}\n", rr.sender);
+    routerLog()->info (
+        "Removing dead routes received from router {}", rr.sender);
 
     RouteRevocation revocation;
     revocation.sender = id_;
@@ -428,22 +428,22 @@ Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
     for (auto& route : rr.routes) {
         ++route_n;
 
-        std::cout << fmt::format (
-            "Router:    Route {}: dest {}, cost {}, path [{}]\n",
+        routerLog()->info (
+            "   Route {}: dest {}, cost {}, path [{}]",
             route_n,
             route->dest,
             route->cost,
             comma_separate (route->path));
 
         if (route->dest == id_) {
-            std::cout << fmt::format (
-                "Router:    Route {}: ignored because it's to me\n", route_n);
+            routerLog()->info (
+                "   Route {}: ignored because it's to me", route_n);
             continue;
         }
 
         if (end (route->path) != std::find (begin(route->path), end(route->path), id_)) {
-            std::cout << fmt::format (
-                "Router:    Route {}: ignored because it includes a loop\n",
+            routerLog()->info (
+                "   Route {}: ignored because it includes a loop",
                 route_n);
             continue;
         }
@@ -460,10 +460,10 @@ Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
             boost::tie (new_route->dest, new_route->cost, new_route->path));
 
         if (entry == end (route_table_)) {
-            std::cout << fmt::format ("Router:    Route {}: not found\n",
+            routerLog()->info ("    Route {}: not found",
                                       route_n);
         } else {
-            std::cout << fmt::format ("Router:    Route {}: removed\n",
+            routerLog()->info ("    Route {}: removed",
                                       route_n);
             route_table_.get<by_destination> ().erase (entry);
             routes_updated = true;
@@ -482,13 +482,13 @@ Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
 void
 Router::integrate (RouteAdvertisement& ra, std::shared_ptr<Connection> source) {
     if (ra.sender == id_) {
-        std::cout << fmt::format ("Router: Received own route advertisement. "
-                                  "This indicates a loop. Ignoring\n");
+        routerLog()->info (" Received own route advertisement. "
+                                  "This indicates a loop. Ignoring");
         return;
     }
 
-    std::cout << fmt::format (
-        "Router: Installing routes received from router {}\n", ra.sender);
+    routerLog()->info (
+        "Installing routes received from router {}", ra.sender);
 
     RouteAdvertisement advert;
     advert.sender = id_;
@@ -499,22 +499,22 @@ Router::integrate (RouteAdvertisement& ra, std::shared_ptr<Connection> source) {
     for (auto& route : ra.routes) {
         ++route_n;
 
-        std::cout << fmt::format (
-            "Router:    Route {}: dest {}, cost {}, path [{}]\n",
+        routerLog()->info (
+            "   Route {}: dest {}, cost {}, path [{}]",
             route_n,
             route->dest,
             route->cost,
             comma_separate (route->path));
 
         if (route->dest == id_) {
-            std::cout << fmt::format (
-                "Router:    Route {}: ignored because it's to me\n", route_n);
+            routerLog()->info (
+                "   Route {}: ignored because it's to me", route_n);
             continue;
         }
 
         if (end (route->path) != std::find (begin(route->path), end(route->path), id_)) {
-            std::cout << fmt::format (
-                "Router:    Route {}: ignored because it would create a loop\n",
+            routerLog()->info (
+                "   Route {}: ignored because it would create a loop",
                 route_n);
             continue;
         }
@@ -529,11 +529,11 @@ Router::integrate (RouteAdvertisement& ra, std::shared_ptr<Connection> source) {
 
         bool const installed = integrate (*new_route, source);
         if (installed) {
-            std::cout << fmt::format ("Router:    Route {}: installed\n",
+            routerLog()->info ("    Route {}: installed",
                                       route_n);
             advert.routes.emplace_back (std::move (new_route));
         } else {
-            std::cout << fmt::format ("Router:    Route {}: not installed\n",
+            routerLog()->info ("    Route {}: not installed",
                                       route_n);
         }
 
@@ -549,7 +549,7 @@ Router::integrate (RouteAdvertisement& ra, std::shared_ptr<Connection> source) {
 
 void
 Router::remove (std::shared_ptr<Connection> connection) {
-    std::cout << fmt::format ("Router: Disabling connection {}\n",
+    routerLog()->info (" Disabling connection {}",
                               connection->id ());
     connection->stop ();
 
@@ -559,8 +559,8 @@ Router::remove (std::shared_ptr<Connection> connection) {
     auto const n_dead_routes =
         std::distance (dead_routes.first, dead_routes.second);
 
-    std::cout << fmt::format (
-        "Router: Removing {} route(s) broken by removal of connection {}\n",
+    routerLog()->info (
+        "Removing {} route(s) broken by removal of connection {}",
         n_dead_routes,
         connection->id ());
 

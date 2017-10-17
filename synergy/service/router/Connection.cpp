@@ -5,31 +5,32 @@
 #include "MessageWriter.hpp"
 #include <fmt/format.h>
 #include <iostream>
+#include <synergy/service/ServiceLogs.h>
 
 uint32_t Connection::next_connection_id_ = 0;
 
 Connection::Connection (tcp::socket socket)
     : id_ (++next_connection_id_), socket_ (std::move (socket)),
       endpoint_(socket_.remote_endpoint()), reader_(socket_), writer_(socket_) {
-    std::cout << fmt::format ("Router: Connection {} created\n", id ());
+    routerLog()->info  ("Connection {} created", id ());
 
     boost::system::error_code ec;
     socket_.set_option (tcp::no_delay (true), ec);
 
     if (ec) {
-        std::cout << fmt::format (
-            "Router: Failed to disable Nagles algorithm on connection {}\n",
+        routerLog()->info  (
+            "Failed to disable Nagles algorithm on connection {}",
             id ());
     }
 
     if (!set_tcp_keep_alive_options (socket_, 5, 2, 10)) {
         throw std::runtime_error (fmt::format (
-            "Router: Failed to enable TCP keepalive on connection {}", id ()));
+            "Failed to enable TCP keepalive on connection {}", id ()));
     }
 }
 
 Connection::~Connection () noexcept {
-    std::cout << "Router: Connection " << id () << " destroyed\n";
+    routerLog()->info ("Connection {} destroyed", id());
 }
 
 void
@@ -63,8 +64,8 @@ Connection::start () {
                 }
             }
 
-            std::cout << fmt::format (
-                "Router: Connection {} terminated receive loop\n", this->id ());
+            routerLog()->info  (
+                "Connection {} terminated receive loop", this->id ());
         });
 }
 
