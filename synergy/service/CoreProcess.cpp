@@ -183,14 +183,14 @@ CoreProcess::CoreProcess (boost::asio::io_service& io, std::shared_ptr<UserConfi
     m_ioService (io),
     m_userConfig(userConfig),
     m_localProfileConfig(localProfileConfig),
-    m_proccessMode(ProcessMode::kUnknown),
-    m_lastServerId(-1)
+    m_proccessMode(ProcessMode::kServer),
+    m_currentServerId(-1)
 {
     m_localProfileConfig->profileServerChanged.connect([this](int64_t serverId) {
         m_ioService.post([this, serverId] () {
 
             serviceLog()->debug("handling local profile server changed, mode={} thisId={} serverId={} lastServerId={}",
-                processModeToString(m_proccessMode), m_userConfig->screenId(), serverId, m_lastServerId);
+                processModeToString(m_proccessMode), m_userConfig->screenId(), serverId, m_currentServerId);
 
             switch (m_proccessMode) {
             case ProcessMode::kServer: {
@@ -207,7 +207,7 @@ CoreProcess::CoreProcess (boost::asio::io_service& io, std::shared_ptr<UserConfi
                     startServer();
                 }
                 // when another screen, not local screen, claims to be the server
-                else if (m_lastServerId != serverId) {
+                else if (m_currentServerId != serverId) {
                     startClient(serverId);
                 }
 
@@ -470,7 +470,7 @@ void CoreProcess::startServer()
     serviceLog()->debug("starting core server process");
 
     m_proccessMode = ProcessMode::kServer;
-    m_lastServerId = m_userConfig->screenId();
+    m_currentServerId = m_userConfig->screenId();
 
     writeConfigurationFile();
 
@@ -493,7 +493,7 @@ void CoreProcess::startClient(int serverId)
     serviceLog()->debug("starting core client process");
 
     m_proccessMode = ProcessMode::kClient;
-    m_lastServerId = serverId;
+    m_currentServerId = serverId;
 
     ProcessCommand command;
     command.setLocalHostname(boost::asio::ip::host_name());

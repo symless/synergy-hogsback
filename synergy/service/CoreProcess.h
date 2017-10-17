@@ -22,7 +22,6 @@ public:
     CoreProcess& operator= (CoreProcess const&) = delete;
     ~CoreProcess() noexcept;
 
-    void start (std::vector<std::string> command);
     void shutdown();
 
 public:
@@ -38,6 +37,7 @@ public:
     void setRunAsUid(const std::string& runAsUid);
 
 private:
+    void start (std::vector<std::string> command);
     void writeConfigurationFile();
     void startServer();
     void startClient(int serverId);
@@ -48,7 +48,7 @@ private:
     std::shared_ptr<ProfileConfig> m_localProfileConfig;
     std::unique_ptr<CoreProcessImpl> m_impl;
     ProcessMode m_proccessMode;
-    int m_lastServerId;
+    int m_currentServerId;
     std::vector<std::string> m_nextCommand;
     std::string m_runAsUid = "";
 };
