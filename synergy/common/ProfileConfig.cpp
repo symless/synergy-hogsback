@@ -26,6 +26,12 @@ ProfileConfig ProfileConfig::fromJsonSnapshot(const std::string& json)
     return profileConfig;
 }
 
+ProfileConfig::ProfileConfig()
+{
+    m_screens.emplace_back(-1);
+    m_screens[0].name(boost::asio::ip::host_name());
+}
+
 void ProfileConfig::apply (ProfileConfig const& src)
 {
     if (compare(src)) {
