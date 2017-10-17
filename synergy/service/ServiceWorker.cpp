@@ -63,19 +63,6 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         // forward the message via rpc server to config UI
         auto rpcServer = m_rpc->server();
         rpcServer->publish("synergy.profile.snapshot", std::move(json));
-
-        // HACK: if no server, then use the first screen in the profile. this should
-        // really be done on the cloud server.
-        if (!m_localProfileConfig->hasServer()) {
-            serviceLog()->debug("no server has been established yet, using first screen");
-            auto screens = m_localProfileConfig->screens();
-            if (!screens.empty()) {
-                m_cloudClient->claimServer(screens[0].id());
-            }
-            else {
-                serviceLog()->error("can't choose a server, no screens in config");
-            }
-        }
     });
 
     m_cloudClient->websocketConnected.connect([this](){
