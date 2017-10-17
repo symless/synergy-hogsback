@@ -51,7 +51,6 @@ Rectangle {
         // add localhost as the initial screen
         Component.onCompleted: {
             CloudClient.switchProfile()
-            CloudClient.userProfiles()
         }
 
         // version label
