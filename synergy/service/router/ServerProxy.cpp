@@ -159,8 +159,14 @@ ServerProxyConnection::start (ServerProxy& proxy) {
                 break;
             }
 
-            synergy::protocol::v1::parse (
-                        synergy::protocol::v1::Flow::CTS, handler, reinterpret_cast<char*>(buffer.data ()), size);
+            try {
+                synergy::protocol::v1::parse (
+                            synergy::protocol::v1::Flow::CTS, handler, reinterpret_cast<char*>(buffer.data ()), size);
+            }
+            catch (const std::exception& e) {
+                routerLog()->error ("ServerProxy: failed to parse message: {}",
+                                   e.what());
+            }
         }
     });
 }

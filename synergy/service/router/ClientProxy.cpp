@@ -140,8 +140,14 @@ ClientProxyConnection::start (ClientProxy& proxy) {
                 throw boost::system::system_error (ec, ec.message ());
             }
 
-            synergy::protocol::v1::parse (
-                synergy::protocol::v1::Flow::STC, handler, reinterpret_cast<char*>(buffer.data ()), size);
+            try {
+                synergy::protocol::v1::parse (
+                    synergy::protocol::v1::Flow::STC, handler, reinterpret_cast<char*>(buffer.data ()), size);
+            }
+            catch (const std::exception& e) {
+                routerLog()->error ("ClientProxy: failed to parse message: {}",
+                                   e.what());
+            }
         }
     });
 }
@@ -194,7 +200,6 @@ void ClientProxyMessageHandler::handle(const CoreMessage& cm, int32_t source) co
     });
 
     if (it == end (connections)) {
-        routerLog()->info ("ClientProxy: received core message from client {}, but server has not established a connect to that client", source);
         return;
     }
 
