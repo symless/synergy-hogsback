@@ -37,11 +37,17 @@ signals:
     void logCoreOutput(QString);
     void logServiceOutput(QString);
     void receivedScreens(QByteArray reply);
+    void rpcReceivedScreens(QString reply);
+    void rpcCloudOffline();
+    void rpcCloudOnline();
 
 public slots:
+    void onRpcReceivedScreens(QString);
     void onRpcScreenStatusChanged(QString, int);
     void onLogServiceOutput(QString text);
     void onLogCoreOutput(QString text);
+    void onRpcCloudOffline();
+    void onRpcCloudOnline();
 
 private:
     boost::asio::io_service m_io;

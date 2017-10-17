@@ -18,6 +18,9 @@
 ServiceProxy::ServiceProxy() :
     m_wampClient(m_io)
 {
+    connect (this, &ServiceProxy::rpcReceivedScreens, this,
+             &ServiceProxy::onRpcReceivedScreens, Qt::QueuedConnection);
+
     connect (this, &ServiceProxy::rpcScreenStatusChanged, this,
              &ServiceProxy::onRpcScreenStatusChanged, Qt::QueuedConnection);
 
@@ -27,6 +30,11 @@ ServiceProxy::ServiceProxy() :
     connect (this, &ServiceProxy::logServiceOutput, this,
              &ServiceProxy::onLogServiceOutput, Qt::QueuedConnection);
 
+    connect (this, &ServiceProxy::rpcCloudOnline, this,
+             &ServiceProxy::onRpcCloudOnline, Qt::QueuedConnection);
+
+    connect (this, &ServiceProxy::rpcCloudOffline, this,
+             &ServiceProxy::onRpcCloudOffline, Qt::QueuedConnection);
 
     m_wampClient.connectionError.connect([&]() {
         m_errorView->setMode(ErrorViewMode::kServiceError);
@@ -53,8 +61,7 @@ ServiceProxy::ServiceProxy() :
 #endif
 
         m_wampClient.subscribe ("synergy.profile.snapshot", [&](std::string json) {
-            QByteArray byteArray(json.c_str(), json.length());
-            emit receivedScreens(byteArray);
+            emit rpcReceivedScreens(QString::fromStdString(json));
         });
 
         m_wampClient.subscribe ("synergy.core.log", [this](std::string line) {
@@ -76,13 +83,11 @@ ServiceProxy::ServiceProxy() :
         });
 
         m_wampClient.subscribe ("synergy.cloud.offline", [this]() {
-            LogManager::debug(QString("service cloud connection error"));
-            m_errorView->setMode(ErrorViewMode::kCloudError);
+            emit rpcCloudOnline();
         });
 
         m_wampClient.subscribe ("synergy.cloud.online", [this]() {
-            LogManager::debug(QString("service cloud connection recovered"));
-            m_errorView->setMode(ErrorViewMode::kNone);
+            emit rpcCloudOffline();
         });
     });
 }
@@ -107,6 +112,13 @@ void ServiceProxy::join()
 }
 
 void
+ServiceProxy::onRpcReceivedScreens(QString json)
+{
+    QByteArray byteArray(json.toUtf8());
+    emit receivedScreens(byteArray);
+}
+
+void
 ServiceProxy::onRpcScreenStatusChanged(QString name, int status)
 {
     QPair<QString, ScreenStatus> r;
@@ -123,6 +135,18 @@ ServiceProxy::onLogCoreOutput(QString text)
             LogManager::raw("[ Core    ] " + line);
         }
     }
+}
+
+void ServiceProxy::onRpcCloudOffline()
+{
+    LogManager::debug(QString("service cloud connection error"));
+    m_errorView->setMode(ErrorViewMode::kCloudError);
+}
+
+void ServiceProxy::onRpcCloudOnline()
+{
+    LogManager::debug(QString("service cloud connection recovered"));
+    m_errorView->setMode(ErrorViewMode::kNone);
 }
 
 std::shared_ptr<ErrorView>

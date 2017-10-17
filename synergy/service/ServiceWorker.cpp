@@ -71,7 +71,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     });
 
     m_cloudClient->websocketConnectionError.connect([this](){
-        serviceLog()->error("cloud client connection error");
+        serviceLog()->error("websocket connection error");
         m_rpc->server()->publish("synergy.cloud.offline");
     });
 
