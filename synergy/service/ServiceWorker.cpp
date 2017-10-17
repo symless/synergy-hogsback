@@ -141,7 +141,8 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         m_ioService.post([this, added] () {
             for (const auto& screen : added) {
                 std::vector<std::string> ipList;
-                boost::split(ipList, screen.ipList(), boost::is_any_of(","));
+                std::string ipListStr = screen.ipList();
+                boost::split(ipList, ipListStr, boost::is_any_of(","));
 
                 for(const auto& ipStr : ipList) {
                     ip::address ip = ip::address::from_string (ipStr);
