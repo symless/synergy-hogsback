@@ -129,6 +129,11 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             for (const auto& screen : added) {
                 std::vector<std::string> ipList;
                 std::string ipListStr = screen.ipList();
+
+                if (ipListStr.empty()) {
+                    continue;
+                }
+
                 boost::split(ipList, ipListStr, boost::is_any_of(","));
 
                 for(const auto& ipStr : ipList) {
