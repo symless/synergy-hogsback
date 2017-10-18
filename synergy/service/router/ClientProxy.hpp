@@ -6,7 +6,7 @@
 #include <vector>
 
 class Router;
-struct ClientProxyConnection;
+class ClientProxyConnection;
 class ClientProxyMessageHandler;
 
 class ClientProxy final {

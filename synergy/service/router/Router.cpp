@@ -143,15 +143,19 @@ Router::Router (asio::io_service& io, int const port)
     routerLog ()->info ("ID = {}, Name = '{}'", id_, name_);
 }
 
+bool
+Router::started () const noexcept {
+    return running_;
+}
+
 void
 Router::start (uint32_t const id, std::string name) {
     if (running_) {
         return;
     }
 
-    id_   = id;
-    name_ = name;
-
+    id_      = id;
+    name_    = name;
     running_ = true;
 
     /* Accept thread */
@@ -567,12 +571,18 @@ Router::remove (std::shared_ptr<Connection> connection) {
                                                  dead_routes.second);
     dump_table ();
 
+    auto remote = connection->endpoint ();
     connections_.erase (
         std::remove (begin (connections_), end (connections_), connection),
         end (connections_));
 
     if (!revocation.routes.empty ()) {
         broadcast (std::move (revocation));
+    }
+
+    auto it = std::find (begin (known_peers_), end (known_peers_), remote);
+    if (it != end (known_peers_)) {
+        known_peers_.erase (it);
     }
 }
 

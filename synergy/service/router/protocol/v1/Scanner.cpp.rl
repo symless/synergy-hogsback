@@ -58,12 +58,18 @@
 
 #include "Scanner.hpp"
 #include "MessageTypes.hpp"
+#include <fmt/ostream.h>
+#include <synergy/service/ServiceLogs.h>
 
 #define PROC(TYPE)                  \
 {                                   \
     TYPE##Message msg;              \
     msg.read_from (ts, data, te);   \
-    handle (msg); \
+    if (!handle (msg)) {            \
+        routerLog ()->debug ("Handler failed to process core {} message: {}", \
+                             ((flow == Flow::STC) ? "server" : "client"), msg);  \
+        return false;               \
+    }                               \
 }
 
 namespace synergy {
@@ -73,7 +79,7 @@ namespace v1 {
 %% write data;
 
 bool
-parse (
+process (
     Flow const flow,
     Handler& handle,
     char const* const msg,

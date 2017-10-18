@@ -56,6 +56,8 @@ public:
     id () const noexcept {
         return id_;
     }
+
+    bool started () const noexcept;
     void start (const uint32_t id, std::string name);
     void shutdown ();
     void add (tcp::endpoint endpoint);
