@@ -8,9 +8,10 @@ OSXDirectoryManager::systemAppDir()
 }
 
 boost::filesystem::path
-OSXDirectoryManager::installedDir()
+OSXDirectoryManager::installDir()
 {
-    return m_programDir;
+    auto path = boost::filesystem::system_complete(argv0());
+    return path.remove_filename().string();
 }
 
 boost::filesystem::path

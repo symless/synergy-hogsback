@@ -37,7 +37,7 @@ TEST_CASE("WAMP RPC core start call is recieved", "[Wamp]")
 {
     timeout = false;
     boost::asio::io_service ioService;
-    RpcManager rpcManager(ioService);
+    RpcManager rpcManager(ioService, "127.0.0.1", 24889);
     rpcManager.ready.connect([&rpcManager]() {
         provideCoreTest(rpcManager);
     });

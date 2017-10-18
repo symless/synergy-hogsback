@@ -5,7 +5,7 @@
 #include <boost/asio.hpp>
 #include <boost/signals2.hpp>
 
-std::shared_ptr<spdlog::logger> const& mainLog() noexcept;
+std::shared_ptr<spdlog::logger> const& commonLog() noexcept;
 
 struct Log {
     template <typename... Args>
@@ -14,4 +14,4 @@ struct Log {
     signal<void(std::string)> onLogLine;
 };
 
-extern Log g_log;
+extern Log g_commonLog;

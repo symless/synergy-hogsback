@@ -16,11 +16,11 @@ startCrashHandler()
 
 #if (BOOST_OS_WINDOWS)
     auto dbPath = directoryManager.crashDumpDir().wstring();
-    auto handlerPath = (directoryManager.installedDir()
+    auto handlerPath = (directoryManager.installDir()
                             / "crashpad_handler.exe").wstring();
 #elif (BOOST_OS_MACOS)
     auto dbPath = directoryManager.crashDumpDir().string();
-    auto handlerPath = (directoryManager.installedDir()
+    auto handlerPath = (directoryManager.installDir()
                             / "crashpad_handler").string();
 #endif
 

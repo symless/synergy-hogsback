@@ -3,44 +3,64 @@
 #include <synergy/common/DirectoryManager.h>
 #include <synergy/service/ServiceWorker.h>
 #include <synergy/service/TerminationSignalListener.h>
-#include <synergy/service/Logs.h>
+#include <synergy/service/ServiceLogs.h>
 #include <boost/asio/io_service.hpp>
 #include <cstdlib>
 #include <exception>
 #include <iostream>
 
 int
-main (int argc, char* argv[]) {
-
-    // cache the directory of this binary for installedDir
-    boost::filesystem::path selfPath = boost::filesystem::system_complete(argv[0]);
-    DirectoryManager::instance()->m_programDir = selfPath.remove_filename().string();
-    // TODO: figure out linux linker error and move boost path stuff back to init
-    //DirectoryManager::instance()->init(argc, argv);
+main (int argc, char* argv[])
+{
+    try {
+        DirectoryManager::instance()->init(argv[0]);
+        auto installDir = DirectoryManager::instance()->installDir().string();
+        serviceLog()->debug("install dir: {}", installDir);
+    }
+    catch (const std::exception& ex) {
+        serviceLog()->error("failed to init dirs: {}", ex.what());
+        return EXIT_FAILURE;
+    }
+    catch (...) {
+        serviceLog()->error("failed to init dirs: unknown error");
+        return EXIT_FAILURE;
+    }
 
     try {
         startCrashHandler();
     }
     catch (const std::exception& ex) {
-        mainLog()->error("failed to start crash handler: {}", ex.what());
+        serviceLog()->error("failed to start crash handler: {}", ex.what());
     }
     catch (...) {
-        mainLog()->error("failed to start crash handler: unknown error");
+        serviceLog()->error("failed to start crash handler: unknown error");
     }
 
-    mainLog()->info("starting service...");
 
-    boost::asio::io_service ioService;
+    try {
+        serviceLog()->info("starting service...");
 
-    auto userConfig = std::make_shared<UserConfig>();
-    userConfig->load();
-    ServiceWorker serviceWorker(ioService, userConfig);
+        boost::asio::io_service ioService;
 
-    TerminationSignalListener signalListener(ioService);
-    signalListener.setHandler([&serviceWorker] () {
-        serviceWorker.shutdown();
-    });
+        auto userConfig = std::make_shared<UserConfig>();
+        userConfig->load();
 
-    serviceWorker.start();
-    return EXIT_SUCCESS;
+        ServiceWorker serviceWorker(ioService, userConfig);
+
+        TerminationSignalListener signalListener(ioService);
+        signalListener.setHandler([&serviceWorker] () {
+            serviceWorker.shutdown();
+        });
+
+        serviceWorker.start();
+        return EXIT_SUCCESS;
+    }
+    catch (const std::exception& ex) {
+        serviceLog()->error("failed to start service: {}", ex.what());
+        return EXIT_FAILURE;
+    }
+    catch (...) {
+        serviceLog()->error("failed to start service: unknown error");
+        return EXIT_FAILURE;
+    }
 }

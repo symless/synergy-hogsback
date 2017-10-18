@@ -1,7 +1,7 @@
 #include "SecuredTcpClient.h"
 
 #include <boost/asio/connect.hpp>
-#include <synergy/service/Logs.h>
+#include <synergy/service/ServiceLogs.h>
 
 SecuredTcpClient::SecuredTcpClient(boost::asio::io_service &ioService, std::string hostname, std::string port) :
     m_ioService(ioService),
@@ -14,20 +14,23 @@ SecuredTcpClient::SecuredTcpClient(boost::asio::io_service &ioService, std::stri
 {
 }
 
+SecuredTcpClient::~SecuredTcpClient()
+{
+    serviceLog()->debug("tcp client destroyed");
+}
+
 void SecuredTcpClient::connect()
 {
     if (m_connecting) {
-        mainLog()->warn("tcp client already in connecting");
+        serviceLog()->warn("tcp client already in connecting");
         return;
     }
 
-    m_resolver.async_resolve(
-        {m_address, m_port},
-        std::bind(
-            &SecuredTcpClient::onResolveFinished,
-            this,
-            std::placeholders::_1,
-                    std::placeholders::_2));
+    // resolve syncronously due to a bug in boost where
+    // m_resolver.cancel doesn't trigger abort.
+    errorCode ec;
+    auto result = m_resolver.resolve({m_address, m_port}, ec);
+    onResolveFinished(ec, result);
 }
 
 ssl::stream<tcp::socket> &SecuredTcpClient::stream()
@@ -42,7 +45,7 @@ void SecuredTcpClient::onResolveFinished(errorCode ec, tcp::resolver::iterator r
             return;
         }
 
-        mainLog()->debug("tcp client resolve error: {}", ec.message());
+        serviceLog()->debug("tcp client resolve error: {}", ec.message());
 
         connectFailed(this);
         return;
@@ -64,7 +67,7 @@ void SecuredTcpClient::onConnectFinished(errorCode ec)
             return;
         }
 
-        mainLog()->debug("tcp client connect error: {}", ec.message());
+        serviceLog()->debug("tcp client connect error: {}", ec.message());
 
         connectFailed(this);
         return;
@@ -85,7 +88,7 @@ void SecuredTcpClient::onSslHandshakeFinished(errorCode ec)
             return;
         }
 
-        mainLog()->debug("tcp session ssl handshake error: {}", ec.message());
+        serviceLog()->debug("tcp session ssl handshake error: {}", ec.message());
 
         connectFailed(this);
         return;

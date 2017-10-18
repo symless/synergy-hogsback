@@ -14,7 +14,7 @@ APP_NAME="Synergy"
 DMG_BACKGROUND_IMG="Background.png"
 
 # you should not need to change these
-APP_EXE="${APP_NAME}.app/Contents/MacOS/synergy2"
+APP_EXE="${APP_NAME}.app/Contents/MacOS/synergy-config"
 
 VOL_NAME="${APP_NAME}"   # volume name will be "SuperCoolApp 1.0.0"
 DMG_TMP="${VOL_NAME}-temp.dmg"

@@ -17,10 +17,11 @@ class WebsocketSession final
 {
 public:
     WebsocketSession(boost::asio::io_service& ioService, const std::string& hostname, const std::string& port);
+    ~WebsocketSession();
 
     void connect(const std::string target);
     void disconnect();
-    void reconnect();
+    void reconnect(bool now = false);
     void write(std::string& message);
     void addHeader(std::string headerName, std::string headerContent);
     bool isConnected();
@@ -31,6 +32,7 @@ public:
 
     signal<void()> connected;
     signal<void()> disconnected;
+    signal<void()> connectionError;
     signal<void(std::string)> messageReceived;
 
 private:
@@ -41,6 +43,9 @@ private:
     void onWriteFinished(errorCode ec);
     void onDisconnectFinished(errorCode ec);
 
+    void close() noexcept;
+    void setTcpKeepAliveTimeout();
+    void reconnectOnError();
 
 private:
     boost::beast::multi_buffer m_readBuffer;
@@ -53,6 +58,7 @@ private:
     boost::asio::io_service& m_ioService;
     std::string m_hostname;
     std::string m_port;
+    bool m_connecting = false;
 };
 
 #endif // WEBSOCKETSESSION_H

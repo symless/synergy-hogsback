@@ -17,11 +17,17 @@ class LIB_SPEC LogManager : public QObject
 	Q_DISABLE_COPY(LogManager)
 
 public:
-	static QObject* instance(QQmlEngine* engine = NULL, QJSEngine* scriptEngine = NULL);
+    static QObject* instance(QQmlEngine* engine = NULL, QJSEngine* scriptEngine = NULL);
+    LogManager();
     ~LogManager();
+
+    Q_PROPERTY(QString dialogUrl READ dialogUrl NOTIFY dialogChanged)
+    Q_PROPERTY(QString dialogText READ dialogText NOTIFY dialogChanged)
+    Q_PROPERTY(bool dialogVisible READ dialogVisible NOTIFY dialogChanged)
 
     Q_INVOKABLE void uploadLogFile();
     Q_INVOKABLE static void setCloudClient(CloudClient* value);
+    Q_INVOKABLE void dismissDialog();
 
     static void raw(const QString& text);
     static void error(const QString& text);
@@ -30,10 +36,15 @@ public:
     static void debug(const QString& text);
     static QString logFilename();
     static void setQmlContext(QQmlContext* value);
+    QString dialogText() const;
+    QString dialogUrl() const;
+    bool dialogVisible() const;
+    void setDialogUrl(const QString &dirty);
+
+signals:
+    void dialogChanged();
 
 private:
-    LogManager();
-
     static QString timeStamp();
 	static void appendRaw(const QString& text);
     static void updateLogLineModel();
@@ -46,12 +57,15 @@ private:
 private:
 	static QFile s_file;
     static QStringList s_logLines;
-	static QObject* s_instance;
+    static QObject* s_instance;
     static QQmlContext* s_qmlContext;
     static CloudClient* s_cloudClient;
     static const int s_maximumLogLines;
     static bool s_uploading;
     static const int s_maximumUploadLogLines;
+    QString m_dialogText = "";
+    QString m_dialogUrl = "";
+    bool m_dialogVisible = false;
 };
 
 #endif // LOGMANAGER_H

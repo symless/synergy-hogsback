@@ -23,6 +23,7 @@ set (COMMON_LIB_SOURCES
     Screen.cpp
     ScreenLinks.cpp
     ProcessCommand.cpp
+    Logs.cpp
     ${platform_sources}
 )
 
@@ -30,18 +31,17 @@ if (SYNERGY_CRASHPAD)
     list (APPEND COMMON_LIB_SOURCES CrashHandler.cpp)
 endif()
 
-set (fmt_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/fmt")
 set (Bonefish_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/bonefish/src")
 set (Cpptoml_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/cpptoml/include")
 
 include_directories (
-    ${fmt_INCLUDE_DIR}
+    BEFORE SYSTEM
     ${Bonefish_INCLUDE_DIR}
     ${Cpptoml_INCLUDE_DIR}
 )
 
 add_library (commonlib ${COMMON_LIB_SOURCES})
-target_link_libraries(commonlib bonefish)
+target_link_libraries(commonlib ${Boost_LIBRARIES} bonefish fmt)
 
 if (WIN32)
     target_link_libraries (commonlib Wtsapi32)

@@ -1,0 +1,12 @@
+namespace synergy.protocol.v2.fb;
+
+table Route {
+    dest: uint;
+    cost: uint;
+    path: [uint];
+}
+
+table RouteAdvertisement {
+    sender: uint;
+    routes: [Route];
+}

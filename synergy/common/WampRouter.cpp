@@ -8,7 +8,7 @@
 #include <bonefish/trace/trace.hpp>
 #include <boost/asio/ip/address.hpp>
 
-static bool const debug = true;
+static bool const debug = false;
 
 WampRouter::WampRouter(boost::asio::io_service& ioService) :
     m_ioService(ioService),

@@ -7,11 +7,9 @@ file(GLOB_RECURSE TEST_SOURCES "*.cpp")
 set(SERVICE_SOURCES
     ../service/WebsocketSession.cpp
     ../service/SecuredTcpSession.cpp
-    ../service/ConnectivityTester.cpp
-    ../service/TestDelegatee.cpp
     ../service/SecuredTcpClient.cpp
     ../service/SecuredTcpServer.cpp
-    ../service/Logs.cpp
+    ../service/ServiceLogs.cpp
 )
 
 add_executable (${PROJECT_NAME}
@@ -24,7 +22,6 @@ target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
     ${CMAKE_SOURCE_DIR}/third_party/fakeit/include
     ${CMAKE_SOURCE_DIR}/third_party/fakeit/config/catch
     ${Boost_INCLUDE_DIRS}
-    ${fmt_INCLUDE_DIR}
 )
 
 target_compile_definitions (${PROJECT_NAME}

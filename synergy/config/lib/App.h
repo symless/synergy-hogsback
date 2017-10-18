@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cxxopts.hpp>
+#include <QApplication>
 
 class App {
 public:
@@ -12,6 +13,7 @@ private:
 
 private:
     bool (*m_installServiceHelper)();
+    void restart(QApplication& app, std::vector<std::string> args);
 };
 
 extern cxxopts::Options g_options;

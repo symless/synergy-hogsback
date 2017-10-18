@@ -57,14 +57,12 @@ add_executable (${PROJECT_NAME} WIN32
 
 target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
     lib
-    ${fmt_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
 )
 
 target_link_libraries (${PROJECT_NAME}
     guilib
     fmt
-    libzmq-static
     ${SODIUM_LIBRARIES}
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}

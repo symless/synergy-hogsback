@@ -18,7 +18,7 @@ set (GUI_LIB_SOURCES
     LogManager.cpp
     Profile.cpp
     ProfileListModel.cpp
-    ProcessManager.cpp
+    ServiceProxy.cpp
     ScreenBBArrangement.cpp
     UIScreen.cpp
     ScreenListModel.cpp
@@ -28,6 +28,7 @@ set (GUI_LIB_SOURCES
     ProfileListModel.cpp
     ProfileManager.cpp
     VersionManager.cpp
+    ErrorView.cpp
     ${GUI_LIB_MACOS_SOURCES}
 )
 

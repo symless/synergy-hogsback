@@ -3,7 +3,7 @@
 namespace ip = boost::asio::ip;
 using ip::tcp;
 
-static bool const debug = true;
+static bool const debug = false;
 
 WampServer::WampServer (boost::asio::io_service& io):
     m_executor (io),
@@ -33,6 +33,8 @@ WampServer::start (std::string const& ip, int const port)
                 (m_executor, [&](boost::future<uint64_t> joined) {
                 joined.get();
                 ready();
+
+                this->provide(kKeepAliveFunction, [this]() { });
             });
         });
     });

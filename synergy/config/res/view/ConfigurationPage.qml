@@ -1,6 +1,7 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
+import QtQuick.Dialogs 1.2
 
 import com.synergy.gui 1.0
 
@@ -22,7 +23,7 @@ Rectangle {
     ScreenManager {
         id: screenManager
         screenListModel: screenListModel
-        processManager: applicationWindow.processManager
+        serviceProxy: applicationWindow.serviceProxy
     }
 
     Connections {
@@ -42,7 +43,7 @@ Rectangle {
     }
 
     Item {
-        id: configurationPage
+        id: configPage
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         width: parent.width
@@ -50,7 +51,6 @@ Rectangle {
         // add localhost as the initial screen
         Component.onCompleted: {
             CloudClient.switchProfile()
-            CloudClient.userProfiles()
         }
 
         // version label
@@ -60,7 +60,7 @@ Rectangle {
 
         // background header
         Rectangle {
-            id: configurationPageBackgroundHeader
+            id: configPageBackgroundHeader
             anchors.top: parent.top
             width: parent.width
             height: dp(65)
@@ -85,29 +85,18 @@ Rectangle {
 
         // separator
         Rectangle {
-            id: configurationPageBackgroundSeparator
-            anchors.top: configurationPageBackgroundHeader.bottom
+            id: configPageBackgroundSeparator
+            anchors.top: configPageBackgroundHeader.bottom
             width: parent.width
             height: dp(5)
             color:"#96C13D"
             z: 1
         }
 
-        // separator 2, which is coinciding with the saparator above in the beginning
-        // when console expands out, this is at the bottom of the console
-        Rectangle {
-            id: configurationPageBackgroundSeparator2
-            anchors.top: logConsole.bottom
-            width: parent.width
-            height: logConsole.height > 0 ? dp(5) : 0
-            color:"#96C13D"
-            z: 3
-        }
-
         // log console
         Rectangle {
             id: logConsole
-            anchors.top: configurationPageBackgroundSeparator.bottom
+            anchors.top: configPageBackgroundSeparator.bottom
             width: parent.width
             height: 0
             color:"black"
@@ -144,14 +133,6 @@ Rectangle {
                         }
                     }
 
-                    MenuItem {
-                        text: "&Send log"
-                        shortcut: "Alt+S"
-                        onTriggered: {
-                            LogManager.uploadLogFile()
-                        }
-                    }
-
                     style: MenuStyle {
                         font.family: sample.font.family
                         font.pixelSize: sample.font.pixelSize
@@ -165,20 +146,190 @@ Rectangle {
             }
         }
 
-        // background
+        // separator for log console, at the bottom of the log console
         Rectangle {
-            id: configurationPageBackground
-            anchors.top: configurationPageBackgroundSeparator.bottom
+            id: logConsoleSeparator
+            anchors.top: logConsole.bottom
+            width: parent.width
+            height: logConsole.height > 0 ? dp(5) : 0
+            color:"#96C13D"
+            z: 3
+        }
+
+        // background for config area
+        Rectangle {
+            id: configPageBackground
+            anchors.top: logConsoleSeparator.bottom
             width: parent.width
             anchors.bottom: parent.bottom
-            color:"#3F95B8"
+            color: applicationWindow.errorView.visible ? errorOverlay.color : "#3F95B8"
             z: 1
+
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.RightButton
+                onClicked: configPageMenu.popup()
+            }
+
+            Menu {
+                id: configPageMenu
+
+                MenuItem {
+                    text: "&Send log"
+                    shortcut: "Alt+S"
+                    onTriggered: {
+                        applicationWindow.logManager.uploadLogFile()
+                    }
+                }
+            }
+        }
+
+        // error overlay with mouse trap
+        Rectangle {
+            id: errorOverlay
+            anchors.top: errorMessage.bottom
+            width: parent.width
+            anchors.bottom: parent.bottom
+            color: "#A9A9A9"
+            opacity: 0.7
+            z: 2
+            visible: applicationWindow.errorView.visible
+
+            MouseArea {
+                anchors.fill: parent
+            }
+        }
+
+        // error overlay with mouse trap
+        Rectangle {
+            id: errorMessage
+            anchors.top: logConsoleSeparator.bottom
+            width: parent.width
+            height: dp(22)
+            color: "#FFF1E1"
+            visible: applicationWindow.errorView.visible
+            z: 1
+
+            // error message
+            Text {
+                id: errorMessageText
+                text: applicationWindow.errorView.message
+                color: "#8C4A00"
+                font.pixelSize: dp(12)
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.bottom: parent.bottom
+                anchors.margins: dp(5)
+            }
+
+            // error retry link
+            Text {
+                id: errorRetryLink
+                text: "Retry"
+                font.underline: true
+                font.pixelSize: errorMessageText.font.pixelSize
+                color: errorMessageText.color
+                anchors.top: parent.top
+                anchors.left: errorMessageText.right
+                anchors.margins: errorMessageText.anchors.margins
+                visible: !applicationWindow.errorView.retrying
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.LeftButton
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        applicationWindow.errorView.retry()
+                    }
+                }
+            }
+
+            // error retrying text
+            Text {
+                id: errorRetryingText
+                text: "Retrying..."
+                font.italic: true
+                font.pixelSize: errorMessageText.font.pixelSize
+                color: errorMessageText.color
+                anchors.top: parent.top
+                anchors.left: errorMessageText.right
+                anchors.margins: errorMessageText.anchors.margins
+                visible: applicationWindow.errorView.retrying
+            }
+        }
+
+        // log upload banner
+        Rectangle {
+            id: logUploadBanner
+            anchors.top: logConsoleSeparator.bottom
+            width: parent.width
+            height: dp(22)
+            color: "#D6E5FF"
+            visible: applicationWindow.logManager.dialogVisible
+            z: 1
+
+            // log upload message
+            Text {
+                id: logUploadText
+                text: applicationWindow.logManager.dialogText
+                color: "#0644A8"
+                font.pixelSize: dp(12)
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.bottom: parent.bottom
+                anchors.margins: dp(5)
+            }
+
+            // log upload url
+            Text {
+                id: logUploadUrl
+                text: applicationWindow.logManager.dialogUrl
+                color: "#0644A8"
+                font.pixelSize: dp(12)
+                anchors.top: parent.top
+                anchors.left: logUploadText.right
+                anchors.bottom: parent.bottom
+                anchors.margins: dp(5)
+                visible: applicationWindow.logManager.dialogUrl !== ""
+
+                onLinkActivated: {
+                    applicationWindow.logManager.dismissDialog()
+                    Qt.openUrlExternally(link)
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    acceptedButtons: Qt.NoButton
+                }
+            }
+
+            //  log upload dismiss link
+            Text {
+                id: logUploadLink
+                text: "Dismiss"
+                font.underline: true
+                font.pixelSize: logUploadText.font.pixelSize
+                color: logUploadText.color
+                anchors.top: parent.top
+                anchors.left: logUploadUrl.right
+                anchors.margins: logUploadText.anchors.margins
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.LeftButton
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        applicationWindow.logManager.dismissDialog()
+                    }
+                }
+            }
         }
 
         // configuration area
         ScrollView {
             id: screenArrangementScrollView
-            anchors.top: configurationPageBackgroundSeparator.bottom
+            anchors.top: errorMessage.bottom
             anchors.bottom: parent.bottom
             width: parent.width
             z: 1

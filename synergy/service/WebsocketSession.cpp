@@ -1,9 +1,36 @@
 #include "WebsocketSession.h"
 
-#include <synergy/service/Logs.h>
+#include <synergy/service/ServiceLogs.h>
 #include <boost/asio/connect.hpp>
+#include <stdlib.h>
+#include <time.h>
 
-static const long kReconnectDelaySec = 3;
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <winsock2.h>
+#include <Windows.h>
+#include <MSTcpIP.h>
+#else
+#include <netinet/tcp.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <errno.h>
+#endif
+
+// randomly reconnect between this min and max.
+static const long kMinReconnectDelaySec = 1;
+static const long kMaxReconnectDelaySec = 10;
+
+// user should wait no more than 5 seconds before realizing the connection is down.
+static const unsigned int kTcpKeepAliveIdleSec = 5;
+
+// once we've had a failure, try frequently to fail quickly (so the user isn't
+// waiting around for ages wondering what's going on.
+static const unsigned int kTcpKeepAliveIntervalSec = 1;
+
+// claim the connection is down after this number of keep alive retries.
+// BUG: this is hard coded to 10 seconds on windows (we can't change it).
+static const unsigned int kTcpKeepAliveCount = 2;
 
 WebsocketSession::WebsocketSession(boost::asio::io_service &ioService,
         const std::string& hostname,
@@ -17,11 +44,22 @@ WebsocketSession::WebsocketSession(boost::asio::io_service &ioService,
     m_hostname(hostname),
     m_port(port)
 {
+    srand (time(NULL));
+}
+
+WebsocketSession::~WebsocketSession()
+{
+    close();
 }
 
 void
 WebsocketSession::connect(const std::string target)
 {
+    if (m_connecting) {
+        serviceLog()->warn("already connecting websocket");
+    }
+
+    m_connecting = true;
     m_target = target;
 
     m_tcpClient->connected.connect(
@@ -38,7 +76,7 @@ WebsocketSession::connect(const std::string target)
         boost::signals2::at_front
     );
 
-    mainLog()->debug("connecting websocket");
+    serviceLog()->debug("connecting websocket");
     m_tcpClient->connect();
 }
 
@@ -54,26 +92,42 @@ WebsocketSession::disconnect()
 }
 
 void
-WebsocketSession::reconnect()
+WebsocketSession::reconnect(bool now)
 {
-    mainLog()->debug("retrying websocket connection in {}s", kReconnectDelaySec);
+    int random = rand() % (kMaxReconnectDelaySec - kMinReconnectDelaySec + 1);
+    int reconnectDelay = kMinReconnectDelaySec + random;
 
-    if (m_connected) {
-        mainLog()->debug("closing existing open connection");
-        m_websocket->close(websocket::close_code::normal);
-        m_connected = false;
+    if (now) {
+        // HACK: it's a bit ugly...
+        reconnectDelay = 0;
+    }
+    else {
+        serviceLog()->debug("retrying websocket connection in {}s", reconnectDelay);
     }
 
-    m_reconnectTimer.expires_from_now(boost::posix_time::seconds(kReconnectDelaySec));
+    close();
 
-    m_reconnectTimer.async_wait([this](const boost::system::error_code&) {
-        mainLog()->debug("retrying websocket connection now");
+    m_reconnectTimer.cancel();
+    m_reconnectTimer.expires_from_now(boost::posix_time::seconds(reconnectDelay));
+    m_reconnectTimer.async_wait([this](const boost::system::error_code& ec) {
+        if (ec == boost::asio::error::operation_aborted) {
+            return;
+        }
+        serviceLog()->debug("retrying websocket connection now");
 
         m_tcpClient.reset(new SecuredTcpClient(m_ioService, m_hostname, m_port));
         m_websocket.reset(new websocket::stream<ssl::stream<tcp::socket>&>(m_tcpClient->stream()));
 
         connect(m_target);
     });
+}
+
+void
+WebsocketSession::reconnectOnError()
+{
+    m_connecting = false;
+    connectionError();
+    reconnect();
 }
 
 void
@@ -103,6 +157,8 @@ bool WebsocketSession::isConnected()
 void
 WebsocketSession::onTcpClientConnected()
 {
+    setTcpKeepAliveTimeout();
+
     // websocket handshake
     m_websocket->async_handshake_ex(
         m_tcpClient->address().c_str(),
@@ -124,8 +180,9 @@ WebsocketSession::onTcpClientConnectFailed()
 {
     if (m_tcpClient) {
         m_tcpClient.reset();
-        mainLog()->debug("websocket connect failed");
-        reconnect();
+
+        serviceLog()->debug("websocket connect failed");
+        reconnectOnError();
     }
 }
 
@@ -133,14 +190,15 @@ void
 WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
 {
     if (ec) {
-        mainLog()->debug("websocket handshake error: {}", ec.message());
-        reconnect();
+        serviceLog()->debug("websocket handshake error {}: {}", ec.value(), ec.message());
+        reconnectOnError();
         return;
     }
 
+    m_connecting = false;
     m_connected = true;
     connected();
-    mainLog()->debug("websocket connected");
+    serviceLog()->debug("websocket connected");
 
     m_websocket->async_read(
         m_readBuffer,
@@ -155,7 +213,8 @@ void
 WebsocketSession::onReadFinished(errorCode ec)
 {
     if (ec) {
-        mainLog()->debug("websocket read error: {}", ec.message());
+        serviceLog()->debug("websocket read error {}: {}", ec.value(), ec.message());
+        reconnectOnError();
         return;
     }
 
@@ -180,7 +239,7 @@ void
 WebsocketSession::onWriteFinished(errorCode ec)
 {
     if (ec) {
-        mainLog()->debug("websocket write error: {}", ec.message());
+        serviceLog()->debug("websocket write error {}: {}", ec.value(), ec.message());
     }
 }
 
@@ -188,10 +247,94 @@ void
 WebsocketSession::onDisconnectFinished(errorCode ec)
 {
     if (ec) {
-        mainLog()->debug("websocket disconnect error: {}", ec.message());
+        serviceLog()->debug("websocket disconnect error {}: {}", ec.value(), ec.message());
     }
 
+    m_connecting = false;
     m_connected = false;
     disconnected();
-    mainLog()->debug("websocket disconnected");
+    serviceLog()->debug("websocket disconnected");
+}
+
+void WebsocketSession::close() noexcept
+{
+    if (m_connected) {
+        serviceLog()->debug("closing existing websocket connection");
+        errorCode ec;
+        m_websocket->close(websocket::close_code::normal, ec);
+        m_connecting = false;
+        m_connected = false;
+    }
+}
+
+void WebsocketSession::setTcpKeepAliveTimeout()
+{
+    auto& socket = m_tcpClient->stream().next_layer();
+
+#ifdef _WIN32
+    struct tcp_keepalive options;
+    options.onoff = 1;
+    options.keepalivetime = kTcpKeepAliveIdleSec * 1000;
+    options.keepaliveinterval = kTcpKeepAliveIntervalSec * 1000;
+
+    BOOL on = true;
+    SOCKET native = socket.native();
+    DWORD bytesReturned;
+
+    int keepaliveResult = setsockopt(native, SOL_SOCKET, SO_KEEPALIVE, (const char *) &on, sizeof(on));
+
+    if (keepaliveResult) {
+        serviceLog()->error("enable keepalive failed");
+        return;
+    }
+
+    int iotclResult = WSAIoctl(native, SIO_KEEPALIVE_VALS, (LPVOID) & options, (DWORD) sizeof(options), NULL, 0,
+                (LPDWORD) & bytesReturned, NULL, NULL);
+
+    if (iotclResult) {
+        serviceLog()->error("set keepalive timeout and interval failed");
+        return;
+    }
+#else
+    int nativeSocket= socket.native();
+
+    int on = 1;
+    int enableResult = 0;
+    enableResult = setsockopt(nativeSocket, SOL_SOCKET,  SO_KEEPALIVE, &on, sizeof(int));
+    if (enableResult == -1) {
+        serviceLog()->error("enable keepalive failed: {}", std::string(strerror(errno)));
+        return;
+    }
+
+#ifdef __APPLE__
+    int keepaliveResult = 0;
+    int keepaliveTimeout = kTcpKeepAliveIdleSec;
+    keepaliveResult = setsockopt(nativeSocket, IPPROTO_TCP, TCP_KEEPALIVE, &keepaliveTimeout, sizeof(int));
+    if (keepaliveResult == -1) {
+        serviceLog()->error("set keepalive timeout failed: {}", std::string(strerror(errno)));
+        return;
+    }
+#else
+    int keepaliveResult = 0;
+    int keepaliveTimeout = kTcpKeepAliveIdleSec;
+    keepaliveResult = setsockopt(nativeSocket, SOL_TCP, TCP_KEEPIDLE, &keepaliveTimeout, sizeof(int));
+    if (keepaliveResult == -1) {
+        serviceLog()->error("set keepalive timeout failed: {}", std::string(strerror(errno)));
+        return;
+    }
+#endif
+    int timeoutInterval = kTcpKeepAliveIntervalSec;
+    int intvlResult = setsockopt(nativeSocket, IPPROTO_TCP, TCP_KEEPINTVL, &timeoutInterval, sizeof(int));
+    if (intvlResult == -1) {
+        serviceLog()->error("set keepalive interval failed: {}", std::string(strerror(errno)));
+        return;
+    }
+
+    int timeoutCount = kTcpKeepAliveCount;
+    int countResult = setsockopt(nativeSocket, IPPROTO_TCP, TCP_KEEPCNT, &timeoutCount, sizeof(int));
+    if (countResult == -1) {
+        serviceLog()->error("set keepalive timeout count failed: {}", std::string(strerror(errno)));
+        return;
+    }
+#endif
 }

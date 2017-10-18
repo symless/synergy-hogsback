@@ -227,6 +227,7 @@ void CloudClient::onUploadLogFileFinished(QNetworkReply *reply)
 
         if (success) {
             QString msg = obj["message"].toString();
+            uploadLogFileSuccess(msg);
             LogManager::info(msg);
         }
     }
@@ -289,8 +290,6 @@ void CloudClient::onSwitchProfileFinished(QNetworkReply* reply)
     if (!screen.isDouble() || !profile.isDouble()) {
         return;
     }
-
-    int64_t originalProfileId = m_profileId;
 
     m_screenId = screen.toInt();
     m_profileId = profile.toInt();
@@ -397,11 +396,6 @@ void CloudClient::uploadLogFile(QString filename)
     });
     connect(reply, SIGNAL(uploadProgress(qint64, qint64)),
             this, SLOT  (onUploadProgress(qint64, qint64)));
-}
-
-void CloudClient::receivedScreensInterface(QByteArray msg)
-{
-    emit receivedScreens(msg);
 }
 
 void CloudClient::report(int destId, QString successfulIpList, QString failedIpList)

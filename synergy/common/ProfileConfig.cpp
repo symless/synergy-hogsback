@@ -1,6 +1,6 @@
 #include "ProfileConfig.h"
 
-#include <synergy/service/Logs.h>
+#include <synergy/service/ServiceLogs.h>
 #include <synergy/common/ProfileConfigSnapshot.h>"
 
 #include <synergy/service/json.hpp>
@@ -29,42 +29,42 @@ ProfileConfig ProfileConfig::fromJsonSnapshot(const std::string& json)
 void ProfileConfig::apply (ProfileConfig const& src)
 {
     if (compare(src)) {
-        mainLog()->debug("profile changed, storing local copy");
+        serviceLog()->debug("profile changed, storing local copy");
         clone(src);
     }
     else {
-        mainLog()->debug("profile has not changed, no action needed");
+        serviceLog()->debug("profile has not changed, no action needed");
     }
 }
 
 bool ProfileConfig::compare(ProfileConfig const& target)
 {
-    mainLog()->debug(
+    serviceLog()->debug(
         "comparing profiles, id={} this=v{} other=v{}",
         m_profile.id(), m_profile.m_version, target.m_profile.m_version);
 
     bool different = false;
 
     if (target.m_profile.m_version < m_profile.m_version) {
-        mainLog()->debug("profile version is older ({} < {}), abort compare",
+        serviceLog()->debug("profile version is older ({} < {}), abort compare",
             m_profile.m_version, target.m_profile.m_version);
         return different;
     }
 
     if (target.m_profile.m_id != m_profile.m_id) {
-        mainLog()->debug("profile id changed, {}->{}", m_profile.m_id, target.m_profile.m_id);
+        serviceLog()->debug("profile id changed, {}->{}", m_profile.m_id, target.m_profile.m_id);
         profileIdChanged(target.m_profile.m_id);
         different = true;
     }
 
     if (target.m_profile.m_name != m_profile.m_name) {
-        mainLog()->debug("profile name changed, {}->{}", m_profile.m_name, target.m_profile.m_name);
+        serviceLog()->debug("profile name changed, {}->{}", m_profile.m_name, target.m_profile.m_name);
         profileNameChanged(target.m_profile.m_name);
         different = true;
     }
 
     if (target.m_profile.m_server != m_profile.m_server) {
-        mainLog()->debug("profile server changed, {}->{}", m_profile.m_server, target.m_profile.m_server);
+        serviceLog()->debug("profile server changed, {}->{}", m_profile.m_server, target.m_profile.m_server);
         profileServerChanged(target.m_profile.m_server);
         different = true;
     }
@@ -78,14 +78,14 @@ bool ProfileConfig::compare(ProfileConfig const& target)
                 found = true;
 
                 if (screen.m_name != targetScreen.m_name) {
-                    mainLog()->debug("profile screen name changed, screenId={} {}->{}",
+                    serviceLog()->debug("profile screen name changed, screenId={} {}->{}",
                         screen.m_id, screen.m_name, targetScreen.m_name);
                     screenNameChanged(targetScreen.m_id);
                     different = true;
                 }
 
                 if (screen.m_active != targetScreen.m_active) {
-                    mainLog()->debug("profile screen active changed, screenId={} {}->{}",
+                    serviceLog()->debug("profile screen active changed, screenId={} {}->{}",
                         screen.m_id, screen.m_active, targetScreen.m_active);
 
                     if (targetScreen.m_active) {
@@ -96,14 +96,14 @@ bool ProfileConfig::compare(ProfileConfig const& target)
                 }
 
                 if (screen.m_x != targetScreen.m_x || screen.m_y != targetScreen.m_y) {
-                    mainLog()->debug("profile screen position changed, screenId={} {},{}->{},{}",
+                    serviceLog()->debug("profile screen position changed, screenId={} {},{}->{},{}",
                         screen.m_id, screen.m_x, screen.m_y, targetScreen.m_x, targetScreen.m_y);
                     screenPositionChanged(targetScreen.m_id);
                     different = true;
                 }
 
                 if (screen.m_status != targetScreen.m_status) {
-                    mainLog()->debug("profile screen status changed, screenId={} {}->{}",
+                    serviceLog()->debug("profile screen status changed, screenId={} {}->{}",
                         screen.m_id, screenStatusToString(screen.m_status),
                         screenStatusToString(targetScreen.m_status));
                     screenStatusChanged(targetScreen.m_id);
@@ -112,7 +112,7 @@ bool ProfileConfig::compare(ProfileConfig const& target)
 
                 if ((screen.m_successfulTestIp != targetScreen.m_successfulTestIp) ||
                     (screen.m_failedTestIp != targetScreen.m_failedTestIp)) {
-                    mainLog()->debug("profile screen test result changed, screenId={} success=`{}`->`{}` failed=`{}`->`{}`",
+                    serviceLog()->debug("profile screen test result changed, screenId={} success=`{}`->`{}` failed=`{}`->`{}`",
                         screen.m_id, screen.m_successfulTestIp, targetScreen.m_successfulTestIp,
                         screen.m_failedTestIp, targetScreen.m_failedTestIp);
                     screenTestResultChanged(targetScreen.m_id, targetScreen.m_successfulTestIp, targetScreen.m_failedTestIp);
@@ -142,7 +142,7 @@ bool ProfileConfig::compare(ProfileConfig const& target)
     }
 
     if (!added.empty() || !removed.empty()) {
-        mainLog()->debug("profile screen set changed, added={} removed={}",
+        serviceLog()->debug("profile screen set changed, added={} removed={}",
             added.size(), removed.size());
         screenSetChanged(added, removed);
         different = true;

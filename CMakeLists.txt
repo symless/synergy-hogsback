@@ -73,21 +73,13 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 find_package (OpenSSL REQUIRED)
-include_directories (${OPENSSL_INCLUDE_DIR})
+include_directories (BEFORE SYSTEM ${OPENSSL_INCLUDE_DIR})
 
 #
 # libsodium
 #
 find_package (Sodium REQUIRED)
 find_package (Threads REQUIRED)
-
-#
-# ZeroMQ
-#
-add_definitions (-DZMQ_STATIC)
-add_definitions (-DZMQ_BUILD_DRAFT_API)
-include_directories (BEFORE SYSTEM third_party/libzmq/include)
-include_directories (BEFORE SYSTEM third_party/cppzmq)
 
 #
 # JSON
@@ -100,6 +92,11 @@ include_directories (BEFORE SYSTEM third_party/json/include)
 include_directories (BEFORE SYSTEM third_party/cxxopts/include)
 
 #
+# fmt
+#
+include_directories (BEFORE SYSTEM third_party/fmt)
+
+#
 # spdlog
 #
 include_directories (BEFORE SYSTEM third_party/spdlog/include)
@@ -110,7 +107,7 @@ add_definitions (-DSPDLOG_FMT_EXTERNAL=1)
 #
 set (Msgpack_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/msgpack-c/include")
 add_definitions (-DMSGPACK_DEFAULT_API_VERSION=1)
-include_directories (${Msgpack_INCLUDE_DIR})
+include_directories (BEFORE SYSTEM ${Msgpack_INCLUDE_DIR})
 
 #
 # Google Crashpad
@@ -135,9 +132,9 @@ set (Boost_USE_STATIC_LIBS      ON)
 set (Boost_USE_STATIC_RUNTIME   OFF)
 set (Boost_USE_MULTITHREADED    ON)
 find_package (Boost 1.55 REQUIRED COMPONENTS system date_time filesystem regex
-                                             thread chrono)
+                                             thread chrono coroutine context)
 include_directories (BEFORE SYSTEM ${Boost_INCLUDE_DIRS})
-include_directories (BEFORE "${CMAKE_SOURCE_DIR}/third_party/callable_traits/include")
+include_directories (BEFORE SYSTEM "${CMAKE_SOURCE_DIR}/third_party/callable_traits/include")
 
 # Enable the latest version of Boost Thread (default as of 1.64.0 is 2)
 add_definitions (-DBOOST_THREAD_VERSION=5)
@@ -149,13 +146,19 @@ add_definitions (-DBOOST_THREAD_PROVIDES_EXECUTORS)
 # Beast
 #
 set (Beast_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/beast/include")
-include_directories(${Beast_INCLUDE_DIR})
+include_directories(BEFORE SYSTEM ${Beast_INCLUDE_DIR})
 
 #
 # Autobahn
 #
 set (Autobahn_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/autobahn-cpp")
-include_directories(${Autobahn_INCLUDE_DIR})
+include_directories(BEFORE SYSTEM ${Autobahn_INCLUDE_DIR})
+
+#
+# Flatbuffers
+#
+set (Flatbuffers_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/flatbuffers/include")
+include_directories(BEFORE SYSTEM ${Flatbuffers_INCLUDE_DIR})
 
 #
 # CMake Dependencies
@@ -165,6 +168,7 @@ add_subdirectory (third_party)
 #
 # Packaging
 #
+set (SYNERGY_CORE_INSTALL ON CACHE BOOL "Configure Synergy Core install")
 macro (configure_files srcDir destDir)
     message (STATUS "Configuring directory ${destDir}")
     make_directory (${destDir})
@@ -214,12 +218,12 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif()
 
 #
-# Linux RPM
+# Linux RPM and DEB
 #
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     configure_files (${CMAKE_CURRENT_SOURCE_DIR}/dist/rpm ${CMAKE_BINARY_DIR}/rpm)
-    install(FILES synergy/core/res/synergy.svg DESTINATION share/icons)
-    install(FILES synergy/core/res/synergy.desktop DESTINATION share/applications)
+    install(FILES res/synergy.svg DESTINATION share/icons)
+    install(FILES res/synergy.desktop DESTINATION share/applications)
 endif()
 
 include_directories (.)

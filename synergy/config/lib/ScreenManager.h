@@ -8,7 +8,7 @@
 #include <QMap>
 
 class IScreenArrangement;
-class ProcessManager;
+class ServiceProxy;
 class ScreenListSnapshotManager;
 class AppConfig;
 class CloudClient;
@@ -22,7 +22,7 @@ public:
     ~ScreenManager();
 
     Q_PROPERTY(ScreenListModel* screenListModel READ screenListModel WRITE setScreenModel)
-    Q_PROPERTY(ProcessManager* processManager WRITE setProcessManager)
+    Q_PROPERTY(ServiceProxy* serviceProxy WRITE setServiceProxy)
     Q_PROPERTY(int viewWidth WRITE setViewWidth)
     Q_PROPERTY(int viewHeight WRITE setViewHeight)
 
@@ -39,7 +39,7 @@ public:
 
     ScreenListModel* screenListModel() const;
     void setScreenModel(ScreenListModel* screenListModel);
-    void setProcessManager(ProcessManager* processManager);
+    void setServiceProxy(ServiceProxy* serviceProxy);
     void setViewWidth(int w);
     void setViewHeight(int h);
     void saveSnapshot();
@@ -57,7 +57,7 @@ private slots:
 
 private:
     ScreenListModel* m_screenListModel;
-    ProcessManager* m_processManager = nullptr;
+    ServiceProxy* m_serviceProxy = nullptr;
     IScreenArrangement* m_arrangementStrategy;
     ScreenListSnapshotManager* m_screenListSnapshotManager;
     AppConfig* m_appConfig;

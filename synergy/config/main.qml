@@ -12,18 +12,20 @@ ApplicationWindow {
     minimumHeight: dp(450)
     title: qsTr("Synergy")
     signal keyReceived(int key)
-    property ProcessManager processManager: rpcProcessManager
+    property ServiceProxy serviceProxy: qmlServiceProxy
+    property ErrorView errorView: qmlErrorView
+    property LogManager logManager: qmlLogManager
 
     function dp(v) {
-        return v * PixelPerPoint;
+        return v * kPixelPerPoint;
     }
 
     function op(dp) {
-        return dp / PixelPerPoint;
+        return dp / kPixelPerPoint;
     }
 
     Component.onCompleted: {
-        LogManager.setCloudClient(CloudClient)
+        logManager.setCloudClient(CloudClient)
     }
 
     Connections {

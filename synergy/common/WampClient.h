@@ -3,6 +3,7 @@
 
 #include "WampUtility.h"
 
+#include <synergy/common/Logs.h>
 #include <autobahn/autobahn.hpp>
 // TODO: Figure out why AsioExecutor has to be included after autobahn
 #include <synergy/common/AsioExecutor.h>
@@ -17,6 +18,8 @@
 #include <boost/signals2.hpp>
 
 namespace {
+
+const int kKeepAliveIntervalSec = 5;
 
 template <typename R>
 struct WampCallHelper {
@@ -67,6 +70,8 @@ public:
         return m_executor.underlying_executor().get_io_service();
     }
 
+    bool isConnected() const;
+
     template <typename Result, typename... Args>
     boost::future<Result>
     call (char const* const fun, Args&&... args) {
@@ -76,8 +81,19 @@ public:
         auto task = std::make_shared<boost::packaged_task<Result()>> (
             [this, fun, args_tup = std::make_tuple (std::forward<Args>(args)...)]() mutable {
                 return m_session->call (fun, std::move(args_tup), m_defaultCallOptions).then
-                    (m_executor, [](boost::future<autobahn::wamp_call_result> result) {
-                        return WampCallHelper<Result>::getReturnValue (result.get());
+                    (m_executor, [&](boost::future<autobahn::wamp_call_result> result) {
+                        try {
+                            return WampCallHelper<Result>::getReturnValue (result.get());
+                        }
+                        catch (...) {
+                            if (std::string(fun) == std::string(kKeepAliveFunction)) {
+                                commonLog()->debug("rpc keep alive failed");
+                            }
+                            else {
+                                commonLog()->error("rpc function call failed: {}", std::string(fun));
+                            }
+                            connectionError();
+                        }
                     }
                 );
             }
@@ -108,17 +124,19 @@ public:
 
     boost::signals2::signal<void()> connected;
     boost::signals2::signal<void()> connecting;
+    boost::signals2::signal<void()> connectionError;
 
 private:
     void connect();
+    void keepAlive();
 
 private:
     boost::executors::executor_adaptor<AsioExecutor> m_executor;
     std::shared_ptr<autobahn::wamp_session> m_session;
     std::shared_ptr<autobahn::wamp_transport> m_transport;
     autobahn::wamp_call_options m_defaultCallOptions;
-    boost::asio::deadline_timer m_retryTimer;
-    bool m_started = false;
+    boost::asio::deadline_timer m_keepAliveTimer;
+    bool m_connected;
 };
 
 

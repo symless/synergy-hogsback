@@ -14,12 +14,14 @@ class ProfileConfig;
 class CloudClient
 {
 public:
-    void report(int screenId, const std::string& successfulIp, const std::string& failedIp);
-    void claimServer(int64_t serverId);
-
     CloudClient (boost::asio::io_service& ioService,
                  std::shared_ptr<UserConfig> userConfig,
                  std::shared_ptr<ProfileConfig> remoteProfileConfig);
+
+    void report(int screenId, const std::string& successfulIp, const std::string& failedIp);
+    void claimServer(int64_t serverId);
+    void reconnectWebsocket();
+    bool isWebsocketConnected();
 
 private:
     void load(const UserConfig &userConfig);
@@ -36,6 +38,9 @@ public:
     using signal = boost::signals2::signal<Args...>;
 
     signal<void(std::string)> websocketMessageReceived;
+    signal<void()> websocketConnected;
+    signal<void()> websocketDisconnected;
+    signal<void()> websocketConnectionError;
 };
 
 #endif // CLOUDCLIENT_H

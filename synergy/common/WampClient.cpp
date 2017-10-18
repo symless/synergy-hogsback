@@ -1,14 +1,20 @@
 #include <synergy/common/WampClient.h>
 #include <iostream>
 
-static bool const debug = true;
+static bool const debug = false;
 
 WampClient::WampClient(boost::asio::io_service& io):
-    m_executor (io),
-    m_session (std::make_shared<autobahn::wamp_session>(ioService(), debug)),
-    m_retryTimer(io)
+    m_executor(io),
+    m_session(std::make_shared<autobahn::wamp_session>(ioService(), debug)),
+    m_keepAliveTimer(io),
+    m_connected(false)
 {
-    m_defaultCallOptions.set_timeout (std::chrono::seconds(10));
+    m_defaultCallOptions.set_timeout(std::chrono::seconds(2));
+}
+
+bool WampClient::isConnected() const
+{
+    return m_connected;
 }
 
 void
@@ -20,14 +26,10 @@ WampClient::start (std::string const& ip, int const port)
         m_transport.reset();
     }
 
-    m_transport = std::make_shared<autobahn::wamp_tcp_transport>(
-                    ioService(), boost::asio::ip::tcp::endpoint
-                        (boost::asio::ip::address_v4::from_string(ip), port),
-                            debug);
-    m_transport->attach(std::static_pointer_cast<autobahn::wamp_transport_handler>
-                      (m_session));
+    auto endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4::from_string(ip), port);
+    m_transport = std::make_shared<autobahn::wamp_tcp_transport>(ioService(), endpoint, debug);
+    m_transport->attach(std::static_pointer_cast<autobahn::wamp_transport_handler>(m_session));
 
-    m_started = true;
     connect();
 }
 
@@ -35,36 +37,54 @@ void
 WampClient::connect()
 {
     connecting();
-    m_transport->connect().then(
-        m_executor, [&](boost::future<void> status) {
 
-        if (status.has_exception()) {
-            if (!m_started) {
-                return;
-            }
-            m_retryTimer.expires_from_now(boost::posix_time::milliseconds(500));
-            m_retryTimer.async_wait([&](boost::system::error_code const& ec) {
-                if (ec) {
-                    if (ec == boost::asio::error::operation_aborted) {
-                        return;
-                    }
-                    throw boost::system::system_error(ec);
-                }
-                connect();
-            });
+    m_transport->connect().then(m_executor, [&](boost::future<void> connected) {
+
+        try {
+            connected.get();
+        }
+        catch (const std::exception& e) {
+            // BUG: when the connection fails, this only sometimes gets hit.
+            // could be caused by a race condition? perhaps related to the cloud?
+            commonLog()->error("rpc connect failed: {}", e.what());
+            connectionError();
             return;
         }
 
-        // if not connected, throws exception
-        status.get();
+        m_session->start().then(m_executor, [&](boost::future<void> started) {
+            try {
+                started.get();
+            }
+            catch (const std::exception& e) {
+                commonLog()->error("rpc start failed: {}", e.what());
+                connectionError();
+                return;
+            }
 
-        m_session->start().then (m_executor, [&](boost::future<void> started) {
-            started.get();
-            m_session->join("default").then
-                    (m_executor, [&](boost::future<uint64_t> joined) {
-                joined.get();
-                connected();
+            m_session->join("default").then(m_executor, [&](boost::future<uint64_t> joined) {
+                try {
+                    joined.get();
+                    this->connected();
+                    m_connected = true;
+                }
+                catch (const std::exception& e) {
+                    commonLog()->error("rpc join failed: {}", e.what());
+                    connectionError();
+                    return;
+                }
             });
         });
+    });
+
+    keepAlive();
+}
+
+void
+WampClient::keepAlive()
+{
+    m_keepAliveTimer.expires_from_now(boost::posix_time::seconds(kKeepAliveIntervalSec));
+    m_keepAliveTimer.async_wait([&](auto const& ec) {
+        this->call<void>(kKeepAliveFunction);
+        this->keepAlive();
     });
 }

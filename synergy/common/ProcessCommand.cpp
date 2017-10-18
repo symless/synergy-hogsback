@@ -5,34 +5,45 @@
 
 #include <boost/filesystem.hpp>
 
-const std::string kCoreLogFile = "synergy.log";
-
 #ifdef _WIN32
-const std::string kServerCmd = "synergys.exe";
-const std::string kClientCmd = "synergyc.exe";
+const std::string kCoreProgram = "synergy-core.exe";
 #else
-const std::string kServerCmd = "synergys";
-const std::string kClientCmd = "synergyc";
+const std::string kCoreProgram = "synergy-core";
 #endif
 
 std::vector<std::string>
 ProcessCommand::generate(bool serverMode) const
 {
     auto profileDir = DirectoryManager::instance()->profileDir();
-    auto installedDir = DirectoryManager::instance()->installedDir();
+    auto installDir = DirectoryManager::instance()->installDir();
 
     std::vector<std::string> args;
 
-    std::string processName = serverMode ? kServerCmd : kClientCmd;
-    auto processPath = installedDir / processName;
-    args.push_back(processPath.string());
+    auto programPath = installDir / kCoreProgram;
+    args.push_back(programPath.string());
+
+    if (serverMode) {
+        args.push_back("--server");
+    }
+    else {
+        args.push_back("--client");
+    }
 
     args.push_back("-f");
-    args.push_back("--no-tray");
 
-    // TODO: set debug level based on settings
+#ifdef __linux__
+    // for use on linux, tell the core process what user id it should run as.
+    // this is a simple way to allow the core process to talk to X. this avoids
+    // the "WARNING: primary screen unavailable: unable to open screen" error.
+    // a better way would be to use xauth cookie and dbus to get access to X.
+    if (!m_runAsUid.empty()) {
+        args.push_back("--run-as-uid");
+        args.push_back(m_runAsUid);
+    }
+#endif
+
     args.push_back("--debug");
-    args.push_back("DEBUG");
+    args.push_back(kCoreDebugLevel);
 
     if (m_localHostname.empty()) {
         throw std::runtime_error("Can't generate args, local hostname missing.");
@@ -47,9 +58,9 @@ ProcessCommand::generate(bool serverMode) const
     args.push_back("--profile-dir");
     args.push_back(profileDir.string());
 
-    // TODO: use constant
+    auto logPath = DirectoryManager::instance()->systemLogDir() / kCoreLogFile;
     args.push_back("--log");
-    args.push_back(kCoreLogFile);
+    args.push_back(logPath.string());
 
     if (serverMode) {
         // configuration file
@@ -65,7 +76,7 @@ ProcessCommand::generate(bool serverMode) const
             throw std::runtime_error("Can't generate args, server IP/hostname missing.");
         }
 
-        args.push_back(m_serverAddress + ":24800");
+        args.push_back(m_serverAddress);
     }
 
     return args;
@@ -81,4 +92,9 @@ void
 ProcessCommand::setLocalHostname(const std::string& localHostname)
 {
     m_localHostname = localHostname;
+}
+
+void ProcessCommand::setRunAsUid(const std::string& runAsUid)
+{
+    m_runAsUid = runAsUid;
 }

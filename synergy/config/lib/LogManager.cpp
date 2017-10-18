@@ -1,5 +1,6 @@
 #include "LogManager.h"
 
+#include <synergy/common/Logs.h>
 #include "CloudClient.h"
 #include "DirectoryManager.h"
 #include "AppConfig.h"
@@ -20,7 +21,7 @@ bool LogManager::s_uploading = false;
 const int LogManager::s_maximumUploadLogLines = 1000;
 
 const QString kDefaultLogFile = "synergy.log";
-const QString kGUILogPrefix = "[ Config  ] ";
+const QString kLogPrefix = "[ Config  ] ";
 
 // TODO: Make LogManager thread safe
 QObject* LogManager::instance(QQmlEngine* engine,
@@ -39,6 +40,10 @@ LogManager::LogManager()
     GUIDirectoryManager directoryManager;
     s_file.setFileName(directoryManager.profileDir() + '/'+ kDefaultLogFile);
     s_file.open(QIODevice::WriteOnly | QIODevice::Append);
+
+    g_commonLog.onLogLine.connect([this](std::string logLine) {
+        appendRaw(kLogPrefix + QString::fromStdString(logLine));
+    });
 }
 
 LogManager::~LogManager()
@@ -51,6 +56,12 @@ LogManager::~LogManager()
 void LogManager::uploadLogFile()
 {
     if (!s_uploading) {
+
+        m_dialogText = "Uploading log...";
+        m_dialogUrl = "";
+        m_dialogVisible = true;
+        dialogChanged();
+
         info("Sending log file...");
 
         s_uploading = true;
@@ -70,23 +81,23 @@ void LogManager::raw(const QString& text)
 }
 void LogManager::error(const QString& text)
 {
-    appendRaw(kGUILogPrefix + timeStamp() + " ERROR: " + text);
+    appendRaw(kLogPrefix + timeStamp() + " ERROR: " + text);
 }
 
 void LogManager::warning(const QString& text)
 {
-    appendRaw(kGUILogPrefix + timeStamp() + " WARNNIG: " + text);
+    appendRaw(kLogPrefix + timeStamp() + " WARNNIG: " + text);
 }
 
 void LogManager::info(const QString& text)
 {
-    appendRaw(kGUILogPrefix + timeStamp() + " INFO: " + text);
+    appendRaw(kLogPrefix + timeStamp() + " INFO: " + text);
 }
 
 void LogManager::debug(const QString& text)
 {
 
-    appendRaw(kGUILogPrefix + timeStamp() + " DEBUG: " + text);
+    appendRaw(kLogPrefix + timeStamp() + " DEBUG: " + text);
 }
 
 QString LogManager::logFilename()
@@ -209,9 +220,41 @@ void LogManager::upload(QString filename)
     }
 }
 
+bool LogManager::dialogVisible() const
+{
+    return m_dialogVisible;
+}
+
+QString LogManager::dialogUrl() const
+{
+    return m_dialogUrl;
+}
+
+QString LogManager::dialogText() const
+{
+    return m_dialogText;
+}
+
+void LogManager::setDialogUrl(const QString &dirty)
+{
+    QString urlText = QString(dirty).replace("Upload path: ", "");
+    QString url = QString("<a href='%1'>View log</a>").arg(urlText);
+
+    m_dialogUrl = url;
+    m_dialogText = "Log uploaded.";
+    m_dialogVisible = true;
+    dialogChanged();
+}
+
 void LogManager::setCloudClient(CloudClient* value)
 {
     s_cloudClient = value;
+}
+
+void LogManager::dismissDialog()
+{
+    m_dialogVisible = false;
+    dialogChanged();
 }
 
 void LogManager::setQmlContext(QQmlContext* value)

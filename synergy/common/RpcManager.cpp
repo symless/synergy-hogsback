@@ -2,13 +2,15 @@
 #include <synergy/common/WampRouter.h>
 #include <synergy/common/WampServer.h>
 
-RpcManager::RpcManager (boost::asio::io_service& ioService) :
+RpcManager::RpcManager (boost::asio::io_service& ioService, std::string ipAddress, int port) :
     m_ioService (ioService),
     m_router (std::make_shared<WampRouter>(m_ioService)),
-    m_server (std::make_shared<WampServer>(m_ioService))
+    m_server (std::make_shared<WampServer>(m_ioService)),
+    m_ipAddress(ipAddress),
+    m_port(port)
 {
     m_router->ready.connect ([this]() {
-        m_ioService.post([this] () { m_server->start(ipAddress(), port()); });
+        m_ioService.post([this] () { m_server->start(m_ipAddress, m_port); });
     });
     m_server->ready.connect ([this]() { ready(); });
 }
@@ -36,11 +38,11 @@ RpcManager::server() {
 std::string
 RpcManager::ipAddress() const
 {
-    return "127.0.0.1";
+    return m_ipAddress;
 }
 
 int
 RpcManager::port() const
 {
-    return 24888;
+    return m_port;
 }

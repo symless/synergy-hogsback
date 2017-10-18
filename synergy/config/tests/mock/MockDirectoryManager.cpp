@@ -15,7 +15,7 @@ QString MockDirectoryManager::configFileDir()
     return "mockDir";
 }
 
-QString MockDirectoryManager::installedDir()
+QString MockDirectoryManager::installDir()
 {
     return "mockDir";
 }

@@ -1,5 +1,5 @@
 #include "SecuredTcpServer.h"
-#include <synergy/service/Logs.h>
+#include <synergy/service/ServiceLogs.h>
 
 SecuredTcpServer::SecuredTcpServer(boost::asio::io_service &ioService) :
     m_ioService(ioService),
@@ -16,19 +16,19 @@ void SecuredTcpServer::start()
                 std::stoi(m_port));
     m_acceptor.open(endpoint.protocol(), ec);
     if (ec) {
-        mainLog()->debug("tcp server open error: {}", ec.message());
+        serviceLog()->debug("tcp server open error: {}", ec.message());
         startFailed(this);
     }
 
     m_acceptor.bind(endpoint, ec);
     if (ec) {
-        mainLog()->debug("tcp server bind error: {}", ec.message());
+        serviceLog()->debug("tcp server bind error: {}", ec.message());
         startFailed(this);
     }
 
     m_acceptor.listen(boost::asio::socket_base::max_connections, ec);
     if (ec) {
-        mainLog()->debug("tcp server listen error: {}", ec.message());
+        serviceLog()->debug("tcp server listen error: {}", ec.message());
         startFailed(this);
     }
 
@@ -98,13 +98,13 @@ void SecuredTcpServer::accept()
 void SecuredTcpServer::onAccept(SecuredTcpSession* session, boost::system::error_code ec)
 {
     if (ec) {
-        mainLog()->debug("tcp server accept error: {}", ec.message());
+        serviceLog()->debug("tcp server accept error: {}", ec.message());
         acceptFailed(this);
         delete session;
     }
     else {
         auto address = session->stream().lowest_layer().remote_endpoint().address().to_string();
-        mainLog()->debug("tcp server accepted connection, address={}", address);
+        serviceLog()->debug("tcp server accepted connection, address={}", address);
 
         session->stream().async_handshake(
             ssl::stream_base::server,
@@ -116,21 +116,21 @@ void SecuredTcpServer::onAccept(SecuredTcpSession* session, boost::system::error
     }
 
     // accept next client
-    mainLog()->debug("tcp server waiting for next client");
+    serviceLog()->debug("tcp server waiting for next client");
     accept();
 }
 
 void SecuredTcpServer::onSslHandshakeFinished(SecuredTcpSession* session, errorCode ec)
 {
     if (ec) {
-        mainLog()->debug("tcp server ssl handshake error: {}", ec.message());
+        serviceLog()->debug("tcp server ssl handshake error: {}", ec.message());
         acceptFailed(this);
         delete session;
         return;
     }
 
     auto address = session->stream().lowest_layer().remote_endpoint().address().to_string();
-    mainLog()->debug("tcp server ssl handshake finished, address={}", address);
+    serviceLog()->debug("tcp server ssl handshake finished, address={}", address);
     accepted(session, address);
 
     m_sessions.emplace_back(session);

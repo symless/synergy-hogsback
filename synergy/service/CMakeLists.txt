@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.4)
 
 set (SERVICE_SOURCES
     main.cpp
-    ProcessManager.cpp
+    CoreProcess.cpp
     ServiceWorker.cpp
     CloudClient.cpp
     SecuredTcpSession.cpp
@@ -12,15 +12,12 @@ set (SERVICE_SOURCES
     HttpSession.cpp
     WebsocketSession.cpp
     TerminationSignalListener.cpp
-    ConnectivityTester.cpp
-    TestDelegatee.cpp
-    Logs.cpp
+    ServiceLogs.cpp
 )
 
 add_executable (${PROJECT_NAME} ${SERVICE_SOURCES})
 
 target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
-    ${fmt_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
 )
 
@@ -60,8 +57,8 @@ target_compile_definitions (${PROJECT_NAME}
 )
 
 target_link_libraries (${PROJECT_NAME}
-    fmt
     commonlib
+    router
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
     ${OPENSSL_LIBS}
@@ -73,6 +70,9 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     install (TARGETS ${PROJECT_NAME} DESTINATION bin)
     install(FILES ${CMAKE_SOURCE_DIR}/debian/synergy.service DESTINATION lib/systemd/system)
 endif()
+
+
+add_subdirectory (router)
 
 if (WIN32)
 add_subdirectory (windows)

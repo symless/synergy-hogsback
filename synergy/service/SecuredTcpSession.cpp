@@ -1,6 +1,6 @@
 #include "SecuredTcpSession.h"
 
-#include <synergy/service/Logs.h>
+#include <synergy/service/ServiceLogs.h>
 #include <iostream>
 
 SecuredTcpSession::SecuredTcpSession(boost::asio::io_service& ioService, ssl::context &context) :
