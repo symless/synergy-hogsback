@@ -29,6 +29,8 @@ target_compile_definitions (${PROJECT_NAME}
     PRIVATE -DBOOST_COROUTINES_NO_DEPRECATION_WARNING
 )
 
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-devirtualize")
+
 #
 # OpenSSL
 #
