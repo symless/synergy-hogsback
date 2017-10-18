@@ -36,7 +36,11 @@ public:
     signal<void(const std::string& screenName, ScreenStatus state)> screenStatusChanged;
     void setRunAsUid(const std::string& runAsUid);
 
+    int currentServerId() const;
+    ProcessMode proccessMode() const;
+
 private:
+    void onServerChanged(int64_t serverId);
     void start (std::vector<std::string> command);
     void writeConfigurationFile();
     void startServer();

@@ -188,42 +188,7 @@ CoreProcess::CoreProcess (boost::asio::io_service& io, std::shared_ptr<UserConfi
 {
     m_localProfileConfig->profileServerChanged.connect([this](int64_t serverId) {
         m_ioService.post([this, serverId] () {
-
-            serviceLog()->debug("handling local profile server changed, mode={} thisId={} serverId={} lastServerId={}",
-                processModeToString(m_proccessMode), m_userConfig->screenId(), serverId, m_currentServerId);
-
-            switch (m_proccessMode) {
-            case ProcessMode::kServer: {
-                // when server changes from local screen to another screen
-                if (m_userConfig->screenId() != serverId) {
-                   startClient(serverId);
-                }
-
-                break;
-            }
-            case ProcessMode::kClient: {
-                // when local screen becomes the server
-                if (m_userConfig->screenId() == serverId) {
-                    startServer();
-                }
-                // when another screen, not local screen, claims to be the server
-                else if (m_currentServerId != serverId) {
-                    startClient(serverId);
-                }
-
-                break;
-            }
-            case ProcessMode::kUnknown: {
-                if (m_userConfig->screenId() == serverId) {
-                    startServer();
-                }
-                else {
-                    startClient(serverId);
-                }
-
-                break;
-            }
-            }
+            onServerChanged(serverId);
         });
     });
 
@@ -511,8 +476,57 @@ void CoreProcess::startClient(int serverId)
     }
 }
 
+ProcessMode CoreProcess::proccessMode() const
+{
+    return m_proccessMode;
+}
+
+int CoreProcess::currentServerId() const
+{
+    return m_currentServerId;
+}
+
 void
 CoreProcess::setRunAsUid(const std::string& runAsUid)
 {
     m_runAsUid = runAsUid;
+}
+
+void CoreProcess::onServerChanged(int64_t serverId)
+{
+    serviceLog()->debug("handling local profile server changed, mode={} thisId={} serverId={} lastServerId={}",
+        processModeToString(m_proccessMode), m_userConfig->screenId(), serverId, m_currentServerId);
+
+    switch (m_proccessMode) {
+    case ProcessMode::kServer: {
+        // when server changes from local screen to another screen
+        if (m_userConfig->screenId() != serverId) {
+           startClient(serverId);
+        }
+
+        break;
+    }
+    case ProcessMode::kClient: {
+        // when local screen becomes the server
+        if (m_userConfig->screenId() == serverId) {
+            startServer();
+        }
+        // when another screen, not local screen, claims to be the server
+        else if (m_currentServerId != serverId) {
+            startClient(serverId);
+        }
+
+        break;
+    }
+    case ProcessMode::kUnknown: {
+        if (m_userConfig->screenId() == serverId) {
+            startServer();
+        }
+        else {
+            startClient(serverId);
+        }
+
+        break;
+    }
+    }
 }
