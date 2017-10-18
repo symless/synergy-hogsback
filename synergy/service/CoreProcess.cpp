@@ -397,6 +397,11 @@ CoreProcess::shutdown() {
         return;
     }
 
+    if (m_impl->m_expectingExit) {
+        serviceLog()->debug("core process is shutting down, ignoring extra shutdown");
+        return;
+    }
+
     // control which exited event is invoked
     m_impl->m_expectingExit = true;
 
