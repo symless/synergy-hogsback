@@ -2,10 +2,10 @@
 
 #include <synergy/service/router/protocol/v1/MessageTypes.hpp>
 
-#include <synergy/service/router/Router.hpp>
+#include <boost/signals2/signal.hpp>
 #include <cstddef>
 #include <iostream>
-#include <boost/signals2/signal.hpp>
+#include <synergy/service/router/Router.hpp>
 
 namespace synergy {
 namespace protocol {
@@ -18,32 +18,33 @@ enum class Flow : int {
 
 class Handler final {
 public:
-    Handler(Router & router, int32_t target_id) :
-        router_(router),
-        target_id_(target_id)
-    {
+    Handler (Router& router, int32_t target_id)
+        : router_ (router), target_id_ (target_id) {
     }
 
     template <typename T>
-    void operator() (T& msg) noexcept {
+    void
+    operator() (T& msg) noexcept {
         std::cout << msg << "\n";
 
         std::vector<unsigned char> buffer;
         int32_t size = msg.size ();
         buffer.resize (size);
-        msg.write_to (reinterpret_cast<char*>(buffer.data ()));
+        msg.write_to (reinterpret_cast<char*> (buffer.data ()));
 
         CoreMessage coreMessage;
         coreMessage.data = buffer;
-        router_.send(coreMessage, target_id_);
+        router_.send (coreMessage, target_id_);
     }
 
-    void operator() (HelloBackMessage& msg) noexcept {
-        on_hello_back(msg.args().screen_name);
+    void
+    operator() (HelloBackMessage& msg) noexcept {
+        on_hello_back (msg.args ().screen_name);
     }
 
-    void operator() (HelloMessage& msg) noexcept {
-        on_hello();
+    void
+    operator() (HelloMessage& msg) noexcept {
+        on_hello ();
     }
 
     template <typename... Args>

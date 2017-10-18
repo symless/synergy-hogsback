@@ -5,8 +5,8 @@
 
 using tcp = boost::asio::ip::tcp;
 
-template <typename Socket> inline
-static void
+template <typename Socket>
+inline static void
 set_tcp_socket_buffer_sizes (Socket& socket, boost::system::error_code& ec) {
     /* Limit the maximum send and receive buffer size to optimize for low
      * latency LANs.

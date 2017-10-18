@@ -8,12 +8,12 @@
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/ranked_index.hpp>
 #include <boost/multi_index_container.hpp>
+#include <boost/signals2.hpp>
 #include <cassert>
 #include <cstdint>
 #include <memory>
 #include <tuple>
 #include <vector>
-#include <boost/signals2.hpp>
 
 class Connection;
 class MessageHeader;
@@ -52,7 +52,10 @@ public:
 
     Router (asio::io_service& io, int port);
 
-    auto id() const noexcept { return id_; }
+    auto
+    id () const noexcept {
+        return id_;
+    }
     void start (const uint32_t id, std::string name);
     void shutdown ();
     void add (tcp::endpoint endpoint);
@@ -85,5 +88,5 @@ private:
     bool running_ = false;
 
 public:
-    boost::signals2::signal<void (Message const&, int32_t)> on_receive;
+    boost::signals2::signal<void(Message const&, int32_t)> on_receive;
 };

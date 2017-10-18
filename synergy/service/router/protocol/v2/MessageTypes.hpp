@@ -14,12 +14,12 @@ namespace synergy {
 namespace protocol {
 namespace v2 {
 
-using HelloMessage          = fb::HelloT;
-using Route                 = fb::RouteT;
-using RouteAdvertisement    = fb::RouteAdvertisementT;
-using ProxyClientConnect    = fb::ProxyClientConnectT;
-using ProxyServerClaim      = fb::ProxyServerClaimT;
-using CoreMessage           = fb::CoreMessageT;
+using HelloMessage       = fb::HelloT;
+using Route              = fb::RouteT;
+using RouteAdvertisement = fb::RouteAdvertisementT;
+using ProxyClientConnect = fb::ProxyClientConnectT;
+using ProxyServerClaim   = fb::ProxyServerClaimT;
+using CoreMessage        = fb::CoreMessageT;
 
 struct RouteRevocation : RouteAdvertisement {};
 

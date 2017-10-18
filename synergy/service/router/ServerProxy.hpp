@@ -1,9 +1,9 @@
 #pragma once
 #include "Asio.hpp"
 #include <boost/signals2/signal.hpp>
+#include <cstdint>
 #include <memory>
 #include <vector>
-#include <cstdint>
 
 class Router;
 struct ServerProxyConnection;
@@ -14,18 +14,18 @@ class ServerProxy final {
 
 public:
     explicit ServerProxy (asio::io_service&, Router& router, int port);
-    ~ServerProxy();
+    ~ServerProxy ();
 
     void start ();
 
-    Router &router() const;
-    uint32_t server_id() const;
+    Router& router () const;
+    uint32_t server_id () const;
 
 public:
     boost::signals2::signal<int32_t (std::string screen_name,
                                      asio::yield_context ctx)>
         on_client_connected;
-    boost::signals2::signal<void (uint32_t)> on_new_server;
+    boost::signals2::signal<void(uint32_t)> on_new_server;
 
 private:
     tcp::acceptor acceptor_;

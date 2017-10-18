@@ -34,7 +34,7 @@ public:
 
     bool
     do_write (MessageHeader& header, std::vector<char> const& body,
-           asio::yield_context ctx) {
+              asio::yield_context ctx) {
         header.size = body.size ();
 
         std::array<asio::const_buffer, 2> const buffers = {
@@ -51,7 +51,8 @@ public:
     }
 
     bool
-    write (MessageHeader header, Message const& message, asio::yield_context ctx) {
+    write (MessageHeader header, Message const& message,
+           asio::yield_context ctx) {
         return boost::apply_visitor (
             [this, &header, ctx](auto const& body) {
                 return this->do_write (header, body, ctx);

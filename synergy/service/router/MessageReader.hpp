@@ -8,8 +8,8 @@
 #include <boost/endian/conversion.hpp>
 #include <boost/fusion/include/for_each.hpp>
 #include <boost/fusion/include/out.hpp>
-#include <iostream>
 #include <chrono>
+#include <iostream>
 
 template <typename AsyncReadStream>
 class MessageReader final {
@@ -72,12 +72,13 @@ public:
             *stream_,
             asio::mutable_buffers_1 (&header, sizeof (header)),
             [this](auto&&... args) {
-                return this->read_chunk (std::forward<decltype (args)> (args)...);
+                return this->read_chunk (
+                    std::forward<decltype (args)> (args)...);
             },
             ctx[ec_]);
 
         if (bytes_read != sizeof (header)) {
-            reset();
+            reset ();
             return false;
         }
 
@@ -101,13 +102,14 @@ public:
     read_body (T& body, asio::yield_context ctx) {
         buffer_.resize (read_size_);
 
-        auto const bytes_read = asio::async_read (
-            *stream_,
-            asio::buffer (buffer_.data (), buffer_.size ()),
-            [this](auto&&... args) {
-                return this->read_chunk (std::forward<decltype (args)> (args)...);
-            },
-            ctx[ec_]);
+        auto const bytes_read =
+            asio::async_read (*stream_,
+                              asio::buffer (buffer_.data (), buffer_.size ()),
+                              [this](auto&&... args) {
+                                  return this->read_chunk (
+                                      std::forward<decltype (args)> (args)...);
+                              },
+                              ctx[ec_]);
 
         if (bytes_read != read_size_) {
             return false;
@@ -132,7 +134,8 @@ public:
             *stream_,
             asio::buffer (const_cast<char*> (body.data ()), body.size ()),
             [this](auto&&... args) {
-                return this->read_chunk (std::forward<decltype (args)> (args)...);
+                return this->read_chunk (
+                    std::forward<decltype (args)> (args)...);
             },
             ctx[ec_]);
 
@@ -145,7 +148,8 @@ public:
     }
 
     bool
-    read_body (MessageHeader& header, Message& message, asio::yield_context ctx) {
+    read_body (MessageHeader& header, Message& message,
+               asio::yield_context ctx) {
         bool success  = false;
         message.type_ = header.type;
         message.ttl_  = header.ttl;

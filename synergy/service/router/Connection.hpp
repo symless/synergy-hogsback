@@ -4,8 +4,8 @@
 #include "MessageReader.hpp"
 #include "MessageWriter.hpp"
 #include <boost/signals2/signal.hpp>
-#include <memory>
 #include <functional>
+#include <memory>
 
 using namespace synergy::protocol::v2;
 
@@ -24,7 +24,7 @@ public:
     void stop ();
     bool send (Message const&, asio::yield_context ctx);
     bool send (MessageHeader const&, Message const&, asio::yield_context ctx);
-    tcp::endpoint endpoint() const;
+    tcp::endpoint endpoint () const;
 
 private:
     static uint32_t next_connection_id_;
@@ -37,7 +37,8 @@ private:
 
 public:
     signal<void(std::shared_ptr<Connection>)> on_disconnect;
-    signal<void(MessageHeader const&, Message&, std::shared_ptr<Connection>)> on_message;
+    signal<void(MessageHeader const&, Message&, std::shared_ptr<Connection>)>
+        on_message;
 };
 
 inline uint32_t

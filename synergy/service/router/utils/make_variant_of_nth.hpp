@@ -31,7 +31,7 @@ struct make_variant_of_nth_helper<0> {
     emplace (int const n, bool* const success, Transform&& transform) {
         using type_vector = typename Variant::types;
         using nth_type    = typename boost::mpl::at_c<type_vector, 0>::type;
-        *success = true;
+        *success          = true;
         return Variant (transform (nth_type ()));
     }
 };

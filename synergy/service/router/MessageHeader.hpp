@@ -1,4 +1,3 @@
-#include <cstdint>
 #include <boost/fusion/adapted/struct/adapt_struct.hpp>
 #include <cstdint>
 
