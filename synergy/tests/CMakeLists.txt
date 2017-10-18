@@ -20,8 +20,8 @@ add_executable (${PROJECT_NAME}
 
 target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
     ${CMAKE_SOURCE_DIR}/third_party/catch/include
-    ${CMAKE_SOURCE_DIR}/third_party/fakeit/include
-    ${CMAKE_SOURCE_DIR}/third_party/fakeit/config/catch
+    ${CMAKE_SOURCE_DIR}/third_party/FakeIt/include
+    ${CMAKE_SOURCE_DIR}/third_party/FakeIt/config/catch
     ${Boost_INCLUDE_DIRS}
 )
 
