@@ -9,13 +9,15 @@
 
 class ConfigParser;
 
-class UserConfig final
+class UserConfig
 {
 public:
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
 
     UserConfig();
+    virtual ~UserConfig() = default;
+
     static std::string defaultFilePath();
     void load (std::istream& outputStream);
     void load (std::string const& filepath = defaultFilePath());
@@ -32,7 +34,7 @@ public:
     int64_t profileId() const;
     void setProfileId(const int64_t& profileId);
 
-    int64_t screenId() const;
+    virtual int64_t screenId() const;
     void setScreenId(const int64_t& screenId);
 
     /* Process options */
