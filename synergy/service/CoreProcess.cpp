@@ -47,6 +47,12 @@ public:
         m_errorPipe (io) {
     }
 
+    ~CoreProcessImpl() {
+        bs::error_code ec;
+        m_outPipe.close(ec);
+        m_errorPipe.close(ec);
+    }
+
     void start();
     void shutdown();
     void onScreenStatusChanged(std::string const& screenName,
@@ -415,7 +421,6 @@ CoreProcess::shutdown() {
             serviceLog()->error("can't join process, not initialized");
         }
 
-        // TODO: figure out how to stop qt freaking out when this is called
         m_impl.reset();
 
         serviceLog()->debug("core process shutdown complete");
