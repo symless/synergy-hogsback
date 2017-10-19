@@ -29,6 +29,7 @@ target_compile_definitions (${PROJECT_NAME}
     PRIVATE -DBOOST_COROUTINES_NO_DEPRECATION_WARNING
 )
 
+# This is for fix crash when faking virtual destructor in FakeIt
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-devirtualize")
 
 #
