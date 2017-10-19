@@ -9,7 +9,6 @@ class SecuredTcpClient
 {
 public:
     SecuredTcpClient(boost::asio::io_service& ioService, std::string hostname, std::string port);
-    ~SecuredTcpClient();
 
     void connect();
 

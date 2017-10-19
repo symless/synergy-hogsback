@@ -14,11 +14,6 @@ SecuredTcpClient::SecuredTcpClient(boost::asio::io_service &ioService, std::stri
 {
 }
 
-SecuredTcpClient::~SecuredTcpClient()
-{
-    serviceLog()->debug("tcp client destroyed");
-}
-
 void SecuredTcpClient::connect()
 {
     if (m_connecting) {
