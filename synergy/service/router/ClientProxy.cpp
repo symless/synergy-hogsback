@@ -170,7 +170,7 @@ ClientProxyConnection::start (ClientProxy& proxy) {
         }
 
         routerLog ()->debug ("Terminating core server read loop");
-        on_disconnect (shared_from_this ());
+        on_disconnect (this->shared_from_this ());
     });
 }
 
