@@ -110,19 +110,23 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
 
     if (m_userConfig->screenId() != -1) {
         m_router.start (m_userConfig->screenId(), boost::asio::ip::host_name());
-        m_serverProxy.start ();
         m_clientProxy.start ();
     }
     else {
         m_userConfig->updated.connect_extended ([this](const auto& connection) {
-            // TODO: there is race condition here between router is ready and core is running
             m_router.start (m_userConfig->screenId(), boost::asio::ip::host_name());
-            m_serverProxy.start ();
             m_clientProxy.start ();
-
             connection.disconnect();
         });
     }
+
+    m_localProfileConfig->profileServerChanged.connect ([this](int64_t const server) {
+        m_serverProxy.reset();
+        if (server < 0) {
+            return;
+        }
+        m_serverProxy.start (server);
+    });
 
     m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen> added, std::vector<Screen>){
         m_ioService.post([this, added] () {

@@ -6,12 +6,20 @@
 
 #include "Scanner.hpp"
 #include "MessageTypes.hpp"
+#include <fmt/ostream.h>
+#include <synergy/service/ServiceLogs.h>
 
 #define PROC(TYPE)                                                             \
     {                                                                          \
         TYPE##Message msg;                                                     \
         msg.read_from (ts, data, te);                                          \
-        handle (msg);                                                          \
+        if (!handle (msg)) {                                                   \
+            routerLog ()->debug (                                              \
+                "Handler failed to process core {} message: {}",               \
+                ((flow == Flow::STC) ? "server" : "client"),                   \
+                msg);                                                          \
+            return false;                                                      \
+        }                                                                      \
     }
 
 namespace synergy {
@@ -19,7 +27,7 @@ namespace protocol {
 namespace v1 {
 
 
-#line 24 "Scanner.cpp"
+#line 30 "Scanner.cpp"
 static const int synergy_proto_v1_start       = 168;
 static const int synergy_proto_v1_first_final = 168;
 static const int synergy_proto_v1_error       = 0;
@@ -27,11 +35,11 @@ static const int synergy_proto_v1_error       = 0;
 static const int synergy_proto_v1_en_message = 168;
 
 
-#line 74 "Scanner.cpp.rl"
+#line 80 "Scanner.cpp.rl"
 
 bool
-parse (Flow const flow, Handler& handle, char const* const msg,
-       std::size_t const size) {
+process (Flow const flow, Handler& handle, char const* const msg,
+         std::size_t const size) {
     char const* p         = msg;
     char const* const pe  = msg + size;
     char const* const eof = pe;
@@ -41,7 +49,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
     char const* te;
 
 
-#line 50 "Scanner.cpp"
+#line 56 "Scanner.cpp"
     {
         cs  = synergy_proto_v1_start;
         ts  = 0;
@@ -49,14 +57,14 @@ parse (Flow const flow, Handler& handle, char const* const msg,
         act = 0;
     }
 
-#line 91 "Scanner.cpp.rl"
+#line 97 "Scanner.cpp.rl"
 
     std::size_t dlen  = 0;
     std::size_t dsize = 0;
     char const* data  = nullptr;
 
 
-#line 65 "Scanner.cpp"
+#line 71 "Scanner.cpp"
     {
         short _widec;
         if (p == pe)
@@ -404,7 +412,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
             {
                 ts = p;
             }
-#line 252 "Scanner.cpp"
+#line 258 "Scanner.cpp"
                 _widec = (*p);
                 if (83 <= (*p) && (*p) <= 83) {
                     _widec = (short) (128 + ((*p) - -128));
@@ -521,7 +529,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
                 if (++p == pe)
                     goto _test_eof9;
             case 9:
-#line 352 "Scanner.cpp"
+#line 358 "Scanner.cpp"
                 goto st10;
             st10:
                 if (++p == pe)
@@ -583,7 +591,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
                 if (++p == pe)
                     goto _test_eof17;
             case 17:
-#line 410 "Scanner.cpp"
+#line 416 "Scanner.cpp"
                 goto st18;
             st18:
                 if (++p == pe)
@@ -751,7 +759,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
                 if (++p == pe)
                     goto _test_eof39;
             case 39:
-#line 569 "Scanner.cpp"
+#line 575 "Scanner.cpp"
                 goto st40;
             st40:
                 if (++p == pe)
@@ -796,7 +804,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
             }
 #line 9 "Scanner.cpp.rl"
                 { dlen |= (*p); }
-#line 610 "Scanner.cpp"
+#line 616 "Scanner.cpp"
                 goto st46;
             st46:
                 if (++p == pe)
@@ -808,7 +816,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
             }
 #line 9 "Scanner.cpp.rl"
                 { dlen |= (*p); }
-#line 620 "Scanner.cpp"
+#line 626 "Scanner.cpp"
                 goto st47;
             st47:
                 if (++p == pe)
@@ -820,7 +828,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
             }
 #line 9 "Scanner.cpp.rl"
                 { dlen |= (*p); }
-#line 630 "Scanner.cpp"
+#line 636 "Scanner.cpp"
                 goto st175;
             st175:
                 if (++p == pe)
@@ -864,7 +872,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
                 if (++p == pe)
                     goto _test_eof51;
             case 51:
-#line 671 "Scanner.cpp"
+#line 677 "Scanner.cpp"
                 goto st52;
             st52:
                 if (++p == pe)
@@ -889,7 +897,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
             }
 #line 9 "Scanner.cpp.rl"
                 { dlen |= (*p); }
-#line 692 "Scanner.cpp"
+#line 698 "Scanner.cpp"
                 goto st54;
             st54:
                 if (++p == pe)
@@ -901,7 +909,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
             }
 #line 9 "Scanner.cpp.rl"
                 { dlen |= (*p); }
-#line 702 "Scanner.cpp"
+#line 708 "Scanner.cpp"
                 goto st55;
             st55:
                 if (++p == pe)
@@ -913,7 +921,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
             }
 #line 9 "Scanner.cpp.rl"
                 { dlen |= (*p); }
-#line 712 "Scanner.cpp"
+#line 718 "Scanner.cpp"
                 goto st176;
             st176:
                 if (++p == pe)
@@ -957,7 +965,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
                 if (++p == pe)
                     goto _test_eof59;
             case 59:
-#line 753 "Scanner.cpp"
+#line 759 "Scanner.cpp"
                 goto tr73;
             tr73 :
 #line 22 "Scanner.cpp.rl"
@@ -977,7 +985,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
             }
 #line 9 "Scanner.cpp.rl"
                 { dlen |= (*p); }
-#line 769 "Scanner.cpp"
+#line 775 "Scanner.cpp"
                 goto st61;
             st61:
                 if (++p == pe)
@@ -989,7 +997,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
             }
 #line 9 "Scanner.cpp.rl"
                 { dlen |= (*p); }
-#line 779 "Scanner.cpp"
+#line 785 "Scanner.cpp"
                 goto st62;
             st62:
                 if (++p == pe)
@@ -1001,7 +1009,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
             }
 #line 9 "Scanner.cpp.rl"
                 { dlen |= (*p); }
-#line 789 "Scanner.cpp"
+#line 795 "Scanner.cpp"
                 goto st177;
             st177:
                 if (++p == pe)
@@ -1045,7 +1053,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
                 if (++p == pe)
                     goto _test_eof66;
             case 66:
-#line 830 "Scanner.cpp"
+#line 836 "Scanner.cpp"
                 goto st67;
             st67:
                 if (++p == pe)
@@ -1142,7 +1150,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
                 if (++p == pe)
                     goto _test_eof82;
             case 82:
-#line 922 "Scanner.cpp"
+#line 928 "Scanner.cpp"
                 goto st83;
             st83:
                 if (++p == pe)
@@ -1186,7 +1194,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
                 if (++p == pe)
                     goto _test_eof89;
             case 89:
-#line 964 "Scanner.cpp"
+#line 970 "Scanner.cpp"
                 goto st90;
             st90:
                 if (++p == pe)
@@ -1240,7 +1248,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
                 if (++p == pe)
                     goto _test_eof98;
             case 98:
-#line 1016 "Scanner.cpp"
+#line 1022 "Scanner.cpp"
                 goto st99;
             st99:
                 if (++p == pe)
@@ -1313,7 +1321,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
                 if (++p == pe)
                     goto _test_eof108;
             case 108:
-#line 1082 "Scanner.cpp"
+#line 1088 "Scanner.cpp"
                 goto st109;
             st109:
                 if (++p == pe)
@@ -1347,7 +1355,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
                 if (++p == pe)
                     goto _test_eof113;
             case 113:
-#line 1114 "Scanner.cpp"
+#line 1120 "Scanner.cpp"
                 goto st114;
             st114:
                 if (++p == pe)
@@ -1393,7 +1401,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
                 if (++p == pe)
                     goto _test_eof120;
             case 120:
-#line 1158 "Scanner.cpp"
+#line 1164 "Scanner.cpp"
                 goto st121;
             st121:
                 if (++p == pe)
@@ -1444,7 +1452,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
             }
 #line 9 "Scanner.cpp.rl"
                 { dlen |= (*p); }
-#line 1205 "Scanner.cpp"
+#line 1211 "Scanner.cpp"
                 goto st127;
             st127:
                 if (++p == pe)
@@ -1456,7 +1464,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
             }
 #line 9 "Scanner.cpp.rl"
                 { dlen |= (*p); }
-#line 1215 "Scanner.cpp"
+#line 1221 "Scanner.cpp"
                 goto st128;
             st128:
                 if (++p == pe)
@@ -1468,7 +1476,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
             }
 #line 9 "Scanner.cpp.rl"
                 { dlen |= (*p); }
-#line 1225 "Scanner.cpp"
+#line 1231 "Scanner.cpp"
                 goto st178;
             st178:
                 if (++p == pe)
@@ -1560,7 +1568,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
                 if (++p == pe)
                     goto _test_eof136;
             case 136:
-#line 1309 "Scanner.cpp"
+#line 1315 "Scanner.cpp"
                 goto st137;
             st137:
                 if (++p == pe)
@@ -1722,7 +1730,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
                 if (++p == pe)
                     goto _test_eof151;
             case 151:
-#line 1463 "Scanner.cpp"
+#line 1469 "Scanner.cpp"
                 goto st152;
             st152:
                 if (++p == pe)
@@ -1757,7 +1765,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
             }
 #line 9 "Scanner.cpp.rl"
                 { dlen |= (*p); }
-#line 1494 "Scanner.cpp"
+#line 1500 "Scanner.cpp"
                 goto st156;
             st156:
                 if (++p == pe)
@@ -1769,7 +1777,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
             }
 #line 9 "Scanner.cpp.rl"
                 { dlen |= (*p); }
-#line 1504 "Scanner.cpp"
+#line 1510 "Scanner.cpp"
                 goto st157;
             st157:
                 if (++p == pe)
@@ -1781,7 +1789,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
             }
 #line 9 "Scanner.cpp.rl"
                 { dlen |= (*p); }
-#line 1514 "Scanner.cpp"
+#line 1520 "Scanner.cpp"
                 goto st183;
             st183:
                 if (++p == pe)
@@ -1901,7 +1909,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
                 if (++p == pe)
                     goto _test_eof165;
             case 165:
-#line 1625 "Scanner.cpp"
+#line 1631 "Scanner.cpp"
                 goto st166;
             st166:
                 if (++p == pe)
@@ -2503,7 +2511,7 @@ parse (Flow const flow, Handler& handle, char const* const msg,
     _out : {}
     }
 
-#line 97 "Scanner.cpp.rl"
+#line 103 "Scanner.cpp.rl"
 
     if ((cs < 168) || (p != pe)) {
         return false;

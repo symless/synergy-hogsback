@@ -19,8 +19,9 @@ class Message final {
 
 public:
     using Body =
-        boost::variant<UnknownMessage, v2::HelloMessage,
-                       v2::RouteAdvertisement, v2::RouteRevocation, v2::ProxyClientConnect, v2::ProxyServerClaim, v2::CoreMessage>;
+        boost::variant<UnknownMessage, v2::HelloMessage, v2::RouteAdvertisement,
+                       v2::RouteRevocation, v2::ProxyClientConnect,
+                       v2::ProxyServerClaim, v2::CoreMessage>;
 
 public:
     Message () = default;
@@ -34,9 +35,9 @@ public:
     int ttl () const noexcept;
 
     MessageHeader
-    make_header () const& {
+    make_header () const & {
         MessageHeader header;
-        header.ttl = ttl_;
+        header.ttl  = ttl_;
         header.type = type_;
         return header;
     }

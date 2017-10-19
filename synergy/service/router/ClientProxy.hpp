@@ -1,12 +1,12 @@
 #pragma once
 #include "Asio.hpp"
 #include <boost/signals2/signal.hpp>
+#include <cstdint>
 #include <memory>
 #include <vector>
-#include <cstdint>
 
 class Router;
-struct ClientProxyConnection;
+class ClientProxyConnection;
 class ClientProxyMessageHandler;
 
 class ClientProxy final {
@@ -14,12 +14,12 @@ class ClientProxy final {
 
 public:
     explicit ClientProxy (asio::io_service&, Router& router, int port);
-    ~ClientProxy();
+    ~ClientProxy ();
 
     void start ();
     void connect (int32_t client_id, const std::string& screen_name);
 
-    Router &router() const;
+    Router& router () const;
 
 private:
     asio::io_service& io_;

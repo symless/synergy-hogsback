@@ -17,7 +17,7 @@ class ProfileConfig;
 class ServiceWorker final
 {
 public:
-    explicit ServiceWorker(boost::asio::io_service& ioService,
+    ServiceWorker(boost::asio::io_service& ioService,
                            std::shared_ptr<UserConfig> userConfig);
     ~ServiceWorker();
 
