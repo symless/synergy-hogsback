@@ -154,6 +154,7 @@ ServiceWorker::~ServiceWorker()
     m_work.reset();
     m_ioService.stop();
     m_userConfig->save();
+    m_logSender.disconnect();
 }
 
 void
