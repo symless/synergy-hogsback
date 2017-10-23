@@ -2,7 +2,7 @@
 #import <ServiceManagement/ServiceManagement.h>
 #import <Security/Authorization.h>
 
-BOOL
+static BOOL
 blessHelperWithLabel (NSString* label, AuthorizationRef& authRef, NSError** errorPtr)
 {
     BOOL result = NO;
@@ -40,10 +40,12 @@ blessHelperWithLabel (NSString* label, AuthorizationRef& authRef, NSError** erro
     return result;
 }
 
-BOOL
+static BOOL
 blessServiceHelper (AuthorizationRef& authRef, NSError** errorPtr) {
     return blessHelperWithLabel (@"com.symless.synergy.v2.ServiceHelper", authRef, errorPtr);
 }
+
+extern "C++" {
 
 bool
 installServiceHelper() {
@@ -64,4 +66,6 @@ installServiceHelper() {
     }
 
     return false;
+}
+
 }

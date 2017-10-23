@@ -35,12 +35,13 @@ using namespace std;
 
 cxxopts::Options g_options("");
 
-App::App(bool (*installServiceHelper)())
-{
-    m_installServiceHelper = installServiceHelper;
+#ifndef Q_OS_OSX
+static inline bool installServiceHelper() {
+    return false;
 }
+#else
 
-#ifdef Q_OS_OSX
+extern "C++" bool installServiceHelper();
 
 bool
 App::installService()
@@ -48,14 +49,16 @@ App::installService()
     if (!boost::filesystem::exists
             ("/Library/LaunchDaemons/com.symless.synergy.v2.ServiceHelper.plist")) {
         std::clog << "Service helper not installed, installing...\n";
-        if (!m_installServiceHelper()) {
+        if (installServiceHelper()) {
             std::clog << "Failed to install service helper" << "\n";
             return false;
         }
+
         std::clog << "Service helper installed\n";
         sleep(3);
         return true;
     }
+
     return false;
 }
 #endif
