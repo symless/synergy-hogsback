@@ -249,10 +249,8 @@ void ServiceController::serviceCtrlHandler(DWORD dwCtrl)
 void
 ServiceController::monitorService()
 {
-    writeEventErrorLog("monitoring");
     while(true) {
         Sleep(kMonitorIntervalMS);
-        writeEventErrorLog("checking");
         if (m_serviceHandle) {
             DWORD exitCode;
             GetExitCodeProcess(m_serviceHandle, &exitCode);
@@ -265,15 +263,6 @@ ServiceController::monitorService()
                 // controller has been configured to restart on unexpected shutdown in wix
                 ExitProcess(1);
             }
-            else {
-                writeEventErrorLog("service is running");
-            }
-        }
-        else {
-            if (!m_serviceHandle)
-                writeEventErrorLog("serviceHandle not ready");
-            if (!m_jobOject)
-                writeEventErrorLog("jobOject not ready");
         }
     }
 }
@@ -455,7 +444,6 @@ void ServiceController::setServiceStatus(DWORD currentState, DWORD win32ExitCode
 
 void ServiceController::startSynergyService()
 {
-    writeEventErrorLog("startSynergyService");
     try {
         DWORD sessionId = getActiveSession();
         SECURITY_ATTRIBUTES securityAttributes;
@@ -465,7 +453,6 @@ void ServiceController::startSynergyService()
 
         // Use separate thread to monitor underlying service process
         if (!m_monitorThread) {
-            writeEventErrorLog("starting thread");
             DWORD threadId;
             m_monitorThread = CreateThread(NULL, 0, &ServiceController::staticMonitorService, this, 0, &threadId);
         }
@@ -478,7 +465,6 @@ void ServiceController::startSynergyService()
 void ServiceController::stopSynergyService()
 {
     if (m_monitorThread) {
-        writeEventErrorLog("terminate thread");
         TerminateThread(m_monitorThread, 0);
         CloseHandle(m_monitorThread);
         m_monitorThread = nullptr;
