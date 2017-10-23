@@ -25,6 +25,7 @@
 #include <boost/asio.hpp>
 #include <synergy/common/WampClient.h>
 #include <synergy/common/CrashHandler.h>
+#include <CoreFoundation/CoreFoundation.h>
 
 namespace asio = boost::asio;
 using namespace std;
@@ -42,7 +43,30 @@ static inline bool installServiceHelper() {
 #else
 extern "C++" bool installServiceHelper();
 extern bool iAmInstalled();
-extern void killInstalledSynergyComponents();
+extern void killInstalledComponents();
+
+static void
+installBundle() {
+    // Get a reference to the main bundle
+    CFBundleRef mainBundle = CFBundleGetMainBundle();
+
+    // Get a reference to the file's URL
+    CFURLRef imageURL = CFBundleCopyResourceURL(mainBundle, CFSTR("Version"), CFSTR("txt"), NULL);
+    if (!imageURL) {
+        return;
+    }
+
+    // Convert the URL reference into a string reference
+    CFStringRef imagePath = CFURLCopyFileSystemPath(imageURL, kCFURLPOSIXPathStyle);
+
+    // Get the system encoding method
+    CFStringEncoding encodingMethod = CFStringGetSystemEncoding();
+
+    // Convert the string reference into a C string
+    const char* const path = CFStringGetCStringPtr(imagePath, encodingMethod);
+
+    std::cout << "Bundle location: " << (path ? path : "<empty>") << "\n";
+}
 
 void
 App::installAndStartService()
@@ -50,20 +74,15 @@ App::installAndStartService()
     if (!iAmInstalled()) {
         std::clog << "Synergy is not installed, installing...\n";
         stopService();
-        //killInstalledSynergyComponents();
+        killInstalledComponents();
+        //installBundle();
     }
 
-    /*if (!boost::filesystem::exists
-            ("/Library/LaunchDaemons/com.symless.synergy.v2.ServiceHelper.plist")) {*/
-        std::clog << "Service helper not installed, installing...\n";
-
-        if (installServiceHelper()) {
-            std::clog << "Failed to install service helper" << "\n";
-        }
-
+    if (installServiceHelper()) {
         std::clog << "Service helper installed\n";
-        sleep(3);
-    //}
+        // Give the helper time to install the service.
+        sleep (3);
+    }
 
     QProcess serviceLoader;
     QString cmd("launchctl load /Library/LaunchAgents/com.symless.synergy.synergy-service.plist");
@@ -256,8 +275,16 @@ App::restart(QApplication& app, std::vector<std::string> argsVector)
 void
 App::stopService()
 {
-    QProcess serviceLoader;
-    QString cmd("launchctl unload /Library/LaunchAgents/com.symless.synergy.synergy-service.plist");
-    serviceLoader.start(cmd);
-    serviceLoader.waitForFinished(5000);
+    {
+        QProcess serviceLoader;
+        QString cmd("launchctl unload /Library/LaunchAgents/com.symless.synergy.v2.synergyd.plist");
+        serviceLoader.start(cmd);
+        serviceLoader.waitForFinished(5000);
+    }
+    {
+        QProcess serviceLoader;
+        QString cmd("launchctl unload /Library/LaunchAgents/com.symless.synergy.synergy-service.plist");
+        serviceLoader.start(cmd);
+        serviceLoader.waitForFinished(5000);
+    }
 }

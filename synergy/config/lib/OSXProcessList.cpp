@@ -124,7 +124,7 @@ iAmInstalled() {
 }
 
 void
-killInstalledSynergyComponents() {
+killInstalledComponents() {
     kinfo_proc* procs = nullptr;
     size_t count = 0;
     auto const err = GetBSDProcessList (&procs, &count);
