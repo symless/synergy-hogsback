@@ -53,8 +53,8 @@ App::installAndStartService()
         //killInstalledSynergyComponents();
     }
 
-    if (!boost::filesystem::exists
-            ("/Library/LaunchDaemons/com.symless.synergy.v2.ServiceHelper.plist")) {
+    /*if (!boost::filesystem::exists
+            ("/Library/LaunchDaemons/com.symless.synergy.v2.ServiceHelper.plist")) {*/
         std::clog << "Service helper not installed, installing...\n";
 
         if (installServiceHelper()) {
@@ -63,7 +63,7 @@ App::installAndStartService()
 
         std::clog << "Service helper installed\n";
         sleep(3);
-    }
+    //}
 
     QProcess serviceLoader;
     QString cmd("launchctl load /Library/LaunchAgents/com.symless.synergy.synergy-service.plist");
