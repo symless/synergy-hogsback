@@ -16,14 +16,15 @@ static char* kServiceProcess = "synergy-service.exe";
 static char* kCoreProcess = "synergy-core.exe";
 static char* kWinLogon = "winlogon.exe";
 static const UINT kExitCode = 0;
-
+static const DWORD kMonitorIntervalMS = 2000;
 ServiceController* ServiceController::s_instance = nullptr;
 
 ServiceController::ServiceController() :
     m_install(false),
     m_uninstall(false),
     m_foreground(false),
-    m_jobOject(NULL)
+    m_jobOject(NULL),
+    m_monitorThread(NULL)
 {
     m_status.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
     m_status.dwCurrentState = SERVICE_START_PENDING;
@@ -245,6 +246,35 @@ void ServiceController::serviceCtrlHandler(DWORD dwCtrl)
     }
 }
 
+void
+ServiceController::monitorService()
+{
+    while(true) {
+        Sleep(kMonitorIntervalMS);
+
+        if (m_serviceHandle && m_jobOject) {
+            BOOL result = false;
+            IsProcessInJob(m_serviceHandle, m_jobOject, &result);
+
+            if (!result) {
+                // HACK: use exception to restart the controller
+                throw;
+            }
+        }
+    }
+}
+
+DWORD
+ServiceController::staticMonitorService(LPVOID)
+{
+    if (!s_instance) {
+        return -1;
+    }
+
+    s_instance->monitorService();
+
+    return 0;
+}
 
 void ServiceController::start(DWORD dwArgc, LPSTR *pszArgv)
 {
@@ -417,6 +447,12 @@ void ServiceController::startSynergyService()
         ZeroMemory(&securityAttributes, sizeof(SECURITY_ATTRIBUTES));
         HANDLE token = getElevateTokenInSession(sessionId, &securityAttributes);
         startSynergyServiceAsUser(token, &securityAttributes);
+
+        // Use separate thread to monitor underlying service process
+        if (!m_monitorThread) {
+            DWORD threadId;
+            m_monitorThread = CreateThread(NULL, 0, &ServiceController::staticMonitorService, this, 0, &threadId);
+        }
     }
     catch (...) {
         writeEventErrorLog("Failed to start synergy service");
@@ -425,7 +461,13 @@ void ServiceController::startSynergyService()
 
 void ServiceController::stopSynergyService()
 {
-    if (m_jobOject != NULL) {
+    if (m_monitorThread) {
+        TerminateThread(m_monitorThread, 0);
+        CloseHandle(m_monitorThread);
+        m_monitorThread = nullptr;
+    }
+
+    if (m_jobOject) {
         BOOL result = TerminateJobObject(m_jobOject, kExitCode);
         if (!result) {
             writeEventErrorLog("Failed to terminate synergy service group");
@@ -433,6 +475,8 @@ void ServiceController::stopSynergyService()
         else {
             stopAllUserProcesses();
         }
+
+        m_jobOject = nullptr;
     }
 
     return;
@@ -505,6 +549,8 @@ void ServiceController::startSynergyServiceAsUser(HANDLE userToken, LPSECURITY_A
         writeEventErrorLog("Failed to assign the service in a group");
         throw;
     }
+
+    m_serviceHandle = processInfo.hProcess;
 
     DestroyEnvironmentBlock(environment);
     CloseHandle(userToken);

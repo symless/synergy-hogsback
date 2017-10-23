@@ -49,6 +49,9 @@ private:
     static void WINAPI serviceMain(DWORD dwArgc, LPSTR *pszArgv);
     static void WINAPI serviceCtrlHandler(DWORD dwCtrl);
 
+    void monitorService();
+    static DWORD WINAPI staticMonitorService(LPVOID);
+
 protected:
     bool m_install;
     bool m_uninstall;
@@ -58,6 +61,8 @@ protected:
     SERVICE_STATUS_HANDLE m_statusHandle;
 
     HANDLE m_jobOject;
+    HANDLE m_serviceHandle;
+    HANDLE m_monitorThread;
 
     static ServiceController* s_instance;
 };
