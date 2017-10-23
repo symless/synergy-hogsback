@@ -253,11 +253,11 @@ ServiceController::monitorService()
     while(true) {
         Sleep(kMonitorIntervalMS);
         writeEventErrorLog("checking");
-        if (m_serviceHandle && m_jobOject) {
-            BOOL result = false;
-            IsProcessInJob(m_serviceHandle, m_jobOject, &result);
+        if (m_serviceHandle) {
+            DWORD exitCode;
+            GetExitCodeProcess(m_serviceHandle, &exitCode);
 
-            if (!result) {
+            if (exitCode != STILL_ACTIVE) {
                 writeEventErrorLog("Detect Synergy service is not running, restarting");
                 // HACK: use exception to restart the controller
                 throw;
