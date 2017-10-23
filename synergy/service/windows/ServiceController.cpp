@@ -259,6 +259,9 @@ ServiceController::monitorService()
 
             if (exitCode != STILL_ACTIVE) {
                 writeEventErrorLog("Detect Synergy service is not running, restarting");
+
+                stopAllUserProcesses();
+
                 // controller has been configured to restart on unexpected shutdown in wix
                 ExitProcess(1);
             }
