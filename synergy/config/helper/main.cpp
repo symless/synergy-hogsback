@@ -13,7 +13,6 @@
 std::string const kSharedConfigPath ("/Users/Shared/Synergy");
 std::string const kAppPath ("/Applications/Synergy.app");
 std::string const kAppResourcePath (kAppPath + "/Contents/Resources");
-
 auto const kAppVersionFilePath = kAppResourcePath + "/Version.txt";
 
 std::string const kHelperName = "com.symless.synergy.ServiceHelper";

@@ -40,26 +40,35 @@ static inline bool installServiceHelper() {
     return false;
 }
 #else
-
 extern "C++" bool installServiceHelper();
+extern bool iAmInstalled();
+extern void killInstalledSynergyComponents();
 
-bool
-App::installService()
+void
+App::installAndStartService()
 {
+    if (!iAmInstalled()) {
+        std::clog << "Synergy is not installed, installing...\n";
+        stopService();
+        //killInstalledSynergyComponents();
+    }
+
     if (!boost::filesystem::exists
             ("/Library/LaunchDaemons/com.symless.synergy.v2.ServiceHelper.plist")) {
         std::clog << "Service helper not installed, installing...\n";
+
         if (installServiceHelper()) {
             std::clog << "Failed to install service helper" << "\n";
-            return false;
         }
 
         std::clog << "Service helper installed\n";
         sleep(3);
-        return true;
     }
 
-    return false;
+    QProcess serviceLoader;
+    QString cmd("launchctl load /Library/LaunchAgents/com.symless.synergy.synergy-service.plist");
+    serviceLoader.start(cmd);
+    serviceLoader.waitForFinished(5000);
 }
 #endif
 
@@ -90,7 +99,6 @@ App::run(int argc, char* argv[])
     }
 
 #ifdef Q_OS_OSX
-
     if (g_options.count("service")) {
         QProcess service;
         QString cmd("/Applications/Synergy.app/Contents/MacOS/synergy-service");
@@ -100,13 +108,7 @@ App::run(int argc, char* argv[])
         return 0;
     }
 
-    if (installService()) {
-        QProcess serviceLoader;
-        QString cmd("launchctl load /Library/LaunchAgents/com.symless.synergy.synergy-service.plist");
-        serviceLoader.start(cmd);
-        serviceLoader.waitForFinished(5000);
-    }
-
+    installAndStartService();
 #endif
 
     /* Workaround for QTBUG-40332
@@ -249,4 +251,13 @@ App::restart(QApplication& app, std::vector<std::string> argsVector)
     LogManager::debug(QString("restarting app with: %1 %2").arg(path).arg(args.join(" ")));
     app.quit();
     QProcess::startDetached(path, args);
+}
+
+void
+App::stopService()
+{
+    QProcess serviceLoader;
+    QString cmd("launchctl unload /Library/LaunchAgents/com.symless.synergy.synergy-service.plist");
+    serviceLoader.start(cmd);
+    serviceLoader.waitForFinished(5000);
 }

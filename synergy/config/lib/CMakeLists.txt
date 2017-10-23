@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.4)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set (GUI_LIB_MACOS_SOURCES Accessibility.mm)
+    set (GUI_LIB_MACOS_SOURCES Accessibility.mm OSXProcessList.cpp)
 endif()
 
 set (GUI_LIB_SOURCES
