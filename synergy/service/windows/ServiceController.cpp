@@ -251,6 +251,7 @@ ServiceController::monitorService()
 {
     while(true) {
         Sleep(kMonitorIntervalMS);
+
         if (m_serviceHandle) {
             DWORD exitCode;
             GetExitCodeProcess(m_serviceHandle, &exitCode);
@@ -455,6 +456,10 @@ void ServiceController::startSynergyService()
         if (!m_monitorThread) {
             DWORD threadId;
             m_monitorThread = CreateThread(NULL, 0, &ServiceController::staticMonitorService, this, 0, &threadId);
+
+            if (!m_monitorThread) {
+                writeEventErrorLog("Failed to start monitor thread");
+            }
         }
     }
     catch (...) {
