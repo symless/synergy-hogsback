@@ -249,17 +249,28 @@ void ServiceController::serviceCtrlHandler(DWORD dwCtrl)
 void
 ServiceController::monitorService()
 {
+    writeEventErrorLog("monitoring");
     while(true) {
         Sleep(kMonitorIntervalMS);
-
+        writeEventErrorLog("checking");
         if (m_serviceHandle && m_jobOject) {
             BOOL result = false;
             IsProcessInJob(m_serviceHandle, m_jobOject, &result);
 
             if (!result) {
+                writeEventErrorLog("Detect Synergy service is not running, restarting");
                 // HACK: use exception to restart the controller
                 throw;
             }
+            else {
+                writeEventErrorLog("service is running");
+            }
+        }
+        else {
+            if (!m_serviceHandle)
+                writeEventErrorLog("serviceHandle not ready");
+            if (!m_jobOject)
+                writeEventErrorLog("jobOject not ready");
         }
     }
 }
@@ -441,6 +452,7 @@ void ServiceController::setServiceStatus(DWORD currentState, DWORD win32ExitCode
 
 void ServiceController::startSynergyService()
 {
+    writeEventErrorLog("startSynergyService");
     try {
         DWORD sessionId = getActiveSession();
         SECURITY_ATTRIBUTES securityAttributes;
@@ -450,6 +462,7 @@ void ServiceController::startSynergyService()
 
         // Use separate thread to monitor underlying service process
         if (!m_monitorThread) {
+            writeEventErrorLog("starting thread");
             DWORD threadId;
             m_monitorThread = CreateThread(NULL, 0, &ServiceController::staticMonitorService, this, 0, &threadId);
         }
@@ -462,6 +475,7 @@ void ServiceController::startSynergyService()
 void ServiceController::stopSynergyService()
 {
     if (m_monitorThread) {
+        writeEventErrorLog("terminate thread");
         TerminateThread(m_monitorThread, 0);
         CloseHandle(m_monitorThread);
         m_monitorThread = nullptr;
