@@ -15,7 +15,7 @@ std::string const kAppPath ("/Applications/Synergy.app");
 std::string const kAppResourcePath (kAppPath + "/Contents/Resources");
 auto const kAppVersionFilePath = kAppResourcePath + "/Version.txt";
 
-std::string const kHelperName = "com.symless.synergy.ServiceHelper";
+std::string const kHelperName = "com.symless.synergy.v2.ServiceHelper";
 auto const kHelperPListPath = "/Library/LaunchDaemons/" + kHelperName + ".plist";
 auto const kHelperExecPath = "/Library/PrivilegedHelperTools/" + kHelperName;
 
@@ -86,15 +86,15 @@ main (int, const char*[])
             /* Remove all the service files */
             boost::filesystem::remove (kServiceUserAgentPListTargetPath, ec);
             log() << fmt::format ("[{}] uninstalling user agent plist file... {}\n", 
-                                  timestamp(), ec ? "failed" : "done");
+                                  timestamp(), ec ? "Failed" : "OK");
             
             boost::filesystem::remove (kHelperPListPath, ec);
-            log() << fmt::format ("[{}] uninstalling helper plist file... {}\n", 
-                                  timestamp(), ec ? "failed" : "done");
+            log() << fmt::format ("[{}] uninstalling helper plist file... {}\n",
+                                  timestamp(), ec ? "Failed" : "OK");
             
             boost::filesystem::remove (kHelperExecPath, ec);
-            log() << fmt::format ("[{}] uninstalling helper executable file... {}\n", 
-                                  timestamp(), ec ? "failed" : "done");
+            log() << fmt::format ("[{}] uninstalling helper executable... {}\n",
+                                  timestamp(), ec ? "Failed" : "OK");
             
             return EXIT_SUCCESS;
         }
