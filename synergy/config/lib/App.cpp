@@ -38,11 +38,7 @@ using namespace std;
 
 cxxopts::Options g_options("");
 
-#ifndef Q_OS_OSX
-static inline bool installServiceHelper() {
-    return false;
-}
-#else
+#ifdef Q_OS_OSX
 extern "C++" bool installServiceHelper();
 extern bool iAmInstalled();
 extern void killInstalledComponents();
