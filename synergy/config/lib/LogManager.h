@@ -43,6 +43,7 @@ public:
 
 signals:
     void dialogChanged();
+    void commonLogLine(const QString& logLine);
 
 private:
     static QString timeStamp();
