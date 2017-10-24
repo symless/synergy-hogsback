@@ -8,7 +8,6 @@ set(SERVICE_SOURCES
     ../service/WebsocketSession.cpp
     ../service/SecuredTcpSession.cpp
     ../service/SecuredTcpClient.cpp
-    ../service/SecuredTcpServer.cpp
     ../service/ServiceLogs.cpp
     ../service/CoreProcess.cpp
 )
