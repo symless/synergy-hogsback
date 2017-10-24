@@ -100,7 +100,8 @@ Router::add (tcp::endpoint endpoint) {
                 routerLog ()->info (
                     "Connection to {} failed. Host is unreachable", endpoint);
             } else if (ec) {
-                throw boost::system::system_error (ec, ec.message ());
+                routerLog ()->info (
+                    "Connection to {} failed. {} (Code {})", endpoint, ec.message(), ec.value());
             }
 
             if (ec) {
