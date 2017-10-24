@@ -51,21 +51,23 @@ installBundle() {
     CFBundleRef mainBundle = CFBundleGetMainBundle();
 
     // Get a reference to the file's URL
-    CFURLRef imageURL = CFBundleCopyResourceURL(mainBundle, CFSTR("Version"), CFSTR("txt"), NULL);
-    if (!imageURL) {
+    CFURLRef versionTxtUrl = CFBundleCopyResourceURL(mainBundle, CFSTR("Version"), CFSTR("txt"), NULL);
+    if (!versionTxtUrl) {
         return;
     }
 
     // Convert the URL reference into a string reference
-    CFStringRef imagePath = CFURLCopyFileSystemPath(imageURL, kCFURLPOSIXPathStyle);
+    CFStringRef imagePath = CFURLCopyFileSystemPath(versionTxtUrl, kCFURLPOSIXPathStyle);
 
     // Get the system encoding method
     CFStringEncoding encodingMethod = CFStringGetSystemEncoding();
 
     // Convert the string reference into a C string
-    const char* const path = CFStringGetCStringPtr(imagePath, encodingMethod);
+    boost::filesystem::path path (CFStringGetCStringPtr(imagePath, encodingMethod));
+    path = path.parent_path().parent_path().parent_path();
+    path = boost::filesystem::canonical(path);
 
-    std::cout << "Bundle location: " << (path ? path : "<empty>") << "\n";
+    std::cout << "Installing " << path << " to /Applications...\n";
 }
 
 void
@@ -75,7 +77,7 @@ App::installAndStartService()
         std::clog << "Synergy is not installed, installing...\n";
         stopService();
         killInstalledComponents();
-        //installBundle();
+        installBundle();
     }
 
     if (installServiceHelper()) {
