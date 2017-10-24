@@ -30,7 +30,7 @@ public:
     template <typename T>
     bool
     operator() (T& msg) noexcept {
-        routerLog ()->debug ("Core message: {}", msg);
+        routerLog ()->trace ("Core message: {}", msg);
 
         std::vector<unsigned char> buffer;
         int32_t size = msg.size ();

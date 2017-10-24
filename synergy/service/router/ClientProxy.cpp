@@ -226,10 +226,10 @@ ClientProxyMessageHandler::handle (const CoreMessage& cm,
         });
 
     if (it == end (connections)) {
-        routerLog ()->info ("ClientProxy: Received core message for client "
-                            "{}, but we have not established a connection to "
-                            "that client",
-                            source);
+        routerLog ()->trace(
+            "ClientProxy: Received core message for client '{}' "
+            "before it connected",
+            source);
         return;
     }
 
