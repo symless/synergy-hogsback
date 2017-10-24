@@ -110,7 +110,7 @@ getPidPath (pid_t const pid = getpid()) {
 }
 
 static bool
-isInstalledSynergyComponent (boost::filesystem::path const& path) {
+isInstalledComponent (boost::filesystem::path const& path) {
     static boost::filesystem::path const kInstallPath = "/Applications/Synergy.app";
     using std::begin;
     using std::end;
@@ -120,7 +120,7 @@ isInstalledSynergyComponent (boost::filesystem::path const& path) {
 
 bool
 iAmInstalled() {
-    return isInstalledSynergyComponent (getPidPath());
+    return isInstalledComponent (getPidPath());
 }
 
 void
@@ -137,7 +137,7 @@ killInstalledComponents() {
         } catch (...) {
             continue;
         }
-        if (isInstalledSynergyComponent (path)) {
+        if (isInstalledComponent (path)) {
             std::cout << fmt::format ("Killing PID {} = {} ... ", pid, path.string());
             std::cout << ((0 == kill (pid, SIGKILL)) ? "OK" : "Failed");
             std::cout << "\n";

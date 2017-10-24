@@ -25,7 +25,9 @@
 #include <boost/asio.hpp>
 #include <synergy/common/WampClient.h>
 #include <synergy/common/CrashHandler.h>
+#ifdef Q_OS_OSX
 #include <CoreFoundation/CoreFoundation.h>
+#endif
 
 namespace asio = boost::asio;
 using namespace std;
@@ -46,7 +48,16 @@ extern bool iAmInstalled();
 extern void killInstalledComponents();
 
 static void
-installBundle() {
+uninstallBundle() {
+    boost::filesystem::path path ("/Applications/Synergy.app");
+    std::cout << "Removing " << path << " ... ";
+    boost::system::error_code ec;
+    boost::filesystem::remove_all (path, ec);
+    std::cout << (ec ? "Failed" : "OK") << "\n";
+}
+
+static void
+reinstallBundle() {
     // Get a reference to the main bundle
     CFBundleRef mainBundle = CFBundleGetMainBundle();
 
@@ -67,39 +78,24 @@ installBundle() {
     path = path.parent_path().parent_path().parent_path();
     path = boost::filesystem::canonical(path);
 
+    uninstallBundle();
     std::cout << "Installing " << path << " to /Applications...\n";
-}
-
-static void
-uninstallBundle() {
-    boost::filesystem::path path ("/Applications/Synergy.app");
-    std::cout << "Removing " << path << " ... ";
-    boost::system::error_code ec;
-    boost::filesystem::remove_all (path, ec);
-    std::cout << (ec ? "Failed" : "OK") << "\n";
 }
 
 void
 App::installAndStartService()
 {
     if (!iAmInstalled()) {
-        std::clog << "Synergy is not installed, installing...\n";
         stopService();
         killInstalledComponents();
-        uninstallBundle();
-        installBundle();
+        reinstallBundle();
+        if (installServiceHelper()) {
+            std::clog << "Service helper installed\n";
+            sleep (3);
+        }
     }
 
-    if (installServiceHelper()) {
-        std::clog << "Service helper installed\n";
-        // Give the helper time to install the service.
-        sleep (3);
-    }
-
-    QProcess serviceLoader;
-    QString cmd("launchctl load /Library/LaunchAgents/com.symless.synergy.synergy-service.plist");
-    serviceLoader.start(cmd);
-    serviceLoader.waitForFinished(5000);
+    startService();
 }
 #endif
 
@@ -282,6 +278,15 @@ App::restart(QApplication& app, std::vector<std::string> argsVector)
     LogManager::debug(QString("restarting app with: %1 %2").arg(path).arg(args.join(" ")));
     app.quit();
     QProcess::startDetached(path, args);
+}
+
+void
+App::startService()
+{
+    QProcess serviceLoader;
+    QString cmd("launchctl load /Library/LaunchAgents/com.symless.synergy.synergy-service.plist");
+    serviceLoader.start(cmd);
+    serviceLoader.waitForFinished(5000);
 }
 
 void

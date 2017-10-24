@@ -10,6 +10,7 @@ public:
 private:
     void restart(QApplication& app, std::vector<std::string> args);
 #ifdef Q_OS_OSX
+    void startService();
     void stopService();
     void installAndStartService();
 #endif
