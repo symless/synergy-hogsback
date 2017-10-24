@@ -57,6 +57,29 @@ uninstallBundle() {
 }
 
 static void
+recursiveCopy (boost::filesystem::path const& src,
+               boost::filesystem::path const& dst) {
+    if (boost::filesystem::exists (dst)){
+        return;
+    }
+
+    boost::system::error_code ec;
+    if (boost::filesystem::is_directory (src)) {
+        std::cout << "Creating directory " << dst << " ...";
+        boost::filesystem::create_directories (dst);
+        std::cout << (ec ? "Failed" : "OK") << "\n";
+
+        for (auto& item : boost::filesystem::directory_iterator (src)) {
+            recursiveCopy (item.path(), dst / item.path().filename());
+        }
+    } else if (boost::filesystem::is_regular_file (src)) {
+        std::cout << "Installing " << dst << " ...";
+        boost::filesystem::copy (src, dst, ec);
+        std::cout << (ec ? "Failed" : "OK") << "\n";
+    }
+}
+
+static void
 reinstallBundle() {
     // Get a reference to the main bundle
     CFBundleRef mainBundle = CFBundleGetMainBundle();
@@ -80,6 +103,7 @@ reinstallBundle() {
 
     uninstallBundle();
     std::cout << "Installing " << path << " to /Applications...\n";
+    recursiveCopy (path, "/Applications/Synergy.app");
 }
 
 void
