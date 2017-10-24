@@ -70,6 +70,15 @@ installBundle() {
     std::cout << "Installing " << path << " to /Applications...\n";
 }
 
+static void
+uninstallBundle() {
+    boost::filesystem::path path ("/Applications/Synergy.app");
+    std::cout << "Removing " << path << " ... ";
+    boost::system::error_code ec;
+    boost::filesystem::remove_all (path, ec);
+    std::cout << (ec ? "Failed" : "OK") << "\n";
+}
+
 void
 App::installAndStartService()
 {
@@ -77,6 +86,7 @@ App::installAndStartService()
         std::clog << "Synergy is not installed, installing...\n";
         stopService();
         killInstalledComponents();
+        uninstallBundle();
         installBundle();
     }
 
