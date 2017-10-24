@@ -70,7 +70,7 @@ public:
     bool forward (MessageHeader const& header, Message message);
 
 protected:
-    void add (tcp::socket);
+    void add (tcp::socket, bool isServer);
 
     bool integrate (Route, std::shared_ptr<Connection> source);
     void integrate (RouteRevocation&, std::shared_ptr<Connection>);

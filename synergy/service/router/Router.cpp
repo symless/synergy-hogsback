@@ -115,7 +115,7 @@ Router::add (tcp::endpoint endpoint) {
             }
 
             routerLog ()->info ("Successfully connected to {}", endpoint);
-            this->add (std::move (socket));
+            this->add (std::move (socket), false);
             return;
         }
 
@@ -176,7 +176,7 @@ Router::start (uint32_t const id, std::string name) {
 
             routerLog ()->info ("Accepted connection from router {}",
                                 socket.remote_endpoint ());
-            add (std::move (socket));
+            add (std::move (socket), true);
         }
     });
 
@@ -306,8 +306,8 @@ operator() (RouteRevocation& rr, std::shared_ptr<Connection> source) const {
 }
 
 void
-Router::add (tcp::socket socket) {
-    auto connection = std::make_shared<Connection> (std::move (socket));
+Router::add (tcp::socket socket, bool isServer) {
+    auto connection = std::make_shared<Connection> (std::move (socket), isServer);
 
     connection->on_disconnect.connect (
         [this](std::shared_ptr<Connection> connection) {
