@@ -9,20 +9,15 @@
 
 uint32_t Connection::next_connection_id_ = 0;
 
-Connection::Connection (tcp::socket socket, bool fromServer)
+Connection::Connection (tcp::socket socket)
     : id_ (++next_connection_id_),
       socket_ (std::move (socket)),
       endpoint_ (socket_.remote_endpoint ()),
       context_(ssl::context::tlsv12),
       stream_(socket, context_),
       reader_ (stream_),
-      writer_ (stream_),
-      fromServer_(fromServer) {
+      writer_ (stream_) {
     routerLog ()->info ("Connection {} created", id ());
-
-    if (fromServer_) {
-        loadRawCertificate();
-    }
 
     boost::system::error_code ec;
     socket_.set_option (tcp::no_delay (true), ec);
@@ -43,12 +38,16 @@ Connection::~Connection () noexcept {
 }
 
 void
-Connection::start () {
+Connection::start (bool fromServer) {
+    if (fromServer) {
+        loadRawCertificate();
+    }
+
     asio::spawn (
         socket_.get_io_service (),
-        [ this, self = shared_from_this () ](auto ctx) {
+        [ this, self = shared_from_this (), fromServer ](auto ctx) {
         boost::system::error_code ec;
-        stream_.async_handshake(fromServer_ ? ssl::stream_base::server : ssl::stream_base::client, ctx[ec]);
+        stream_.async_handshake(fromServer ? ssl::stream_base::server : ssl::stream_base::client, ctx[ec]);
 
         if (ec) {
             on_disconnect (self);

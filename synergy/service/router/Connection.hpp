@@ -18,11 +18,11 @@ class Connection final : public std::enable_shared_from_this<Connection> {
     using signal = boost::signals2::signal<Args...>;
 
 public:
-    explicit Connection (tcp::socket socket, bool fromServer);
+    explicit Connection (tcp::socket socket);
     ~Connection () noexcept;
 
     uint32_t id () const noexcept;
-    void start ();
+    void start (bool fromServer);
     void stop ();
     bool send (Message const&, asio::yield_context ctx);
     bool send (MessageHeader const&, Message const&, asio::yield_context ctx);
@@ -46,7 +46,6 @@ private:
     MessageReader<SslStream> reader_;
     MessageWriter<SslStream> writer_;
     bool enabled_ = false;
-    bool fromServer_;
 
 public:
     signal<void(std::shared_ptr<Connection>)> on_connected;

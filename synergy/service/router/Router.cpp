@@ -307,7 +307,7 @@ operator() (RouteRevocation& rr, std::shared_ptr<Connection> source) const {
 
 void
 Router::add (tcp::socket socket, bool isServer) {
-    auto connection = std::make_shared<Connection> (std::move (socket), isServer);
+    auto connection = std::make_shared<Connection> (std::move (socket));
 
     connection->on_connected.connect (
         [this](std::shared_ptr<Connection> connection) {
@@ -360,7 +360,7 @@ Router::add (tcp::socket socket, bool isServer) {
     });
 
     connections_.push_back (connection);
-    connection->start ();
+    connection->start (isServer);
 }
 
 bool
