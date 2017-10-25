@@ -17,7 +17,6 @@ Connection::Connection (tcp::socket&& socket, ssl::context& context)
       reader_ (stream_),
       writer_ (stream_) {
     routerLog ()->debug ("Connection {} created", id ());
-
     boost::system::error_code ec;
     socket_.set_option (tcp::no_delay (true), ec);
 
@@ -74,7 +73,7 @@ bool Connection::start(bool fromServer, asio::yield_context ctx) {
                 }
             }
 
-            routerLog ()->info ("Connection {} terminated receive loop",
+            routerLog()->debug("Connection {} terminated receive loop",
                                 this->id ());
     });
 

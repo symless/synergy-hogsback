@@ -163,6 +163,9 @@ CoreProcessImpl::shutdown()
     m_errorPipe.cancel();
     ioService.poll();
 
+    m_outPipe.close();
+    m_errorPipe.close();
+
     /* Disconnect internal signal handling */
     for (auto& signal: m_signals) {
         signal.disconnect();
@@ -268,6 +271,7 @@ CoreProcess::start (std::vector<std::string> command)
         return;
     }
 
+    m_lastCommand = command;
     serviceLog()->debug("starting core process with command: {}", ba::join(command, " "));
 
     auto const localScreenName = getCommandLocalScreenName (command);
@@ -391,6 +395,26 @@ CoreProcess::start (std::vector<std::string> command)
         throw std::runtime_error("Invalid core process mode: " + mode);
     }
 
+    expectedExit.connect_extended([this](auto& connection) {
+        connection.disconnect();
+
+        handleShutdown();
+
+        if (!m_nextCommand.empty()) {
+            this->start(std::move(m_nextCommand));
+        }
+    });
+
+    unexpectedExit.connect_extended([this](auto& connection) {
+        connection.disconnect();
+
+        handleShutdown();
+
+        if (!m_lastCommand.empty()) {
+            this->start(std::move(m_lastCommand));
+        }
+    });
+
     screenStatusChanged(localScreenName, localState);
     m_impl->start();
 }
@@ -411,27 +435,29 @@ CoreProcess::shutdown() {
     // control which exited event is invoked
     m_impl->m_expectingExit = true;
 
-    expectedExit.connect_extended([this](auto& connection) {
-        connection.disconnect();
+    m_impl->shutdown();
+}
 
-        if (m_impl->m_process) {
+void CoreProcess::handleShutdown()
+{
+    if (m_impl->m_process) {
+        try {
             m_impl->m_process->join();
         }
-        else {
-            serviceLog()->error("can't join process, not initialized");
+        catch (const std::exception& ex) {
+            serviceLog()->error("can't join process: {}", ex.what());
         }
-
-        m_impl.reset();
-
-        serviceLog()->debug("core process shutdown complete");
-
-        if (!m_nextCommand.empty()) {
-            assert(!m_impl);
-            this->start(std::move(m_nextCommand));
+        catch (...) {
+            serviceLog()->error("can't join process: unknown error");
         }
-    });
+    }
+    else {
+        serviceLog()->error("can't join process, not initialized");
+    }
 
-    m_impl->shutdown();
+    m_impl.reset();
+
+    serviceLog()->debug("core process shutdown complete");
 }
 
 void CoreProcess::writeConfigurationFile()
