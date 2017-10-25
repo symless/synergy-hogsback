@@ -251,6 +251,7 @@ void ServiceWorker::provideSnapshot()
         }
         else {
             serviceLog()->error("can't send profile snapshot, not yet received from cloud");
+            m_rpc->server()->publish("synergy.cloud.offline");
         }
     });
 }
