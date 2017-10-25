@@ -16,13 +16,13 @@ Connection::Connection (tcp::socket&& socket, ssl::context& context)
       stream_(socket_, context),
       reader_ (stream_),
       writer_ (stream_) {
-    routerLog ()->info ("Connection {} created", id ());
+    routerLog ()->debug ("Connection {} created", id ());
 
     boost::system::error_code ec;
     socket_.set_option (tcp::no_delay (true), ec);
 
     if (ec) {
-        routerLog ()->info (
+        routerLog ()->warn (
             "Failed to disable Nagles algorithm on connection {}", id ());
     }
 
@@ -33,7 +33,7 @@ Connection::Connection (tcp::socket&& socket, ssl::context& context)
 }
 
 Connection::~Connection () noexcept {
-    routerLog ()->info ("Connection {} destroyed", id ());
+    routerLog ()->debug ("Connection {} destroyed", id ());
 }
 
 void
@@ -45,7 +45,7 @@ Connection::start (bool fromServer) {
         stream_.async_handshake(fromServer ? ssl::stream_base::server : ssl::stream_base::client, ctx[ec]);
 
         if (ec) {
-            routerLog ()->info ("Connection {} failed in SSL handshake: {}",
+            routerLog ()->error ("Connection {} failed in SSL handshake: {}",
                                 this->id (), ec.message());
             on_disconnect (self);
         }
