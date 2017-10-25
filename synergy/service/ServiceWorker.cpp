@@ -16,8 +16,6 @@
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 
-std::string g_lastProfileSnapshot;
-
 ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
                              std::shared_ptr<UserConfig> userConfig) :
     m_ioService (ioService),
@@ -57,8 +55,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         m_localProfileConfig->apply(*m_remoteProfileConfig);
 
         // save for future requests from config UI
-        // TODO: store json in profile config instead of global?
-        g_lastProfileSnapshot = json;
+        m_lastProfileSnapshot = json;
 
         // forward the message via rpc server to config UI
         auto rpcServer = m_rpc->server();
@@ -248,9 +245,9 @@ void ServiceWorker::provideSnapshot()
         "synergy.snapshot.request",
         [this]() {
 
-        if (!g_lastProfileSnapshot.empty()) {
+        if (!m_lastProfileSnapshot.empty()) {
             serviceLog()->debug("sending last profile snapshot");
-            m_rpc->server()->publish ("synergy.profile.snapshot", g_lastProfileSnapshot);
+            m_rpc->server()->publish ("synergy.profile.snapshot", m_lastProfileSnapshot);
         }
         else {
             serviceLog()->error("can't send profile snapshot, not yet received from cloud");

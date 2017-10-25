@@ -45,6 +45,7 @@ private:
     ClientProxy                     m_clientProxy;
     std::shared_ptr<boost::asio::io_service::work> m_work;
     boost::signals2::connection m_logSender;
+    std::string m_lastProfileSnapshot = "";
 };
 
 #endif // SERVICEWORKER_H
