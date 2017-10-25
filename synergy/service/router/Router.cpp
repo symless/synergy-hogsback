@@ -272,7 +272,7 @@ private:
 void
 MessageHandler::
 operator() (HelloMessage& hello, std::shared_ptr<Connection> source) const {
-    routerLog()->debug(
+    routerLog()->trace(
         "Received hello from '{}' (id: {})", hello.name, hello.id);
     if (hello.id == router_->id ()) {
         routerLog()->debug("Received own hello message. Closing connection "
