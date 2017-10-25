@@ -22,7 +22,7 @@ public:
     ~Connection () noexcept;
 
     uint32_t id () const noexcept;
-    void start (bool fromServer);
+    bool start (bool fromServer, asio::yield_context ctx);
     void stop ();
     bool send (Message const&, asio::yield_context ctx);
     bool send (MessageHeader const&, Message const&, asio::yield_context ctx);
@@ -41,7 +41,6 @@ private:
 
 public:
     signal<void(std::shared_ptr<Connection>)> on_connected;
-    signal<void(std::shared_ptr<Connection>)> on_connect_failed;
     signal<void(std::shared_ptr<Connection>)> on_disconnect;
     signal<void(MessageHeader const&, Message&, std::shared_ptr<Connection>)>
         on_message;

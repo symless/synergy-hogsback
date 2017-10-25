@@ -114,8 +114,9 @@ Router::add (tcp::endpoint endpoint) {
                 continue;
             }
 
-            this->add (std::move (socket), false);
-            return;
+            if (this->add (std::move (socket), false, ctx)) {
+                return;
+            }
         }
 
         routerLog ()->info ("Gave up trying to connect to {}", endpoint);
@@ -176,7 +177,7 @@ Router::start (uint32_t const id, std::string name) {
 
             routerLog ()->info ("Accepted connection from router {}",
                                 socket.remote_endpoint ());
-            add (std::move (socket), true);
+            add (std::move (socket), true, ctx);
         }
     });
 
@@ -305,8 +306,8 @@ operator() (RouteRevocation& rr, std::shared_ptr<Connection> source) const {
     router_->integrate (rr, std::move (source));
 }
 
-void
-Router::add (tcp::socket socket, bool isServer) {
+bool
+Router::add (tcp::socket socket, bool isServer, asio::yield_context ctx) {
 
     auto connection = std::make_shared<Connection> (std::move (socket), context_);
 
@@ -317,7 +318,7 @@ Router::add (tcp::socket socket, bool isServer) {
             connections_.push_back (connection);
 
             asio::spawn (acceptor_.get_io_service (),
-                     [this, connection](asio::yield_context ctx) {
+                     [this, connection](asio::yield_context context) {
                          RouteAdvertisement advert;
                          advert.sender = id_;
 
@@ -334,13 +335,8 @@ Router::add (tcp::socket socket, bool isServer) {
                              std::make_move_iterator (begin (known_routes)),
                              std::make_move_iterator (end (known_routes)));
 
-                         connection->send (std::move (advert), ctx);
+                         connection->send (std::move (advert), context);
                      });
-        });
-
-    connection->on_connect_failed.connect (
-        [this](std::shared_ptr<Connection> connection) {
-            this->add (connection->endpoint ());
         });
 
     connection->on_disconnect.connect (
@@ -371,7 +367,7 @@ Router::add (tcp::socket socket, bool isServer) {
         on_receive (message, header.source);
     });
 
-    connection->start (isServer);
+    return connection->start (isServer, ctx);
 }
 
 bool

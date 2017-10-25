@@ -36,29 +36,27 @@ Connection::~Connection () noexcept {
     routerLog ()->debug ("Connection {} destroyed", id ());
 }
 
-void
-Connection::start (bool fromServer) {
+bool Connection::start(bool fromServer, asio::yield_context ctx) {
+    boost::system::error_code ec;
+    stream_.async_handshake(fromServer ? ssl::stream_base::server : ssl::stream_base::client, ctx[ec]);
+
+    if (ec) {
+        routerLog ()->error ("Connection {} failed in SSL handshake: {}",
+                            this->id (), ec.message());
+        return false;
+    }
+
     asio::spawn (
         socket_.get_io_service (),
-        [ this, self = shared_from_this (), fromServer ](auto ctx) {
-        boost::system::error_code ec;
-        stream_.async_handshake(fromServer ? ssl::stream_base::server : ssl::stream_base::client, ctx[ec]);
-
-        if (ec) {
-            routerLog ()->error ("Connection {} failed in SSL handshake: {}",
-                                this->id (), ec.message());
-            on_connect_failed (self);
-        }
-        else {
+        [ this, self = shared_from_this () ](auto context) {
             enabled_ = true;
-            on_connected (self);
 
             while (true) {
                 MessageHeader header;
                 Message message;
 
-                if (reader_.read_header (header, ctx)) {
-                    if (reader_.read_body (header, message, ctx)) {
+                if (reader_.read_header (header, context)) {
+                    if (reader_.read_body (header, message, context)) {
                         on_message (header, message, self);
                     }
                 }
@@ -78,8 +76,10 @@ Connection::start (bool fromServer) {
 
             routerLog ()->info ("Connection {} terminated receive loop",
                                 this->id ());
-        }
     });
+
+    on_connected (shared_from_this ());
+    return true;
 }
 
 void
