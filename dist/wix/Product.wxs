@@ -92,7 +92,7 @@
                 <?else ?>
                     <File Source="$(var.TPBinPath)/crashpad/windows/crashpad_handler.exe"/>
                 <?endif ?>
-                <File Source="$(var.BinPath)/synergys.exe">
+                <File Source="$(var.BinPath)/synergy-service.exe">
                     <fire:FirewallException Id="ServerFirewallException" IgnoreFailure="yes" Name="$(var.Name)" Scope="any"/>
                 </File>
                 <File Source="$(var.BinPath)/synergyc.exe"/>
