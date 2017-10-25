@@ -309,6 +309,30 @@ void
 Router::add (tcp::socket socket, bool isServer) {
     auto connection = std::make_shared<Connection> (std::move (socket), isServer);
 
+    connection->on_connected.connect (
+        [this](std::shared_ptr<Connection> connection) {
+            asio::spawn (acceptor_.get_io_service (),
+                     [this, connection](asio::yield_context ctx) {
+                         RouteAdvertisement advert;
+                         advert.sender = id_;
+
+                         auto known_routes = get_known_routes ();
+                         advert.routes.reserve (1 + known_routes.size ());
+
+                         auto route  = std::make_unique<Route> ();
+                         route->dest = id_;
+                         route->cost = 0;
+                         advert.routes.emplace_back (std::move (route));
+
+                         advert.routes.insert (
+                             end (advert.routes),
+                             std::make_move_iterator (begin (known_routes)),
+                             std::make_move_iterator (end (known_routes)));
+
+                         connection->send (std::move (advert), ctx);
+                     });
+        });
+
     connection->on_disconnect.connect (
         [this](std::shared_ptr<Connection> connection) {
             auto remote = connection->endpoint ();
@@ -337,27 +361,6 @@ Router::add (tcp::socket socket, bool isServer) {
 
     connections_.push_back (connection);
     connection->start ();
-
-    asio::spawn (acceptor_.get_io_service (),
-                 [this, connection](asio::yield_context ctx) {
-                     RouteAdvertisement advert;
-                     advert.sender = id_;
-
-                     auto known_routes = get_known_routes ();
-                     advert.routes.reserve (1 + known_routes.size ());
-
-                     auto route  = std::make_unique<Route> ();
-                     route->dest = id_;
-                     route->cost = 0;
-                     advert.routes.emplace_back (std::move (route));
-
-                     advert.routes.insert (
-                         end (advert.routes),
-                         std::make_move_iterator (begin (known_routes)),
-                         std::make_move_iterator (end (known_routes)));
-
-                     connection->send (std::move (advert), ctx);
-                 });
 }
 
 bool

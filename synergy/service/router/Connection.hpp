@@ -49,6 +49,7 @@ private:
     bool fromServer_;
 
 public:
+    signal<void(std::shared_ptr<Connection>)> on_connected;
     signal<void(std::shared_ptr<Connection>)> on_disconnect;
     signal<void(MessageHeader const&, Message&, std::shared_ptr<Connection>)>
         on_message;

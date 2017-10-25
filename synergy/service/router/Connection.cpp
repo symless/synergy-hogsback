@@ -55,6 +55,7 @@ Connection::start () {
         }
         else {
             enabled_ = true;
+            on_connected (self);
 
             while (true) {
                 MessageHeader header;
