@@ -300,6 +300,7 @@ App::restart(QApplication& app, std::vector<std::string> argsVector)
     QProcess::startDetached(path, args);
 }
 
+#ifdef Q_OS_OSX
 void
 App::startService()
 {
@@ -325,3 +326,4 @@ App::stopService()
         serviceLoader.waitForFinished(5000);
     }
 }
+#endif
