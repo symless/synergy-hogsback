@@ -45,7 +45,7 @@ Router::add (tcp::endpoint endpoint) {
         return;
     }
 
-    routerLog ()->info ("Adding {}", endpoint);
+    routerLog()->debug("Adding {}", endpoint);
 
     known_peers_.push_back (endpoint);
 
@@ -63,7 +63,7 @@ Router::add (tcp::endpoint endpoint) {
                 return;
             }
 
-            routerLog ()->info ("Connecting to {} (attempt {}/{})",
+            routerLog()->debug("Connecting to {} (attempt {}/{})",
                                 endpoint,
                                 attempt,
                                 kConnectRetryLimit);
@@ -86,21 +86,21 @@ Router::add (tcp::endpoint endpoint) {
 
             if (ec == asio::error::operation_aborted) {
                 if (!timed_out) {
-                    routerLog ()->info ("Aborting connection to {}", endpoint);
+                    routerLog()->debug("Aborting connection to {}", endpoint);
 
                     return;
                 }
             }
 
             if (ec == asio::error::connection_refused) {
-                routerLog ()->info ("Connection to {} refused", endpoint);
+                routerLog()->debug("Connection to {} refused", endpoint);
             } else if ((ec == asio::error::timed_out) || timed_out) {
-                routerLog ()->info ("Connection to {} timed out", endpoint);
+                routerLog()->debug("Connection to {} timed out", endpoint);
             } else if (ec == asio::error::host_unreachable) {
-                routerLog ()->info (
+                routerLog()->debug(
                     "Connection to {} failed. Host is unreachable", endpoint);
             } else if (ec) {
-                routerLog ()->info (
+                routerLog()->debug(
                     "Connection to {} failed. {} (Code {})", endpoint, ec.message(), ec.value());
             }
 
@@ -114,12 +114,12 @@ Router::add (tcp::endpoint endpoint) {
                 continue;
             }
 
-            routerLog ()->info ("Successfully connected to {}", endpoint);
+            routerLog()->debug("Successfully connected to {}", endpoint);
             this->add (std::move (socket));
             return;
         }
 
-        routerLog ()->info ("Gave up trying to connect to {}", endpoint);
+        routerLog()->debug("Gave up trying to connect to {}", endpoint);
 
         auto it =
             std::find (begin (known_peers_), end (known_peers_), endpoint);
@@ -143,7 +143,7 @@ Router::Router (asio::io_service& io, int const port)
     set_tcp_socket_buffer_sizes (acceptor_, ec);
     acceptor_.listen ();
 
-    routerLog ()->info ("ID = {}, Name = '{}'", id_, name_);
+    routerLog()->debug("ID = {}, Name = '{}'", id_, name_);
 }
 
 bool
@@ -174,7 +174,7 @@ Router::start (uint32_t const id, std::string name) {
                 throw boost::system::system_error (ec);
             }
 
-            routerLog ()->info ("Accepted connection from router {}",
+            routerLog()->debug("Accepted connection from router {}",
                                 socket.remote_endpoint ());
             add (std::move (socket));
         }
@@ -208,7 +208,7 @@ Router::start (uint32_t const id, std::string name) {
             }
         }
 
-        routerLog ()->info ("Hello loop terminated");
+        routerLog()->debug("Hello loop terminated");
     });
 }
 
@@ -234,17 +234,17 @@ Router::get_known_routes () {
 void
 Router::dump_table () {
     if (route_table_.empty ()) {
-        routerLog ()->info ("Route table is empty");
+        routerLog()->debug("Route table is empty");
         return;
     } else {
-        routerLog ()->info ("Route table contents:");
+        routerLog()->debug("Route table contents:");
     }
 
     int route_n = 0;
     for (auto& route : route_table_) {
         ++route_n;
 
-        routerLog ()->info ("   Route {}: dest {}, cost {}, path [{}]",
+        routerLog()->debug("   Route {}: dest {}, cost {}, path [{}]",
                             route_n,
                             route.dest,
                             route.cost,
@@ -272,10 +272,10 @@ private:
 void
 MessageHandler::
 operator() (HelloMessage& hello, std::shared_ptr<Connection> source) const {
-    routerLog ()->info (
+    routerLog()->debug(
         "Received hello from '{}' (id: {})", hello.name, hello.id);
     if (hello.id == router_->id ()) {
-        routerLog ()->info ("Received own hello message. Closing connection "
+        routerLog()->debug("Received own hello message. Closing connection "
                             "{}",
                             source->id ());
         router_->remove (std::move (source));
@@ -286,13 +286,13 @@ operator() (HelloMessage& hello, std::shared_ptr<Connection> source) const {
 void
 MessageHandler::
 operator() (UnknownMessage& message, std::shared_ptr<Connection> source) const {
-    routerLog ()->info ("Received an unknown message");
+    routerLog()->debug("Received an unknown message");
 }
 
 void
 MessageHandler::
 operator() (RouteAdvertisement& ra, std::shared_ptr<Connection> source) const {
-    routerLog ()->info ("Received route advertisement from router {}",
+    routerLog()->debug("Received route advertisement from router {}",
                         ra.sender);
     router_->integrate (ra, std::move (source));
 }
@@ -300,7 +300,7 @@ operator() (RouteAdvertisement& ra, std::shared_ptr<Connection> source) const {
 void
 MessageHandler::
 operator() (RouteRevocation& rr, std::shared_ptr<Connection> source) const {
-    routerLog ()->info (
+    routerLog()->debug(
         "Received {} dead routes from router {}", rr.routes.size (), rr.sender);
     router_->integrate (rr, std::move (source));
 }
@@ -377,7 +377,7 @@ Router::integrate (Route route, std::shared_ptr<Connection> source) {
 
         route_limit_reached = ((rank_higher - rank_lower) == kDestRouteLimit);
         if (route_limit_reached) {
-            routerLog ()->info ("   Route limit reached for dest {}",
+            routerLog()->debug("   Route limit reached for dest {}",
                                 route.dest);
         }
     }
@@ -394,12 +394,12 @@ Router::integrate (Route route, std::shared_ptr<Connection> source) {
         if ((rank_installed >= rank_lower) && (rank_installed <= rank_higher)) {
             auto bumped = std::prev (existing_routes.second);
 
-            routerLog ()->info ("   Removed route: dest {}, cost {}, path [{}]",
+            routerLog()->debug("   Removed route: dest {}, cost {}, path [{}]",
                                 bumped->dest,
                                 bumped->cost,
                                 comma_separate (bumped->path));
 
-            routerLog ()->info (
+            routerLog()->debug(
                 "  ... to make way for: dest {}, cost {}, path [{}]",
                 installed.first->dest,
                 installed.first->cost,
@@ -417,12 +417,12 @@ Router::integrate (Route route, std::shared_ptr<Connection> source) {
 void
 Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
     if (rr.sender == id_) {
-        routerLog ()->info (" Received own route revocation. "
+        routerLog()->debug(" Received own route revocation. "
                             "This indicates a loop. Ignoring");
         return;
     }
 
-    routerLog ()->info ("Removing dead routes received from router {}",
+    routerLog()->debug("Removing dead routes received from router {}",
                         rr.sender);
 
     RouteRevocation revocation;
@@ -434,21 +434,21 @@ Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
     for (auto& route : rr.routes) {
         ++route_n;
 
-        routerLog ()->info ("   Route {}: dest {}, cost {}, path [{}]",
+        routerLog()->debug("   Route {}: dest {}, cost {}, path [{}]",
                             route_n,
                             route->dest,
                             route->cost,
                             comma_separate (route->path));
 
         if (route->dest == id_) {
-            routerLog ()->info ("   Route {}: ignored because it's to me",
+            routerLog()->debug("   Route {}: ignored because it's to me",
                                 route_n);
             continue;
         }
 
         if (end (route->path) !=
             std::find (begin (route->path), end (route->path), id_)) {
-            routerLog ()->info (
+            routerLog()->debug(
                 "   Route {}: ignored because it includes a loop", route_n);
             continue;
         }
@@ -465,9 +465,9 @@ Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
             boost::tie (new_route->dest, new_route->cost, new_route->path));
 
         if (entry == end (route_table_)) {
-            routerLog ()->info ("    Route {}: not found", route_n);
+            routerLog()->debug("    Route {}: not found", route_n);
         } else {
-            routerLog ()->info ("    Route {}: removed", route_n);
+            routerLog()->debug("    Route {}: removed", route_n);
             route_table_.get<by_destination> ().erase (entry);
             routes_updated = true;
         }
@@ -485,12 +485,12 @@ Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
 void
 Router::integrate (RouteAdvertisement& ra, std::shared_ptr<Connection> source) {
     if (ra.sender == id_) {
-        routerLog ()->info (" Received own route advertisement. "
+        routerLog()->debug(" Received own route advertisement. "
                             "This indicates a loop. Ignoring");
         return;
     }
 
-    routerLog ()->info ("Installing routes received from router {}", ra.sender);
+    routerLog()->debug("Installing routes received from router {}", ra.sender);
 
     RouteAdvertisement advert;
     advert.sender = id_;
@@ -501,21 +501,21 @@ Router::integrate (RouteAdvertisement& ra, std::shared_ptr<Connection> source) {
     for (auto& route : ra.routes) {
         ++route_n;
 
-        routerLog ()->info ("   Route {}: dest {}, cost {}, path [{}]",
+        routerLog()->debug("   Route {}: dest {}, cost {}, path [{}]",
                             route_n,
                             route->dest,
                             route->cost,
                             comma_separate (route->path));
 
         if (route->dest == id_) {
-            routerLog ()->info ("   Route {}: ignored because it's to me",
+            routerLog()->debug("   Route {}: ignored because it's to me",
                                 route_n);
             continue;
         }
 
         if (end (route->path) !=
             std::find (begin (route->path), end (route->path), id_)) {
-            routerLog ()->info (
+            routerLog()->debug(
                 "   Route {}: ignored because it would create a loop", route_n);
             continue;
         }
@@ -530,10 +530,10 @@ Router::integrate (RouteAdvertisement& ra, std::shared_ptr<Connection> source) {
 
         bool const installed = integrate (*new_route, source);
         if (installed) {
-            routerLog ()->info ("    Route {}: installed", route_n);
+            routerLog()->debug("    Route {}: installed", route_n);
             advert.routes.emplace_back (std::move (new_route));
         } else {
-            routerLog ()->info ("    Route {}: not installed", route_n);
+            routerLog()->debug("    Route {}: not installed", route_n);
 
         }
 
@@ -549,7 +549,7 @@ Router::integrate (RouteAdvertisement& ra, std::shared_ptr<Connection> source) {
 
 void
 Router::remove (std::shared_ptr<Connection> connection) {
-    routerLog ()->info (" Disabling connection {}", connection->id ());
+    routerLog()->debug(" Disabling connection {}", connection->id ());
 
     connection->stop ();
 
@@ -559,7 +559,7 @@ Router::remove (std::shared_ptr<Connection> connection) {
     auto const n_dead_routes =
         std::distance (dead_routes.first, dead_routes.second);
 
-    routerLog ()->info (
+    routerLog()->debug(
         "Removing {} route(s) broken by removal of connection {}",
         n_dead_routes,
         connection->id ());

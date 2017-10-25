@@ -15,13 +15,13 @@ Connection::Connection (tcp::socket socket)
       endpoint_ (socket_.remote_endpoint ()),
       reader_ (socket_),
       writer_ (socket_) {
-    routerLog ()->info ("Connection {} created", id ());
+    routerLog()->debug("Connection {} created", id ());
 
     boost::system::error_code ec;
     socket_.set_option (tcp::no_delay (true), ec);
 
     if (ec) {
-        routerLog ()->info (
+        routerLog()->debug(
             "Failed to disable Nagles algorithm on connection {}", id ());
     }
 
@@ -32,7 +32,7 @@ Connection::Connection (tcp::socket socket)
 }
 
 Connection::~Connection () noexcept {
-    routerLog ()->info ("Connection {} destroyed", id ());
+    routerLog()->debug("Connection {} destroyed", id ());
 }
 
 void
@@ -66,7 +66,7 @@ Connection::start () {
                 }
             }
 
-            routerLog ()->info ("Connection {} terminated receive loop",
+            routerLog()->debug("Connection {} terminated receive loop",
                                 this->id ());
         });
 }
