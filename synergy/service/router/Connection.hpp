@@ -18,7 +18,7 @@ class Connection final : public std::enable_shared_from_this<Connection> {
     using signal = boost::signals2::signal<Args...>;
 
 public:
-    explicit Connection (tcp::socket socket);
+    explicit Connection (tcp::socket &&socket, ssl::context& context);
     ~Connection () noexcept;
 
     uint32_t id () const noexcept;
@@ -29,19 +29,11 @@ public:
     tcp::endpoint endpoint () const;
 
 private:
-    void loadRawCertificate();
-
-    static const std::string sslCertificate();
-    static const std::string sslKey();
-    static const std::string sslDH();
-
-private:
     using SslStream = ssl::stream<boost::asio::ip::tcp::socket&>;
     static uint32_t next_connection_id_;
     uint32_t id_;
     tcp::socket socket_;
     tcp::endpoint endpoint_;
-    ssl::context context_;
     SslStream stream_;
     MessageReader<SslStream> reader_;
     MessageWriter<SslStream> writer_;
