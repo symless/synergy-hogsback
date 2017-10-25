@@ -41,6 +41,7 @@ private:
 
 public:
     signal<void(std::shared_ptr<Connection>)> on_connected;
+    signal<void(std::shared_ptr<Connection>)> on_connect_failed;
     signal<void(std::shared_ptr<Connection>)> on_disconnect;
     signal<void(MessageHeader const&, Message&, std::shared_ptr<Connection>)>
         on_message;

@@ -47,7 +47,7 @@ Connection::start (bool fromServer) {
         if (ec) {
             routerLog ()->error ("Connection {} failed in SSL handshake: {}",
                                 this->id (), ec.message());
-            on_disconnect (self);
+            on_connect_failed (self);
         }
         else {
             enabled_ = true;

@@ -312,7 +312,7 @@ Router::add (tcp::socket socket, bool isServer) {
 
     connection->on_connected.connect (
         [this](std::shared_ptr<Connection> connection) {
-            routerLog ()->debug ("Successfully connected to {}", connection->endpoint);
+            routerLog ()->debug ("Successfully connected to {}", connection->endpoint());
 
             connections_.push_back (connection);
 
@@ -336,6 +336,11 @@ Router::add (tcp::socket socket, bool isServer) {
 
                          connection->send (std::move (advert), ctx);
                      });
+        });
+
+    connection->on_connect_failed.connect (
+        [this](std::shared_ptr<Connection> connection) {
+            this->add (connection->endpoint ());
         });
 
     connection->on_disconnect.connect (
