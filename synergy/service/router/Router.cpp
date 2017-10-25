@@ -114,7 +114,6 @@ Router::add (tcp::endpoint endpoint) {
                 continue;
             }
 
-            routerLog ()->info ("Successfully connected to {}", endpoint);
             this->add (std::move (socket), false);
             return;
         }
@@ -313,6 +312,10 @@ Router::add (tcp::socket socket, bool isServer) {
 
     connection->on_connected.connect (
         [this](std::shared_ptr<Connection> connection) {
+            routerLog ()->debug ("Successfully connected to {}", connection->endpoint);
+
+            connections_.push_back (connection);
+
             asio::spawn (acceptor_.get_io_service (),
                      [this, connection](asio::yield_context ctx) {
                          RouteAdvertisement advert;
@@ -337,7 +340,7 @@ Router::add (tcp::socket socket, bool isServer) {
 
     connection->on_disconnect.connect (
         [this](std::shared_ptr<Connection> connection) {
-            routerLog ()->info (
+            routerLog ()->debug (
             "Connection {} is disconnected", connection->id());
             auto remote = connection->endpoint ();
             this->remove (std::move (connection));
@@ -363,7 +366,6 @@ Router::add (tcp::socket socket, bool isServer) {
         on_receive (message, header.source);
     });
 
-    connections_.push_back (connection);
     connection->start (isServer);
 }
 
