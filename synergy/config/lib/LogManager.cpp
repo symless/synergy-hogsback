@@ -41,8 +41,15 @@ LogManager::LogManager()
     s_file.setFileName(directoryManager.profileDir() + '/'+ kDefaultLogFile);
     s_file.open(QIODevice::WriteOnly | QIODevice::Append);
 
+    // use a double signal to move threads
+    connect(this, &LogManager::commonLogLine, this,
+        [this](const QString& logLine) {
+            appendRaw(kLogPrefix + logLine);
+        },
+        Qt::QueuedConnection);
+
     g_commonLog.onLogLine.connect([this](std::string logLine) {
-        appendRaw(kLogPrefix + QString::fromStdString(logLine));
+        emit commonLogLine(QString::fromStdString(logLine));
     });
 }
 

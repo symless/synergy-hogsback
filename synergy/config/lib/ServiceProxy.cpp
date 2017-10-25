@@ -185,7 +185,7 @@ ServiceProxy::onLogServiceOutput(QString text)
 {
     foreach(QString line, text.split(QRegExp("\r|\n|\r\n"))) {
         if (!line.isEmpty()) {
-            LogManager::raw("[ Service ] " + line);
+            LogManager::raw(line);
         }
     }
 }

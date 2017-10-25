@@ -200,7 +200,7 @@ operator() (Message const& message, int32_t source) const {
 void
 ClientProxyMessageHandler::handle (ProxyClientConnect const& pcc,
                                    int32_t source) const {
-    routerLog ()->info (
+    routerLog()->debug(
         "ClientProxy: Received client connection for {} from screen",
         pcc.screen,
         source);
@@ -226,10 +226,10 @@ ClientProxyMessageHandler::handle (const CoreMessage& cm,
         });
 
     if (it == end (connections)) {
-        routerLog ()->info ("ClientProxy: Received core message for client "
-                            "{}, but we have not established a connection to "
-                            "that client",
-                            source);
+        routerLog ()->trace(
+            "ClientProxy: Received core message for client '{}' "
+            "before it connected",
+            source);
         return;
     }
 

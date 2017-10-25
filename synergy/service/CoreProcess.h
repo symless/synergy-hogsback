@@ -45,6 +45,7 @@ private:
     void writeConfigurationFile();
     void startServer();
     void startClient(int serverId);
+    void handleShutdown();
 
 private:
     boost::asio::io_service& m_ioService;
@@ -54,6 +55,7 @@ private:
     ProcessMode m_proccessMode;
     int m_currentServerId;
     std::vector<std::string> m_nextCommand;
+    std::vector<std::string> m_lastCommand;
     std::string m_runAsUid = "";
 };
 
