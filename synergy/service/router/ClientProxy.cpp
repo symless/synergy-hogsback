@@ -165,7 +165,6 @@ ClientProxyConnection::start (ClientProxy& proxy) {
             catch (const std::exception& e) {
                 routerLog()->error ("ClientProxy: failed to parse message: {}",
                                    e.what());
-                break;
             }
         }
 
