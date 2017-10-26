@@ -398,7 +398,7 @@ CoreProcess::start (std::vector<std::string> command)
     expectedExit.connect_extended([this](auto& connection) {
         connection.disconnect();
 
-        handleShutdown();
+        this->handleShutdown();
 
         if (!m_nextCommand.empty()) {
             this->start(std::move(m_nextCommand));
@@ -408,7 +408,7 @@ CoreProcess::start (std::vector<std::string> command)
     unexpectedExit.connect_extended([this](auto& connection) {
         connection.disconnect();
 
-        handleShutdown();
+        this->handleShutdown();
 
         if (!m_lastCommand.empty()) {
             this->start(std::move(m_lastCommand));
