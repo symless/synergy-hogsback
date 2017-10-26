@@ -163,9 +163,6 @@ CoreProcessImpl::shutdown()
     m_errorPipe.cancel();
     ioService.poll();
 
-    m_outPipe.close();
-    m_errorPipe.close();
-
     /* Disconnect internal signal handling */
     for (auto& signal: m_signals) {
         signal.disconnect();
