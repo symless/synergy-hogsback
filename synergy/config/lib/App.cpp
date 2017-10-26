@@ -27,6 +27,7 @@
 #include <synergy/common/CrashHandler.h>
 #ifdef Q_OS_OSX
 #include <CoreFoundation/CoreFoundation.h>
+#include <boost/algorithm/string/predicate.hpp>
 #endif
 
 namespace asio = boost::asio;
@@ -102,6 +103,24 @@ reinstallBundle() {
     recursiveCopy (path, "/Applications/Synergy.app");
 }
 
+extern void unmountDMG (char const*);
+
+static void
+unmountVolumes() {
+    boost::filesystem::directory_iterator it ("/Volumes");
+    boost::filesystem::directory_iterator end;
+
+    for (; it != end; ++it) {
+        if (!boost::filesystem::is_directory(it->status())) {
+            continue;
+        }
+        auto path = it->path();
+        if (boost::algorithm::icontains (path.filename().string(), "synergy", std::locale::classic())) {
+            unmountDMG (path.c_str());
+        }
+    }
+}
+
 void
 App::installAndStartService()
 {
@@ -125,6 +144,7 @@ App::installAndStartService()
         }
     }
 
+    unmountVolumes();
     startService();
 }
 #endif
