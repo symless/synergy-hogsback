@@ -62,8 +62,8 @@
         </Property>
         <Condition Message="An existing installation of $(var.Name) was detected, please uninstall it before continuing.">NOT LEGACY_UNINSTALL_EXISTS</Condition>
 
-        <CustomAction ExeCommand="" FileKey="GuiProgram" Id="StartGui" Return="asyncNoWait"/>
-        <UI><Publish Control="Finish" Dialog="ExitDialog" Event="DoAction" Value="StartGui">NOT Installed</Publish></UI>
+        <CustomAction ExeCommand="" FileKey="ConfigProgram" Id="StartConfig" Return="asyncNoWait"/>
+        <UI><Publish Control="Finish" Dialog="ExitDialog" Event="DoAction" Value="StartConfig">NOT Installed</Publish></UI>
     </Product>
     <Fragment>
         <Directory Id="TARGETDIR" Name="SourceDir">
@@ -115,9 +115,9 @@
                     Id="ServiceControl" Name="Synergy"
                     Start="install" Stop="both" Remove="uninstall" />
             </Component>
-            <Component Guid="BAC8149B-6287-45BF-9C27-43D71ED40214" Id="Gui">
-                <File Id="GuiProgram" KeyPath="yes" Source="$(var.BinPath)/synergy-config.exe">
-                    <Shortcut Advertise="yes" Directory="ProgramMenuFolder" Icon="synergy.ico" Id="GuiShortcut" Name="$(var.Name)"/>
+            <Component Guid="BAC8149B-6287-45BF-9C27-43D71ED40214" Id="Config">
+                <File Id="ConfigProgram" KeyPath="yes" Source="$(var.BinPath)/synergy-config.exe">
+                    <Shortcut Advertise="yes" Directory="ProgramMenuFolder" Icon="synergy.ico" Id="ConfigShortcut" Name="$(var.Name)"/>
                 </File>
                 <?if $(var.Configuration) = "Debug" ?>
                     <File Source="$(var.BinPath)/synergy-config.pdb"/>
