@@ -11,7 +11,7 @@
 #include <ctime>
 
 static boost::signals2::signal<void()> testFinished;
-const int kMaxmiumStartTime = 20;
+const int kMaxmiumStartTime = 21;
 const float kSignalDelay = 0.5f;
 const float kMinRestartDelay = 0.05f;
 const float kMaxRestartDelay = 0.3f;
@@ -52,8 +52,8 @@ TEST_CASE("Start and stop core process in different modes", "[CoreProcess]" ) {
     boost::asio::deadline_timer signalDelayTimer(ioService, boost::posix_time::seconds(kSignalDelay));
 
     testFinished.connect([&ioService, &coreProcess]() {
-        REQUIRE (coreProcess.currentServerId() == 1);
-        REQUIRE (coreProcess.proccessMode() == ProcessMode::kServer);
+        REQUIRE (coreProcess.currentServerId() == 2);
+        REQUIRE (coreProcess.proccessMode() == ProcessMode::kClient);
 
         coreProcess.shutdown();
 
