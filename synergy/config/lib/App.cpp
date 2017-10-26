@@ -113,6 +113,16 @@ App::installAndStartService()
             std::clog << "Service helper installed\n";
             sleep (3);
         }
+        startService();
+        QProcess::startDetached("/Applications/Synergy.app/Contents/MacOS/synergy-config");
+        exit (EXIT_SUCCESS);
+    }
+
+    if (!boost::filesystem::exists
+            ("/Library/LaunchDaemons/com.symless.synergy.v2.ServiceHelper.plist")) {
+        if (installServiceHelper()) {
+            sleep (3);
+        }
     }
 
     startService();
