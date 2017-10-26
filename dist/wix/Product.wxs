@@ -83,8 +83,6 @@
         <ComponentGroup Directory="INSTALLFOLDER" Id="ProductComponents">
             <Component Guid="EC9AD3B0-277C-4157-B5C8-5FD5B6A5F4AD" Id="Core">
                 <?if $(var.Configuration) = "Debug" ?>
-                    <File Source="$(var.BinPath)/synergys.pdb"/>
-                    <File Source="$(var.BinPath)/synergyc.pdb"/>
                     <File Source="$(var.BinPath)/synergy-core.pdb"/>
                     <File Source="$(var.BinPath)/synergy-service.pdb"/>
                     <File Source="$(var.BinPath)/synergy-service-controller.pdb"/>
@@ -95,7 +93,6 @@
                 <File Source="$(var.BinPath)/synergy-service.exe">
                     <fire:FirewallException Id="ServerFirewallException" IgnoreFailure="yes" Name="$(var.Name)" Scope="any"/>
                 </File>
-                <File Source="$(var.BinPath)/synergyc.exe"/>
                 <File Source="$(var.BinPath)/synwinhk.dll"/>
                 <File Source="$(var.BinPath)/synergy-core.exe"/>
                 <File Source="$(var.BinPath)/synergy-service-controller.exe" KeyPath="yes" />
