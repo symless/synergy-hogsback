@@ -201,7 +201,7 @@ void
 ClientProxyMessageHandler::handle (ProxyClientConnect const& pcc,
                                    int32_t source) const {
     routerLog()->debug(
-        "ClientProxy: Received client connection for {} from screen",
+        "ClientProxy: Received client connection for {} from screen {}",
         pcc.screen,
         source);
 
