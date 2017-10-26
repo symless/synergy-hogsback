@@ -98,7 +98,6 @@
                 <File Source="$(var.BinPath)/synergyc.exe"/>
                 <File Source="$(var.BinPath)/synwinhk.dll"/>
                 <File Source="$(var.BinPath)/synergy-core.exe"/>
-                <File Source="$(var.BinPath)/synergy-service.exe"/>
                 <File Source="$(var.BinPath)/synergy-service-controller.exe" KeyPath="yes" />
                 <File Source="$(var.OpenSSLBinPath)/libeay32.dll"/>
                 <File Source="$(var.OpenSSLBinPath)/ssleay32.dll"/>
