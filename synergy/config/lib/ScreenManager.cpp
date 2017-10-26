@@ -247,6 +247,14 @@ void ScreenManager::updateScreens(QByteArray reply)
 
         emit updateProfileConfig();
     }
+
+    if (m_screenListModel->getScreenList().count() == 1) {
+        setConfigHint("Next step: install Synergy 2 on another computer");
+    }
+    else {
+        // clear the hint now we have more than 1 screen
+        setConfigHint("");
+    }
 }
 
 void ScreenManager::onUpdateProfileConfig()
@@ -296,4 +304,15 @@ void ScreenManager::onScreenError(QString screenName, int errorCode)
 
         m_cloudClient->updateScreen(s);
     }
+}
+
+QString ScreenManager::configHint()
+{
+    return m_configHint;
+}
+
+void ScreenManager::setConfigHint(const QString& text)
+{
+    m_configHint = text;
+    configHintChanged();
 }

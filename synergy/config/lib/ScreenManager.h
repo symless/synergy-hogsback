@@ -25,6 +25,7 @@ public:
     Q_PROPERTY(ServiceProxy* serviceProxy WRITE setServiceProxy)
     Q_PROPERTY(int viewWidth WRITE setViewWidth)
     Q_PROPERTY(int viewHeight WRITE setViewHeight)
+    Q_PROPERTY(QString configHint READ configHint NOTIFY configHintChanged)
 
     Q_INVOKABLE int getModelIndex(int x, int y);
     Q_INVOKABLE void moveModel(int index, int offsetX, int offsetY);
@@ -43,17 +44,22 @@ public:
     void setViewWidth(int w);
     void setViewHeight(int h);
     void saveSnapshot();
+    QString configHint();
 
 signals:
     void updateProfileConfig();
     void newServer(int serverId);
     void localhostUnsubscribed();
+    void configHintChanged();
 
 private slots:
     void updateScreens(QByteArray reply);
     void onUpdateProfileConfig();
     void onScreenStatusChanged(QPair<QString, ScreenStatus> r);
     void onScreenError(QString screenName, int errorCode);
+
+private:
+    void setConfigHint(const QString &value);
 
 private:
     ScreenListModel* m_screenListModel;
@@ -68,6 +74,7 @@ private:
     int m_latestConfigSerial;
     int m_configVersion;
     int m_previousServerId;
+    QString m_configHint = "";
 };
 
 #endif // SCREENMANAGER_H
