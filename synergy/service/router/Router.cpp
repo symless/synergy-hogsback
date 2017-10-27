@@ -193,7 +193,7 @@ Router::start (uint32_t const id, std::string name) {
                 if (!running_) {
                     return;
                 }
-                connection->send (hello, ctx);
+                connection->send (hello);
             }
 
             boost::system::error_code ec;
@@ -317,26 +317,23 @@ Router::add (tcp::socket socket, bool isServer, asio::yield_context ctx) {
 
             connections_.push_back (connection);
 
-            asio::spawn (acceptor_.get_io_service (),
-                     [this, connection](asio::yield_context context) {
-                         RouteAdvertisement advert;
-                         advert.sender = id_;
+            RouteAdvertisement advert;
+            advert.sender = id_;
 
-                         auto known_routes = get_known_routes ();
-                         advert.routes.reserve (1 + known_routes.size ());
+            auto known_routes = get_known_routes ();
+            advert.routes.reserve (1 + known_routes.size ());
 
-                         auto route  = std::make_unique<Route> ();
-                         route->dest = id_;
-                         route->cost = 0;
-                         advert.routes.emplace_back (std::move (route));
+            auto route  = std::make_unique<Route> ();
+            route->dest = id_;
+            route->cost = 0;
+            advert.routes.emplace_back (std::move (route));
 
-                         advert.routes.insert (
-                             end (advert.routes),
-                             std::make_move_iterator (begin (known_routes)),
-                             std::make_move_iterator (end (known_routes)));
+            advert.routes.insert (
+             end (advert.routes),
+             std::make_move_iterator (begin (known_routes)),
+             std::make_move_iterator (end (known_routes)));
 
-                         connection->send (std::move (advert), context);
-                     });
+            connection->send (std::move (advert));
         });
 
     connection->on_disconnect.connect (
@@ -618,46 +615,33 @@ Router::forward (MessageHeader const& header, Message message) {
         return false;
     }
 
-    asio::spawn (acceptor_.get_io_service (), [
-        this,
-        header,
-        message    = std::move (message),
-        connection = route->connection->shared_from_this ()
-    ](auto ctx) { connection->send (header, std::move (message), ctx); });
+    route->connection->send (header, std::move (message));
 
     return true;
 }
 
 void
 Router::flood (Message message, uint32_t const source_port) {
-    asio::spawn (acceptor_.get_io_service (),
-                 [ this, message = std::move (message), source_port ](
-                     asio::yield_context ctx) {
-                     auto connections = connections_;
-                     for (auto& connection : connections) {
-                         if (!running_) {
-                             break;
-                         }
-                         if (connection->id () != source_port) {
-                             connection->send (message, ctx);
-                         }
-                     }
-                 });
+    auto connections = connections_;
+    for (auto& connection : connections) {
+        if (!running_) {
+            break;
+        }
+        if (connection->id () != source_port) {
+            connection->send (message);
+        }
+    }
 }
 
 void
 Router::broadcast (Message message) {
-    asio::spawn (
-        acceptor_.get_io_service (),
-        [ this, message = std::move (message) ](asio::yield_context ctx) {
-            auto connections = connections_;
-            for (auto& connection : connections) {
-                if (!running_) {
-                    break;
-                }
-                connection->send (message, ctx);
-            }
-        });
+    auto connections = connections_;
+    for (auto& connection : connections) {
+        if (!running_) {
+            break;
+        }
+        connection->send (message);
+    }
 }
 
 uint32_t
