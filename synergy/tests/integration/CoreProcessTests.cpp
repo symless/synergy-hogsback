@@ -1,4 +1,4 @@
-#include <synergy/service/CoreProcess.h>
+/*#include <synergy/service/CoreProcess.h>
 #include <synergy/common/UserConfig.h>
 #include <synergy/common/ProfileConfig.h>
 
@@ -70,3 +70,4 @@ TEST_CASE("Start and stop core process in different modes", "[CoreProcess]" ) {
     ioService.run();
 }
 
+*/

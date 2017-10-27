@@ -58,6 +58,21 @@ Rectangle {
             z: 2
         }
 
+        //  config hint text
+        Text {
+            id: configHintText
+            text: screenManager.configHint
+            color: "white"
+            font.pixelSize: dp(15)
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.margins: dp(100)
+            width: parent.width
+            horizontalAlignment: Text.AlignHCenter
+            z: 2
+        }
+
         // background header
         Rectangle {
             id: configPageBackgroundHeader

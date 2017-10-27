@@ -41,7 +41,7 @@
             <Component Guid="7CF3564D-1F8E-4D3D-9781-E1EE22D5BD67" Id="RegistryEntries">
                 <RegistryKey ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes" 
                              Key="Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers" Root="HKLM">
-                    <RegistryValue Name="[INSTALLFOLDER]synergys.exe" Type="string" Value="~ HIGHDPIAWARE WIN7RTM"/>
+                    <RegistryValue Name="[INSTALLFOLDER]synergy-core.exe" Type="string" Value="~ HIGHDPIAWARE WIN7RTM"/>
                 </RegistryKey>
                 <Condition><![CDATA[Installed OR (VersionNT >= 602)]]></Condition><!-- Windows 8 and later only -->
             </Component>
@@ -62,8 +62,8 @@
         </Property>
         <Condition Message="An existing installation of $(var.Name) was detected, please uninstall it before continuing.">NOT LEGACY_UNINSTALL_EXISTS</Condition>
 
-        <CustomAction ExeCommand="" FileKey="GuiProgram" Id="StartGui" Return="asyncNoWait"/>
-        <UI><Publish Control="Finish" Dialog="ExitDialog" Event="DoAction" Value="StartGui">NOT Installed</Publish></UI>
+        <CustomAction ExeCommand="" FileKey="ConfigProgram" Id="StartConfig" Return="asyncNoWait"/>
+        <UI><Publish Control="Finish" Dialog="ExitDialog" Event="DoAction" Value="StartConfig">NOT Installed</Publish></UI>
     </Product>
     <Fragment>
         <Directory Id="TARGETDIR" Name="SourceDir">
@@ -83,8 +83,6 @@
         <ComponentGroup Directory="INSTALLFOLDER" Id="ProductComponents">
             <Component Guid="EC9AD3B0-277C-4157-B5C8-5FD5B6A5F4AD" Id="Core">
                 <?if $(var.Configuration) = "Debug" ?>
-                    <File Source="$(var.BinPath)/synergys.pdb"/>
-                    <File Source="$(var.BinPath)/synergyc.pdb"/>
                     <File Source="$(var.BinPath)/synergy-core.pdb"/>
                     <File Source="$(var.BinPath)/synergy-service.pdb"/>
                     <File Source="$(var.BinPath)/synergy-service-controller.pdb"/>
@@ -95,10 +93,8 @@
                 <File Source="$(var.BinPath)/synergy-service.exe">
                     <fire:FirewallException Id="ServerFirewallException" IgnoreFailure="yes" Name="$(var.Name)" Scope="any"/>
                 </File>
-                <File Source="$(var.BinPath)/synergyc.exe"/>
                 <File Source="$(var.BinPath)/synwinhk.dll"/>
                 <File Source="$(var.BinPath)/synergy-core.exe"/>
-                <File Source="$(var.BinPath)/synergy-service.exe"/>
                 <File Source="$(var.BinPath)/synergy-service-controller.exe" KeyPath="yes" />
                 <File Source="$(var.OpenSSLBinPath)/libeay32.dll"/>
                 <File Source="$(var.OpenSSLBinPath)/ssleay32.dll"/>
@@ -119,10 +115,9 @@
                     Id="ServiceControl" Name="Synergy"
                     Start="install" Stop="both" Remove="uninstall" />
             </Component>
-            <Component Guid="BAC8149B-6287-45BF-9C27-43D71ED40214" Id="Gui">
-                <File Id="GuiProgram" KeyPath="yes" Source="$(var.BinPath)/synergy-config.exe">
-                    <Shortcut Advertise="yes" Directory="ProgramMenuFolder" Icon="synergy.ico" Id="GuiShortcut" Name="$(var.Name) 2.0"/>
-                    <fire:FirewallException Id="GuiFirewallException" IgnoreFailure="yes" Name="$(var.Name) 2.0" Scope="any"/>
+            <Component Guid="BAC8149B-6287-45BF-9C27-43D71ED40214" Id="Config">
+                <File Id="ConfigProgram" KeyPath="yes" Source="$(var.BinPath)/synergy-config.exe">
+                    <Shortcut Advertise="yes" Directory="ProgramMenuFolder" Icon="synergy.ico" Id="ConfigShortcut" Name="$(var.Name)"/>
                 </File>
                 <?if $(var.Configuration) = "Debug" ?>
                     <File Source="$(var.BinPath)/synergy-config.pdb"/>
