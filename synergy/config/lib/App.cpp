@@ -40,6 +40,7 @@ using namespace std;
 cxxopts::Options g_options("");
 
 #ifdef Q_OS_OSX
+extern "C++" bool authorizeServiceHelper();
 extern "C++" bool installServiceHelper();
 extern bool iAmInstalled();
 extern void killInstalledComponents();
@@ -125,6 +126,9 @@ void
 App::installAndStartService()
 {
     if (!iAmInstalled()) {
+        if (!authorizeServiceHelper()) {
+            exit (EXIT_FAILURE);
+        }
         stopService();
         killInstalledComponents();
         reinstallBundle();
