@@ -83,12 +83,6 @@ DEVICE=$(hdiutil attach -readwrite -noverify "${DMG_TMP}" | \
 
 sleep 2
 
-# add a link to the Applications dir
-echo "Add link to /Applications"
-pushd /Volumes/"${VOL_NAME}"
-ln -s /Applications
-popd
-
 # add a background image
 mkdir /Volumes/"${VOL_NAME}"/.background
 cp "${DMG_BACKGROUND_IMG}" /Volumes/"${VOL_NAME}"/.background/
