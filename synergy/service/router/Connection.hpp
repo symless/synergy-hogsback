@@ -6,6 +6,7 @@
 #include <boost/signals2/signal.hpp>
 #include <boost/asio/ssl/stream.hpp>
 #include <functional>
+#include <deque>
 #include <memory>
 
 using namespace synergy::protocol::v2;
@@ -24,8 +25,8 @@ public:
     uint32_t id () const noexcept;
     bool start (bool fromServer, asio::yield_context ctx);
     void stop ();
-    bool send (Message const&, asio::yield_context ctx);
-    bool send (MessageHeader const&, Message const&, asio::yield_context ctx);
+    bool send (Message const&);
+    bool send (MessageHeader const&, Message const&);
     tcp::endpoint endpoint () const;
 
 private:
@@ -38,6 +39,8 @@ private:
     MessageReader<SslStream> reader_;
     MessageWriter<SslStream> writer_;
     bool enabled_ = false;
+    boost::asio::io_service::strand strand_;
+    std::deque<std::pair<MessageHeader, Message>> messageQueue_;
 
 public:
     signal<void(std::shared_ptr<Connection>)> on_connected;

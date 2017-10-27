@@ -15,7 +15,8 @@ Connection::Connection (tcp::socket&& socket, ssl::context& context)
       endpoint_ (socket_.remote_endpoint ()),
       stream_(socket_, context),
       reader_ (stream_),
-      writer_ (stream_) {
+      writer_ (stream_),
+      strand_ (socket_.get_io_service()){
     routerLog ()->debug ("Connection {} created", id ());
     boost::system::error_code ec;
     socket_.set_option (tcp::no_delay (true), ec);
@@ -64,6 +65,7 @@ bool Connection::start(bool fromServer, asio::yield_context ctx) {
                 if (!enabled_) {
                     routerLog()->debug("Connection {} is not enabled",
                                         this->id ());
+                    break;
                 }
                 else if (ec == asio::error::operation_aborted) {
                     routerLog()->debug("Operation is aborted in connection {}",
@@ -97,15 +99,26 @@ Connection::stop () {
 }
 
 bool
-Connection::send (Message const& message, asio::yield_context ctx) {
+Connection::send (Message const& message) {
     auto header = message.make_header ();
-    return send (header, message, ctx);
+    return send (header, message);
 }
 
 bool
-Connection::send (MessageHeader const& header, Message const& message,
-                  asio::yield_context ctx) {
-    return writer_.write (header, message, ctx);
+Connection::send (MessageHeader const& header, Message const& message) {
+    messageQueue_.emplace_back(header, message);
+
+    if (messageQueue_.size() == 1) {
+        asio::spawn(strand_, [this] (auto ctx) {
+            while (messageQueue_.size() != 0) {
+                auto firstItem = messageQueue_.front();
+                writer_.write (firstItem.first, firstItem.second, ctx);
+                messageQueue_.pop_front();
+            }
+        });
+    }
+
+    return true;
 }
 
 tcp::endpoint
