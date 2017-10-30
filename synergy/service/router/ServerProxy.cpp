@@ -111,7 +111,11 @@ ServerProxy::start (int32_t const server_id) {
                 [this, server_id](std::string screenname) {
                     ProxyClientConnect pcc;
                     pcc.screen = std::move (screenname);
-                    router_.send (pcc, server_id);
+                    if (!router_.send (pcc, server_id)) {
+                        // when it fails to send, drop the connection and let core client reconnect
+                        connections_.back()->close();
+                        connections_.pop_back();
+                    }
                 });
 
             connections_.push_back (connection);
