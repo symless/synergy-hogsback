@@ -14,6 +14,9 @@
 #include <synergy/service/ServiceLogs.h>
 #include <synergy/service/router/Router.hpp>
 
+static int const kConnectRetryLimit     = 20;
+static auto const kConnectRetryInterval = std::chrono::milliseconds (500);
+
 class ClientProxyMessageHandler {
 public:
     explicit ClientProxyMessageHandler (ClientProxy& proxy) : proxy_ (proxy) {
@@ -80,27 +83,41 @@ ClientProxy::connect (int32_t client_id, const std::string& screen_name) {
         boost::system::error_code ec;
         socket.open (tcp::v4 ());
         set_tcp_socket_buffer_sizes (socket, ec);
-        socket.async_connect (
-            tcp::endpoint (ip::address_v4::from_string ("127.0.0.1"), port_),
-            ctx[ec]);
 
-        if (!ec) {
-            socket.set_option (tcp::no_delay (true), ec);
-            connections_.emplace_back (std::make_shared<ClientProxyConnection> (
-                std::move (socket), client_id, std::move (screen_name)));
+        asio::steady_timer timer (io_);
 
-            auto connection = connections_.back ();
-            connection->on_disconnect.connect (
-                [this](
-                    std::shared_ptr<ClientProxyConnection> const& connection) {
-                    auto it = std::find (
-                        begin (connections_), end (connections_), connection);
-                    if (it != end (connections_)) {
-                        connections_.erase (it);
-                    }
-                });
+        for (int attempt = 1; attempt <= kConnectRetryLimit; ++attempt) {
+            socket.async_connect (
+                tcp::endpoint (ip::address_v4::from_string ("127.0.0.1"), port_),
+                ctx[ec]);
 
-            connection->start (*this);
+            if (!ec) {
+                socket.set_option (tcp::no_delay (true), ec);
+                connections_.emplace_back (std::make_shared<ClientProxyConnection> (
+                    std::move (socket), client_id, std::move (screen_name)));
+
+                auto connection = connections_.back ();
+                connection->on_disconnect.connect (
+                    [this](
+                        std::shared_ptr<ClientProxyConnection> const& connection) {
+                        auto it = std::find (
+                            begin (connections_), end (connections_), connection);
+                        if (it != end (connections_)) {
+                            connections_.erase (it);
+                        }
+                    });
+
+                connection->start (*this);
+            }
+            else {
+                timer.expires_from_now (kConnectRetryInterval);
+                timer.async_wait (ctx[ec]);
+                socket.close (ec);
+                if (ec) {
+                    throw boost::system::system_error (ec, ec.message ());
+                }
+                continue;
+            }
         }
     });
 }
