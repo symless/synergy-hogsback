@@ -3,8 +3,11 @@
 boost::filesystem::path
 OSXDirectoryManager::systemAppDir()
 {
-    // TODO: use /Library instead?
-    return "/usr/local/share/synergy";
+    // on mac, everything runs as user (not root), so use
+    // a dir that the user always has write access to.
+    // this seems safe, as of writing this comment only
+    // GlobalConfig uses this dir.
+    return profileDir();
 }
 
 boost::filesystem::path
