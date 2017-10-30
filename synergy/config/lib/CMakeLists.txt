@@ -1,7 +1,11 @@
 cmake_minimum_required (VERSION 3.4)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set (GUI_LIB_MACOS_SOURCES Accessibility.mm)
+    set (GUI_LIB_MACOS_SOURCES
+        Accessibility.mm
+        OSXVolumeManagement.mm
+        OSXProcessList.cpp
+    )
 endif()
 
 set (GUI_LIB_SOURCES
@@ -36,5 +40,10 @@ add_library (guilib ${GUI_LIB_SOURCES})
 target_compile_definitions (guilib PRIVATE -DSYNLIB})
 
 target_link_libraries(guilib commonlib)
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    find_library (DISKARB_LIBRARY DiskArbitration)
+    target_link_libraries (guilib ${DISKARB_LIBRARY})
+endif()
 
 qt5_use_modules (guilib Core Widgets Quick Network Svg)

@@ -8,6 +8,7 @@
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/ranked_index.hpp>
 #include <boost/multi_index_container.hpp>
+#include <boost/asio/ssl/stream.hpp>
 #include <boost/signals2.hpp>
 #include <cassert>
 #include <cstdint>
@@ -19,6 +20,7 @@ class Connection;
 class MessageHeader;
 
 using namespace synergy::protocol::v2;
+namespace ssl = boost::asio::ssl;
 
 struct RouteTableEntry : Route {
     Connection* connection = nullptr;
@@ -70,7 +72,7 @@ public:
     bool forward (MessageHeader const& header, Message message);
 
 protected:
-    void add (tcp::socket);
+    bool add(tcp::socket, bool isServer, asio::yield_context ctx);
 
     bool integrate (Route, std::shared_ptr<Connection> source);
     void integrate (RouteRevocation&, std::shared_ptr<Connection>);
@@ -78,6 +80,13 @@ protected:
 
     void dump_table ();
     std::vector<copy_ptr<Route>> get_known_routes ();
+
+private:
+    void loadRawCertificate();
+
+    static const std::string sslCertificate();
+    static const std::string sslKey();
+    static const std::string sslDH();
 
 private:
     tcp::acceptor acceptor_;
@@ -88,6 +97,7 @@ private:
     uint32_t id_;
     std::string name_;
     bool running_ = false;
+    ssl::context context_;
 
 public:
     boost::signals2::signal<void(Message const&, int32_t)> on_receive;

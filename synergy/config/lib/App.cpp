@@ -25,6 +25,10 @@
 #include <boost/asio.hpp>
 #include <synergy/common/WampClient.h>
 #include <synergy/common/CrashHandler.h>
+#ifdef Q_OS_OSX
+#include <CoreFoundation/CoreFoundation.h>
+#include <boost/algorithm/string/predicate.hpp>
+#endif
 
 namespace asio = boost::asio;
 using namespace std;
@@ -35,28 +39,117 @@ using namespace std;
 
 cxxopts::Options g_options("");
 
-App::App(bool (*installServiceHelper)())
-{
-    m_installServiceHelper = installServiceHelper;
+#ifdef Q_OS_OSX
+extern "C++" bool authorizeServiceHelper();
+extern "C++" bool installServiceHelper();
+extern bool iAmInstalled();
+extern void killInstalledComponents();
+
+static void
+uninstallBundle() {
+    boost::filesystem::path path ("/Applications/Synergy.app");
+    std::cout << "Removing " << path << " ... ";
+    boost::system::error_code ec;
+    boost::filesystem::remove_all (path, ec);
+    std::cout << (ec ? "Failed" : "OK") << "\n";
 }
 
-#ifdef Q_OS_OSX
+static void
+recursiveCopy (boost::filesystem::path const& src,
+               boost::filesystem::path const& dst) {
+    if (boost::filesystem::exists (dst)){
+        return;
+    }
 
-bool
-App::installService()
+    boost::system::error_code ec;
+    if (boost::filesystem::is_directory (src)) {
+        std::cout << "Creating directory " << dst << " ...";
+        boost::filesystem::create_directories (dst);
+        std::cout << (ec ? "Failed" : "OK") << "\n";
+
+        for (auto& item : boost::filesystem::directory_iterator (src)) {
+            recursiveCopy (item.path(), dst / item.path().filename());
+        }
+    } else if (boost::filesystem::is_regular_file (src)) {
+        std::cout << "Installing " << dst << " ...";
+        boost::filesystem::copy (src, dst, ec);
+        std::cout << (ec ? "Failed" : "OK") << "\n";
+    }
+}
+
+static void
+reinstallBundle() {
+    // Get a reference to the main bundle
+    CFBundleRef mainBundle = CFBundleGetMainBundle();
+
+    // Get a reference to the file's URL
+    CFURLRef versionTxtUrl = CFBundleCopyResourceURL(mainBundle, CFSTR("Version"), CFSTR("txt"), NULL);
+    if (!versionTxtUrl) {
+        return;
+    }
+
+    // Convert the URL reference into a string reference
+    CFStringRef imagePath = CFURLCopyFileSystemPath(versionTxtUrl, kCFURLPOSIXPathStyle);
+
+    // Get the system encoding method
+    CFStringEncoding encodingMethod = CFStringGetSystemEncoding();
+
+    // Convert the string reference into a C string
+    boost::filesystem::path path (CFStringGetCStringPtr(imagePath, encodingMethod));
+    path = path.parent_path().parent_path().parent_path();
+    path = boost::filesystem::canonical(path);
+
+    uninstallBundle();
+    std::cout << "Installing " << path << " to /Applications...\n";
+    recursiveCopy (path, "/Applications/Synergy.app");
+}
+
+extern void unmountDMG (char const*);
+
+static void
+unmountVolumes() {
+    boost::filesystem::directory_iterator it ("/Volumes");
+    boost::filesystem::directory_iterator end;
+
+    for (; it != end; ++it) {
+        if (!boost::filesystem::is_directory(it->status())) {
+            continue;
+        }
+        auto path = it->path();
+        if (boost::algorithm::icontains (path.filename().string(), "synergy", std::locale::classic())) {
+            unmountDMG (path.c_str());
+        }
+    }
+}
+
+void
+App::installAndStartService()
 {
+    if (!iAmInstalled()) {
+        if (!authorizeServiceHelper()) {
+            exit (EXIT_FAILURE);
+        }
+        stopService();
+        killInstalledComponents();
+        reinstallBundle();
+        if (installServiceHelper()) {
+            std::clog << "Service helper installed\n";
+            sleep (3);
+        }
+        startService();
+        QProcess::startDetached("/Applications/Synergy.app/Contents/MacOS/synergy-config");
+        exit (EXIT_SUCCESS);
+    }
+
     if (!boost::filesystem::exists
             ("/Library/LaunchDaemons/com.symless.synergy.v2.ServiceHelper.plist")) {
-        std::clog << "Service helper not installed, installing...\n";
-        if (!m_installServiceHelper()) {
-            std::clog << "Failed to install service helper" << "\n";
-            return false;
+        if (installServiceHelper()) {
+            sleep (3);
         }
-        std::clog << "Service helper installed\n";
-        sleep(3);
-        return true;
     }
-    return false;
+
+    unmountVolumes();
+    startService();
 }
 #endif
 
@@ -87,7 +180,6 @@ App::run(int argc, char* argv[])
     }
 
 #ifdef Q_OS_OSX
-
     if (g_options.count("service")) {
         QProcess service;
         QString cmd("/Applications/Synergy.app/Contents/MacOS/synergy-service");
@@ -97,13 +189,7 @@ App::run(int argc, char* argv[])
         return 0;
     }
 
-    if (installService()) {
-        QProcess serviceLoader;
-        QString cmd("launchctl load /Library/LaunchAgents/com.symless.synergy.synergy-service.plist");
-        serviceLoader.start(cmd);
-        serviceLoader.waitForFinished(5000);
-    }
-
+    installAndStartService();
 #endif
 
     /* Workaround for QTBUG-40332
@@ -247,3 +333,31 @@ App::restart(QApplication& app, std::vector<std::string> argsVector)
     app.quit();
     QProcess::startDetached(path, args);
 }
+
+#ifdef Q_OS_OSX
+void
+App::startService()
+{
+    QProcess serviceLoader;
+    QString cmd("launchctl load /Library/LaunchAgents/com.symless.synergy.synergy-service.plist");
+    serviceLoader.start(cmd);
+    serviceLoader.waitForFinished(5000);
+}
+
+void
+App::stopService()
+{
+    {
+        QProcess serviceLoader;
+        QString cmd("launchctl unload /Library/LaunchAgents/com.symless.synergy.v2.synergyd.plist");
+        serviceLoader.start(cmd);
+        serviceLoader.waitForFinished(5000);
+    }
+    {
+        QProcess serviceLoader;
+        QString cmd("launchctl unload /Library/LaunchAgents/com.symless.synergy.synergy-service.plist");
+        serviceLoader.start(cmd);
+        serviceLoader.waitForFinished(5000);
+    }
+}
+#endif

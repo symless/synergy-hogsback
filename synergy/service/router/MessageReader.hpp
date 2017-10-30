@@ -54,7 +54,7 @@ public:
                 } else if (ec) {
                     throw boost::system::system_error (ec, ec.message ());
                 }
-                stream_->cancel ();
+                stream_->lowest_layer().cancel ();
             });
         }
 

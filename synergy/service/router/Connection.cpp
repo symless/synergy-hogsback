@@ -9,19 +9,20 @@
 
 uint32_t Connection::next_connection_id_ = 0;
 
-Connection::Connection (tcp::socket socket)
+Connection::Connection (tcp::socket&& socket, ssl::context& context)
     : id_ (++next_connection_id_),
       socket_ (std::move (socket)),
       endpoint_ (socket_.remote_endpoint ()),
-      reader_ (socket_),
-      writer_ (socket_) {
-    routerLog()->debug("Connection {} created", id ());
-
+      stream_(socket_, context),
+      reader_ (stream_),
+      writer_ (stream_),
+      strand_ (socket_.get_io_service()){
+    routerLog ()->debug ("Connection {} created", id ());
     boost::system::error_code ec;
     socket_.set_option (tcp::no_delay (true), ec);
 
     if (ec) {
-        routerLog()->debug(
+        routerLog ()->warn (
             "Failed to disable Nagles algorithm on connection {}", id ());
     }
 
@@ -32,34 +33,50 @@ Connection::Connection (tcp::socket socket)
 }
 
 Connection::~Connection () noexcept {
-    routerLog()->debug("Connection {} destroyed", id ());
+    routerLog ()->debug ("Connection {} destroyed", id ());
 }
 
-void
-Connection::start () {
-    enabled_ = true;
+bool Connection::start(bool fromServer, asio::yield_context ctx) {
+    boost::system::error_code ec;
+    stream_.async_handshake(fromServer ? ssl::stream_base::server : ssl::stream_base::client, ctx[ec]);
 
-    /* Receive loop */
+    if (ec) {
+        routerLog ()->error ("Connection {} failed in SSL handshake: {}",
+                            this->id (), ec.message());
+        return false;
+    }
+
     asio::spawn (
         socket_.get_io_service (),
-        [ this, self = shared_from_this () ](auto ctx) {
+        [ this, self = shared_from_this () ](auto context) {
+            enabled_ = true;
+
             while (true) {
                 MessageHeader header;
                 Message message;
 
-                if (reader_.read_header (header, ctx)) {
-                    if (reader_.read_body (header, message, ctx)) {
+                if (reader_.read_header (header, context)) {
+                    if (reader_.read_body (header, message, context)) {
                         on_message (header, message, self);
                     }
                 }
 
                 auto ec = reader_.error ();
-                if (!enabled_ || (ec == asio::error::operation_aborted)) {
+                if (!enabled_) {
+                    routerLog()->debug("Connection {} is not enabled",
+                                        this->id ());
+                    break;
+                }
+                else if (ec == asio::error::operation_aborted) {
+                    routerLog()->debug("Operation is aborted in connection {}",
+                                        this->id ());
                     break;
                 } else if ((ec == asio::error::connection_reset) ||
                            (ec == asio::error::eof) ||
                            (ec == asio::error::timed_out)) {
                     on_disconnect (self);
+                    routerLog()->debug("Connection {} read error: {}",
+                                        this->id (), ec.message ());
                     break;
                 } else if (ec) {
                     throw boost::system::system_error (ec, ec.message ());
@@ -68,7 +85,10 @@ Connection::start () {
 
             routerLog()->debug("Connection {} terminated receive loop",
                                 this->id ());
-        });
+    });
+
+    on_connected (shared_from_this ());
+    return true;
 }
 
 void
@@ -79,15 +99,26 @@ Connection::stop () {
 }
 
 bool
-Connection::send (Message const& message, asio::yield_context ctx) {
+Connection::send (Message const& message) {
     auto header = message.make_header ();
-    return send (header, message, ctx);
+    return send (header, message);
 }
 
 bool
-Connection::send (MessageHeader const& header, Message const& message,
-                  asio::yield_context ctx) {
-    return writer_.write (header, message, ctx);
+Connection::send (MessageHeader const& header, Message const& message) {
+    messageQueue_.emplace_back(header, message);
+
+    if (messageQueue_.size() == 1) {
+        asio::spawn(strand_, [this] (auto ctx) {
+            while (messageQueue_.size() != 0) {
+                auto firstItem = messageQueue_.front();
+                writer_.write (firstItem.first, firstItem.second, ctx);
+                messageQueue_.pop_front();
+            }
+        });
+    }
+
+    return true;
 }
 
 tcp::endpoint

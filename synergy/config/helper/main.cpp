@@ -13,16 +13,19 @@
 std::string const kSharedConfigPath ("/Users/Shared/Synergy");
 std::string const kAppPath ("/Applications/Synergy.app");
 std::string const kAppResourcePath (kAppPath + "/Contents/Resources");
-
 auto const kAppVersionFilePath = kAppResourcePath + "/Version.txt";
 
-std::string const kHelperName = "com.symless.synergy.ServiceHelper";
+std::string const kHelperName = "com.symless.synergy.v2.ServiceHelper";
 auto const kHelperPListPath = "/Library/LaunchDaemons/" + kHelperName + ".plist";
 auto const kHelperExecPath = "/Library/PrivilegedHelperTools/" + kHelperName;
 
 std::string const kServiceUserAgentFilename = "com.symless.synergy.synergy-service.plist";
 auto const kServiceUserAgentPListTargetPath = "/Library/LaunchAgents/" + kServiceUserAgentFilename;
 auto const kServiceUserAgentPListSourcePath = kAppResourcePath + "/" + kServiceUserAgentFilename;
+
+// This file was made redundant in v2.0-beta4. If you're reading this in 2018 or later, you can
+// probably remove this.
+auto const kServiceLegacyUserAgentPListPath = "/Library/LaunchAgents/com.symless.synergy.v2.synergyd.plist";
 
 static std::ofstream&
 log() {
@@ -44,9 +47,9 @@ std::string timestamp() {
 }
 
 static bool
-installSynergyService()
+installSynergyService(bool const force = false)
 {
-    if (boost::filesystem::exists (kServiceUserAgentPListTargetPath)) {
+    if (!force && boost::filesystem::exists (kServiceUserAgentPListTargetPath)) {
         log() << fmt::format ("[{}] service already installed, we're done\n", timestamp());
         return true;
     }
@@ -75,21 +78,23 @@ main (int, const char*[])
         std::ifstream appVersionFile;
         appVersionFile.open (kAppVersionFilePath, std::ios::in);
 
+        boost::system::error_code ec;
+        boost::filesystem::remove (kServiceLegacyUserAgentPListPath, ec);
+
         /* Test to see if Synergy is installed. If not, remove thyself. */
         if (!appVersionFile.is_open()) {
             /* Remove all the service files */
-            boost::system::error_code ec;
             boost::filesystem::remove (kServiceUserAgentPListTargetPath, ec);
             log() << fmt::format ("[{}] uninstalling user agent plist file... {}\n", 
-                                  timestamp(), ec ? "failed" : "done");
+                                  timestamp(), ec ? "Failed" : "OK");
             
             boost::filesystem::remove (kHelperPListPath, ec);
-            log() << fmt::format ("[{}] uninstalling helper plist file... {}\n", 
-                                  timestamp(), ec ? "failed" : "done");
+            log() << fmt::format ("[{}] uninstalling helper plist file... {}\n",
+                                  timestamp(), ec ? "Failed" : "OK");
             
             boost::filesystem::remove (kHelperExecPath, ec);
-            log() << fmt::format ("[{}] uninstalling helper executable file... {}\n", 
-                                  timestamp(), ec ? "failed" : "done");
+            log() << fmt::format ("[{}] uninstalling helper executable... {}\n",
+                                  timestamp(), ec ? "Failed" : "OK");
             
             return EXIT_SUCCESS;
         }
@@ -104,7 +109,7 @@ main (int, const char*[])
         log() << fmt::format ("[{}] installed helper revision = {}\n", ts, SYNERGY_REVISION);
         log() << fmt::format ("[{}] installed app revision = {}\n", ts, version);
 
-        if (!installSynergyService()) {
+        if (!installSynergyService (version != SYNERGY_REVISION)) {
             log() << fmt::format ("[{}] failed to install the service\n", timestamp());
         }
         else {
