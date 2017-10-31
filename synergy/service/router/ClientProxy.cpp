@@ -108,6 +108,7 @@ ClientProxy::connect (int32_t client_id, const std::string& screen_name) {
                     });
 
                 connection->start (*this);
+                break;
             }
             else {
                 timer.expires_from_now (kConnectRetryInterval);
