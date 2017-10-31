@@ -88,7 +88,11 @@
                     <File Source="$(var.BinPath)/synergy-service-controller.pdb"/>
                     <File Source="C:\Program Files (x86)\Windows Kits\10\bin\$(var.Platform)\ucrt\ucrtbased.dll"/>
                 <?else ?>
-                    <File Source="$(var.TPBinPath)/crashpad/windows/crashpad_handler.exe"/>
+                    <?if $(var.Platform) = "x64" ?>
+                        <File Source="$(var.TPBinPath)/crashpad/windows/x64/crashpad_handler.exe"/>
+                    <?else ?>
+                        <File Source="$(var.TPBinPath)/crashpad/windows/x86/crashpad_handler.exe"/>
+                    <?endif ?>
                 <?endif ?>
                 <File Source="$(var.BinPath)/synergy-service.exe">
                     <fire:FirewallException Id="ServerFirewallException" IgnoreFailure="yes" Name="$(var.Name)" Scope="any"/>
