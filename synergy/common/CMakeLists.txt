@@ -50,11 +50,19 @@ endif()
 if (SYNERGY_CRASHPAD)
     if (WIN32)
         target_link_libraries (commonlib ws2_32 rpcrt4 iphlpapi)
-        target_link_libraries (commonlib
-            "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/windows/crashpad_client.lib"
-            "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/windows/crashpad_util.lib"
-            "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/windows/base.lib"
-        )
+        if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+            target_link_libraries (commonlib
+                "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/windows/x64/crashpad_client.lib"
+                "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/windows/x64/crashpad_util.lib"
+                "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/windows/x64/base.lib"
+            )
+        else()
+            target_link_libraries (commonlib
+                "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/windows/x86/crashpad_client.lib"
+                "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/windows/x86/crashpad_util.lib"
+                "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/windows/x86/base.lib"
+            )
+        endif()
     elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         find_library (IOKit_LIBRARY IOKit)
         find_library (Security_LIBRARY Security)
