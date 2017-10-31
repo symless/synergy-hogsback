@@ -1,12 +1,12 @@
 %%{
     machine synergy_proto_v1;
-    alphtype char;
+    alphtype unsigned char;
 
     action stc              { flow == Flow::STC }
     action mdb              { data = fpc; }
-    action dlen_init        { dlen = fc; }
+    action dlen_init        { dlen = fc; std::cout << "\n" << "byte: " << (unsigned int) fc; }
     action dlen_shift       { dlen <<= 8; }
-    action dlen_or          { dlen |= fc; }
+    action dlen_or          { dlen |= fc; std::cout << "byte: " << (unsigned int) fc << ", "; }
     action dlen_is_zero     { dlen == 0 }
     action dlen_is_safe     { (dlen > 0) && ((dlen * dsize) <= (pe - fpc)) }
     action skip_data_bytes  { fhold; fpc += (dlen * dsize); }
@@ -19,7 +19,7 @@
     data_bytes  = ((any when dlen_is_safe) >skip_data_bytes)
                   | ('' when dlen_is_zero);
 
-    string = dlen >{ dsize = 1; } data_bytes;
+    string = dlen >{ std::cout << "\ndlen = " << dlen << std::endl; dsize = 1; } data_bytes;
     i4vec  = dlen >{ dsize = 4; } data_bytes;
 
     message := |*
@@ -61,10 +61,12 @@
 #include <fmt/ostream.h>
 #include <synergy/service/ServiceLogs.h>
 
+#define XX_CHAR_PTR(X) reinterpret_cast<char const*>(X)
+
 #define PROC(TYPE)                  \
 {                                   \
     TYPE##Message msg;              \
-    msg.read_from (ts, data, te);   \
+    msg.read_from (XX_CHAR_PTR(ts), XX_CHAR_PTR(data), XX_CHAR_PTR(te));   \
     if (!handle (msg)) {            \
         routerLog ()->debug ("Handler failed to process core {} message: {}", \
                              ((flow == Flow::STC) ? "server" : "client"), msg);  \
@@ -82,22 +84,22 @@ bool
 process (
     Flow const flow,
     Handler& handle,
-    char const* const msg,
+    unsigned char const* const msg,
     std::size_t const size
 ){
-    char const* p = msg;
-    char const* const pe = msg + size;
-    char const* const eof = pe;
+    unsigned char const* p = msg;
+    unsigned char const* const pe = msg + size;
+    unsigned char const* const eof = pe;
     int cs;
     int act;
-    char const* ts;
-    char const* te;
+    unsigned char const* ts;
+    unsigned char const* te;
 
 %% write init;
 
     std::size_t dlen = 0;
     std::size_t dsize = 0;
-    char const* data = nullptr;
+    unsigned char const* data = nullptr;
 
 %% write exec;
 

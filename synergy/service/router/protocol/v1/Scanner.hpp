@@ -63,7 +63,7 @@ public:
     signal<void()> on_hello;
 };
 
-bool process (Flow flow, Handler& handler, char const* msg, std::size_t size);
+bool process (Flow flow, Handler& handler, unsigned char const* msg, std::size_t size);
 
 } // namespace v1
 } // namespace protocol

@@ -160,7 +160,7 @@ ClientProxyConnection::start (ClientProxy& proxy) {
 
             try {
                 synergy::protocol::v1::process (
-                    synergy::protocol::v1::Flow::STC, handler, reinterpret_cast<char*>(buffer.data ()), size);
+                    synergy::protocol::v1::Flow::STC, handler, buffer.data (), size);
             }
             catch (const std::exception& e) {
                 routerLog()->error ("ClientProxy: failed to parse message: {}",
