@@ -548,7 +548,7 @@ QString CloudClient::loginClientId()
 void CloudClient::switchServer(int screenId)
 {
     if (screenId == -1) {
-        LogManager::warning(QString("can't use unknown screen Id as server"));
+        LogManager::warning(QString("can't use unknown screen as server"));
         return;
     }
 
