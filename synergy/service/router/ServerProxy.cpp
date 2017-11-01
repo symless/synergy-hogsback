@@ -36,7 +36,7 @@ private:
     ServerProxy& proxy_;
 };
 
-class ServerProxyConnection final {
+class ServerProxyConnection : public std::enable_shared_from_this<ServerProxyConnection> {
     friend class ServerProxy;
 
 public:
@@ -62,6 +62,7 @@ private:
 
 public:
     signal<void(std::string screen_name)> on_hello_back;
+    signal<void(std::shared_ptr<ServerProxyConnection> const&)> on_disconnect;
 };
 
 ServerProxy::ServerProxy (asio::io_service& io, Router& router, int const port)
@@ -114,7 +115,15 @@ ServerProxy::start (int32_t const server_id) {
                     if (!router_.send (pcc, server_id)) {
                         // when it fails to send, drop the connection and let core client reconnect
                         connections_.back()->close();
-                        connections_.pop_back();
+                    }
+                });
+
+            connection->on_disconnect.connect (
+                [this](
+                    std::shared_ptr<ServerProxyConnection> const& connection) {
+                    auto it = std::find (begin (connections_), end (connections_), connection);
+                    if (it != end (connections_)) {
+                        connections_.erase (it);
                     }
                 });
 
@@ -212,6 +221,7 @@ ServerProxyConnection::start (ServerProxy& proxy, int32_t const server_id) {
             }
 
             routerLog ()->debug ("Terminating core client read loop");
+            on_disconnect (this->shared_from_this ());
         });
 }
 
