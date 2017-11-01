@@ -376,7 +376,28 @@ Rectangle {
                             hoverEnabled: true
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
 
+                            Menu {
+                                id: individualScreenMen
+
+                                MenuItem {
+                                    id: claimServerItem
+                                    shortcut: "Alt+S"
+                                    onTriggered: {
+                                        //CloudClient.claimServer()
+                                    }
+                                }
+
+                                onAboutToHide: {
+                                    modelIndex = -1
+                                }
+                            }
+
                             onPressed: {
+                                if (mouse.button === Qt.RightButton) {
+                                    claimServerItem.text = "Share from " + name
+                                    individualScreenMenu.popup()
+                                }
+
                                 beginDrag = Qt.point(screenIcon.x,
                                                 screenIcon.y);
                                 modelIndex = screenManager.getModelIndex(
