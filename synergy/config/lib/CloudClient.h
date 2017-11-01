@@ -30,6 +30,7 @@ public:
     Q_INVOKABLE void checkUpdate();
     Q_INVOKABLE QString serverHostname() const;
     Q_INVOKABLE QString loginClientId();
+    Q_INVOKABLE void switchServer(int screenId);
 
     void report(int destId, QString successfulIp, QString failedIp);
     void updateProfileConfig(QJsonDocument& doc);

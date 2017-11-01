@@ -43,7 +43,7 @@ int ScreenManager::getModelIndex(int x, int y)
 
 void ScreenManager::moveModel(int index, int offsetX, int offsetY)
 {
-    if (!offsetX && !offsetY) {
+    if (!offsetX && !offsetY || index == -1) {
         return;
     }
 
@@ -144,6 +144,13 @@ void ScreenManager::lockScreen(int index)
 void ScreenManager::unlockScreen(int index)
 {
     m_screenListModel->unlockScreen(index);
+}
+
+void ScreenManager::switchServer(int index)
+{
+    const UIScreen& s = m_screenListModel->getScreen(index);
+
+    m_cloudClient->switchServer(s.id());
 }
 
 bool ScreenManager::removeScreen(QString name, bool notify)

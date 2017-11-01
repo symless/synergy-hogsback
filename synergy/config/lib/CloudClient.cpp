@@ -334,16 +334,7 @@ void CloudClient::checkUpdate()
 
 void CloudClient::claimServer()
 {
-    QNetworkRequest req(m_claimServerUrl);
-    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
-    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
-
-    QJsonObject jsonObject;
-    jsonObject.insert("screen_id", qint64(m_screenId));
-    jsonObject.insert("profile_id", qint64(m_profileId));
-    QJsonDocument doc(jsonObject);
-
-    m_networkManager->post(req, doc.toJson());
+    switchServer(m_screenId);
 }
 
 void CloudClient::updateScreen(const UIScreen& screen)
@@ -552,4 +543,23 @@ CloudClient::serverHostname() const {
 QString CloudClient::loginClientId()
 {
     return QString::fromStdString(m_loginClientId);
+}
+
+void CloudClient::switchServer(int screenId)
+{
+    if (screenId == -1) {
+        LogManager::warning(QString("can't use unknown screen Id as server"));
+        return;
+    }
+
+    QNetworkRequest req(m_claimServerUrl);
+    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
+
+    QJsonObject jsonObject;
+    jsonObject.insert("screen_id", qint64(screenId));
+    jsonObject.insert("profile_id", qint64(m_profileId));
+    QJsonDocument doc(jsonObject);
+
+    m_networkManager->post(req, doc.toJson());
 }

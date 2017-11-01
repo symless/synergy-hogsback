@@ -34,6 +34,7 @@ public:
     Q_INVOKABLE bool addScreen(QString name);
     Q_INVOKABLE void lockScreen(int index);
     Q_INVOKABLE void unlockScreen(int index);
+    Q_INVOKABLE void switchServer(int index);
 
     // TODO: remove these debug functions
     Q_INVOKABLE void printBoundingBoxInfo();

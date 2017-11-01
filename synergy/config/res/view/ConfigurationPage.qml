@@ -377,13 +377,17 @@ Rectangle {
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
 
                             Menu {
-                                id: individualScreenMen
+                                id: individualScreenMenu
 
                                 MenuItem {
                                     id: claimServerItem
                                     shortcut: "Alt+S"
+                                    property int screenIndex: -1
                                     onTriggered: {
-                                        //CloudClient.claimServer()
+                                        screenIndex = screenManager.getModelIndex(
+                                                    op(screenIcon.x + 45),
+                                                    op(screenIcon.y + 45))
+                                        screenManager.switchServer(screenIndex)
                                     }
                                 }
 
