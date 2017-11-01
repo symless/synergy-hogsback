@@ -26,6 +26,15 @@ if (WIN32)
     add_definitions (/D_WIN32_WINNT=0x0601)
     add_definitions (/DWINVER=0x0601)
 
+    # Disable SafeSEH on x86 (32-bit), since currently Boost Context (dependency of Coroutine)
+    # is built without SafeSEH
+    if (CMAKE_SIZEOF_VOID_P EQUAL 4)
+        set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
+        set (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
+        set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
+        set (CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} /SAFESEH:NO")
+    endif()
+
     if (MSVC)
 		set (SYNERGY_WARNING_FLAGS /W4)
     endif()
