@@ -17,12 +17,15 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/join.hpp>
 
+auto const kUnexpectedExitRetryTime = std::chrono::seconds (2);
+
 CoreProcess::CoreProcess (boost::asio::io_service& io,
                           std::shared_ptr<UserConfig> userConfig,
                           std::shared_ptr<ProfileConfig> localProfileConfig):
     m_ioService (io),
     m_userConfig (std::move (userConfig)),
     m_localProfileConfig (std::move (localProfileConfig)),
+    m_retryTimer (io),
     m_processMode(ProcessMode::kUnknown),
     m_currentServerId(-1)
 {
@@ -66,7 +69,17 @@ CoreProcess::CoreProcess (boost::asio::io_service& io,
         m_ioService.poll();
         this->join();
         if (!m_lastCommand.empty()) {
-            this->start (std::move (m_lastCommand));
+            boost::system::error_code ec;
+            m_retryTimer.cancel(ec);
+            m_retryTimer.expires_from_now (kUnexpectedExitRetryTime);
+            m_retryTimer.async_wait([this, command = std::move(m_lastCommand)](auto const ec) {
+                if (ec == boost::asio::error::operation_aborted) {
+                    return;
+                } else if (ec) {
+                    throw boost::system::system_error (ec, ec.message());
+                }
+                this->start (std::move (command));
+            });
         }
     });
 
@@ -109,6 +122,9 @@ void
 CoreProcess::start (std::vector<std::string> command)
 {
     using boost::algorithm::contains;
+
+    boost::system::error_code ec;
+    m_retryTimer.cancel (ec);
 
     if (m_impl) {
         serviceLog()->debug("core process already running, attempting to stop");

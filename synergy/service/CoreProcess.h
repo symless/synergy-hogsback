@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <boost/asio/steady_timer.hpp>
 
 class Screen;
 class UserConfig;
@@ -52,6 +53,7 @@ private:
     std::shared_ptr<UserConfig> m_userConfig;
     std::shared_ptr<ProfileConfig> m_localProfileConfig;
     std::unique_ptr<CoreProcessImpl> m_impl;
+    boost::asio::steady_timer m_retryTimer;
     ProcessMode m_processMode;
     int m_currentServerId;
     std::vector<std::string> m_nextCommand;
