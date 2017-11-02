@@ -4,9 +4,9 @@
 
     action stc              { flow == Flow::STC }
     action mdb              { data = fpc; }
-    action dlen_init        { dlen = fc; std::cout << "\n" << "byte: " << (unsigned int) fc; }
+    action dlen_init        { dlen = fc; }
     action dlen_shift       { dlen <<= 8; }
-    action dlen_or          { dlen |= fc; std::cout << "byte: " << (unsigned int) fc << ", "; }
+    action dlen_or          { dlen |= fc; }
     action dlen_is_zero     { dlen == 0 }
     action dlen_is_safe     { (dlen > 0) && ((dlen * dsize) <= (pe - fpc)) }
     action skip_data_bytes  { fhold; fpc += (dlen * dsize); }
@@ -19,7 +19,7 @@
     data_bytes  = ((any when dlen_is_safe) >skip_data_bytes)
                   | ('' when dlen_is_zero);
 
-    string = dlen >{ std::cout << "\ndlen = " << dlen << std::endl; dsize = 1; } data_bytes;
+    string = dlen >{ dsize = 1; } data_bytes;
     i4vec  = dlen >{ dsize = 4; } data_bytes;
 
     message := |*
