@@ -12,7 +12,7 @@ const std::string kCoreProgram = "synergy-core";
 #endif
 
 std::vector<std::string>
-ProcessCommand::generate(bool serverMode) const
+ProcessCommand::generate(bool const serverMode) const
 {
     auto profileDir = DirectoryManager::instance()->profileDir();
     auto installDir = DirectoryManager::instance()->installDir();

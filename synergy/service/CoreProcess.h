@@ -30,14 +30,14 @@ public:
 
     signal<void()> expectedExit;
     signal<void()> unexpectedExit;
-    signal<void(const std::string& line)> output;
     signal<void()> localInputDetected;
-    signal<void(const std::string& screenName)> screenConnectionError;
-    signal<void(const std::string& screenName, ScreenStatus state)> screenStatusChanged;
-    void setRunAsUid(const std::string& runAsUid);
+    signal<void(std::string const& line)> output;
+    signal<void(std::string const& screenName)> screenConnectionError;
+    signal<void(std::string const& screenName, ScreenStatus status)> screenStatusChanged;
 
+    void setRunAsUid (std::string runAsUid);
     int currentServerId() const;
-    ProcessMode proccessMode() const;
+    ProcessMode processMode() const;
 
 private:
     void onServerChanged(int64_t serverId);
@@ -45,18 +45,18 @@ private:
     void writeConfigurationFile();
     void startServer();
     void startClient(int serverId);
-    void handleShutdown();
+    void join();
 
 private:
     boost::asio::io_service& m_ioService;
     std::shared_ptr<UserConfig> m_userConfig;
     std::shared_ptr<ProfileConfig> m_localProfileConfig;
     std::unique_ptr<CoreProcessImpl> m_impl;
-    ProcessMode m_proccessMode;
+    ProcessMode m_processMode;
     int m_currentServerId;
     std::vector<std::string> m_nextCommand;
     std::vector<std::string> m_lastCommand;
-    std::string m_runAsUid = "";
+    std::string m_runAsUid;
 };
 
 #endif // SYNERGY_SERVICE_PROCESSMANAGER_H

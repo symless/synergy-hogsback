@@ -53,10 +53,9 @@ TEST_CASE("Start and stop core process in different modes", "[CoreProcess]" ) {
 
     testFinished.connect([&ioService, &coreProcess]() {
         REQUIRE (coreProcess.currentServerId() == 1);
-        REQUIRE (coreProcess.proccessMode() == ProcessMode::kServer);
+        REQUIRE (coreProcess.processMode() == ProcessMode::kServer);
 
         coreProcess.shutdown();
-
         ioService.poll();
         ioService.stop();
     });

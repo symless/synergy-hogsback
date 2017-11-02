@@ -10,6 +10,7 @@ set(SERVICE_SOURCES
     ../service/SecuredTcpClient.cpp
     ../service/ServiceLogs.cpp
     ../service/CoreProcess.cpp
+    ../service/CoreProcessImpl.cpp
 )
 
 add_executable (${PROJECT_NAME}

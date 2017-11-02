@@ -1,230 +1,62 @@
 #include <synergy/service/CoreProcess.h>
 
+#include <synergy/common/Screen.h>
 #include <synergy/common/ConfigGen.h>
 #include <synergy/common/DirectoryManager.h>
 #include <synergy/common/ProcessCommand.h>
 #include <synergy/common/ConfigGen.h>
 #include <synergy/common/UserConfig.h>
-#include <synergy/service/ServiceLogs.h>
 #include <synergy/common/NetworkParameters.h>
+#include <synergy/service/ServiceLogs.h>
+#include <synergy/service/CoreProcessImpl.h>
 
-#include <boost/process.hpp>
-#include <boost/process/async_pipe.hpp>
-#include <boost/asio/read_until.hpp>
-#include <boost/optional.hpp>
+#include <cassert>
 #include <vector>
 #include <string>
-#include <boost/asio/strand.hpp>
-#include <mutex>
-#include <cassert>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/asio/steady_timer.hpp>
-#include <synergy/common/Screen.h>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/join.hpp>
 
-namespace bp = boost::process;
-namespace bs = boost::system;
-namespace ba = boost::algorithm;
-using boost::optional;
-
-static const int kConnectingTimeout = 3;
-
-class CoreProcessImpl {
-public:
-    CoreProcessImpl (
-        CoreProcess& parent,
-        boost::asio::io_service& io,
-        std::vector<std::string> command)
-        :
-        m_parent(parent),
-        m_command(std::move(command)),
-        m_ioStrand (io),
-        m_connectionTimer(io),
-        m_outPipe (io),
-        m_errorPipe (io) {
-    }
-
-    ~CoreProcessImpl() {
-        bs::error_code ec;
-        m_outPipe.close(ec);
-        m_errorPipe.close(ec);
-    }
-
-    void start();
-    void shutdown();
-    void onScreenStatusChanged(std::string const& screenName,
-                                ScreenStatus status);
-
-public:
-    std::map<std::string, ScreenStatus> m_clients;
-    std::vector<boost::signals2::connection> m_signals;
-    std::vector<std::string> m_command;
-    bool m_expectingExit = false;
-
-    boost::asio::io_service::strand m_ioStrand;
-    boost::asio::steady_timer m_connectionTimer;
-    boost::asio::streambuf m_outputBuffer;
-    boost::asio::streambuf m_errorBuffer;
-    std::string m_lineBuffer;
-
-    bp::async_pipe m_outPipe;
-    bp::async_pipe m_errorPipe;
-    optional<bp::child> m_process;
-
-private:
-    CoreProcess& m_parent;
-};
-
-template <typename Strand, typename Pipe, typename Buffer, typename Line>
-static void
-asyncReadLines (CoreProcess& manager, Strand& strand, Pipe& pipe,
-                Buffer& buffer, Line& line, bs::error_code const& ec,
-                std::size_t const bytes) {
-    std::istream stream (&buffer);
-    if (ec || !bytes || !std::getline (stream, line)) {
-        return;
-    }
-
-    boost::algorithm::trim_right(line);
-    manager.output (line);
-
-    boost::asio::async_read_until (
-        pipe,
-        buffer,
-        '\n',
-        strand.wrap (
-            [&](boost::system::error_code const& ec, std::size_t const bytes) {
-                return asyncReadLines (manager, strand, pipe, buffer, line,
-                                       ec, bytes);
-        })
-    );
-}
-
-void
-CoreProcessImpl::start () {
-    assert (!m_command.empty());
-    assert (!m_process);
-
-    m_process.emplace (
-        m_command,
-        bp::std_in.close (),
-        bp::std_out > m_outPipe,
-        bp::std_err > m_errorPipe,
-        bp::on_exit = [this](int exit, std::error_code const& ec){
-            serviceLog()->debug("core process exited: code={} expected={}", exit, m_expectingExit);
-            if (m_expectingExit) {
-                m_parent.expectedExit();
-            } else {
-                m_parent.unexpectedExit();
-            }
-        },
-        m_ioStrand.get_io_service()
-    );
-
-    /* Start the stdout I/O loop */
-    boost::asio::async_read_until (
-        m_outPipe,
-        m_outputBuffer,
-        '\n',
-        m_ioStrand.wrap (
-            [&](boost::system::error_code const& ec, std::size_t bytes) {
-                return asyncReadLines (m_parent, m_ioStrand, m_outPipe,
-                                       m_outputBuffer, m_lineBuffer, ec, bytes);
-        })
-    );
-
-    /* Start the stderr I/O loop */
-    boost::asio::async_read_until (
-        m_errorPipe,
-        m_errorBuffer,
-        '\n',
-        m_ioStrand.wrap (
-            [&](boost::system::error_code const& ec, std::size_t bytes) {
-                return asyncReadLines (m_parent, m_ioStrand, m_errorPipe,
-                                       m_errorBuffer, m_lineBuffer, ec, bytes);
-        })
-    );
-
-    serviceLog()->debug("core process started, id={}", m_process->id());
-}
-
-void
-CoreProcessImpl::shutdown()
-{
-    serviceLog()->debug("stopping core process");
-
-    auto& ioService = m_ioStrand.get_io_service();
-
-    /* Cancel the standard stream I/O loops */
-    m_outPipe.cancel();
-    m_errorPipe.cancel();
-    ioService.poll();
-
-    /* Disconnect internal signal handling */
-    for (auto& signal: m_signals) {
-        signal.disconnect();
-    }
-
-    m_process->terminate();
-    ioService.poll();
-}
-
-std::string
-processModeToString(ProcessMode mode) {
-    switch (mode) {
-        case ProcessMode::kServer:
-            return "server";
-        case ProcessMode::kClient:
-            return "client";
-        case ProcessMode::kUnknown:
-            return "unknown";
-    }
-    return "";
-}
-
-CoreProcess::CoreProcess (boost::asio::io_service& io, std::shared_ptr<UserConfig> userConfig, std::shared_ptr<ProfileConfig> localProfileConfig) :
+CoreProcess::CoreProcess (boost::asio::io_service& io,
+                          std::shared_ptr<UserConfig> userConfig,
+                          std::shared_ptr<ProfileConfig> localProfileConfig):
     m_ioService (io),
-    m_userConfig(userConfig),
-    m_localProfileConfig(localProfileConfig),
-    m_proccessMode(ProcessMode::kUnknown),
+    m_userConfig (std::move (userConfig)),
+    m_localProfileConfig (std::move (localProfileConfig)),
+    m_processMode(ProcessMode::kUnknown),
     m_currentServerId(-1)
 {
-    m_localProfileConfig->profileServerChanged.connect([this](int64_t serverId) {
+    m_localProfileConfig->profileServerChanged.connect([this](int64_t const serverId) {
         m_ioService.post([this, serverId] () {
             onServerChanged(serverId);
         });
     });
 
-    m_localProfileConfig->screenPositionChanged.connect([this](int64_t){
-        m_ioService.post([this] () {
-
-            serviceLog()->debug("handling local profile screen position changed, mode={}",
-                processModeToString(m_proccessMode));
-
-            if (m_proccessMode == ProcessMode::kServer) {
+    m_localProfileConfig->screenPositionChanged.connect([this](int64_t const /* targetScreenID */){
+        m_ioService.post([this]() {
+            serviceLog()->debug ("handling local profile screen position change, mode={}",
+                                 processModeToString(m_processMode));
+            if (m_processMode == ProcessMode::kServer) {
                 startServer();
             }
         });
     });
 
-    m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen>, std::vector<Screen>){
-        m_ioService.post([this] () {
-
-            serviceLog()->debug("handling local profile screen set changed, mode={}",
-                processModeToString(m_proccessMode));
-
-            if (m_proccessMode == ProcessMode::kServer) {
+    m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen> const&,
+                                                          std::vector<Screen> const&) {
+        m_ioService.post([this]() {
+            serviceLog()->debug ("handling local profile screen set changed, mode={}",
+                                 processModeToString(m_processMode));
+            if (m_processMode == ProcessMode::kServer) {
                 startServer();
             }
         });
     });
+
     expectedExit.connect ([this]() {
-        this->handleShutdown();
+        this->join();
         if (!m_nextCommand.empty()) {
-            this->start(std::move(m_nextCommand));
+            this->start (std::move (m_nextCommand));
         }
     });
 
@@ -232,13 +64,19 @@ CoreProcess::CoreProcess (boost::asio::io_service& io, std::shared_ptr<UserConfi
         m_impl->m_outPipe.cancel();
         m_impl->m_errorPipe.cancel();
         m_ioService.poll();
-
-        this->handleShutdown();
+        this->join();
         if (!m_lastCommand.empty()) {
-            this->start(std::move(m_lastCommand));
+            this->start (std::move (m_lastCommand));
         }
     });
 
+    screenStatusChanged.connect (
+        [this](std::string const& screenName, ScreenStatus const status) {
+            if (m_impl) {
+                m_impl->onScreenStatusChanged (screenName, status);
+            }
+        }
+    );
 }
 
 CoreProcess::~CoreProcess () noexcept {
@@ -249,102 +87,79 @@ static std::string
 getCommandLocalScreenName (std::vector<std::string> const& command) {
     auto nameArg = std::find (begin(command), end(command), "--name");
     if ((nameArg == end(command)) || (++nameArg == end(command))) {
-        throw;
+        throw std::runtime_error("Unable to determine local screen name from core process command.");
     }
     return *nameArg;
 }
 
-void
-CoreProcessImpl::onScreenStatusChanged
-(std::string const& screenName, ScreenStatus const status) {
-    auto& timer = m_connectionTimer;
-    if (status == ScreenStatus::kConnecting) {
-        if (timer.expires_at() > std::chrono::steady_clock::now()) {
-            return;
-        }
-        timer.expires_from_now (std::chrono::seconds (kConnectingTimeout));
-        timer.async_wait ([this, screenName](auto const& ec) {
-            if (ec == boost::asio::error::operation_aborted) {
-                return;
-            } else if (ec) {
-                throw boost::system::system_error(ec);
-            }
-            m_parent.screenConnectionError(screenName);
-        });
-    } else {
-        timer.cancel();
+static std::string
+getCommandProcessMode (std::vector<std::string> const& command) {
+    auto const clientArg = std::find (begin(command), end(command), "--client");
+    if (clientArg != end(command)) {
+        return *clientArg;
     }
+    auto const serverArg = std::find (begin(command), end(command), "--server");
+    if (serverArg != end(command)) {
+        return *serverArg;
+    }
+    throw std::runtime_error("Unable to determine core process mode from core process command.");
 }
 
 void
 CoreProcess::start (std::vector<std::string> command)
 {
+    using boost::algorithm::contains;
+
     if (m_impl) {
         serviceLog()->debug("core process already running, attempting to stop");
-        m_nextCommand = command;
+        m_nextCommand = std::move (command);
         shutdown();
         return;
     }
 
-    m_lastCommand = command;
-    serviceLog()->debug("starting core process with command: {}", ba::join(command, " "));
+    serviceLog()->debug("starting core process with command: {}",
+                        boost::algorithm::join(command, " "));
 
     auto const localScreenName = getCommandLocalScreenName (command);
+    auto const processMode = getCommandProcessMode (command);
+    m_lastCommand = command;
+    m_impl = std::make_unique<CoreProcessImpl>(*this, m_ioService, std::move (command));
 
-    std::string mode;
-    if (command.size() > 1) {
-        mode = command[1];
-        if ((mode != "--server") && (mode != "--client")) {
-            throw std::runtime_error("Invalid core process mode: " + mode);
-        }
-    }
+    auto& localScreenState = m_impl->m_screenStates[localScreenName];
+    auto& signals = m_impl->m_signals;
 
-    if (mode.empty()) {
-        throw std::runtime_error("Unable to determine core process mode.");
-    }
-
-    m_impl = std::make_unique<CoreProcessImpl>(*this, m_ioService, command);
-
-    auto& localState = m_impl->m_clients[localScreenName];
-    using boost::algorithm::contains;
-
-    if (mode == "--client") {
-
-        localState = ScreenStatus::kDisconnected;
-        auto& signals = m_impl->m_signals;
+    if (processMode == "--client") {
+        localScreenState = ScreenStatus::kDisconnected;
 
         signals.emplace_back (
-            output.connect ([this, &localState,
-                              localScreenName](std::string const& line) {
+            output.connect ([this, &localScreenState, localScreenName](std::string const& line) {
                 if (!contains (line, "connected to server")) {
                     return;
                 }
-                assert (localState == ScreenStatus::kConnecting);
-                localState = ScreenStatus::kConnected;
-                screenStatusChanged(localScreenName, localState);
+                assert (localScreenState == ScreenStatus::kConnecting);
+                localScreenState = ScreenStatus::kConnected;
+                screenStatusChanged(localScreenName, localScreenState);
             }, boost::signals2::at_front)
         );
 
         signals.emplace_back (
-            output.connect ([this, &localState,
-                              localScreenName](std::string const& line) {
+            output.connect ([this, &localScreenState, localScreenName](std::string const& line) {
                 if (!contains (line, "disconnected from server")) {
                     return;
                 }
-                assert (localState != ScreenStatus::kDisconnected);
-                localState = ScreenStatus::kDisconnected;
-                screenStatusChanged(localScreenName, localState);
+                assert (localScreenState != ScreenStatus::kDisconnected);
+                localScreenState = ScreenStatus::kDisconnected;
+                screenStatusChanged(localScreenName, localScreenState);
             }, boost::signals2::at_front)
         );
 
         signals.emplace_back (
-            output.connect ([this, &localState,
-                              localScreenName](std::string const& line) {
+            output.connect ([this, &localScreenState, localScreenName](std::string const& line) {
                 if (!contains (line, "connecting to")) {
                     return;
                 }
-                localState = ScreenStatus::kConnecting;
-                screenStatusChanged(localScreenName, localState);
+                localScreenState = ScreenStatus::kConnecting;
+                screenStatusChanged(localScreenName, localScreenState);
             }, boost::signals2::at_front)
         );
 
@@ -356,21 +171,19 @@ CoreProcess::start (std::vector<std::string> command)
             }, boost::signals2::at_front)
         );
     }
-    else if (mode == "--server") {
-
-        localState = ScreenStatus::kConnecting;
-        auto& signals = m_impl->m_signals;
+    else if (processMode == "--server") {
+        localScreenState = ScreenStatus::kConnecting;
 
         signals.emplace_back (
-            output.connect_extended ([this, &localState, localScreenName]
-                                (auto& connection, std::string const& line) {
+            output.connect_extended ( [this, &localScreenState, localScreenName]
+                                      (auto& connection, std::string const& line) {
                 if (!contains (line, "started server, waiting for clients")) {
                     return;
                 }
                 connection.disconnect();
-                assert (localState == ScreenStatus::kConnecting);
-                localState = ScreenStatus::kConnected;
-                screenStatusChanged(localScreenName, localState);
+                assert (localScreenState == ScreenStatus::kConnecting);
+                localScreenState = ScreenStatus::kConnected;
+                screenStatusChanged(localScreenName, localScreenState);
             }, boost::signals2::at_front)
         );
 
@@ -382,11 +195,10 @@ CoreProcess::start (std::vector<std::string> command)
                     return;
                 }
                 assert (results.size() == 2);
-                auto screenName = results[1].str();
-                auto& status = m_impl->m_clients[screenName];
-                // assert (status == ScreenStatus::Disconnected);
-                status = ScreenStatus::kConnected;
-                screenStatusChanged(std::move (screenName), status);
+                auto clientScreenName = results[1].str();
+                auto& clientScreenStatus = m_impl->m_screenStates[clientScreenName];
+                clientScreenStatus = ScreenStatus::kConnected;
+                screenStatusChanged(std::move (clientScreenName), clientScreenStatus);
             }, boost::signals2::at_front)
         );
 
@@ -398,75 +210,68 @@ CoreProcess::start (std::vector<std::string> command)
                     return;
                 }
                 assert (results.size() == 2);
-                auto screenName = results[1].str();
-                auto& status = m_impl->m_clients[screenName];
-                assert (status == ScreenStatus::kConnected);
-                status = ScreenStatus::kDisconnected;
-                screenStatusChanged(std::move (screenName), status);
+                auto clientScreenName = results[1].str();
+                auto& clientScreenStatus = m_impl->m_screenStates[clientScreenName];
+                assert (clientScreenStatus == ScreenStatus::kConnected);
+                clientScreenStatus = ScreenStatus::kDisconnected;
+                screenStatusChanged(std::move (clientScreenName), clientScreenStatus);
             }, boost::signals2::at_front)
         );
     }
-    else {
-        throw std::runtime_error("Invalid core process mode: " + mode);
-    }
 
-    screenStatusChanged(localScreenName, localState);
+    screenStatusChanged(localScreenName, localScreenState);
     m_impl->start();
 }
 
 void
 CoreProcess::shutdown() {
-
     if (!m_impl) {
-        serviceLog()->debug("core process is not running, ignoring shutdown");
+        serviceLog()->debug("ignoring shutdown request, core process is not running");
         return;
     }
 
     if (m_impl->m_expectingExit) {
-        serviceLog()->debug("core process is shutting down, ignoring extra shutdown");
+        serviceLog()->debug("ignoring duplicate shutdown request");
         return;
     }
 
-    // control which exited event is invoked
     m_impl->m_expectingExit = true;
-
     m_impl->shutdown();
 }
 
-void CoreProcess::handleShutdown()
+void
+CoreProcess::join()
 {
-    if (m_impl->m_process) {
+    if (m_impl && m_impl->m_process) {
         try {
             m_impl->m_process->join();
+        } catch (const std::exception& ex) {
+            serviceLog()->error("can't join core process: {}", ex.what());
+        } catch (...) {
+            serviceLog()->error("can't join core process: exception thrown");
         }
-        catch (const std::exception& ex) {
-            serviceLog()->error("can't join process: {}", ex.what());
-        }
-        catch (...) {
-            serviceLog()->error("can't join process: unknown error");
-        }
-    }
-    else {
-        serviceLog()->error("can't join process, not initialized");
+    } else {
+        serviceLog()->error("can't join core process, not initialized");
     }
 
     m_impl.reset();
     serviceLog()->debug("core process shutdown complete");
 }
 
-void CoreProcess::writeConfigurationFile()
+void
+CoreProcess::writeConfigurationFile()
 {
     auto configPath = DirectoryManager::instance()->profileDir() / kCoreConfigFile;
     createConfigFile(configPath.string(), m_localProfileConfig->screens());
 }
 
-void CoreProcess::startServer()
+void
+CoreProcess::startServer()
 {
     serviceLog()->debug("starting core server process");
 
-    m_proccessMode = ProcessMode::kServer;
+    m_processMode = ProcessMode::kServer;
     m_currentServerId = m_userConfig->screenId();
-
     writeConfigurationFile();
 
     ProcessCommand command;
@@ -475,88 +280,89 @@ void CoreProcess::startServer()
 
     try {
         start(command.generate(true));
-    }
-    catch (const std::exception& ex) {
-        serviceLog()->error("failed to start server core process: {}", ex.what());
+    } catch (const std::exception& ex) {
+        serviceLog()->error ("failed to start server core process: {}", ex.what());
         m_impl.reset();
-        assert(!m_impl);
+        assert (!m_impl);
     }
 }
 
-void CoreProcess::startClient(int serverId)
+void
+CoreProcess::startClient(int const serverId)
 {
     serviceLog()->debug("starting core client process");
 
-    m_proccessMode = ProcessMode::kClient;
+    m_processMode = ProcessMode::kClient;
     m_currentServerId = serverId;
 
     ProcessCommand command;
     command.setLocalHostname(boost::asio::ip::host_name());
     command.setRunAsUid(m_runAsUid);
-
     command.setServerAddress(kServerProxyEndpoint);
 
     try {
-        start(command.generate(false));
-    }
-    catch (const std::exception& ex) {
+        start (command.generate(false));
+    } catch (const std::exception& ex) {
         serviceLog()->error("failed to start client core process: {}", ex.what());
         m_impl.reset();
-        assert(!m_impl);
+        assert (!m_impl);
     }
 }
 
-ProcessMode CoreProcess::proccessMode() const
+ProcessMode
+CoreProcess::processMode() const
 {
-    return m_proccessMode;
+    return m_processMode;
 }
 
-int CoreProcess::currentServerId() const
+int
+CoreProcess::currentServerId() const
 {
     return m_currentServerId;
 }
 
 void
-CoreProcess::setRunAsUid(const std::string& runAsUid)
+CoreProcess::setRunAsUid(std::string runAsUid)
 {
-    m_runAsUid = runAsUid;
+    m_runAsUid = std::move (runAsUid);
 }
 
-void CoreProcess::onServerChanged(int64_t serverId)
+void
+CoreProcess::onServerChanged(int64_t const serverId)
 {
     serviceLog()->debug("handling local profile server changed, mode={} thisId={} serverId={} lastServerId={}",
-        processModeToString(m_proccessMode), m_userConfig->screenId(), serverId, m_currentServerId);
+        processModeToString(m_processMode), m_userConfig->screenId(), serverId, m_currentServerId);
 
-    switch (m_proccessMode) {
-    case ProcessMode::kServer: {
-        // when server changes from local screen to another screen
-        if (m_userConfig->screenId() != serverId) {
-           startClient(serverId);
-        }
+    switch (m_processMode) {
+        case ProcessMode::kServer: {
+            // when server changes from local screen to another screen
+            if (m_userConfig->screenId() != serverId) {
+               startClient(serverId);
+            }
 
-        break;
-    }
-    case ProcessMode::kClient: {
-        // when local screen becomes the server
-        if (m_userConfig->screenId() == serverId) {
-            startServer();
+            break;
         }
-        // when another screen, not local screen, claims to be the server
-        else if (m_currentServerId != serverId) {
-            startClient(serverId);
-        }
+        case ProcessMode::kClient: {
+            // when local screen becomes the server
+            if (m_userConfig->screenId() == serverId) {
+                startServer();
+            }
+            // when another screen, not local screen, claims to be the server
+            else if (m_currentServerId != serverId) {
+                startClient(serverId);
+            }
 
-        break;
-    }
-    case ProcessMode::kUnknown: {
-        if (m_userConfig->screenId() == serverId) {
-            startServer();
+            break;
         }
-        else {
-            startClient(serverId);
-        }
+        case ProcessMode::kUnknown: {
+            if (m_userConfig->screenId() == serverId) {
+                startServer();
+            }
+            else {
+                startClient(serverId);
+            }
 
-        break;
-    }
+            break;
+        }
     }
 }
