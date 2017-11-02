@@ -52,7 +52,7 @@ startCrashHandler()
 #endif
 
 #ifdef SYNERGY_BUILD_NUMBER
-    annotations["synergy-build-number"] = #SYNERGY_BUILD_NUMBER;
+    annotations["synergy-build-number"] = SYNERGY_BUILD_NUMBER;
 #endif
 
     std::vector<std::string> arguments;
