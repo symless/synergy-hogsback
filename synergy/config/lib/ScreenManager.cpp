@@ -118,7 +118,7 @@ void ScreenManager::onKeyPressed (int const key)
 {
     switch (key) {
         case Qt::Key_F12:
-            LogManager::warn(QString("F12 is no longer claims server, right click a screen instead"));
+            LogManager::warn(QString("F12 longer claims server, right click a screen instead"));
             break;
     }
 }
