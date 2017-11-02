@@ -157,7 +157,7 @@ void
 ServerProxyConnection::start (ServerProxy& proxy, int32_t const server_id) {
     /* Read loop */
     asio::spawn (
-        socket_.get_io_service (), [this, &proxy, server_id](auto ctx) {
+        socket_.get_io_service (), [this, &proxy, server_id, self = shared_from_this()](auto ctx) {
             std::vector<unsigned char> buffer;
             buffer.reserve (64 * 1024);
 
@@ -221,7 +221,7 @@ ServerProxyConnection::start (ServerProxy& proxy, int32_t const server_id) {
             }
 
             routerLog ()->debug ("Terminating core client read loop");
-            on_disconnect (this->shared_from_this ());
+            on_disconnect (self);
         });
 }
 
