@@ -390,30 +390,29 @@ Rectangle {
                                         screenManager.switchServer(screenIndex)
                                     }
                                 }
-
-                                onAboutToHide: {
-                                    modelIndex = -1
-                                }
                             }
 
                             onPressed: {
-                                if (mouse.button === Qt.RightButton) {
+                                if (mouse.button === Qt.LeftButton) {
+                                    beginDrag = Qt.point(screenIcon.x,
+                                                    screenIcon.y);
+                                    modelIndex = screenManager.getModelIndex(
+                                                    op(screenIcon.x + 45),
+                                                    op(screenIcon.y + 45))
+                                    screenManager.lockScreen(modelIndex)
+                                }
+                                else {
                                     claimServerItem.text = "Share from " + name
                                     individualScreenMenu.popup()
                                 }
-
-                                beginDrag = Qt.point(screenIcon.x,
-                                                screenIcon.y);
-                                modelIndex = screenManager.getModelIndex(
-                                                op(screenIcon.x + 45),
-                                                op(screenIcon.y + 45))
-                                screenManager.lockScreen(modelIndex)
                             }
                             onReleased: {
-                                screenManager.moveModel(modelIndex,
-                                                op(screenIcon.x - beginDrag.x),
-                                                op(screenIcon.y - beginDrag.y))
-                                screenManager.unlockScreen(modelIndex)
+                                if (mouse.button === Qt.LeftButton) {
+                                    screenManager.moveModel(modelIndex,
+                                                    op(screenIcon.x - beginDrag.x),
+                                                    op(screenIcon.y - beginDrag.y))
+                                    screenManager.unlockScreen(modelIndex)
+                                }
                                 modelIndex = -1
                             }
                         }
