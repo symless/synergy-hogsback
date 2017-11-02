@@ -64,7 +64,7 @@ popd
 # figure out how big our DMG needs to be
 #  assumes our contents are at least 1M!
 SIZE=`du -sh "${STAGING_DIR}" | sed 's/\([0-9\.]*\)M\(.*\)/\1/'` 
-SIZE=`echo "${SIZE} + 2.0" | bc | awk '{print int($1+2.0)}'`
+SIZE=`echo "${SIZE} + 5.0" | bc | awk '{print int($1+2.0)}'`
 
 if [ $? -ne 0 ]; then
    echo "Error: Cannot compute size of staging dir"
