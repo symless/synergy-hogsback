@@ -221,6 +221,24 @@ CoreProcess::CoreProcess (boost::asio::io_service& io, std::shared_ptr<UserConfi
             }
         });
     });
+    expectedExit.connect ([this]() {
+        this->handleShutdown();
+        if (!m_nextCommand.empty()) {
+            this->start(std::move(m_nextCommand));
+        }
+    });
+
+    unexpectedExit.connect ([this]() {
+        m_impl->m_outPipe.cancel();
+        m_impl->m_errorPipe.cancel();
+        m_ioService.poll();
+
+        this->handleShutdown();
+        if (!m_lastCommand.empty()) {
+            this->start(std::move(m_lastCommand));
+        }
+    });
+
 }
 
 CoreProcess::~CoreProcess () noexcept {
@@ -392,26 +410,6 @@ CoreProcess::start (std::vector<std::string> command)
         throw std::runtime_error("Invalid core process mode: " + mode);
     }
 
-    expectedExit.connect_extended([this](auto& connection) {
-        connection.disconnect();
-
-        this->handleShutdown();
-
-        if (!m_nextCommand.empty()) {
-            this->start(std::move(m_nextCommand));
-        }
-    });
-
-    unexpectedExit.connect_extended([this](auto& connection) {
-        connection.disconnect();
-
-        this->handleShutdown();
-
-        if (!m_lastCommand.empty()) {
-            this->start(std::move(m_lastCommand));
-        }
-    });
-
     screenStatusChanged(localScreenName, localState);
     m_impl->start();
 }
@@ -453,7 +451,6 @@ void CoreProcess::handleShutdown()
     }
 
     m_impl.reset();
-
     serviceLog()->debug("core process shutdown complete");
 }
 
