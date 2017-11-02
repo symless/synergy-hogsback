@@ -118,8 +118,7 @@ void ScreenManager::onKeyPressed (int const key)
 {
     switch (key) {
         case Qt::Key_F12:
-            LogManager::debug(QString("forcing current computer to be server"));
-            m_cloudClient->claimServer();
+            LogManager::warn(QString("F12 is no longer claims server, right click a screen instead"));
             break;
     }
 }
