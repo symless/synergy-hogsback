@@ -72,7 +72,7 @@ CoreProcess::CoreProcess (boost::asio::io_service& io,
             boost::system::error_code ec;
             m_retryTimer.cancel(ec);
             m_retryTimer.expires_from_now (kUnexpectedExitRetryTime);
-            m_retryTimer.async_wait([this, command = std::move(m_lastCommand)](auto const ec) {
+            m_retryTimer.async_wait ([&, command = std::move(m_lastCommand)](auto const ec) {
                 if (ec == boost::asio::error::operation_aborted) {
                     return;
                 } else if (ec) {
