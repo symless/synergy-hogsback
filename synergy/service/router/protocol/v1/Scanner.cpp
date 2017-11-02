@@ -602,9 +602,9 @@ case 44:
 	goto tr58;
 tr58:
 #line 22 "Scanner.cpp.rl"
-	{ std::cout << "\ndlen = " << dlen << std::endl; dsize = 1; }
+	{ dsize = 1; }
 #line 7 "Scanner.cpp.rl"
-	{ dlen = (*p); std::cout << "\n" << "byte: " << (unsigned int) (*p); }
+	{ dlen = (*p); }
 	goto st45;
 st45:
 	if ( ++p == pe )
@@ -613,7 +613,7 @@ case 45:
 #line 8 "Scanner.cpp.rl"
 	{ dlen <<= 8; }
 #line 9 "Scanner.cpp.rl"
-	{ dlen |= (*p); std::cout << "byte: " << (unsigned int) (*p) << ", "; }
+	{ dlen |= (*p); }
 #line 618 "Scanner.cpp"
 	goto st46;
 st46:
@@ -623,7 +623,7 @@ case 46:
 #line 8 "Scanner.cpp.rl"
 	{ dlen <<= 8; }
 #line 9 "Scanner.cpp.rl"
-	{ dlen |= (*p); std::cout << "byte: " << (unsigned int) (*p) << ", "; }
+	{ dlen |= (*p); }
 #line 628 "Scanner.cpp"
 	goto st47;
 st47:
@@ -633,7 +633,7 @@ case 47:
 #line 8 "Scanner.cpp.rl"
 	{ dlen <<= 8; }
 #line 9 "Scanner.cpp.rl"
-	{ dlen |= (*p); std::cout << "byte: " << (unsigned int) (*p) << ", "; }
+	{ dlen |= (*p); }
 #line 638 "Scanner.cpp"
 	goto st175;
 st175:
@@ -684,9 +684,9 @@ case 52:
 	goto tr66;
 tr66:
 #line 22 "Scanner.cpp.rl"
-	{ std::cout << "\ndlen = " << dlen << std::endl; dsize = 1; }
+	{ dsize = 1; }
 #line 7 "Scanner.cpp.rl"
-	{ dlen = (*p); std::cout << "\n" << "byte: " << (unsigned int) (*p); }
+	{ dlen = (*p); }
 	goto st53;
 st53:
 	if ( ++p == pe )
@@ -695,7 +695,7 @@ case 53:
 #line 8 "Scanner.cpp.rl"
 	{ dlen <<= 8; }
 #line 9 "Scanner.cpp.rl"
-	{ dlen |= (*p); std::cout << "byte: " << (unsigned int) (*p) << ", "; }
+	{ dlen |= (*p); }
 #line 700 "Scanner.cpp"
 	goto st54;
 st54:
@@ -705,7 +705,7 @@ case 54:
 #line 8 "Scanner.cpp.rl"
 	{ dlen <<= 8; }
 #line 9 "Scanner.cpp.rl"
-	{ dlen |= (*p); std::cout << "byte: " << (unsigned int) (*p) << ", "; }
+	{ dlen |= (*p); }
 #line 710 "Scanner.cpp"
 	goto st55;
 st55:
@@ -715,7 +715,7 @@ case 55:
 #line 8 "Scanner.cpp.rl"
 	{ dlen <<= 8; }
 #line 9 "Scanner.cpp.rl"
-	{ dlen |= (*p); std::cout << "byte: " << (unsigned int) (*p) << ", "; }
+	{ dlen |= (*p); }
 #line 720 "Scanner.cpp"
 	goto st176;
 st176:
@@ -761,9 +761,9 @@ case 59:
 	goto tr73;
 tr73:
 #line 22 "Scanner.cpp.rl"
-	{ std::cout << "\ndlen = " << dlen << std::endl; dsize = 1; }
+	{ dsize = 1; }
 #line 7 "Scanner.cpp.rl"
-	{ dlen = (*p); std::cout << "\n" << "byte: " << (unsigned int) (*p); }
+	{ dlen = (*p); }
 	goto st60;
 st60:
 	if ( ++p == pe )
@@ -772,7 +772,7 @@ case 60:
 #line 8 "Scanner.cpp.rl"
 	{ dlen <<= 8; }
 #line 9 "Scanner.cpp.rl"
-	{ dlen |= (*p); std::cout << "byte: " << (unsigned int) (*p) << ", "; }
+	{ dlen |= (*p); }
 #line 777 "Scanner.cpp"
 	goto st61;
 st61:
@@ -782,7 +782,7 @@ case 61:
 #line 8 "Scanner.cpp.rl"
 	{ dlen <<= 8; }
 #line 9 "Scanner.cpp.rl"
-	{ dlen |= (*p); std::cout << "byte: " << (unsigned int) (*p) << ", "; }
+	{ dlen |= (*p); }
 #line 787 "Scanner.cpp"
 	goto st62;
 st62:
@@ -792,7 +792,7 @@ case 62:
 #line 8 "Scanner.cpp.rl"
 	{ dlen <<= 8; }
 #line 9 "Scanner.cpp.rl"
-	{ dlen |= (*p); std::cout << "byte: " << (unsigned int) (*p) << ", "; }
+	{ dlen |= (*p); }
 #line 797 "Scanner.cpp"
 	goto st177;
 st177:
@@ -1199,7 +1199,7 @@ tr145:
 #line 23 "Scanner.cpp.rl"
 	{ dsize = 4; }
 #line 7 "Scanner.cpp.rl"
-	{ dlen = (*p); std::cout << "\n" << "byte: " << (unsigned int) (*p); }
+	{ dlen = (*p); }
 	goto st126;
 st126:
 	if ( ++p == pe )
@@ -1208,7 +1208,7 @@ case 126:
 #line 8 "Scanner.cpp.rl"
 	{ dlen <<= 8; }
 #line 9 "Scanner.cpp.rl"
-	{ dlen |= (*p); std::cout << "byte: " << (unsigned int) (*p) << ", "; }
+	{ dlen |= (*p); }
 #line 1213 "Scanner.cpp"
 	goto st127;
 st127:
@@ -1218,7 +1218,7 @@ case 127:
 #line 8 "Scanner.cpp.rl"
 	{ dlen <<= 8; }
 #line 9 "Scanner.cpp.rl"
-	{ dlen |= (*p); std::cout << "byte: " << (unsigned int) (*p) << ", "; }
+	{ dlen |= (*p); }
 #line 1223 "Scanner.cpp"
 	goto st128;
 st128:
@@ -1228,7 +1228,7 @@ case 128:
 #line 8 "Scanner.cpp.rl"
 	{ dlen <<= 8; }
 #line 9 "Scanner.cpp.rl"
-	{ dlen |= (*p); std::cout << "byte: " << (unsigned int) (*p) << ", "; }
+	{ dlen |= (*p); }
 #line 1233 "Scanner.cpp"
 	goto st178;
 st178:
@@ -1486,9 +1486,9 @@ case 154:
 	goto tr177;
 tr177:
 #line 22 "Scanner.cpp.rl"
-	{ std::cout << "\ndlen = " << dlen << std::endl; dsize = 1; }
+	{ dsize = 1; }
 #line 7 "Scanner.cpp.rl"
-	{ dlen = (*p); std::cout << "\n" << "byte: " << (unsigned int) (*p); }
+	{ dlen = (*p); }
 	goto st155;
 st155:
 	if ( ++p == pe )
@@ -1497,7 +1497,7 @@ case 155:
 #line 8 "Scanner.cpp.rl"
 	{ dlen <<= 8; }
 #line 9 "Scanner.cpp.rl"
-	{ dlen |= (*p); std::cout << "byte: " << (unsigned int) (*p) << ", "; }
+	{ dlen |= (*p); }
 #line 1502 "Scanner.cpp"
 	goto st156;
 st156:
@@ -1507,7 +1507,7 @@ case 156:
 #line 8 "Scanner.cpp.rl"
 	{ dlen <<= 8; }
 #line 9 "Scanner.cpp.rl"
-	{ dlen |= (*p); std::cout << "byte: " << (unsigned int) (*p) << ", "; }
+	{ dlen |= (*p); }
 #line 1512 "Scanner.cpp"
 	goto st157;
 st157:
@@ -1517,7 +1517,7 @@ case 157:
 #line 8 "Scanner.cpp.rl"
 	{ dlen <<= 8; }
 #line 9 "Scanner.cpp.rl"
-	{ dlen |= (*p); std::cout << "byte: " << (unsigned int) (*p) << ", "; }
+	{ dlen |= (*p); }
 #line 1522 "Scanner.cpp"
 	goto st183;
 st183:
@@ -1853,11 +1853,7 @@ case 167:
 
 #line 105 "Scanner.cpp.rl"
 
-    if ((cs < 
-#line 1858 "Scanner.cpp"
-168
-#line 106 "Scanner.cpp.rl"
-) || (p != pe)) {
+    if ((cs < 168) || (p != pe)) {
         return false;
     }
 
