@@ -42,12 +42,12 @@ elseif (UNIX)
     if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
         set (SYNERGY_WARNING_FLAGS  -Weverything
                                     -Wno-c++98-compat -Wno-c++98-compat-pedantic)
-        set (SYNERGY_CXX_FLAGS_RELEASE "-O2 -flto -fvisibility=hidden -DNDEBUG")
+        set (SYNERGY_CXX_FLAGS_RELEASE "-O3 -fvisibility=hidden -DNDEBUG")
 
     elseif (CMAKE_COMPILER_IS_GNUCXX)
         set (SYNERGY_WARNING_FLAGS -Wall -Wextra -Wpedantic
                                    -Wconversion -Wsign-conversion -Wformat=2)
-        set (SYNERGY_CXX_FLAGS_RELEASE "-O2 -flto -fvisibility=hidden -DNDEBUG")
+        set (SYNERGY_CXX_FLAGS_RELEASE "-O3 -fvisibility=hidden -DNDEBUG")
     endif()
 
     if (NOT DEFINED SYNERGY_SCAN_BUILD)
