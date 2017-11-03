@@ -57,21 +57,27 @@ CloudClient::CloudClient(boost::asio::io_service& ioService,
 void
 CloudClient::load(UserConfig const& userConfig)
 {
-    static auto lastProfileId = -1;
     auto const profileId = userConfig.profileId();
-    if (profileId != lastProfileId) {
+    auto const userToken = userConfig.userToken();
+
+    if ((profileId != m_lastProfileId) || (userToken != m_lastUserToken)) {
+
+        serviceLog()->debug("setting websocket headers, channel={} auth={}", profileId, userToken);
         m_websocket.addHeader("X-Channel-Id", std::to_string(profileId));
-        m_websocket.addHeader("X-Auth-Token", userConfig.userToken());
+        m_websocket.addHeader("X-Auth-Token", userToken);
 
         if (!m_websocket.isConnected()) {
+            serviceLog()->debug("initial websocket connection");
             m_websocket.connect(kSubTarget);
         }
         else {
+            serviceLog()->debug("websocket reconnecting");
             m_websocket.reconnect();
         }
     }
 
-    lastProfileId = profileId;
+    m_lastProfileId = profileId;
+    m_lastUserToken = userToken;
 }
 
 void CloudClient::report(int screenId, const std::string &successfulIp, const std::string &failedIp)

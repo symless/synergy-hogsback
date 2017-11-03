@@ -10,14 +10,14 @@ SecuredTcpClient::SecuredTcpClient(boost::asio::io_service &ioService, std::stri
     m_resolver(ioService),
     m_address(hostname),
     m_port(port),
-    m_connecting(false)
+    m_connected(false)
 {
 }
 
 void SecuredTcpClient::connect()
 {
-    if (m_connecting) {
-        serviceLog()->warn("tcp client already in connecting");
+    if (m_connected) {
+        serviceLog()->warn("tcp client already connected");
         return;
     }
 
@@ -89,7 +89,7 @@ void SecuredTcpClient::onSslHandshakeFinished(errorCode ec)
         return;
     }
 
-    m_connecting = true;
+    m_connected = true;
     connected(this);
 }
 

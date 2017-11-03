@@ -35,7 +35,7 @@ private:
     tcp::resolver m_resolver;
     std::string m_address;
     std::string m_port;
-    bool m_connecting;
+    bool m_connected;
 };
 
 #endif // SECUREDTCPCLIENT_H

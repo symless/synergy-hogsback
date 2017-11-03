@@ -20,7 +20,6 @@ public:
     ~WebsocketSession();
 
     void connect(const std::string target);
-    void disconnect();
     void reconnect(bool now = false);
     void write(std::string& message);
     void addHeader(std::string headerName, std::string headerContent);
@@ -42,11 +41,11 @@ private:
     void onWebsocketHandshakeFinished(errorCode ec);
     void onReadFinished(errorCode ec);
     void onWriteFinished(errorCode ec);
-    void onDisconnectFinished(errorCode ec);
 
     void close() noexcept;
     void setTcpKeepAliveTimeout();
     void handleConnectError(bool reconnect, bool isFatal);
+    void initSockets();
 
 private:
     boost::beast::multi_buffer m_readBuffer;

@@ -44,6 +44,8 @@ private:
     std::shared_ptr<UserConfig> m_userConfig;
     WebsocketSession m_websocket;
     std::shared_ptr<ProfileConfig> m_remoteProfileConfig;
+    int m_lastProfileId = -1;
+    std::string m_lastUserToken = "";
 };
 
 #endif // CLOUDCLIENT_H

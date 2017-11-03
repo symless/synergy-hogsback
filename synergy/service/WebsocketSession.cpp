@@ -36,8 +36,6 @@ WebsocketSession::WebsocketSession(boost::asio::io_service &ioService,
         const std::string& hostname,
         const std::string& port) :
     m_reconnectTimer(ioService),
-    m_tcpClient(std::make_unique<SecuredTcpClient>(ioService, hostname, port)),
-    m_websocket(std::make_unique<websocket::stream<ssl::stream<tcp::socket>&>>(m_tcpClient->stream())),
     m_target(),
     m_connected(false),
     m_ioService(ioService),
@@ -53,11 +51,20 @@ WebsocketSession::~WebsocketSession()
 }
 
 void
+WebsocketSession::initSockets()
+{
+    m_tcpClient.reset(new SecuredTcpClient(m_ioService, m_hostname, m_port));
+    m_websocket.reset(new websocket::stream<ssl::stream<tcp::socket>&>(m_tcpClient->stream()));
+}
+
+void
 WebsocketSession::connect(const std::string target)
 {
     if (m_connecting) {
         serviceLog()->warn("already connecting websocket");
     }
+
+    initSockets();
 
     m_fatalConnectionError = false;
     m_connecting = true;
@@ -79,17 +86,6 @@ WebsocketSession::connect(const std::string target)
 
     serviceLog()->debug("connecting websocket");
     m_tcpClient->connect();
-}
-
-void
-WebsocketSession::disconnect()
-{
-    m_websocket->async_close(websocket::close_code::normal,
-        std::bind(
-            &WebsocketSession::onDisconnectFinished,
-            this,
-            std::placeholders::_1)
-    );
 }
 
 void
@@ -115,10 +111,7 @@ WebsocketSession::reconnect(bool now)
             return;
         }
         serviceLog()->debug("retrying websocket connection now");
-
-        m_tcpClient.reset(new SecuredTcpClient(m_ioService, m_hostname, m_port));
-        m_websocket.reset(new websocket::stream<ssl::stream<tcp::socket>&>(m_tcpClient->stream()));
-
+        initSockets();
         connect(m_target);
     });
 }
@@ -261,19 +254,6 @@ WebsocketSession::onWriteFinished(errorCode ec)
     if (ec) {
         serviceLog()->error("websocket write error {}: {}", ec.value(), ec.message());
     }
-}
-
-void
-WebsocketSession::onDisconnectFinished(errorCode ec)
-{
-    if (ec) {
-        serviceLog()->error("websocket disconnect error {}: {}", ec.value(), ec.message());
-    }
-
-    m_connecting = false;
-    m_connected = false;
-    disconnected();
-    serviceLog()->debug("websocket disconnected");
 }
 
 void WebsocketSession::close() noexcept
