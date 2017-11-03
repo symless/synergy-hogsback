@@ -71,14 +71,14 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     });
 
     m_cloudClient->websocketConnectionError.connect([this](){
+
+        m_rpc->server()->publish("synergy.cloud.offline");
+
         if (m_cloudClient->fatalConnectionError()) {
             // fatal, meaning that it's impossible to recover, presumably
             // because the current session is invalid.
             serviceLog()->warn("fatal websocket error, send logout to config ui");
             m_rpc->server()->publish("synergy.auth.logout");
-        }
-        else {
-            m_rpc->server()->publish("synergy.cloud.offline");
         }
     });
 
