@@ -95,6 +95,7 @@ void
 Connection::stop () {
     enabled_ = false;
     boost::system::error_code ec;
+    stream_.shutdown(ec);
     socket_.cancel (ec);
 }
 
