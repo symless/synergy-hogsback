@@ -6,6 +6,7 @@
 class App {
 public:
     int run(int argc, char* argv[]);
+    static cxxopts::Options& options();
 
 private:
     void restart(QApplication& app, std::vector<std::string> args);
@@ -14,6 +15,7 @@ private:
     void stopService();
     void installAndStartService();
 #endif
-};
 
-extern cxxopts::Options g_options;
+private:
+    static cxxopts::Options s_options;
+};

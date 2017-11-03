@@ -481,7 +481,7 @@ void CloudClient::syncConfig()
 
 void CloudClient::setUrls()
 {
-    bool useTestCloud = g_options.count("use-test-cloud");
+    bool useTestCloud = App::options().count("use-test-cloud");
 
     if (useTestCloud) {
         m_cloudUri = "https://alpha1.cloud.symless.com";

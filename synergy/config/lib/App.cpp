@@ -37,7 +37,7 @@ using namespace std;
 #include <cstdlib>
 #endif
 
-cxxopts::Options g_options("");
+cxxopts::Options App::s_options("");
 
 #ifdef Q_OS_OSX
 extern "C++" bool authorizeServiceHelper();
@@ -171,11 +171,11 @@ App::run(int argc, char* argv[])
 
     options.parse(argc, argv);
 
-    g_options = options;
+    s_options = options;
 
-    if (g_options.count("help"))
+    if (s_options.count("help"))
     {
-      std::cout << g_options.help({"", "Group"}) << std::endl;
+      std::cout << s_options.help({"", "Group"}) << std::endl;
       return 0;
     }
 
@@ -293,7 +293,7 @@ App::run(int argc, char* argv[])
     // and wamp connect handler (above) has been connected
     serviceProxy.start();
 
-    if (!g_options.count("disable-version-check")) {
+    if (!s_options.count("disable-version-check")) {
         cloudClient->checkUpdate();
     }
 
@@ -312,6 +312,12 @@ App::run(int argc, char* argv[])
     serviceProxy.join();
 
     return qtAppRet;
+}
+
+cxxopts::Options
+&App::options()
+{
+    return s_options;
 }
 
 void
