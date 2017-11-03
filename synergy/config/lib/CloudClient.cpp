@@ -53,14 +53,19 @@ CloudClient::instance (QQmlEngine* engine, QJSEngine* scriptEngine)
 
 void CloudClient::getUserToken()
 {
-    if (m_appConfig->userToken().isEmpty() ||
-            (m_appConfig->userId() == -1)) {
-        QNetworkRequest req(m_identifyUrl);
+    try {
+        if (m_appConfig->userToken().isEmpty() ||
+                (m_appConfig->userId() == -1)) {
+            QNetworkRequest req(m_identifyUrl);
 
-        auto reply = m_networkManager->get(req);
-        connect (reply, &QNetworkReply::finished, [this, reply]() {
-            onGetIdentifyFinished (reply);
-        });
+            auto reply = m_networkManager->get(req);
+            connect (reply, &QNetworkReply::finished, [this, reply]() {
+                onGetIdentifyFinished (reply);
+            });
+        }
+    }
+    catch (const std::exception& ex) {
+        LogManager::error(QString("failed to get user profile").arg(ex.what()));
     }
 }
 
@@ -77,43 +82,49 @@ bool CloudClient::verifyUser()
 
 void CloudClient::getUserId(bool initialCall)
 {
-    if (initialCall) {
-        // if user click login as Symless again while trying to poll the
-        // user Id, we only need to restart the time and skip creating
-        // a new poll as the last one probably is not finished yet
-        bool skip = false;
-        if (m_elapsedTimer.remainingTime() > 0) {
-            skip = true;
+    try {
+        if (initialCall) {
+            // if user click login as Symless again while trying to poll the
+            // user Id, we only need to restart the time and skip creating
+            // a new poll as the last one probably is not finished yet
+            bool skip = false;
+            if (m_elapsedTimer.remainingTime() > 0) {
+                skip = true;
+            }
+
+            m_elapsedTimer.start(kPollingTimeout);
+
+            if (skip) {
+                return;
+            }
+        }
+        else {
+            if (m_elapsedTimer.remainingTime() <= 0) {
+                emit loginFail("Login failed. Please try again.");
+                return;
+            }
         }
 
-        m_elapsedTimer.start(kPollingTimeout);
+        // start polling cloud to see if we have a valid user ID associated
+        // with this user token
+        QNetworkRequest req(m_identifyUrl);
+        req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+        req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
-        if (skip) {
-            return;
-        }
+        auto reply = m_networkManager->get(req);
+        connect (reply, &QNetworkReply::finished, [this, reply](){
+            onGetUserIdFinished (reply);
+        });
+
+        connect(
+            reply,
+            static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
+                    this, &CloudClient::onReplyError);
+
     }
-    else {
-        if (m_elapsedTimer.remainingTime() <= 0) {
-            emit loginFail("Login failed. Please try again.");
-            return;
-        }
+    catch (const std::exception& ex) {
+        LogManager::error(QString("failed to get user id").arg(ex.what()));
     }
-
-    // start polling cloud to see if we have a valid user ID associated
-    // with this user token
-    QNetworkRequest req(m_identifyUrl);
-    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
-    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
-
-    auto reply = m_networkManager->get(req);
-    connect (reply, &QNetworkReply::finished, [this, reply](){
-        onGetUserIdFinished (reply);
-    });
-
-    connect(
-        reply,
-        static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
-                this, &CloudClient::onReplyError);
 }
 
 void CloudClient::unsubProfile(int screenId)
@@ -191,18 +202,24 @@ void CloudClient::onUnsubProfileFinished(QNetworkReply *reply)
 
 void CloudClient::onCheckUpdateFinished(QNetworkReply *reply)
 {
-    if (replyHasError(reply)) {
-        throw std::runtime_error(QString("failed to check update: %1").arg(reply->errorString()).toStdString());
-        return;
+    try {
+        if (replyHasError(reply)) {
+            throw std::runtime_error(QString("failed to check update: %1").arg(reply->errorString()).toStdString());
+            return;
+        }
+
+        m_Data = reply->readAll();
+        reply->deleteLater();
+
+        QJsonDocument doc = QJsonDocument::fromJson(m_Data);
+
+        VersionManager* versionManager = qobject_cast<VersionManager*>(VersionManager::instance());
+        versionManager->checkUpdate(doc);
+
     }
-
-    m_Data = reply->readAll();
-    reply->deleteLater();
-
-    QJsonDocument doc = QJsonDocument::fromJson(m_Data);
-
-    VersionManager* versionManager = qobject_cast<VersionManager*>(VersionManager::instance());
-    versionManager->checkUpdate(doc);
+    catch (const std::exception& ex) {
+        LogManager::error(QString("failed to check update finished").arg(ex.what()));
+    }
 }
 
 void CloudClient::onUploadLogFileFinished(QNetworkReply *reply)
@@ -240,36 +257,41 @@ void CloudClient::onUploadProgress(qint64 done, qint64 total)
 
 void CloudClient::switchProfile(QString profileName)
 {
-    QNetworkRequest req (m_switchProfileUrl);
-    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
-    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
+    try {
+        QNetworkRequest req (m_switchProfileUrl);
+        req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+        req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
-    QStringList ipList;
+        QStringList ipList;
 
-    foreach (QHostAddress const& address, QNetworkInterface::allAddresses()) {
-        if (address.protocol() == QAbstractSocket::IPv4Protocol &&
-                address != QHostAddress(QHostAddress::LocalHost)) {
-            ipList.push_back(address.toString());
+        foreach (QHostAddress const& address, QNetworkInterface::allAddresses()) {
+            if (address.protocol() == QAbstractSocket::IPv4Protocol &&
+                    address != QHostAddress(QHostAddress::LocalHost)) {
+                ipList.push_back(address.toString());
+            }
         }
+
+        QJsonObject screenObject;
+
+        screenObject.insert("name", QHostInfo::localHostName());
+        screenObject.insert("ipList", ipList.join(","));
+        screenObject.insert("status", "Disconnected");
+
+        QJsonObject profileObject;
+        profileObject.insert ("name", profileName);
+        QJsonObject jsonObject;
+        jsonObject.insert("screen", screenObject);
+        jsonObject.insert("profile", profileObject);
+        QJsonDocument doc(jsonObject);
+
+        auto reply = m_networkManager->post(req, doc.toJson());
+        connect (reply, &QNetworkReply::finished, [this, reply]() {
+           this->onSwitchProfileFinished (reply);
+        });
     }
-
-    QJsonObject screenObject;
-
-    screenObject.insert("name", QHostInfo::localHostName());
-    screenObject.insert("ipList", ipList.join(","));
-    screenObject.insert("status", "Disconnected");
-
-    QJsonObject profileObject;
-    profileObject.insert ("name", profileName);
-    QJsonObject jsonObject;
-    jsonObject.insert("screen", screenObject);
-    jsonObject.insert("profile", profileObject);
-    QJsonDocument doc(jsonObject);
-
-    auto reply = m_networkManager->post(req, doc.toJson());
-    connect (reply, &QNetworkReply::finished, [this, reply]() {
-       this->onSwitchProfileFinished (reply);
-    });
+    catch (const std::exception& ex) {
+        LogManager::error(QString("failed to get user profile").arg(ex.what()));
+    }
 }
 
 void CloudClient::onSwitchProfileFinished(QNetworkReply* reply)
@@ -300,36 +322,46 @@ void CloudClient::onSwitchProfileFinished(QNetworkReply* reply)
 
 void CloudClient::userProfiles()
 {
-    if (m_appConfig->userToken().isEmpty()) {
-        return;
+    try {
+        if (m_appConfig->userToken().isEmpty()) {
+            return;
+        }
+
+        QNetworkRequest req(m_userProfilesUrl);
+        req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+        req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
+
+        auto reply = m_networkManager->get(req);
+        connect (reply, &QNetworkReply::finished, [this, reply]() {
+            onUserProfilesFinished (reply);
+        });
     }
-
-    QNetworkRequest req(m_userProfilesUrl);
-    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
-    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
-
-    auto reply = m_networkManager->get(req);
-    connect (reply, &QNetworkReply::finished, [this, reply]() {
-        onUserProfilesFinished (reply);
-    });
+    catch (const std::exception& ex) {
+        LogManager::error(QString("failed to get user profile").arg(ex.what()));
+    }
 }
 
 void CloudClient::checkUpdate()
 {
-    QNetworkRequest req(m_checkUpdateUrl);
-    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
+    try {
+        QNetworkRequest req(m_checkUpdateUrl);
+        req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
-    VersionManager* versionManager = qobject_cast<VersionManager*>(VersionManager::instance());
-    QString currentVersion = versionManager->currentVersion();
-    QJsonObject jsonObject;
-    jsonObject.insert("currentVersion", currentVersion);
+        VersionManager* versionManager = qobject_cast<VersionManager*>(VersionManager::instance());
+        QString currentVersion = versionManager->currentVersion();
+        QJsonObject jsonObject;
+        jsonObject.insert("currentVersion", currentVersion);
 
-    QJsonDocument doc(jsonObject);
+        QJsonDocument doc(jsonObject);
 
-    auto reply = m_networkManager->post(req, doc.toJson());
-    connect (reply, &QNetworkReply::finished, [this, reply]() {
-        onCheckUpdateFinished (reply);
-    });
+        auto reply = m_networkManager->post(req, doc.toJson());
+        connect (reply, &QNetworkReply::finished, [this, reply]() {
+            onCheckUpdateFinished (reply);
+        });
+    }
+    catch (const std::exception& ex) {
+        LogManager::error(QString("failed to check for update").arg(ex.what()));
+    }
 }
 
 void CloudClient::claimServer()
@@ -339,18 +371,23 @@ void CloudClient::claimServer()
 
 void CloudClient::updateScreen(const UIScreen& screen)
 {
-    QNetworkRequest req(m_updateScreenUrl);
-    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
-    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
+    try {
+        QNetworkRequest req(m_updateScreenUrl);
+        req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+        req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
-    QJsonObject screenObject;
-    screenObject.insert("id", screen.id());
-    screenObject.insert("name", screen.name());
-    screenObject.insert("status", QString::fromStdString(screenStatusToString(screen.status())));
+        QJsonObject screenObject;
+        screenObject.insert("id", screen.id());
+        screenObject.insert("name", screen.name());
+        screenObject.insert("status", QString::fromStdString(screenStatusToString(screen.status())));
 
-    QJsonDocument doc(screenObject);
+        QJsonDocument doc(screenObject);
 
-    m_networkManager->post(req, doc.toJson());
+        m_networkManager->post(req, doc.toJson());
+    }
+    catch (const std::exception& ex) {
+        LogManager::error(QString("failed to update screen").arg(ex.what()));
+    }
 }
 
 void CloudClient::uploadLogFile(QString filename)
@@ -391,32 +428,42 @@ void CloudClient::uploadLogFile(QString filename)
 
 void CloudClient::report(int destId, QString successfulIpList, QString failedIpList)
 {
-    QNetworkRequest req(m_reportUrl);
-    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
-    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
+    try {
+        QNetworkRequest req(m_reportUrl);
+        req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+        req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
-    QJsonObject reportObject;
-    reportObject.insert("src", (qint64)m_screenId);
-    reportObject.insert("dest", destId);
-    reportObject.insert("successfulIpList", successfulIpList);
-    reportObject.insert("failedIpList", failedIpList);
-    QJsonDocument doc(reportObject);
+        QJsonObject reportObject;
+        reportObject.insert("src", (qint64)m_screenId);
+        reportObject.insert("dest", destId);
+        reportObject.insert("successfulIpList", successfulIpList);
+        reportObject.insert("failedIpList", failedIpList);
+        QJsonDocument doc(reportObject);
 
-    m_networkManager->post(req, doc.toJson());
+        m_networkManager->post(req, doc.toJson());
 
-    LogManager::debug(QString("report to cloud: destId %1 successfulIp %2 failedIp %3").arg(destId).arg(successfulIpList).arg(failedIpList));
+        LogManager::debug(QString("report to cloud: destId %1 successfulIp %2 failedIp %3").arg(destId).arg(successfulIpList).arg(failedIpList));
+    }
+    catch (const std::exception& ex) {
+        LogManager::error(QString("failed to get user profile").arg(ex.what()));
+    }
 }
 
 void CloudClient::updateProfileConfig(QJsonDocument& doc)
 {
-    QNetworkRequest req(m_updateProfileConfigUrl);
-    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
-    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
+    try {
+        QNetworkRequest req(m_updateProfileConfigUrl);
+        req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+        req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
-    auto reply = m_networkManager->post(req, doc.toJson());
-    connect (reply, &QNetworkReply::finished, [this, reply]{
-        onUpdateProfileConfigFinished (reply);
-    });
+        auto reply = m_networkManager->post(req, doc.toJson());
+        connect (reply, &QNetworkReply::finished, [this, reply]{
+            onUpdateProfileConfigFinished (reply);
+        });
+    }
+    catch (const std::exception& ex) {
+        LogManager::error(QString("failed to get user profile").arg(ex.what()));
+    }
 }
 
 void CloudClient::onGetIdentifyFinished(QNetworkReply *reply)
@@ -547,19 +594,24 @@ QString CloudClient::loginClientId()
 
 void CloudClient::switchServer(int screenId)
 {
-    if (screenId == -1) {
-        LogManager::warning(QString("can't use unknown screen as server"));
-        return;
+    try {
+        if (screenId == -1) {
+            LogManager::warning(QString("can't use unknown screen as server"));
+            return;
+        }
+
+        QNetworkRequest req(m_claimServerUrl);
+        req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
+        req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
+
+        QJsonObject jsonObject;
+        jsonObject.insert("screen_id", qint64(screenId));
+        jsonObject.insert("profile_id", qint64(m_profileId));
+        QJsonDocument doc(jsonObject);
+
+        m_networkManager->post(req, doc.toJson());
     }
-
-    QNetworkRequest req(m_claimServerUrl);
-    req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
-    req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
-
-    QJsonObject jsonObject;
-    jsonObject.insert("screen_id", qint64(screenId));
-    jsonObject.insert("profile_id", qint64(m_profileId));
-    QJsonDocument doc(jsonObject);
-
-    m_networkManager->post(req, doc.toJson());
+    catch (const std::exception& ex) {
+        LogManager::error(QString("failed to switch server").arg(ex.what()));
+    }
 }
