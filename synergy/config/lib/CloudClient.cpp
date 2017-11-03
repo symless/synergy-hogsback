@@ -65,7 +65,7 @@ void CloudClient::getUserToken()
         }
     }
     catch (const std::exception& ex) {
-        LogManager::error(QString("failed to get user profile").arg(ex.what()));
+        LogManager::error(QString("failed to get user token: %1").arg(ex.what()));
     }
 }
 
@@ -123,7 +123,7 @@ void CloudClient::getUserId(bool initialCall)
 
     }
     catch (const std::exception& ex) {
-        LogManager::error(QString("failed to get user id").arg(ex.what()));
+        LogManager::error(QString("failed to get user id: %1").arg(ex.what()));
     }
 }
 
@@ -204,8 +204,7 @@ void CloudClient::onCheckUpdateFinished(QNetworkReply *reply)
 {
     try {
         if (replyHasError(reply)) {
-            throw std::runtime_error(QString("failed to check update: %1").arg(reply->errorString()).toStdString());
-            return;
+            throw std::runtime_error(QString("reply has error: %1").arg(reply->errorString()).toStdString());
         }
 
         m_Data = reply->readAll();
@@ -218,7 +217,7 @@ void CloudClient::onCheckUpdateFinished(QNetworkReply *reply)
 
     }
     catch (const std::exception& ex) {
-        LogManager::error(QString("failed to check update finished").arg(ex.what()));
+        LogManager::error(QString("failed to check update: %1").arg(ex.what()));
     }
 }
 
@@ -290,7 +289,7 @@ void CloudClient::switchProfile(QString profileName)
         });
     }
     catch (const std::exception& ex) {
-        LogManager::error(QString("failed to get user profile").arg(ex.what()));
+        LogManager::error(QString("failed to switch profile: %1").arg(ex.what()));
     }
 }
 
@@ -337,7 +336,7 @@ void CloudClient::userProfiles()
         });
     }
     catch (const std::exception& ex) {
-        LogManager::error(QString("failed to get user profile").arg(ex.what()));
+        LogManager::error(QString("failed to get user profile: %1").arg(ex.what()));
     }
 }
 
@@ -360,7 +359,7 @@ void CloudClient::checkUpdate()
         });
     }
     catch (const std::exception& ex) {
-        LogManager::error(QString("failed to check for update").arg(ex.what()));
+        LogManager::error(QString("failed to check for update: %1").arg(ex.what()));
     }
 }
 
@@ -386,7 +385,7 @@ void CloudClient::updateScreen(const UIScreen& screen)
         m_networkManager->post(req, doc.toJson());
     }
     catch (const std::exception& ex) {
-        LogManager::error(QString("failed to update screen").arg(ex.what()));
+        LogManager::error(QString("failed to update screen: %1").arg(ex.what()));
     }
 }
 
@@ -445,7 +444,7 @@ void CloudClient::report(int destId, QString successfulIpList, QString failedIpL
         LogManager::debug(QString("report to cloud: destId %1 successfulIp %2 failedIp %3").arg(destId).arg(successfulIpList).arg(failedIpList));
     }
     catch (const std::exception& ex) {
-        LogManager::error(QString("failed to get user profile").arg(ex.what()));
+        LogManager::error(QString("failed to report: %1").arg(ex.what()));
     }
 }
 
@@ -462,7 +461,7 @@ void CloudClient::updateProfileConfig(QJsonDocument& doc)
         });
     }
     catch (const std::exception& ex) {
-        LogManager::error(QString("failed to get user profile").arg(ex.what()));
+        LogManager::error(QString("failed to update profile config: %1").arg(ex.what()));
     }
 }
 
@@ -612,6 +611,6 @@ void CloudClient::switchServer(int screenId)
         m_networkManager->post(req, doc.toJson());
     }
     catch (const std::exception& ex) {
-        LogManager::error(QString("failed to switch server").arg(ex.what()));
+        LogManager::error(QString("failed to switch server: %1").arg(ex.what()));
     }
 }
