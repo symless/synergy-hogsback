@@ -180,7 +180,7 @@ App::run(int argc, char* argv[])
     }
 
 #ifdef Q_OS_OSX
-    if (g_options.count("service")) {
+    if (s_options.count("service")) {
         QProcess service;
         QString cmd("/Applications/Synergy.app/Contents/MacOS/synergy-service");
         QStringList args;
