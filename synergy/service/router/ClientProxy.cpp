@@ -136,6 +136,7 @@ ClientProxyConnection::start (ClientProxy& proxy) {
         int32_t size = 0;
         boost::system::error_code ec;
         synergy::protocol::v1::Handler handler (proxy.router (), client_id_);
+
         handler.on_hello.connect ([this]() {
             synergy::protocol::v1::HelloBackMessage hb;
             hb.args ().version.major = 1;
@@ -146,6 +147,7 @@ ClientProxyConnection::start (ClientProxy& proxy) {
             buffer.resize (hb.size ());
             hb.write_to (reinterpret_cast<char*> (buffer.data ()));
             this->write (buffer);
+            return true; /* FIXME: write() is asynchronous */
         });
 
 

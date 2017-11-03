@@ -54,14 +54,15 @@ public:
 
     void close ();
     void start (ServerProxy& proxy, int32_t server_id);
-    void write (std::vector<uint8_t> const& data);
+    void write (std::vector<uint8_t> data);
 
 private:
     int32_t id_;
     tcp::socket socket_;
 
 public:
-    signal<void(std::string screen_name)> on_hello_back;
+    signal<bool(std::string screen_name),
+           synergy::protocol::v1::bool_signal_combiner> on_hello_back;
     signal<void(std::shared_ptr<ServerProxyConnection> const&)> on_disconnect;
 };
 
@@ -109,13 +110,10 @@ ServerProxy::start (int32_t const server_id) {
             }
 
             connection->on_hello_back.connect (
-                [this, server_id](std::string screenname) {
+                [this, server_id](std::string screenName) {
                     ProxyClientConnect pcc;
-                    pcc.screen = std::move (screenname);
-                    if (!router_.send (pcc, server_id)) {
-                        // when it fails to send, drop the connection and let core client reconnect
-                        connections_.back()->close();
-                    }
+                    pcc.screen = std::move (screenName);
+                    return router_.send (std::move (pcc), server_id);
                 });
 
             connection->on_disconnect.connect (
@@ -157,7 +155,8 @@ void
 ServerProxyConnection::start (ServerProxy& proxy, int32_t const server_id) {
     /* Read loop */
     asio::spawn (
-        socket_.get_io_service (), [this, &proxy, server_id, self = shared_from_this()](auto ctx) {
+        socket_.get_io_service (), [this, &proxy, server_id,
+                                    self = shared_from_this()](auto ctx) {
             // HACK: wait for 200 ms, so core will be ready for this hello
             asio::steady_timer timer (socket_.get_io_service());
             boost::system::error_code ec;
@@ -169,7 +168,10 @@ ServerProxyConnection::start (ServerProxy& proxy, int32_t const server_id) {
 
             synergy::protocol::v1::Handler handler (proxy.router (), server_id);
             handler.on_hello_back.connect (
-                [this](std::string screenname) { on_hello_back (screenname); });
+                [this](std::string screenName) {
+                    return on_hello_back (std::move (screenName));
+                }
+            );
 
             routerLog ()->debug ("Saying Hello to core client");
             synergy::protocol::v1::HelloMessage hello;
@@ -193,8 +195,6 @@ ServerProxyConnection::start (ServerProxy& proxy, int32_t const server_id) {
                                   asio::transfer_exactly (sizeof (size)),
                                   ctx[ec]);
                 if (ec) {
-                    // TODO: detect disconnect and remove this connection from
-                    // array
                     routerLog ()->debug ("Error reading from core client: {}",
                                          ec.message ());
                     break;
@@ -208,8 +208,6 @@ ServerProxyConnection::start (ServerProxy& proxy, int32_t const server_id) {
                                   asio::transfer_exactly (size),
                                   ctx[ec]);
                 if (ec) {
-                    // TODO: detect disconnect and remove this connection from
-                    // array
                     routerLog ()->debug ("Error reading from core client: {}",
                                          ec.message ());
                     break;
@@ -231,8 +229,9 @@ ServerProxyConnection::start (ServerProxy& proxy, int32_t const server_id) {
 }
 
 void
-ServerProxyConnection::write (const std::vector<uint8_t>& data) {
-    asio::spawn (socket_.get_io_service (), [this, data](auto ctx) {
+ServerProxyConnection::write (std::vector<uint8_t> data) {
+    asio::spawn (socket_.get_io_service (),
+                 [this, data = std::move(data)](auto ctx) {
         int32_t size = data.size ();
         boost::endian::native_to_big_inplace (size);
 
@@ -247,7 +246,7 @@ ServerProxyConnection::write (const std::vector<uint8_t>& data) {
 
 void
 ServerProxyMessageHandler::
-operator() (Message const& message, int32_t source) const {
+operator() (Message const& message, int32_t const source) const {
     boost::apply_visitor (
         [this, source](auto& body) { this->handle (body, source); },
         message.body ());
