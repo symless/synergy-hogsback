@@ -10,6 +10,11 @@ WampClient::WampClient(boost::asio::io_service& io):
     m_connected(false)
 {
     m_defaultCallOptions.set_timeout(std::chrono::seconds(2));
+
+    connectionError.connect([&]() {
+        commonLog()->error("rpc connection offline");
+        m_connected = false;
+    });
 }
 
 bool WampClient::isConnected() const
