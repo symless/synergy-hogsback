@@ -149,7 +149,12 @@ void ScreenManager::switchServer(int index)
 {
     const UIScreen& s = m_screenListModel->getScreen(index);
 
-    m_cloudClient->switchServer(s.id());
+    if (s.status() != ScreenStatus::kInactive) {
+        m_cloudClient->switchServer(s.id());
+    }
+    else {
+        LogManager::warning("can't use an inactive machine to control the others");
+    }
 }
 
 bool ScreenManager::removeScreen(QString name, bool notify)
