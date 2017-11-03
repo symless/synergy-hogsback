@@ -120,7 +120,7 @@ Connection::send (MessageHeader const& header, Message const& message) {
     messageQueue_.emplace_back(header, message);
 
     if (messageQueue_.size() == 1) {
-        asio::spawn(strand_, [this] (auto ctx) {
+        asio::spawn(strand_, [this, self = shared_from_this ()] (auto ctx) {
             while (messageQueue_.size() != 0) {
                 auto firstItem = messageQueue_.front();
                 writer_.write (firstItem.first, firstItem.second, ctx);
