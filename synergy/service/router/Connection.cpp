@@ -78,7 +78,16 @@ bool Connection::start(bool fromServer, asio::yield_context ctx) {
                     routerLog()->debug("Connection {} read error: {}",
                                         this->id (), ec.message ());
                     break;
-                } else if (ec) {
+                }
+                if (ec.category() == asio::error::get_ssl_category() &&
+                    ec.value() == ERR_PACK(ERR_LIB_SSL, 0, SSL_R_SHORT_READ)) {
+                    // short read when the other end closes without doing SSL close notify
+                    on_disconnect (self);
+                    routerLog()->debug("Shutdown Connection {} because of short read",
+                                        this->id ());
+                    break;
+                }
+                else if (ec) {
                     throw boost::system::system_error (ec, ec.message ());
                 }
             }
@@ -95,7 +104,8 @@ void
 Connection::stop () {
     enabled_ = false;
     boost::system::error_code ec;
-    stream_.shutdown(ec);
+
+    // TODO: shutdown SSL stream properly
     socket_.cancel (ec);
 }
 
