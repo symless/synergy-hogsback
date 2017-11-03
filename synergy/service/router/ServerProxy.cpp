@@ -158,6 +158,12 @@ ServerProxyConnection::start (ServerProxy& proxy, int32_t const server_id) {
     /* Read loop */
     asio::spawn (
         socket_.get_io_service (), [this, &proxy, server_id, self = shared_from_this()](auto ctx) {
+            // HACK: wait for 200 ms, so core will be ready for this hello
+            asio::steady_timer timer (socket_.get_io_service());
+            boost::system::error_code ec;
+            timer.expires_from_now (std::chrono::milliseconds (200));
+            timer.async_wait (ctx[ec]);
+
             std::vector<unsigned char> buffer;
             buffer.reserve (64 * 1024);
 
@@ -179,7 +185,6 @@ ServerProxyConnection::start (ServerProxy& proxy, int32_t const server_id) {
                 asio::const_buffer (&size, sizeof (size)),
                 asio::const_buffer (buffer.data (), buffer.size ())};
 
-            boost::system::error_code ec;
             asio::async_write (socket_, buffers, ctx[ec]);
 
             while (true) {

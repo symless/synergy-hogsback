@@ -40,19 +40,19 @@ startCrashHandler()
     annotations["format"] = "minidump";
 
 #ifdef SYNERGY_VERSION_STRING
-    annotations["synergy-version"] = SYNERGY_VERSION_STRING;
+    annotations["synergy.version"] = SYNERGY_VERSION_STRING;
 #endif
 
 #ifdef SYNERGY_REVISION
-    annotations["synergy-revision"] = SYNERGY_REVISION;
+    annotations["synergy.revision"] = SYNERGY_REVISION;
 #endif
 
 #ifdef SYNERGY_BUILD_DATE
-    annotations["synergy-build-date"] = SYNERGY_BUILD_DATE;
+    annotations["synergy.build.date"] = SYNERGY_BUILD_DATE;
 #endif
 
 #ifdef SYNERGY_BUILD_NUMBER
-    annotations["synergy-build-number"] = SYNERGY_BUILD_NUMBER;
+    annotations["synergy.build.number"] = SYNERGY_BUILD_NUMBER;
 #endif
 
     std::vector<std::string> arguments;
