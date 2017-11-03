@@ -165,6 +165,7 @@ App::run(int argc, char* argv[])
       ("disable-version-check", "Disable version check")
       ("use-test-cloud", "Connect to the test cloud server")
 #ifdef Q_OS_OSX
+      ("disable-install", "Disables automatic install (Mac only)")
       ("service", "Start the service (Mac only)")
 #endif
     ;
@@ -189,7 +190,9 @@ App::run(int argc, char* argv[])
         return 0;
     }
 
-    installAndStartService();
+    if (!s_options.count("disable-install")) {
+        installAndStartService();
+    }
 #endif
 
     /* Workaround for QTBUG-40332
