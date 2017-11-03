@@ -172,7 +172,7 @@ ServerProxyConnection::start (ServerProxy& proxy, int32_t const server_id) {
 
             int32_t size = hello.size ();
             buffer.resize (size);
-            boost::endian::big_to_native_inplace (size);
+            boost::endian::native_to_big_inplace (size);
             hello.write_to (reinterpret_cast<char*> (buffer.data ()));
 
             std::array<asio::const_buffer, 2> const buffers = {
