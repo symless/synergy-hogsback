@@ -249,6 +249,8 @@ ServiceWorker::provideAuth()
         m_userConfig->setProfileId(profileId);
         m_userConfig->setUserToken(std::move(userToken));
         m_userConfig->save();
+
+        serviceLog()->debug("got user auth token: {}", m_userConfig->userToken());
     });
 }
 
