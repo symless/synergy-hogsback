@@ -132,19 +132,28 @@ Router::add (tcp::endpoint endpoint) {
 Router::Router (asio::io_service& io, int const port)
     : acceptor_ (io), hello_timer_ (io),
       context_(ssl::context::tls) {
-    loadRawCertificate();
-    tcp::endpoint endpoint (ip::address (), port);
-    acceptor_.open (endpoint.protocol ());
-    acceptor_.set_option (tcp::socket::reuse_address (true));
-    acceptor_.bind (endpoint);
+    try {
+        loadRawCertificate();
+        tcp::endpoint endpoint (ip::address (), port);
+        acceptor_.open (endpoint.protocol ());
+        acceptor_.set_option (tcp::socket::reuse_address (true));
 
-    /* On individual connections, the socket buffer size must be set prior to
-     * the listen(2) or connect(2) calls in order to have it take effect */
-    boost::system::error_code ec;
-    set_tcp_socket_buffer_sizes (acceptor_, ec);
-    acceptor_.listen ();
+        routerLog()->debug("binding router to {}:{}",
+            endpoint.address().to_string(), endpoint.port());
+        acceptor_.bind (endpoint);
 
-    routerLog()->debug("ID = {}, Name = '{}'", id_, name_);
+        /* On individual connections, the socket buffer size must be set prior to
+         * the listen(2) or connect(2) calls in order to have it take effect */
+        boost::system::error_code ec;
+        set_tcp_socket_buffer_sizes (acceptor_, ec);
+        acceptor_.listen ();
+
+        routerLog()->debug("ID = {}, Name = '{}'", id_, name_);
+    }
+    catch (const std::exception& ex) {
+        routerLog()->error("failed to initialize router");
+        throw;
+    }
 }
 
 bool
