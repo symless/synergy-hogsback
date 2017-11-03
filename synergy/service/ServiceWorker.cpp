@@ -72,6 +72,9 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
 
     m_cloudClient->websocketConnectionError.connect([this](){
 
+        serviceLog()->debug("clearing last profile snapshot");
+        m_lastProfileSnapshot.clear();
+
         m_rpc->server()->publish("synergy.cloud.offline");
 
         if (m_cloudClient->fatalConnectionError()) {
