@@ -24,7 +24,8 @@ public:
     void reconnect(bool now = false);
     void write(std::string& message);
     void addHeader(std::string headerName, std::string headerContent);
-    bool isConnected();
+    bool isConnected() const;
+    bool fatalConnectionError() const;
 
 public:
     template <typename... Args>
@@ -45,7 +46,7 @@ private:
 
     void close() noexcept;
     void setTcpKeepAliveTimeout();
-    void reconnectOnError();
+    void handleConnectError(bool reconnect, bool isFatal);
 
 private:
     boost::beast::multi_buffer m_readBuffer;
@@ -59,6 +60,7 @@ private:
     std::string m_hostname;
     std::string m_port;
     bool m_connecting = false;
+    bool m_fatalConnectionError = false;
 };
 
 #endif // WEBSOCKETSESSION_H

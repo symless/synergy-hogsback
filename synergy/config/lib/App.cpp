@@ -268,6 +268,11 @@ App::run(int argc, char* argv[])
         logManager->setDialogUrl(url);
     });
 
+    QObject::connect(&serviceProxy, &ServiceProxy::authLogout, [&](){
+        LogManager::debug("user logged out, showing activation screen");
+        cloudClient->invalidAuth();
+    });
+
     WampClient& wampClient = serviceProxy.wampClient();
 
     QObject::connect(cloudClient, &CloudClient::profileUpdated, [&wampClient](){

@@ -21,17 +21,14 @@ public:
     void report(int screenId, const std::string& successfulIp, const std::string& failedIp);
     void claimServer(int64_t serverId);
     void reconnectWebsocket();
-    bool isWebsocketConnected();
+    bool isWebsocketConnected() const;
+    bool fatalConnectionError() const;
 
 private:
     void load(const UserConfig &userConfig);
-
     HttpSession* newHttpSession();
-
-    boost::asio::io_service& m_ioService;
-    std::shared_ptr<UserConfig> m_userConfig;
-    WebsocketSession m_websocket;
-    std::shared_ptr<ProfileConfig> m_remoteProfileConfig;
+    static std::string pubSubServerHostname();
+    static std::string cloudServerHostname();
 
 public:
     template <typename... Args>
@@ -43,8 +40,10 @@ public:
     signal<void()> websocketConnectionError;
 
 private:
-    static std::string pubSubServerHostname();
-    static std::string cloudServerHostname();
+    boost::asio::io_service& m_ioService;
+    std::shared_ptr<UserConfig> m_userConfig;
+    WebsocketSession m_websocket;
+    std::shared_ptr<ProfileConfig> m_remoteProfileConfig;
 };
 
 #endif // CLOUDCLIENT_H

@@ -59,6 +59,7 @@ WebsocketSession::connect(const std::string target)
         serviceLog()->warn("already connecting websocket");
     }
 
+    m_fatalConnectionError = false;
     m_connecting = true;
     m_target = target;
 
@@ -123,11 +124,25 @@ WebsocketSession::reconnect(bool now)
 }
 
 void
-WebsocketSession::reconnectOnError()
+WebsocketSession::handleConnectError(bool reconnect_, bool isFatal)
 {
     m_connecting = false;
+    m_fatalConnectionError = isFatal;
+
     connectionError();
-    reconnect();
+
+    if (reconnect_) {
+        reconnect();
+    }
+    else {
+        serviceLog()->warn("abandoning websocket connection attempt");
+    }
+}
+
+bool
+WebsocketSession::fatalConnectionError() const
+{
+    return m_fatalConnectionError;
 }
 
 void
@@ -149,7 +164,7 @@ void WebsocketSession::addHeader(std::string headerName, std::string headerConte
     m_headers[headerName] = headerContent;
 }
 
-bool WebsocketSession::isConnected()
+bool WebsocketSession::isConnected() const
 {
     return m_connected;
 }
@@ -181,8 +196,8 @@ WebsocketSession::onTcpClientConnectFailed()
     if (m_tcpClient) {
         m_tcpClient.reset();
 
-        serviceLog()->debug("websocket connect failed");
-        reconnectOnError();
+        serviceLog()->error("websocket connect failed");
+        handleConnectError(true, false);
     }
 }
 
@@ -190,8 +205,13 @@ void
 WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
 {
     if (ec) {
-        serviceLog()->debug("websocket handshake error {}: {}", ec.value(), ec.message());
-        reconnectOnError();
+        serviceLog()->error("websocket handshake error {}: {}", ec.value(), ec.message());
+        if (ec == websocket::error::handshake_failed) {
+            handleConnectError(false, true);
+        }
+        else {
+            handleConnectError(true, false);
+        }
         return;
     }
 
@@ -213,8 +233,8 @@ void
 WebsocketSession::onReadFinished(errorCode ec)
 {
     if (ec) {
-        serviceLog()->debug("websocket read error {}: {}", ec.value(), ec.message());
-        reconnectOnError();
+        serviceLog()->error("websocket read error {}: {}", ec.value(), ec.message());
+        handleConnectError(true, false);
         return;
     }
 
@@ -239,7 +259,7 @@ void
 WebsocketSession::onWriteFinished(errorCode ec)
 {
     if (ec) {
-        serviceLog()->debug("websocket write error {}: {}", ec.value(), ec.message());
+        serviceLog()->error("websocket write error {}: {}", ec.value(), ec.message());
     }
 }
 
@@ -247,7 +267,7 @@ void
 WebsocketSession::onDisconnectFinished(errorCode ec)
 {
     if (ec) {
-        serviceLog()->debug("websocket disconnect error {}: {}", ec.value(), ec.message());
+        serviceLog()->error("websocket disconnect error {}: {}", ec.value(), ec.message());
     }
 
     m_connecting = false;

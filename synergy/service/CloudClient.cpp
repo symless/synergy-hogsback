@@ -111,9 +111,15 @@ CloudClient::reconnectWebsocket()
 }
 
 bool
-CloudClient::isWebsocketConnected()
+CloudClient::isWebsocketConnected() const
 {
     return m_websocket.isConnected();
+}
+
+bool
+CloudClient::fatalConnectionError() const
+{
+    return m_websocket.fatalConnectionError();
 }
 
 HttpSession* CloudClient::newHttpSession()

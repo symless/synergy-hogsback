@@ -36,6 +36,9 @@ ServiceProxy::ServiceProxy() :
     connect (this, &ServiceProxy::rpcCloudOffline, this,
              &ServiceProxy::onRpcCloudOffline, Qt::QueuedConnection);
 
+    connect (this, &ServiceProxy::rpcAuthLogout, this,
+             &ServiceProxy::onRpcAuthLogout, Qt::QueuedConnection);
+
     m_wampClient.connectionError.connect([&]() {
         m_errorView->setMode(ErrorViewMode::kServiceError);
     });
@@ -46,9 +49,6 @@ ServiceProxy::ServiceProxy() :
 
     m_wampClient.connected.connect([&]() {
         LogManager::debug("connected to background service");
-
-        LogManager::debug("saying hello to background service");
-        m_wampClient.call<void>("synergy.hello");
 
 #if __linux__
         // for use on linux, tell the core process what user id it should run as.
@@ -89,6 +89,13 @@ ServiceProxy::ServiceProxy() :
         m_wampClient.subscribe ("synergy.cloud.online", [this]() {
             emit rpcCloudOnline();
         });
+
+        m_wampClient.subscribe ("synergy.auth.logout", [this]() {
+            emit rpcAuthLogout();
+        });
+
+        LogManager::debug("saying hello to background service");
+        m_wampClient.call<void>("synergy.hello");
     });
 }
 
@@ -147,6 +154,11 @@ void ServiceProxy::onRpcCloudOnline()
 {
     LogManager::debug(QString("service cloud connection recovered"));
     m_errorView->setMode(ErrorViewMode::kNone);
+}
+
+void ServiceProxy::onRpcAuthLogout()
+{
+    emit authLogout();
 }
 
 std::shared_ptr<ErrorView>

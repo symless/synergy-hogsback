@@ -40,6 +40,8 @@ signals:
     void rpcReceivedScreens(QString reply);
     void rpcCloudOffline();
     void rpcCloudOnline();
+    void rpcAuthLogout();
+    void authLogout();
 
 public slots:
     // TODO: figure out how to get rid of double signals hack
@@ -52,6 +54,7 @@ public slots:
     void onLogCoreOutput(QString text);
     void onRpcCloudOffline();
     void onRpcCloudOnline();
+    void onRpcAuthLogout();
 
 private:
     boost::asio::io_service m_io;
