@@ -11,11 +11,32 @@
 #include <exception>
 #include <iostream>
 
+cxxopts::Options App::s_options("");
+
 int
 App::run(int argc, char* argv[])
 {
+    std::vector<std::string> arguments(argv, argv + argc);
+
+    cxxopts::Options options("synergy-service");
+
+    options.add_options()
+      ("help", "Print command line argument help")
+      ("use-test-cloud", "Connect to the test cloud server")
+    ;
+
+    options.parse(argc, argv);
+
+    s_options = options;
+
+    if (s_options.count("help"))
+    {
+      std::cout << s_options.help({"", "Group"}) << std::endl;
+      return 0;
+    }
+
     try {
-        DirectoryManager::instance()->init(argv[0]);
+        DirectoryManager::instance()->init(arguments[0]);
         auto installDir = DirectoryManager::instance()->installDir().string();
         serviceLog()->debug("install dir: {}", installDir);
     }
@@ -65,4 +86,10 @@ App::run(int argc, char* argv[])
         serviceLog()->error("failed to start service: unknown error");
         return EXIT_FAILURE;
     }
+}
+
+cxxopts::Options&
+App::options()
+{
+    return s_options;
 }

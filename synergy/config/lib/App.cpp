@@ -314,8 +314,8 @@ App::run(int argc, char* argv[])
     return qtAppRet;
 }
 
-cxxopts::Options
-&App::options()
+cxxopts::Options&
+App::options()
 {
     return s_options;
 }

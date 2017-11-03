@@ -41,6 +41,10 @@ public:
     signal<void()> websocketConnected;
     signal<void()> websocketDisconnected;
     signal<void()> websocketConnectionError;
+
+private:
+    static std::string pubSubServerHostname();
+    static std::string cloudServerHostname();
 };
 
 #endif // CLOUDCLIENT_H
