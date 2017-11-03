@@ -89,9 +89,7 @@ WampClient::keepAlive()
 {
     m_keepAliveTimer.expires_from_now(boost::posix_time::seconds(kKeepAliveIntervalSec));
     m_keepAliveTimer.async_wait([&](auto const& ec) {
-        if (m_connected) {
-            this->call<void>(kKeepAliveFunction);
-        }
+        this->call<void>(kKeepAliveFunction);
         this->keepAlive();
     });
 }
