@@ -131,7 +131,7 @@ ClientProxy::router () const {
 void
 ClientProxyConnection::start (ClientProxy& proxy) {
     /* Read loop */
-    asio::spawn (socket_.get_io_service (), [this, &proxy](auto ctx) {
+    asio::spawn (socket_.get_io_service (), [this, self = shared_from_this(), &proxy](auto ctx) {
         std::vector<unsigned char> buffer;
         int32_t size = 0;
         boost::system::error_code ec;
@@ -187,7 +187,7 @@ ClientProxyConnection::start (ClientProxy& proxy) {
         }
 
         routerLog ()->debug ("Terminating core server read loop");
-        on_disconnect (this->shared_from_this ());
+        on_disconnect (self);
     });
 }
 
