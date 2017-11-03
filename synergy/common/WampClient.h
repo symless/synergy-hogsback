@@ -81,7 +81,7 @@ public:
         auto task = std::make_shared<boost::packaged_task<Result()>> (
             [this, fun, args_tup = std::make_tuple (std::forward<Args>(args)...)]() mutable {
                 return m_session->call (fun, std::move(args_tup), m_defaultCallOptions).then
-                    (m_executor, [&](boost::future<autobahn::wamp_call_result> result) {
+                    (m_executor, [&, fun](boost::future<autobahn::wamp_call_result> result) {
                         try {
                             return WampCallHelper<Result>::getReturnValue (result.get());
                         }
