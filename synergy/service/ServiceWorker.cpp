@@ -60,6 +60,9 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         // forward the message via rpc server to config UI
         auto rpcServer = m_rpc->server();
         rpcServer->publish("synergy.profile.snapshot", std::move(json));
+
+        // HACK: say that the cloud server is online when there is a snapshot
+        m_rpc->server()->publish("synergy.cloud.online");
     });
 
     m_cloudClient->websocketConnected.connect([this](){
@@ -68,13 +71,14 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     });
 
     m_cloudClient->websocketConnectionError.connect([this](){
-        m_rpc->server()->publish("synergy.cloud.offline");
-
         if (m_cloudClient->fatalConnectionError()) {
             // fatal, meaning that it's impossible to recover, presumably
             // because the current session is invalid.
             serviceLog()->warn("fatal websocket error, send logout to config ui");
             m_rpc->server()->publish("synergy.auth.logout");
+        }
+        else {
+            m_rpc->server()->publish("synergy.cloud.offline");
         }
     });
 
@@ -242,8 +246,6 @@ ServiceWorker::provideAuth()
         m_userConfig->setProfileId(profileId);
         m_userConfig->setUserToken(std::move(userToken));
         m_userConfig->save();
-
-        serviceLog()->debug("got user auth token: {}", m_userConfig->userToken());
     });
 }
 
@@ -256,9 +258,15 @@ void ServiceWorker::provideSnapshot()
         if (!m_lastProfileSnapshot.empty()) {
             serviceLog()->debug("sending last profile snapshot");
             m_rpc->server()->publish("synergy.profile.snapshot", m_lastProfileSnapshot);
+
+            // HACK: say that the cloud server is online when there is a snapshot
+            m_rpc->server()->publish("synergy.cloud.online");
         }
         else {
             serviceLog()->error("can't send profile snapshot, not yet received from cloud");
+
+            // HACK: say that the cloud server is offline when there's no snapshot
+            m_rpc->server()->publish("synergy.cloud.offline");
         }
     });
 }
