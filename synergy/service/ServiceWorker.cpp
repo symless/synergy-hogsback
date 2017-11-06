@@ -283,10 +283,6 @@ ServiceWorker::provideHello()
 
         serviceLog()->debug("saying hello to config ui");
 
-        // TODO: remove hack
-        serviceLog()->debug("config ui opened, forcing connectivity test");
-        m_localProfileConfig->forceConnectivityTest();
-
         if (!m_cloudClient->isWebsocketConnected()) {
             m_rpc->server()->publish("synergy.cloud.offline");
 
