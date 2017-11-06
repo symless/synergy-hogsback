@@ -149,11 +149,10 @@ void ScreenManager::switchServer(int index)
 {
     const UIScreen& s = m_screenListModel->getScreen(index);
 
-    if (s.status() != ScreenStatus::kInactive) {
-        m_cloudClient->switchServer(s.id());
-    }
-    else {
-        LogManager::warning("can't use an inactive machine to control the others");
+    m_cloudClient->switchServer(s.id());
+
+    if (s.status() != ScreenStatus::kConnected) {
+        LogManager::warning("sharing from computer that is not connected");
     }
 }
 
