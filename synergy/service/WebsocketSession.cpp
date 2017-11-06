@@ -66,7 +66,6 @@ WebsocketSession::connect(const std::string target)
 
     initSockets();
 
-    m_fatalConnectionError = false;
     m_connecting = true;
     m_target = target;
 
@@ -117,12 +116,11 @@ WebsocketSession::reconnect(bool now)
 }
 
 void
-WebsocketSession::handleConnectError(bool reconnect_, bool isFatal)
+WebsocketSession::handleConnectError(bool reconnect_, WebsocketError error)
 {
     m_connecting = false;
-    m_fatalConnectionError = isFatal;
 
-    connectionError();
+    connectionError(error);
 
     if (reconnect_) {
         reconnect();
@@ -130,12 +128,6 @@ WebsocketSession::handleConnectError(bool reconnect_, bool isFatal)
     else {
         serviceLog()->warn("abandoning websocket connection attempt");
     }
-}
-
-bool
-WebsocketSession::fatalConnectionError() const
-{
-    return m_fatalConnectionError;
 }
 
 void
@@ -169,6 +161,7 @@ WebsocketSession::onTcpClientConnected()
 
     // websocket handshake
     m_websocket->async_handshake_ex(
+        m_res,
         m_tcpClient->address().c_str(),
         m_target.c_str(),
         [this](boost::beast::websocket::request_type & req) {
@@ -190,7 +183,7 @@ WebsocketSession::onTcpClientConnectFailed()
         m_tcpClient.reset();
 
         serviceLog()->error("websocket connect failed");
-        handleConnectError(true, false);
+        handleConnectError(true, WebsocketError::kConnection);
     }
 }
 
@@ -198,13 +191,15 @@ void
 WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
 {
     if (ec) {
+        if (m_res.result() == boost::beast::http::status::forbidden) {
+            serviceLog()->error("websocket connection failed with authentication error");
+            handleConnectError(false, WebsocketError::kAuth);
+            return;
+        }
+
         serviceLog()->error("websocket handshake error {}: {}", ec.value(), ec.message());
-        if (ec == websocket::error::handshake_failed) {
-            handleConnectError(false, true);
-        }
-        else {
-            handleConnectError(true, false);
-        }
+        handleConnectError(true, WebsocketError::kConnection);
+
         return;
     }
 
@@ -227,7 +222,7 @@ WebsocketSession::onReadFinished(errorCode ec)
 {
     if (ec) {
         serviceLog()->error("websocket read error {}: {}", ec.value(), ec.message());
-        handleConnectError(true, false);
+        handleConnectError(true, WebsocketError::kRead);
         return;
     }
 

@@ -2,6 +2,7 @@
 #define WEBSOCKETSESSION_H
 
 #include "synergy/service/SecuredTcpClient.h"
+#include <synergy/service/WebsocketError.h>
 
 #include <boost/beast/websocket.hpp>
 #include <boost/beast/websocket/ssl.hpp>
@@ -24,7 +25,6 @@ public:
     void write(std::string& message);
     void addHeader(std::string headerName, std::string headerContent);
     bool isConnected() const;
-    bool fatalConnectionError() const;
 
 public:
     template <typename... Args>
@@ -32,7 +32,7 @@ public:
 
     signal<void()> connected;
     signal<void()> disconnected;
-    signal<void()> connectionError;
+    signal<void(WebsocketError error)> connectionError;
     signal<void(std::string)> messageReceived;
 
 private:
@@ -44,7 +44,7 @@ private:
 
     void close() noexcept;
     void setTcpKeepAliveTimeout();
-    void handleConnectError(bool reconnect, bool isFatal);
+    void handleConnectError(bool reconnect, WebsocketError error = WebsocketError::kUnknown);
     void initSockets();
 
 private:
@@ -52,6 +52,7 @@ private:
     boost::asio::deadline_timer m_reconnectTimer;
     std::unique_ptr<SecuredTcpClient> m_tcpClient;
     std::unique_ptr<websocket::stream<ssl::stream<tcp::socket>&>> m_websocket;
+    websocket::response_type m_res;
     std::string m_target;
     std::map<std::string, std::string> m_headers;
     bool m_connected;
@@ -59,7 +60,6 @@ private:
     std::string m_hostname;
     std::string m_port;
     bool m_connecting = false;
-    bool m_fatalConnectionError = false;
 };
 
 #endif // WEBSOCKETSESSION_H
