@@ -83,7 +83,7 @@ WebsocketSession::connect(const std::string target)
         boost::signals2::at_front
     );
 
-    serviceLog()->debug("connecting websocket");
+    serviceLog()->debug("connecting websocket: {}:{}", m_hostname, m_port);
     m_tcpClient->connect();
 }
 
