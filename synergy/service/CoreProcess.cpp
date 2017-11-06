@@ -163,7 +163,7 @@ CoreProcess::start (std::vector<std::string> command)
                 if (!contains (line, "disconnected from server")) {
                     return;
                 }
-                assert (localScreenState != ScreenStatus::kDisconnected);
+                //assert (localScreenState != ScreenStatus::kDisconnected);
                 localScreenState = ScreenStatus::kDisconnected;
                 screenStatusChanged(localScreenName, localScreenState);
             }, boost::signals2::at_front)
@@ -197,7 +197,7 @@ CoreProcess::start (std::vector<std::string> command)
                     return;
                 }
                 connection.disconnect();
-                assert (localScreenState == ScreenStatus::kConnecting);
+                //assert (localScreenState == ScreenStatus::kConnecting);
                 localScreenState = ScreenStatus::kConnected;
                 screenStatusChanged(localScreenName, localScreenState);
             }, boost::signals2::at_front)
@@ -210,7 +210,7 @@ CoreProcess::start (std::vector<std::string> command)
                 if (!regex_search (line, results, rgx)) {
                     return;
                 }
-                assert (results.size() == 2);
+                //assert (results.size() == 2);
                 auto clientScreenName = results[1].str();
                 auto& clientScreenStatus = m_impl->m_screenStates[clientScreenName];
                 clientScreenStatus = ScreenStatus::kConnected;
@@ -225,10 +225,10 @@ CoreProcess::start (std::vector<std::string> command)
                 if (!regex_search (line, results, rgx)) {
                     return;
                 }
-                assert (results.size() == 2);
+                //assert (results.size() == 2);
                 auto clientScreenName = results[1].str();
                 auto& clientScreenStatus = m_impl->m_screenStates[clientScreenName];
-                assert (clientScreenStatus == ScreenStatus::kConnected);
+                //assert (clientScreenStatus == ScreenStatus::kConnected);
                 clientScreenStatus = ScreenStatus::kDisconnected;
                 screenStatusChanged(std::move (clientScreenName), clientScreenStatus);
             }, boost::signals2::at_front)
