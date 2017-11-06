@@ -52,6 +52,7 @@ private:
     boost::asio::deadline_timer m_reconnectTimer;
     std::unique_ptr<SecuredTcpClient> m_tcpClient;
     std::unique_ptr<websocket::stream<ssl::stream<tcp::socket>&>> m_websocket;
+    websocket::response_type m_res;
     std::string m_target;
     std::map<std::string, std::string> m_headers;
     bool m_connected;

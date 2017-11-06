@@ -169,6 +169,7 @@ WebsocketSession::onTcpClientConnected()
 
     // websocket handshake
     m_websocket->async_handshake_ex(
+        m_res,
         m_tcpClient->address().c_str(),
         m_target.c_str(),
         [this](boost::beast::websocket::request_type & req) {
@@ -198,6 +199,13 @@ void
 WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
 {
     if (ec) {
+        if (m_res.result() == boost::beast::http::status::forbidden) {
+            serviceLog()->error("websocket connection failed with authentication error");
+
+            handleConnectError(false, true);
+            return;
+        }
+
         serviceLog()->error("websocket handshake error {}: {}", ec.value(), ec.message());
         if (ec == websocket::error::handshake_failed) {
             handleConnectError(false, true);
