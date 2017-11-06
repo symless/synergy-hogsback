@@ -207,12 +207,8 @@ WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
         }
 
         serviceLog()->error("websocket handshake error {}: {}", ec.value(), ec.message());
-        if (ec == websocket::error::handshake_failed) {
-            handleConnectError(false, true);
-        }
-        else {
-            handleConnectError(true, false);
-        }
+        handleConnectError(true, false);
+
         return;
     }
 
