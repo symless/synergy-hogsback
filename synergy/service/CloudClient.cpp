@@ -65,6 +65,7 @@ CloudClient::load(UserConfig const& userConfig)
         serviceLog()->debug("setting websocket headers, channel={} auth={}", profileId, userToken);
         m_websocket.addHeader("X-Channel-Id", std::to_string(profileId));
         m_websocket.addHeader("X-Auth-Token", userToken);
+        m_websocket.addHeader("X-Synergy-Version", SYNERGY_VERSION_STRING);
 
         if (!m_websocket.isConnected()) {
             serviceLog()->debug("initial websocket connection");
