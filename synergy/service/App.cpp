@@ -23,6 +23,7 @@ App::run(int argc, char* argv[])
     options.add_options()
       ("help", "Print command line argument help")
       ("use-test-cloud", "Connect to the test cloud server")
+      ("disable-version-check", "Disable version check")
     ;
 
     options.parse(argc, argv);
