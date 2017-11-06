@@ -79,12 +79,12 @@ App::run(int argc, char* argv[])
         return EXIT_SUCCESS;
     }
     catch (const std::exception& ex) {
-        serviceLog()->error("failed to start service: {}", ex.what());
-        return EXIT_FAILURE;
+        serviceLog()->error("service failed: {}", ex.what());
+        throw;
     }
     catch (...) {
-        serviceLog()->error("failed to start service: unknown error");
-        return EXIT_FAILURE;
+        serviceLog()->error("service failed: unknown error");
+        throw;
     }
 }
 

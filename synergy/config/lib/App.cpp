@@ -217,11 +217,11 @@ App::run(int argc, char* argv[])
     }
     catch (const std::exception& ex) {
         LogManager::error(QString("failed to init dirs: %1").arg(ex.what()));
-        return EXIT_FAILURE;
+        throw;
     }
     catch (...) {
         LogManager::error("failed to init dirs: unknown error");
-        return EXIT_FAILURE;
+        throw;
     }
 
     try {
