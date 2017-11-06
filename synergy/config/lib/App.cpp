@@ -266,6 +266,7 @@ App::run(int argc, char* argv[])
     });
 
     CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
+    cloudClient->checkUpdate();
 
     QObject::connect(cloudClient, &CloudClient::uploadLogFileSuccess, [&](QString url){
         logManager->setDialogUrl(url);
@@ -300,10 +301,6 @@ App::run(int argc, char* argv[])
     // service proxy start must happen after the cloud client connect
     // and wamp connect handler (above) has been connected
     serviceProxy.start();
-
-    if (!s_options.count("disable-version-check")) {
-        cloudClient->checkUpdate();
-    }
 
     engine.rootContext()->setContextProperty
         ("kPixelPerPoint", QGuiApplication::primaryScreen()->physicalDotsPerInch() / 72);

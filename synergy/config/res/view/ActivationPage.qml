@@ -10,6 +10,10 @@ Rectangle {
         id: activationPage
         anchors.fill: parent
 
+        Component.onCompleted: {
+            CloudClient.checkUpdate()
+        }
+
         Rectangle {
             id: rectangle1
             anchors.fill: parent

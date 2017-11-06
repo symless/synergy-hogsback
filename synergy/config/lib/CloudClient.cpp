@@ -342,6 +342,11 @@ void CloudClient::userProfiles()
 
 void CloudClient::checkUpdate()
 {
+    if (App::options().count("disable-version-check")) {
+        LogManager::warning("version check disabled, skipping");
+        return;
+    }
+
     try {
         QNetworkRequest req(m_checkUpdateUrl);
         req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
