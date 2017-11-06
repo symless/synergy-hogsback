@@ -49,8 +49,8 @@ CloudClient::CloudClient(boost::asio::io_service& ioService,
         websocketDisconnected();
     });
 
-    m_websocket.connectionError.connect([this]() {
-        websocketConnectionError();
+    m_websocket.connectionError.connect([this](WebsocketError error) {
+        websocketError(error);
     });
 }
 
@@ -120,12 +120,6 @@ bool
 CloudClient::isWebsocketConnected() const
 {
     return m_websocket.isConnected();
-}
-
-bool
-CloudClient::fatalConnectionError() const
-{
-    return m_websocket.fatalConnectionError();
 }
 
 HttpSession* CloudClient::newHttpSession()

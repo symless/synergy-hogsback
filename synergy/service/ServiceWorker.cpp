@@ -11,6 +11,7 @@
 #include <synergy/common/Profile.h>
 #include <synergy/common/NetworkParameters.h>
 #include <synergy/service/CoreProcess.h>
+#include <synergy/service/WebsocketError.h>
 
 #include <boost/asio.hpp>
 #include <boost/algorithm/string.hpp>
@@ -70,17 +71,15 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         m_rpc->server()->publish("synergy.cloud.online");
     });
 
-    m_cloudClient->websocketConnectionError.connect([this](){
+    m_cloudClient->websocketError.connect([this](WebsocketError ec){
 
         serviceLog()->debug("clearing last profile snapshot");
         m_lastProfileSnapshot.clear();
 
         m_rpc->server()->publish("synergy.cloud.offline");
 
-        if (m_cloudClient->fatalConnectionError()) {
-            // fatal, meaning that it's impossible to recover, presumably
-            // because the current session is invalid.
-            serviceLog()->warn("fatal websocket error, send logout to config ui");
+        if (ec == WebsocketError::kAuth) {
+            // Authentication failed either by using an invalid session or an out of date version
             m_rpc->server()->publish("synergy.auth.logout");
         }
     });
@@ -289,13 +288,9 @@ ServiceWorker::provideHello()
         m_localProfileConfig->forceConnectivityTest();
 
         if (!m_cloudClient->isWebsocketConnected()) {
-            if (m_cloudClient->fatalConnectionError()) {
-                serviceLog()->warn("fatal websocket error, send logout to config ui");
-                m_rpc->server()->publish("synergy.auth.logout");
-            }
-            else {
-                m_rpc->server()->publish("synergy.cloud.offline");
-            }
+            m_rpc->server()->publish("synergy.cloud.offline");
+
+            m_cloudClient->reconnectWebsocket();
         }
     });
 }

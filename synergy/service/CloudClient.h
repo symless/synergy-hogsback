@@ -2,6 +2,7 @@
 #define CLOUDCLIENT_H
 
 #include "synergy/service/WebsocketSession.h"
+#include "synergy/service/WebsocketError.h"
 
 #include <boost/asio/io_service.hpp>
 #include <boost/signals2.hpp>
@@ -22,7 +23,6 @@ public:
     void claimServer(int64_t serverId);
     void reconnectWebsocket();
     bool isWebsocketConnected() const;
-    bool fatalConnectionError() const;
 
 private:
     void load(const UserConfig &userConfig);
@@ -37,7 +37,7 @@ public:
     signal<void(std::string)> websocketMessageReceived;
     signal<void()> websocketConnected;
     signal<void()> websocketDisconnected;
-    signal<void()> websocketConnectionError;
+    signal<void(WebsocketError)> websocketError;
 
 private:
     boost::asio::io_service& m_ioService;
