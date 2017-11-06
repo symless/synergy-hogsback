@@ -63,32 +63,20 @@ bool Connection::start(bool fromServer, asio::yield_context ctx) {
 
                 auto ec = reader_.error ();
                 if (!enabled_) {
-                    routerLog()->debug("Connection {} is not enabled",
+                    routerLog()->debug("Connection {} disabled",
                                         this->id ());
                     break;
                 }
                 else if (ec == asio::error::operation_aborted) {
-                    routerLog()->debug("Operation is aborted in connection {}",
-                                        this->id ());
-                    break;
-                } else if ((ec == asio::error::connection_reset) ||
-                           (ec == asio::error::eof) ||
-                           (ec == asio::error::timed_out)) {
-                    on_disconnect (self);
-                    routerLog()->debug("Connection {} read error: {}",
-                                        this->id (), ec.message ());
-                    break;
-                }
-                if (ec.category() == asio::error::get_ssl_category() &&
-                    ec.value() == ERR_PACK(ERR_LIB_SSL, 0, SSL_R_SHORT_READ)) {
-                    // short read when the other end closes without doing SSL close notify
-                    on_disconnect (self);
-                    routerLog()->debug("Shutdown Connection {} because of short read",
+                    routerLog()->error("Operation aborted on connection {}",
                                         this->id ());
                     break;
                 }
                 else if (ec) {
-                    throw boost::system::system_error (ec, ec.message ());
+                    routerLog()->error("Read error on connection {}: {} (code {})",
+                                        this->id (), ec.message (), ec.value());
+                    on_disconnect (self);
+                    break;
                 }
             }
 

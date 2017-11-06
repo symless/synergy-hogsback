@@ -84,33 +84,19 @@ Router::add (tcp::endpoint endpoint) {
             socket.async_connect (endpoint, ctx[ec]);
             timer.cancel ();
 
-            if (ec == asio::error::operation_aborted) {
-                if (!timed_out) {
-                    routerLog()->debug("Aborting connection to {}", endpoint);
-
-                    return;
-                }
-            }
-
-            if (ec == asio::error::connection_refused) {
-                routerLog()->debug("Connection to {} refused", endpoint);
-            } else if ((ec == asio::error::timed_out) || timed_out) {
-                routerLog()->debug("Connection to {} timed out", endpoint);
-            } else if (ec == asio::error::host_unreachable) {
-                routerLog()->debug(
-                    "Connection to {} failed. Host is unreachable", endpoint);
-            } else if (ec) {
-                routerLog()->debug(
-                    "Connection to {} failed. {} (Code {})", endpoint, ec.message(), ec.value());
+            if ((ec == asio::error::operation_aborted) && !timed_out) {
+                routerLog()->debug("Aborting connection to {}", endpoint);
+                return;
             }
 
             if (ec) {
+                routerLog()->error(
+                    "Connection to {} failed: {} (code {})",
+                    endpoint, ec.message(), ec.value());
+
                 timer.expires_from_now (kConnectRetryInterval);
                 timer.async_wait (ctx[ec]);
                 socket.close ();
-                if (ec) {
-                    throw boost::system::system_error (ec, ec.message ());
-                }
                 continue;
             }
 
@@ -348,7 +334,7 @@ Router::add (tcp::socket socket, bool isServer, asio::yield_context ctx) {
     connection->on_disconnect.connect (
         [this](std::shared_ptr<Connection> connection) {
             routerLog ()->debug (
-            "Connection {} is disconnected", connection->id());
+            "Connection {} disconnected", connection->id());
             auto remote = connection->endpoint ();
             this->remove (std::move (connection));
             this->add (remote);
