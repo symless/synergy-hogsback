@@ -18,7 +18,7 @@ Rectangle {
     BodyText {
         id: versionNumber
         anchors.left: parent.left
-        anchors.bottom: versionWarning.top
+        anchors.bottom: parent.bottom
         color: textColor
         text: "Version: Synergy " + VersionManager.buildVersion()
     }
@@ -26,11 +26,10 @@ Rectangle {
     BodyText {
         id: versionWarning
         anchors.left: parent.left
-        anchors.bottom: parent.bottom
+        anchors.bottom: versionNumber.top
         color: textColor
         text: VersionManager.latestVersion().length === 0 ?
-                "For testing only, do not redistribute" :
-                VersionManager.latestVersion() + " is available! Please <a href='https://symless.com/synergy/downloads'>download</a>"
+                "" : VersionManager.latestVersion() + " is available! Please <a href='https://symless.com/synergy/downloads'>download</a>."
         onLinkActivated: Qt.openUrlExternally(link)
 
         MouseArea {
