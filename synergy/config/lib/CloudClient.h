@@ -32,6 +32,7 @@ public:
     Q_INVOKABLE QString loginClientId();
     Q_INVOKABLE void switchServer(int screenId);
 
+    QNetworkRequest newRequest(QUrl url);
     void report(int destId, QString successfulIp, QString failedIp);
     void updateProfileConfig(QJsonDocument& doc);
     void claimServer();
