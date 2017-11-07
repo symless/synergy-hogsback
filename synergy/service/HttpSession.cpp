@@ -9,6 +9,7 @@ HttpSession::HttpSession(boost::asio::io_service& ioService, std::string hostnam
     m_tcpClient(ioService, hostname, port),
     m_readBuffer(2048)
 {
+    addHeader("X-Synergy-Version", SYNERGY_VERSION_STRING);
 }
 
 void HttpSession::addHeader(std::string headerName, std::string headerContent)
