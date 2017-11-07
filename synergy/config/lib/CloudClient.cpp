@@ -56,7 +56,7 @@ void CloudClient::getUserToken()
     try {
         if (m_appConfig->userToken().isEmpty() ||
                 (m_appConfig->userId() == -1)) {
-            QNetworkRequest req(m_identifyUrl);
+            auto req = newRequest(m_identifyUrl);
 
             auto reply = m_networkManager->get(req);
             connect (reply, &QNetworkReply::finished, [this, reply]() {
@@ -107,7 +107,7 @@ void CloudClient::getUserId(bool initialCall)
 
         // start polling cloud to see if we have a valid user ID associated
         // with this user token
-        QNetworkRequest req(m_identifyUrl);
+        auto req = newRequest(m_identifyUrl);
         req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
         req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -134,7 +134,7 @@ void CloudClient::unsubProfile(int screenId)
         return;
     }
 
-    QNetworkRequest req (m_unsubProfileUrl);
+    auto req = newRequest(m_unsubProfileUrl);
     req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
     req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -257,7 +257,7 @@ void CloudClient::onUploadProgress(qint64 done, qint64 total)
 void CloudClient::switchProfile(QString profileName)
 {
     try {
-        QNetworkRequest req (m_switchProfileUrl);
+        auto req = newRequest(m_switchProfileUrl);
         req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
         req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -326,7 +326,7 @@ void CloudClient::userProfiles()
             return;
         }
 
-        QNetworkRequest req(m_userProfilesUrl);
+        auto req = newRequest(m_userProfilesUrl);
         req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
         req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -348,7 +348,7 @@ void CloudClient::checkUpdate()
     }
 
     try {
-        QNetworkRequest req(m_checkUpdateUrl);
+        auto req = newRequest(m_checkUpdateUrl);
         req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
         VersionManager* versionManager = qobject_cast<VersionManager*>(VersionManager::instance());
@@ -376,7 +376,7 @@ void CloudClient::claimServer()
 void CloudClient::updateScreen(const UIScreen& screen)
 {
     try {
-        QNetworkRequest req(m_updateScreenUrl);
+        auto req = newRequest(m_updateScreenUrl);
         req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
         req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -417,7 +417,7 @@ void CloudClient::uploadLogFile(QString filename)
     multiPart->append(logPart);
 
     QUrl logUploadUrl = QUrl(kLogUploadUrl);
-    QNetworkRequest req(logUploadUrl);
+    auto req = newRequest(logUploadUrl);
 
     auto reply = m_networkManager->post(req, multiPart);
     // delete the multiPart with the reply
@@ -433,7 +433,7 @@ void CloudClient::uploadLogFile(QString filename)
 void CloudClient::report(int destId, QString successfulIpList, QString failedIpList)
 {
     try {
-        QNetworkRequest req(m_reportUrl);
+        auto req = newRequest(m_reportUrl);
         req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
         req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -456,7 +456,7 @@ void CloudClient::report(int destId, QString successfulIpList, QString failedIpL
 void CloudClient::updateProfileConfig(QJsonDocument& doc)
 {
     try {
-        QNetworkRequest req(m_updateProfileConfigUrl);
+        auto req = newRequest(m_updateProfileConfigUrl);
         req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
         req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -604,7 +604,7 @@ void CloudClient::switchServer(int screenId)
             return;
         }
 
-        QNetworkRequest req(m_claimServerUrl);
+        auto req = newRequest(m_claimServerUrl);
         req.setRawHeader("X-Auth-Token", m_appConfig->userToken().toUtf8());
         req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
@@ -618,4 +618,11 @@ void CloudClient::switchServer(int screenId)
     catch (const std::exception& ex) {
         LogManager::error(QString("failed to switch server: %1").arg(ex.what()));
     }
+}
+
+QNetworkRequest CloudClient::newRequest(QUrl url)
+{
+    QNetworkRequest req (url);
+    req.setRawHeader ("X-Synergy-Version", SYNERGY_VERSION_STRING);
+    return req;
 }
