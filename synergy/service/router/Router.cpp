@@ -607,11 +607,18 @@ Router::forward (MessageHeader const& header, Message message) {
     auto& by_dest = route_table_.get<by_destination> ();
     auto route    = by_dest.find (header.dest);
     if ((route == end (by_dest)) || !route->connection) {
+        routerLog()->error ("Router couldn't send message to {}, route is missing\n",
+                            header.dest);
+        dump_table();
+        return false;
+    } else if (!route->connection) {
+        routerLog()->error ("Router couldn't send message to {}, route has no connection\n",
+                            header.dest);
+        dump_table();
         return false;
     }
 
     route->connection->send (header, std::move (message));
-
     return true;
 }
 
