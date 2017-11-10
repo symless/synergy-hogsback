@@ -18,8 +18,8 @@
 #endif
 
 // randomly reconnect between this min and max.
-static const long kMinReconnectDelaySec = 1;
-static const long kMaxReconnectDelaySec = 10;
+static const long kMinReconnectDelaySec = 5;
+static const long kMaxReconnectDelaySec = 30;
 
 // user should wait no more than 5 seconds before realizing the connection is down.
 static const unsigned int kTcpKeepAliveIdleSec = 5;
