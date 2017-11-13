@@ -2,6 +2,7 @@
 
 #include <synergy/service/ServiceLogs.h>
 #include <boost/asio/connect.hpp>
+#include <fmt/ostream.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -200,6 +201,7 @@ WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
         }
 
         serviceLog()->error("websocket handshake error {}: {}", ec.value(), ec.message());
+        serviceLog()->error("websocket handshake response {}: {}", (int)m_res.result(), m_res.result());
         handleConnectError(true, WebsocketError::kConnection);
 
         return;
