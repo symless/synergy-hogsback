@@ -191,9 +191,11 @@ void
 WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
 {
     if (ec) {
-        if (m_res.result() == boost::beast::http::status::forbidden) {
-            serviceLog()->error("websocket connection failed with authentication error");
+        std::string res_failed_reason = m_res["X-SCS-Reason"].to_string();
+        if (m_res.result() == boost::beast::http::status::forbidden && !res_failed_reason.empty()) {
+            serviceLog()->error("websocket connection failed: {}", res_failed_reason);
             handleConnectError(false, WebsocketError::kAuth);
+
             return;
         }
 
