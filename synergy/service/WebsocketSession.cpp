@@ -2,6 +2,7 @@
 
 #include <synergy/service/ServiceLogs.h>
 #include <boost/asio/connect.hpp>
+#include <fmt/ostream.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -18,8 +19,8 @@
 #endif
 
 // randomly reconnect between this min and max.
-static const long kMinReconnectDelaySec = 1;
-static const long kMaxReconnectDelaySec = 10;
+static const long kMinReconnectDelaySec = 5;
+static const long kMaxReconnectDelaySec = 30;
 
 // user should wait no more than 5 seconds before realizing the connection is down.
 static const unsigned int kTcpKeepAliveIdleSec = 5;
@@ -191,13 +192,16 @@ void
 WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
 {
     if (ec) {
-        if (m_res.result() == boost::beast::http::status::forbidden) {
-            serviceLog()->error("websocket connection failed with authentication error");
+        std::string res_failed_reason = m_res["X-SCS-Reason"].to_string();
+        if (m_res.result() == boost::beast::http::status::forbidden && !res_failed_reason.empty()) {
+            serviceLog()->error("websocket connection failed: {}", res_failed_reason);
             handleConnectError(false, WebsocketError::kAuth);
+
             return;
         }
 
         serviceLog()->error("websocket handshake error {}: {}", ec.value(), ec.message());
+        serviceLog()->error("websocket handshake response {}: {}", (int)m_res.result(), m_res.result());
         handleConnectError(true, WebsocketError::kConnection);
 
         return;

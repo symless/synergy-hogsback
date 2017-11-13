@@ -419,7 +419,7 @@ Router::integrate (Route route, std::shared_ptr<Connection> source) {
 void
 Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
     if (rr.sender == id_) {
-        routerLog()->debug(" Received own route revocation. "
+        routerLog()->debug("Received own route revocation. "
                             "This indicates a loop. Ignoring");
         return;
     }
@@ -487,7 +487,7 @@ Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
 void
 Router::integrate (RouteAdvertisement& ra, std::shared_ptr<Connection> source) {
     if (ra.sender == id_) {
-        routerLog()->debug(" Received own route advertisement. "
+        routerLog()->debug("Received own route advertisement. "
                             "This indicates a loop. Ignoring");
         return;
     }
@@ -532,10 +532,10 @@ Router::integrate (RouteAdvertisement& ra, std::shared_ptr<Connection> source) {
 
         bool const installed = integrate (*new_route, source);
         if (installed) {
-            routerLog()->debug("    Route {}: installed", route_n);
+            routerLog()->debug("   Route {}: installed", route_n);
             advert.routes.emplace_back (std::move (new_route));
         } else {
-            routerLog()->debug("    Route {}: not installed", route_n);
+            routerLog()->debug("   Route {}: not installed", route_n);
 
         }
 
@@ -551,7 +551,7 @@ Router::integrate (RouteAdvertisement& ra, std::shared_ptr<Connection> source) {
 
 void
 Router::remove (std::shared_ptr<Connection> connection) {
-    routerLog()->debug(" Disabling connection {}", connection->id ());
+    routerLog()->debug("Disabling connection {}", connection->id ());
 
     connection->stop ();
 
@@ -607,11 +607,18 @@ Router::forward (MessageHeader const& header, Message message) {
     auto& by_dest = route_table_.get<by_destination> ();
     auto route    = by_dest.find (header.dest);
     if ((route == end (by_dest)) || !route->connection) {
+        routerLog()->error ("Router couldn't send message to {}, route is missing\n",
+                            header.dest);
+        dump_table();
+        return false;
+    } else if (!route->connection) {
+        routerLog()->error ("Router couldn't send message to {}, route has no connection\n",
+                            header.dest);
+        dump_table();
         return false;
     }
 
     route->connection->send (header, std::move (message));
-
     return true;
 }
 

@@ -47,7 +47,7 @@ bool ProfileConfig::compare(ProfileConfig const& target)
 
     if (target.m_profile.m_version < m_profile.m_version) {
         serviceLog()->debug("profile version is older ({} < {}), abort compare",
-            m_profile.m_version, target.m_profile.m_version);
+            target.m_profile.m_version, m_profile.m_version);
         return different;
     }
 
