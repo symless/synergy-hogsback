@@ -93,7 +93,7 @@ void LogManager::error(const QString& text)
 
 void LogManager::warning(const QString& text)
 {
-    appendRaw(kLogPrefix + timeStamp() + " WARNNIG: " + text);
+    appendRaw(kLogPrefix + timeStamp() + " WARNING: " + text);
 }
 
 void LogManager::info(const QString& text)
