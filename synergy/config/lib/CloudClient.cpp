@@ -535,7 +535,7 @@ void CloudClient::setUrls()
     bool useTestCloud = App::options().count("use-test-cloud");
 
     if (useTestCloud) {
-        m_cloudUri = "https://alpha1.cloud.symless.com";
+        m_cloudUri = "https://test-api.cloud.symless.com";
         m_loginClientId = "4";
     }
     else {
