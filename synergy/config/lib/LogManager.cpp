@@ -100,7 +100,7 @@ void LogManager::debug(const QString& text)
 
 QString LogManager::logFilename()
 {
-    auto path = DirectoryManager::instance()->systemAppDir() / kCombinedLogFile;
+    auto path = DirectoryManager::instance()->systemLogDir() / kCombinedLogFile;
     return QString::fromStdString(path.string());
 }
 
