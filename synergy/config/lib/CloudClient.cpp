@@ -394,12 +394,12 @@ void CloudClient::updateScreen(const UIScreen& screen)
     }
 }
 
-void CloudClient::uploadLogFile(QString filename)
+void CloudClient::uploadLogFile(QString source, QString target)
 {
     AppConfig* appConfig =
             qobject_cast<AppConfig*>(AppConfig::instance());
 
-    QFileInfo fileInfo(filename);
+    QFileInfo fileInfo(target);
     QString withoutPath(fileInfo.fileName());
     QString withoutExt(withoutPath.section('.',0, 0));
     QHttpMultiPart* multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
@@ -414,7 +414,7 @@ void CloudClient::uploadLogFile(QString filename)
 
     QHttpPart logPart;
     logPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"log\"; filename=\"" + withoutPath + "\""));
-    QFile *file = new QFile(filename);
+    QFile *file = new QFile(source);
     file->open(QIODevice::ReadOnly | QIODevice::Text);
     logPart.setBodyDevice(file);
     // delete file with the multiPart
