@@ -414,11 +414,11 @@ void CloudClient::uploadLogFile(QString source, QString target)
 
     QHttpPart logPart;
     logPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"log\"; filename=\"" + withoutPath + "\""));
-    QFile *file = new QFile(source);
-    file->open(QIODevice::ReadOnly | QIODevice::Text);
-    logPart.setBodyDevice(file);
-    // delete file with the multiPart
-    file->setParent(multiPart);
+
+    QFile file(source);
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+    logPart.setBody(file.readAll());
+    file.close();
 
     multiPart->append(logIdPart);
     multiPart->append(userIdPart);
