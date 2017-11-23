@@ -298,6 +298,12 @@ App::run(int argc, char* argv[])
         }
     });
 
+    QObject::connect(logManager, &LogManager::logLine, [&](const QString& logLine) {
+        if (wampClient.isConnected()) {
+            wampClient.call<void>("synergy.log.config", logLine.toStdString());
+        }
+    });
+
     // service proxy start must happen after the cloud client connect
     // and wamp connect handler (above) has been connected
     serviceProxy.start();

@@ -394,26 +394,34 @@ void CloudClient::updateScreen(const UIScreen& screen)
     }
 }
 
-void CloudClient::uploadLogFile(QString filename)
+void CloudClient::uploadLogFile(QString source, QString target)
 {
-    QFileInfo fileInfo(filename);
+    AppConfig* appConfig =
+            qobject_cast<AppConfig*>(AppConfig::instance());
+
+    QFileInfo fileInfo(target);
     QString withoutPath(fileInfo.fileName());
     QString withoutExt(withoutPath.section('.',0, 0));
     QHttpMultiPart* multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
-    QHttpPart idPart;
-    idPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"logId\""));
-    idPart.setBody(withoutExt.toUtf8());
+    QHttpPart logIdPart;
+    logIdPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"logId\""));
+    logIdPart.setBody(withoutExt.toUtf8());
+
+    QHttpPart userIdPart;
+    userIdPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"userId\""));
+    userIdPart.setBody(QString::number(appConfig->userId()).toUtf8());
 
     QHttpPart logPart;
     logPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"log\"; filename=\"" + withoutPath + "\""));
-    QFile *file = new QFile(filename);
-    file->open(QIODevice::ReadOnly | QIODevice::Text);
-    logPart.setBodyDevice(file);
-    // delete file with the multiPart
-    file->setParent(multiPart);
 
-    multiPart->append(idPart);
+    QFile file(source);
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+    logPart.setBody(file.readAll());
+    file.close();
+
+    multiPart->append(logIdPart);
+    multiPart->append(userIdPart);
     multiPart->append(logPart);
 
     QUrl logUploadUrl = QUrl(kLogUploadUrl);
@@ -535,7 +543,7 @@ void CloudClient::setUrls()
     bool useTestCloud = App::options().count("use-test-cloud");
 
     if (useTestCloud) {
-        m_cloudUri = "https://alpha1.cloud.symless.com";
+        m_cloudUri = "https://test-api.cloud.symless.com";
         m_loginClientId = "4";
     }
     else {

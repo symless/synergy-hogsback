@@ -31,6 +31,7 @@ private:
     void provideSnapshot();
     void provideHello();
     void provideCloud();
+    void provideLog();
 
 private:
     boost::asio::io_service&        m_ioService;

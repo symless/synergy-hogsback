@@ -37,7 +37,7 @@ public:
     void updateProfileConfig(QJsonDocument& doc);
     void claimServer();
     void updateScreen(const UIScreen& screen);
-    void uploadLogFile(QString filename);
+    void uploadLogFile(QString source, QString target);
     void receivedScreensInterface(QByteArray msg);
 
     static QObject* instance(QQmlEngine* engine = NULL, QJSEngine* scriptEngine = NULL);

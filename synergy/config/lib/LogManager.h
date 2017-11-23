@@ -44,10 +44,11 @@ public:
 signals:
     void dialogChanged();
     void commonLogLine(const QString& logLine);
+    void logLine(const QString& logLine);
 
 private:
     static QString timeStamp();
-	static void appendRaw(const QString& text);
+    static void appendRaw(const QString& text, bool signal = true, bool tag = true);
     static void updateLogLineModel();
 
     bool getLastLines(int lines, QString& content);
