@@ -396,14 +396,21 @@ void CloudClient::updateScreen(const UIScreen& screen)
 
 void CloudClient::uploadLogFile(QString filename)
 {
+    AppConfig* appConfig =
+            qobject_cast<AppConfig*>(AppConfig::instance());
+
     QFileInfo fileInfo(filename);
     QString withoutPath(fileInfo.fileName());
     QString withoutExt(withoutPath.section('.',0, 0));
     QHttpMultiPart* multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
-    QHttpPart idPart;
-    idPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"logId\""));
-    idPart.setBody(withoutExt.toUtf8());
+    QHttpPart logIdPart;
+    logIdPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"logId\""));
+    logIdPart.setBody(withoutExt.toUtf8());
+
+    QHttpPart userIdPart;
+    userIdPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"userId\""));
+    userIdPart.setBody(QString::number(appConfig->userId()).toUtf8());
 
     QHttpPart logPart;
     logPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"log\"; filename=\"" + withoutPath + "\""));
@@ -413,7 +420,8 @@ void CloudClient::uploadLogFile(QString filename)
     // delete file with the multiPart
     file->setParent(multiPart);
 
-    multiPart->append(idPart);
+    multiPart->append(logIdPart);
+    multiPart->append(userIdPart);
     multiPart->append(logPart);
 
     QUrl logUploadUrl = QUrl(kLogUploadUrl);
