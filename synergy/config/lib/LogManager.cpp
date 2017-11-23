@@ -44,7 +44,7 @@ LogManager::LogManager()
     // use a double signal to move threads
     connect(this, &LogManager::commonLogLine, this,
         [this](const QString& logLine) {
-            appendRaw(kLogPrefix + logLine);
+            appendRaw(logLine);
         },
         Qt::QueuedConnection);
 
@@ -84,27 +84,28 @@ void LogManager::uploadLogFile()
 
 void LogManager::raw(const QString& text)
 {
-    appendRaw(text);
+    appendRaw(text, false, false);
 }
+
 void LogManager::error(const QString& text)
 {
-    appendRaw(kLogPrefix + timeStamp() + " ERROR: " + text);
+    appendRaw(timeStamp() + " error: " + text);
 }
 
 void LogManager::warning(const QString& text)
 {
-    appendRaw(kLogPrefix + timeStamp() + " WARNING: " + text);
+    appendRaw(timeStamp() + " warning: " + text);
 }
 
 void LogManager::info(const QString& text)
 {
-    appendRaw(kLogPrefix + timeStamp() + " INFO: " + text);
+    appendRaw(timeStamp() + " info: " + text);
 }
 
 void LogManager::debug(const QString& text)
 {
 
-    appendRaw(kLogPrefix + timeStamp() + " DEBUG: " + text);
+    appendRaw(timeStamp() + " debug: " + text);
 }
 
 QString LogManager::logFilename()
@@ -118,19 +119,29 @@ QString LogManager::timeStamp()
     return '[' + current.toString(Qt::ISODate) + ']';
 }
 
-void LogManager::appendRaw(const QString& text)
+void LogManager::appendRaw(const QString& text, bool signal, bool tag)
 {
+    LogManager* instance =
+        qobject_cast<LogManager*>(LogManager::instance());
+
+    QString prefix = tag ? kLogPrefix : "";
+
     foreach(QString line, text.split(QRegExp("\r|\n|\r\n"))) {
         if (!line.isEmpty()) {
+
+            if (signal) {
+                emit instance->logLine(line);
+            }
+
             QTextStream stream(&s_file);
-            stream << line << endl;
-            qDebug() << line << endl;
+            stream << prefix << line << endl;
+            qDebug() << prefix << line << endl;
 
             if (s_logLines.size() > s_maximumLogLines) {
                 s_logLines.pop_front();
             }
 
-            s_logLines.push_back(line);
+            s_logLines.push_back(prefix + line);
             updateLogLineModel();
         }
     }

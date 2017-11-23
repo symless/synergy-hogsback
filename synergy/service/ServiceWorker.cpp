@@ -195,6 +195,7 @@ ServiceWorker::provideRpcEndpoints()
     provideSnapshot();
     provideHello();
     provideCloud();
+    provideLog();
 
     serviceLog()->debug("rpc endpoints created");
 }
@@ -300,5 +301,15 @@ ServiceWorker::provideCloud()
 
         serviceLog()->debug("retrying cloud connection");
         m_cloudClient->reconnectWebsocket();
+    });
+}
+
+void
+ServiceWorker::provideLog()
+{
+    m_rpc->server()->provide(
+        "synergy.log.config", [this](std::string logLine) {
+
+        configLog()->debug(logLine);
     });
 }
