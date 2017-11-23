@@ -101,27 +101,10 @@ initRouterLog()
     sinks.push_back(console);
 
     auto logDir = DirectoryManager::instance()->systemLogDir();
-    optional<filesystem::path> logPath;
-
-    /* attempt to create log dir, report error later when logging has been
-     * setup. apparently create_directory only returns false if the dir
-     * doesn't exist (otherwise it throws). bah */
-    std::string logDirExString;
-    try {
-        if (!is_directory(logDir)) {
-            if (!create_directory(logDir)) {
-                throw std::runtime_error("directory already exists: " + logDir.string());
-            }
-        }
-
-        logPath = logDir / "synergy-router.log";
-        auto rotating = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
-            logPath->string(), 1024 * 1024, 1);
-        sinks.push_back(rotating);
-    }
-    catch (const std::exception& ex) {
-        logDirExString = ex.what();
-    }
+    auto logPath = logDir / "synergy-router.log";
+    auto rotating = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
+        logPath.string(), 1024 * 1024, 1);
+    sinks.push_back(rotating);
 
     auto signal = std::make_shared<LogSignalSink>();
     sinks.push_back(signal);
@@ -130,13 +113,6 @@ initRouterLog()
     logger->set_pattern("[ Router  ] [%Y-%m-%dT%T] %l: %v");
     logger->flush_on(spdlog::level::debug);
     logger->set_level(spdlog::level::debug);
-
-    if (logPath) {
-        logger->debug("router log path: {}", logPath->string());
-    }
-    else if (!logDirExString.empty()) {
-        logger->warn("router file logging disabled, exception: {}", logDirExString);
-    }
 
     return logger;
 }
