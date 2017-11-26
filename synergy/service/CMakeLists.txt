@@ -27,7 +27,7 @@ target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
 #
 # TODO: this is duplicate from core
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    set (OPENSSL_ROOT ${CMAKE_SOURCE_DIR}/synergy/core/ext/openssl/windows)
+    set (OPENSSL_ROOT ${CMAKE_SOURCE_DIR}/third_party/precompiled/openssl/windows)
     if (CMAKE_SIZEOF_VOID_P EQUAL 8)
         set (OPENSSL_ROOT "${OPENSSL_ROOT}/x64")
     else()

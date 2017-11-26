@@ -27,7 +27,6 @@
 
         <Feature Id="ProductFeature" Title="$(var.Name)">
             <ComponentGroupRef Id="ProductComponents"/>
-            <ComponentGroupRef Id="OpenSSLComponents"/>
             <ComponentGroupRef Id="QtComponents"/>
 
             <MergeRef Id="CRT"/>
@@ -73,7 +72,6 @@
                     <?if $(var.Configuration) = "Debug" ?>
                         <Merge DiskId="1" Id="DebugCRT" Language="0" SourceFile="$(var.DebugCRT)"/>
                     <?endif ?>
-                    <Directory Id="OpenSSLDir" Name="OpenSSL"/>
                 </Directory>
             </Directory>
             <Directory Id="ProgramMenuFolder"/>
@@ -126,14 +124,6 @@
                 <?if $(var.Configuration) = "Debug" ?>
                     <File Source="$(var.BinPath)/synergy-config.pdb"/>
                 <?endif ?>
-            </Component>
-        </ComponentGroup>
-        <ComponentGroup Directory="OpenSSLDir" Id="OpenSSLComponents">
-            <Component Guid="92648F77-65A6-4B16-AC59-A1F37BD341B1" Id="OpenSSL">
-                <File Id="OpenSSLDll1" Source="$(var.OpenSSLBinPath)/libeay32.dll"/>
-                <File Id="OpenSSLDll2" Source="$(var.OpenSSLBinPath)/ssleay32.dll"/>
-                <File Source="$(var.OpenSSLBinPath)/openssl.exe"/>
-                <File Source="$(var.ResPath)/openssl/synergy.conf"/>
             </Component>
         </ComponentGroup>
     </Fragment>
