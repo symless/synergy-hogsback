@@ -6,8 +6,8 @@
 #include <boost/signals2.hpp>
 #include <string>
 
-static const char* kPubSubServerHostname = "165.227.29.181";
-static const char* kPubSubServerPort = "8081";
+static const char* kPubSubServerHostname = "pubsub1.cloud.symless.com";
+static const char* kPubSubServerPort = "443";
 
 static boost::signals2::signal<void()> testFinished;
 static bool timeout;
