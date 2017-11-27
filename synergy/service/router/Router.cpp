@@ -134,10 +134,10 @@ Router::Router (asio::io_service& io, int const port)
         set_tcp_socket_buffer_sizes (acceptor_, ec);
         acceptor_.listen ();
 
-        routerLog()->debug("ID = {}, Name = '{}'", id_, name_);
+        routerLog()->debug("Initialized");
     }
     catch (const std::exception& ex) {
-        routerLog()->error("failed to initialize router");
+        routerLog()->error("Failed to initialize");
         throw;
     }
 }
@@ -156,6 +156,8 @@ Router::start (uint32_t const id, std::string name) {
     id_      = id;
     name_    = name;
     running_ = true;
+    
+    routerLog()->debug("Starting... ID = {}, Name = '{}'", id_, name_);
 
     /* Accept thread */
     asio::spawn (acceptor_.get_io_service (), [this](asio::yield_context ctx) {
