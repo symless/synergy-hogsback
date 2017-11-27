@@ -94,7 +94,7 @@ private:
     std::vector<std::shared_ptr<Connection>> connections_;
     std::vector<tcp::endpoint> known_peers_;
     RouteTable route_table_;
-    uint32_t id_;
+    uint32_t id_ = 0;
     std::string name_;
     bool running_ = false;
     ssl::context context_;
