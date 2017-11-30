@@ -89,6 +89,7 @@ public:
         if (header.ttl) {
             --header.ttl;
         }
+
         return true;
     }
 
@@ -148,7 +149,7 @@ public:
     }
 
     bool
-    read_body (MessageHeader& header, Message& message,
+    read_body (MessageHeader const& header, Message& message,
                asio::yield_context ctx) {
         bool success  = false;
         message.type_ = header.type;
@@ -171,5 +172,5 @@ private:
     std::chrono::milliseconds read_timeout_;
     boost::system::error_code ec_;
     std::size_t read_size_ = 0;
-    bool started_          = false;
+    bool started_ = false;
 };

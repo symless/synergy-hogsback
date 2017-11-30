@@ -1,5 +1,4 @@
 #pragma once
-
 #include <synergy/common/Logs.h>
 
 extern Log g_serviceLog;

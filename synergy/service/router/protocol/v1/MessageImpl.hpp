@@ -16,9 +16,8 @@ public:
 
     virtual std::size_t size () const noexcept = 0;
     virtual void write_to (char* buf) const    = 0;
-    virtual void
-    read_from (char const* header, char const* data, char const* end) = 0;
-
+    virtual void read_from (char const* header, char const* data,
+                            char const* end) = 0;
 protected:
     MessageImpl () noexcept                   = default;
     MessageImpl (MessageImpl const&) noexcept = default;

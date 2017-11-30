@@ -1,7 +1,6 @@
 #pragma once
 
 #include <synergy/service/router/protocol/v1/MessageTypes.hpp>
-
 #include <boost/signals2/signal.hpp>
 #include <cstddef>
 #include <fmt/ostream.h>
@@ -30,10 +29,7 @@ struct all_true final {
 
 class Handler final {
 public:
-    template <typename... Args>
-    using signal = boost::signals2::signal<Args...>;
-
-    Handler (Router& router, int32_t const server)
+    Handler (Router& router, std::uint32_t const server)
         : router_ (router), server_id_ (server) {
     }
 
@@ -42,9 +38,8 @@ public:
     operator() (T& msg) noexcept {
         routerLog ()->trace ("Core message: {}", msg);
 
-        std::vector<unsigned char> buffer; /* TODO: reuse this buffer */
-        int32_t size = msg.size ();
-        buffer.resize (size);
+        std::vector<unsigned char> buffer;
+        buffer.resize (msg.size ());
         msg.write_to (reinterpret_cast<char*> (buffer.data ()));
 
         CoreMessage coreMessage;
@@ -64,10 +59,13 @@ public:
 
 private:
     Router& router_;
-    int32_t server_id_;
+    std::uint32_t server_id_;
 
 public:
-    signal<bool(std::string screenname), all_true> on_hello_back;
+    template <typename... Args>
+    using signal = boost::signals2::signal<Args...>;
+
+    signal<bool(std::string screen), all_true> on_hello_back;
     signal<bool(), all_true> on_hello;
 };
 

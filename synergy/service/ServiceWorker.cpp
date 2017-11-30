@@ -130,13 +130,8 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         });
     }
 
-    m_localProfileConfig->profileServerChanged.connect ([this](int64_t const server) {
-        m_serverProxy.reset();
-        if (server < 0) {
-            return;
-        }
-        m_serverProxy.start (server);
-    });
+    m_localProfileConfig->profileServerChanged.connect
+        ([this](int64_t const server) { m_serverProxy.start (server); });
 
     m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen> added, std::vector<Screen>){
         m_ioService.post([this, added] () {

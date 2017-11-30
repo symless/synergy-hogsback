@@ -8,8 +8,6 @@
 #include <synergy/service/router/protocol/v2/Core_generated.h>
 // clang-format on
 
-#include <string>
-
 namespace synergy {
 namespace protocol {
 namespace v2 {

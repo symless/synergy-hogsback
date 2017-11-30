@@ -17,31 +17,24 @@
 static int const kConnectRetryLimit     = 20;
 static auto const kConnectRetryInterval = std::chrono::milliseconds (500);
 
-class ClientProxyMessageHandler {
+class ClientProxyMessageHandler final {
 public:
-    explicit ClientProxyMessageHandler (ClientProxy& proxy) : proxy_ (proxy) {
-    }
+    explicit ClientProxyMessageHandler (ClientProxy& proxy);
+    ClientProxy& proxy () const;
 
     void operator() (Message const&, int32_t source) const;
-    void handle (ProxyClientConnect const&, int32_t source) const;
     void handle (CoreMessage const&, int32_t source) const;
+    void handle (ProxyClientConnect const&, int32_t source) const;
 
-    ClientProxy&
-    proxy () const {
-        return proxy_;
-    }
-
-    template <typename T>
-    void
-    handle (T const&, int32_t source) const {
-    }
+    template <typename T> inline
+    void handle (T const&, int32_t source) const;
 
 private:
     ClientProxy& proxy_;
 };
 
-class ClientProxyConnection
-    : public std::enable_shared_from_this<ClientProxyConnection> {
+class ClientProxyConnection final :
+    public std::enable_shared_from_this<ClientProxyConnection> {
 public:
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
@@ -50,7 +43,7 @@ public:
                                     std::string screen_name)
         : client_id_ (client_id),
           socket_ (std::move (socket)),
-          screen_name_ (screen_name) {
+          screen_name_ (std::move (screen_name)) {
     }
 
     void start (ClientProxy& proxy);
@@ -59,12 +52,12 @@ public:
     int32_t client_id_;
     tcp::socket socket_;
     std::string screen_name_;
-
     signal<void(std::shared_ptr<ClientProxyConnection> const&)> on_disconnect;
 };
 
-ClientProxy::ClientProxy (asio::io_service& io, Router& router, int port)
-    : io_ (io), port_ (port), router_ (router) {
+ClientProxy::ClientProxy
+(asio::io_service& io, Router& router, int const port):
+    io_ (io), router_ (router), port_ (port) {
     message_handler_ = std::make_unique<ClientProxyMessageHandler> (*this);
     router_.on_receive.connect (*message_handler_);
 }
@@ -82,13 +75,14 @@ ClientProxy::connect (int32_t client_id, const std::string& screen_name) {
         tcp::socket socket (io_);
         boost::system::error_code ec;
         socket.open (tcp::v4 ());
-        set_tcp_socket_buffer_sizes (socket, ec);
+        restrict_tcp_socket_buffer_sizes (socket, ec);
 
         asio::steady_timer timer (io_);
 
         for (int attempt = 1; attempt <= kConnectRetryLimit; ++attempt) {
             socket.async_connect (
-                tcp::endpoint (ip::address_v4::from_string ("127.0.0.1"), port_),
+                tcp::endpoint (ip::address_v4::from_string ("127.0.0.1"),
+                               port_),
                 ctx[ec]);
 
             if (!ec) {
@@ -124,7 +118,7 @@ ClientProxy::connect (int32_t client_id, const std::string& screen_name) {
 }
 
 Router&
-ClientProxy::router () const {
+ClientProxy::router () const noexcept {
     return router_;
 }
 
@@ -210,9 +204,19 @@ ClientProxyConnection::write (const std::vector<uint8_t>& data) {
     });
 }
 
+inline
+ClientProxyMessageHandler::ClientProxyMessageHandler
+(ClientProxy &proxy) : proxy_ (proxy) {
+}
+
+inline ClientProxy&
+ClientProxyMessageHandler::proxy () const {
+    return proxy_;
+}
+
 void
 ClientProxyMessageHandler::
-operator() (Message const& message, int32_t source) const {
+operator() (Message const& message, int32_t const source) const {
     boost::apply_visitor (
         [this, source](auto& body) { this->handle (body, source); },
         message.body ());
@@ -220,7 +224,7 @@ operator() (Message const& message, int32_t source) const {
 
 void
 ClientProxyMessageHandler::handle (ProxyClientConnect const& pcc,
-                                   int32_t source) const {
+                                   int32_t const source) const {
     routerLog()->debug(
         "ClientProxy: Received client connection for {} from screen {}",
         pcc.screen,
@@ -238,8 +242,8 @@ ClientProxyMessageHandler::handle (ProxyClientConnect const& pcc,
 }
 
 void
-ClientProxyMessageHandler::handle (const CoreMessage& cm,
-                                   int32_t source) const {
+ClientProxyMessageHandler::handle (CoreMessage const& msg,
+                                   int32_t const source) const {
     auto& connections = proxy ().connections_;
     auto it           = std::find_if (
         begin (connections), end (connections), [source](auto& connection) {
@@ -249,11 +253,16 @@ ClientProxyMessageHandler::handle (const CoreMessage& cm,
     if (it == end (connections)) {
         routerLog ()->trace(
             "ClientProxy: Received core message for client '{}' "
-            "before it connected",
+            "before a connected was established",
             source);
         return;
     }
 
-    auto& c = *it;
-    c->write (cm.data);
+    auto& connection = *it;
+    connection->write (msg.data);
+}
+
+template <typename T> inline
+void
+ClientProxyMessageHandler::handle (T const&, int32_t) const {
 }

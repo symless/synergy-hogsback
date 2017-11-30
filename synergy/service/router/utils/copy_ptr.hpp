@@ -1,9 +1,9 @@
 #pragma once
 #include <memory>
 
-/* A super dumb smart pointer that just copies when it's copied. This is to
- * work around flatbuffers inability to inline tables when generating object
- * API code.
+/* A super dumb smart pointer that just copies when it's copied. This is a
+ * workaround for flatbuffers inability to inline tables when generating object
+ * API code (this is because FB data structures don't have to be a tree)
  *
  * Ref: A Proposal for the World’s Dumbest Smart Pointer
  *      http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3840.pdf

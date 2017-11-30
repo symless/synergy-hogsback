@@ -1,12 +1,10 @@
 #include "Message.hpp"
+#include <boost/numeric/conversion/cast.hpp>
 
-
-int
-Message::type () const noexcept {
-    return type_;
-}
-
-int
-Message::ttl () const noexcept {
-    return ttl_;
+MessageHeader
+Message::header() const & {
+    MessageHeader header;
+    header.ttl  = boost::numeric_cast<decltype(header.ttl)>(ttl_);
+    header.type = boost::numeric_cast<decltype(header.type)>(type_);
+    return header;
 }

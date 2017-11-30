@@ -17,11 +17,11 @@ inline std::ostream&
 operator<< (std::ostream& os, std::vector<T> const& v) {
     os << "[";
     if (!v.empty ()) {
-        auto b = v.begin ();
-        os << *b++;
-        while (b != v.end ()) {
+        auto i = v.begin ();
+        os << *i++;
+        while (i != v.end ()) {
             os << ", ";
-            os << *b++;
+            os << *i++;
         }
     }
     os << "]";

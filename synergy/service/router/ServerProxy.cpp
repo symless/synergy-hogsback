@@ -9,86 +9,92 @@
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/endian/conversion.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 #include <cstdint>
 #include <synergy/service/ServiceLogs.h>
 #include <synergy/service/router/Router.hpp>
 
 class ServerProxyMessageHandler final {
 public:
-    explicit ServerProxyMessageHandler (ServerProxy& proxy) : proxy_ (proxy) {
-    }
+    explicit ServerProxyMessageHandler (ServerProxy& proxy);
+    ServerProxy& proxy () const&;
 
-    ServerProxy&
-    proxy () const {
-        return proxy_;
-    }
+    void operator() (Message const&, std::uint32_t source) const;
+    void handle (CoreMessage const&, std::uint32_t source) const;
+    void handle (ProxyServerClaim const&, std::uint32_t source) const;
 
     template <typename T>
-    void
-    handle (T const&, int32_t) const {
-    }
-
-    void operator() (Message const&, int32_t source) const;
-    void handle (CoreMessage const& cm, int32_t source) const;
-    void handle (ProxyServerClaim const& psc, int32_t source) const;
+    void handle (T const&,  std::uint32_t) const;
 
 private:
     ServerProxy& proxy_;
 };
 
-class ServerProxyConnection : public std::enable_shared_from_this<ServerProxyConnection> {
-    friend class ServerProxy;
+class ServerProxyConnection:
+    public std::enable_shared_from_this<ServerProxyConnection> {
+public:
+    explicit ServerProxyConnection (asio::io_service& io):
+        socket_ (io) {
+    }
+
+    tcp::socket& socket () &;
+    void start (ServerProxy& proxy, std::uint32_t server_id);
+    void write (std::vector<uint8_t> data);
+    void close ();
+
+private:
+    tcp::socket socket_;
 
 public:
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
 
-    explicit ServerProxyConnection (asio::io_service& io)
-        : id_ (0), socket_ (io) {
-    }
+    signal<bool(std::string screen_name), synergy::protocol::v1::all_true>
+        on_hello_back;
 
-    tcp::socket&
-    socket () {
-        return socket_;
-    }
-
-    void close ();
-    void start (ServerProxy& proxy, int32_t server_id);
-    void write (std::vector<uint8_t> data);
-
-private:
-    int32_t id_;
-    tcp::socket socket_;
-
-public:
-    signal<bool(std::string screen_name),
-           synergy::protocol::v1::all_true> on_hello_back;
-    signal<void(std::shared_ptr<ServerProxyConnection> const&)> on_disconnect;
+    signal<void(std::shared_ptr<ServerProxyConnection> const&)>
+        on_disconnect;
 };
 
-ServerProxy::ServerProxy (asio::io_service& io, Router& router, int const port)
-    : acceptor_ (io), router_ (router) {
-    tcp::endpoint endpoint (ip::address (), port);
+
+ServerProxy::ServerProxy (asio::io_service& io, Router& router,
+                          uint16_t const port)
+    : acceptor_ (io),
+      router_ (router),
+      message_handler_ (std::make_unique<ServerProxyMessageHandler> (*this)) {
+
+    tcp::endpoint endpoint (ip::address::from_string("127.0.0.1"), port);
     acceptor_.open (endpoint.protocol ());
     acceptor_.set_option (tcp::socket::reuse_address (true));
     acceptor_.bind (endpoint);
 
     /* On individual connections, the socket buffer size must be set prior to
-     * the listen(2) or connect(2) calls in order to have it take effect */
+     * the listen(2) or connect(2) calls in order to have any effect
+     */
     boost::system::error_code ec;
-    set_tcp_socket_buffer_sizes (acceptor_, ec);
+    restrict_tcp_socket_buffer_sizes (acceptor_, ec);
     acceptor_.listen ();
-
-    message_handler_ = std::make_unique<ServerProxyMessageHandler> (*this);
     router_.on_receive.connect (*message_handler_);
 }
 
-ServerProxy::~ServerProxy () {
-}
+ServerProxy::~ServerProxy () noexcept = default;
 
 void
-ServerProxy::start (int32_t const server_id) {
-    asio::spawn (acceptor_.get_io_service (), [this, server_id](auto ctx) {
+ServerProxy::start (std::int64_t const server_id) {
+    if (server_id < -1) {
+        throw std::logic_error ("Invalid server ID passed to ServerProxy");
+    } else if (server_id == this->server_id_) {
+        return;
+    } else if (server_id == -1) {
+        this->stop();
+        server_id_ = -1;
+        return;
+    }
+
+    this->stop();
+    server_id_ = boost::numeric_cast<std::uint32_t>(server_id);
+
+    asio::spawn (acceptor_.get_io_service (), [this](auto ctx) {
         while (true) {
             auto connection = std::make_shared<ServerProxyConnection> (
                 acceptor_.get_io_service ());
@@ -102,62 +108,47 @@ ServerProxy::start (int32_t const server_id) {
                 throw boost::system::system_error (ec, ec.message ());
             }
 
-            if (server_id < 0) {
-                routerLog ()->error (
-                    "Incoming core client connection but I have no server ID");
-                connection->close ();
-                continue;
-            }
-
             connection->on_hello_back.connect (
-                [this, server_id](std::string screenName) {
+                [this](std::string screen_name) {
                     ProxyClientConnect pcc;
-                    pcc.screen = std::move (screenName);
-                    return router_.send (std::move (pcc), server_id);
+                    pcc.screen = std::move (screen_name);
+                    return router().send (std::move (pcc), this->server_id_);
                 });
 
             connection->on_disconnect.connect (
-                [this](
-                    std::shared_ptr<ServerProxyConnection> const& connection) {
-                    auto it = std::find (begin (connections_), end (connections_), connection);
+                [this](std::shared_ptr<ServerProxyConnection> const& connection) {
+                    auto it = std::find (begin (connections_), end (connections_),
+                                         connection);
                     if (it != end (connections_)) {
                         connections_.erase (it);
                     }
                 });
 
             connections_.push_back (connection);
-            connection->start (*this, server_id);
+            connection->start (*this, boost::numeric_cast<std::uint32_t>(this->server_id_));
         }
     });
 }
 
 void
-ServerProxy::reset () {
+ServerProxy::stop () {
     acceptor_.cancel ();
+    acceptor_.get_io_service().poll();
     for (auto& connection : connections_) {
         connection->close ();
     }
+    acceptor_.get_io_service().poll();
     connections_.clear ();
 }
 
-Router&
-ServerProxy::router () const {
-    return router_;
-}
-
 void
-ServerProxyConnection::close () {
-    boost::system::error_code ec;
-    socket_.close (ec);
-}
-
-void
-ServerProxyConnection::start (ServerProxy& proxy, int32_t const server_id) {
+ServerProxyConnection::start (ServerProxy& proxy,
+                              std::uint32_t const server_id) {
     /* Read loop */
     asio::spawn (
         socket_.get_io_service (), [this, &proxy, server_id,
-                                    self = shared_from_this()](auto ctx) {
-            // HACK: wait for 200 ms, so core will be ready for this hello
+                                    self = this->shared_from_this()](auto ctx) {
+            // HACK: wait for 200 ms, so core will be ready for this hello message
             asio::steady_timer timer (socket_.get_io_service());
             boost::system::error_code ec;
             timer.expires_from_now (std::chrono::milliseconds (200));
@@ -168,8 +159,8 @@ ServerProxyConnection::start (ServerProxy& proxy, int32_t const server_id) {
 
             synergy::protocol::v1::Handler handler (proxy.router (), server_id);
             handler.on_hello_back.connect (
-                [this](std::string screenName) {
-                    return on_hello_back (std::move (screenName));
+                [this](std::string screen) {
+                    return on_hello_back (std::move (screen));
                 }
             );
 
@@ -178,14 +169,15 @@ ServerProxyConnection::start (ServerProxy& proxy, int32_t const server_id) {
             hello.args ().version.major = 1;
             hello.args ().version.minor = 6;
 
-            int32_t size = hello.size ();
-            buffer.resize (size);
+            buffer.resize (hello.size ());
+            uint32_t size = boost::numeric_cast<uint32_t>(hello.size ());
             boost::endian::native_to_big_inplace (size);
             hello.write_to (reinterpret_cast<char*> (buffer.data ()));
 
             std::array<asio::const_buffer, 2> const buffers = {
                 asio::const_buffer (&size, sizeof (size)),
-                asio::const_buffer (buffer.data (), buffer.size ())};
+                asio::const_buffer (buffer.data (), buffer.size ())
+            };
 
             asio::async_write (socket_, buffers, ctx[ec]);
 
@@ -215,7 +207,8 @@ ServerProxyConnection::start (ServerProxy& proxy, int32_t const server_id) {
 
                 try {
                     if (!synergy::protocol::v1::process
-                        (synergy::protocol::v1::Flow::CTS, handler, buffer.data (), size)) {
+                            (synergy::protocol::v1::Flow::CTS, handler,
+                                buffer.data (), size)) {
                         break;
                     }
                 }
@@ -230,40 +223,67 @@ ServerProxyConnection::start (ServerProxy& proxy, int32_t const server_id) {
         });
 }
 
+tcp::socket&
+ServerProxyConnection::socket() & {
+    return socket_;
+}
+
+void
+ServerProxyConnection::close () {
+    boost::system::error_code ec;
+    socket().close (ec);
+}
+
 void
 ServerProxyConnection::write (std::vector<uint8_t> data) {
     asio::spawn (socket_.get_io_service (),
                  [this, data = std::move(data)](auto ctx) {
-        int32_t size = data.size ();
+        auto size = boost::numeric_cast<int32_t> (data.size ());
         boost::endian::native_to_big_inplace (size);
 
         std::array<asio::const_buffer, 2> const buffers = {
             asio::const_buffer (&size, sizeof (size)),
-            asio::const_buffer (data.data (), data.size ())};
+            asio::const_buffer (data.data (), data.size ())
+        };
 
         boost::system::error_code ec;
         asio::async_write (socket_, buffers, ctx[ec]);
     });
 }
 
+ServerProxyMessageHandler::ServerProxyMessageHandler
+(ServerProxy &proxy) : proxy_ (proxy) {
+}
+
+ServerProxy&
+ServerProxyMessageHandler::proxy() const& {
+    return proxy_;
+}
+
 void
-ServerProxyMessageHandler::
-operator() (Message const& message, int32_t const source) const {
+ServerProxyMessageHandler::operator() (Message const& message,
+                                       std::uint32_t const source) const {
     boost::apply_visitor (
         [this, source](auto& body) { this->handle (body, source); },
-        message.body ());
+        message.body()
+    );
 }
 
 void
-ServerProxyMessageHandler::handle (const ProxyServerClaim& psc,
-                                   int32_t source) const {
+ServerProxyMessageHandler::handle (ProxyServerClaim const& psc,
+                                   std::uint32_t) const {
 }
 
 void
-ServerProxyMessageHandler::handle (const CoreMessage& cm,
-                                   int32_t source) const {
-    if (!proxy_.connections_.empty ()) {
-        auto& connection = proxy_.connections_.back ();
-        connection->write (cm.data);
+ServerProxyMessageHandler::handle (CoreMessage const& msg,
+                                   std::uint32_t) const {
+    if (!proxy().connections().empty ()) {
+        auto& connection = proxy().connections().back ();
+        connection->write (msg.data);
     }
+}
+
+template <typename T> inline
+void
+ServerProxyMessageHandler::handle (T const&, std::uint32_t) const {
 }

@@ -16,11 +16,11 @@
 #include <tuple>
 #include <vector>
 
-class Connection;
-class MessageHeader;
-
+namespace bmi = boost::multi_index;
 using namespace synergy::protocol::v2;
-namespace ssl = boost::asio::ssl;
+
+class Connection;
+struct MessageHeader;
 
 struct RouteTableEntry : Route {
     Connection* connection = nullptr;
@@ -31,7 +31,6 @@ struct connection_id_extractor {
     result_type operator() (RouteTableEntry const&) const noexcept;
 };
 
-namespace bmi = boost::multi_index;
 struct by_destination;
 struct by_connection_id;
 
@@ -51,8 +50,7 @@ using RouteTable = bmi::multi_index_container<
 class Router final {
 public:
     friend class MessageHandler;
-
-    Router (asio::io_service& io, int port);
+    Router (asio::io_service& io, std::uint16_t port);
 
     auto
     id () const noexcept {
@@ -66,14 +64,13 @@ public:
     void add (std::vector<tcp::endpoint> const& endpoints);
     void remove (std::shared_ptr<Connection>);
 
-    bool send (Message message, uint32_t dest);
-    void flood (Message message, uint32_t source_port);
+    bool send (Message message, std::uint32_t dest);
+    void flood (Message message, std::uint32_t source);
     void broadcast (Message message);
     bool forward (MessageHeader const& header, Message message);
 
 protected:
-    bool add(tcp::socket, bool isServer, asio::yield_context ctx);
-
+    bool add (tcp::socket, bool const is_server, asio::yield_context ctx);
     bool integrate (Route, std::shared_ptr<Connection> source);
     void integrate (RouteRevocation&, std::shared_ptr<Connection>);
     void integrate (RouteAdvertisement&, std::shared_ptr<Connection>);
@@ -83,10 +80,9 @@ protected:
 
 private:
     void loadRawCertificate();
-
-    static const std::string sslCertificate();
-    static const std::string sslKey();
-    static const std::string sslDH();
+    static std::string sslCertificate();
+    static std::string sslKey();
+    static std::string sslDH();
 
 private:
     tcp::acceptor acceptor_;
@@ -94,10 +90,10 @@ private:
     std::vector<std::shared_ptr<Connection>> connections_;
     std::vector<tcp::endpoint> known_peers_;
     RouteTable route_table_;
-    uint32_t id_ = 0;
+    boost::asio::ssl::context ssl_context_;
     std::string name_;
+    uint32_t id_ = 0;
     bool running_ = false;
-    ssl::context context_;
 
 public:
     boost::signals2::signal<void(Message const&, int32_t)> on_receive;

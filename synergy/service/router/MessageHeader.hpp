@@ -11,7 +11,8 @@ struct MessageHeader final {
     uint32_t dest   = 0xFFFFFFFF;
 };
 
-static_assert (sizeof (MessageHeader) == 16, "Message header missized");
+static_assert (sizeof (MessageHeader) == 16,
+               "Message header padded to the wrong size");
 
 // clang-format off
 BOOST_FUSION_ADAPT_STRUCT (

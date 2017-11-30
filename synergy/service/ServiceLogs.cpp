@@ -1,13 +1,9 @@
 #include <synergy/service/ServiceLogs.h>
-
 #include <synergy/common/DirectoryManager.h>
 
-#include <iostream>
-
-using namespace boost;
-
 Log g_serviceLog;
-std::shared_ptr<spdlog::sinks::rotating_file_sink_mt> s_global = nullptr;
+static std::shared_ptr<spdlog::sinks::rotating_file_sink_mt> s_global = nullptr;
+
 
 class LogSignalSink : public spdlog::sinks::sink
 {
@@ -18,7 +14,6 @@ class LogSignalSink : public spdlog::sinks::sink
 
     void flush() { }
 };
-
 
 static auto
 initGlobalSink()
