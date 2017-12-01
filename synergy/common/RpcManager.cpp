@@ -21,7 +21,7 @@ RpcManager::~RpcManager() noexcept
 void
 RpcManager::start()
 {
-    m_router->start (ipAddress(), port());
+    m_router->start ("127.0.0.1", this->port());
 }
 
 void
