@@ -112,7 +112,7 @@ ServerProxy::start (std::int64_t const server_id) {
                 [this](std::string screen_name) {
                     ProxyClientConnect pcc;
                     pcc.screen = std::move (screen_name);
-                    return router().send (std::move (pcc), this->server_id_);
+                    return this->router().send (std::move (pcc), this->server_id_);
                 });
 
             connection->on_disconnect.connect (
