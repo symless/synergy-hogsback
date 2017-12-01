@@ -314,7 +314,6 @@ CoreProcess::startClient(int const serverId)
     ProcessCommand command;
     command.setLocalHostname(boost::asio::ip::host_name());
     command.setRunAsUid(m_runAsUid);
-    command.setServerAddress(kServerProxyEndpoint);
 
     try {
         start (command.generate(false));

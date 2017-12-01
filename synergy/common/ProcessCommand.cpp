@@ -2,6 +2,7 @@
 
 #include <synergy/common/DirectoryManager.h>
 #include <synergy/common/ConfigGen.h>
+#include <synergy/common/NetworkParameters.h>
 
 #include <boost/filesystem.hpp>
 
@@ -69,23 +70,13 @@ ProcessCommand::generate(bool const serverMode) const
         args.push_back(configPath.string());
 
         args.push_back("--address");
-        args.push_back(":24800");
+        args.push_back("127.0.0.1:" + std::to_string(kServerPort));
     }
     else {
-        if (m_serverAddress.empty()) {
-            throw std::runtime_error("Can't generate args, server IP/hostname missing.");
-        }
-
-        args.push_back(m_serverAddress);
+        args.push_back("127.0.0.1:" + std::to_string(kServerProxyPort));
     }
 
     return args;
-}
-
-void
-ProcessCommand::setServerAddress(const std::string& serverAddress)
-{
-    m_serverAddress = serverAddress;
 }
 
 void

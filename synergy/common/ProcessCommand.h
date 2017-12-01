@@ -12,7 +12,6 @@ class ProcessCommand
 {
 public:
     std::vector<std::string> generate(bool serverMode) const;
-    void setServerAddress(const std::string& serverAddress);
     void setLocalHostname(const std::string& localHostname);
     void setRunAsUid(const std::string& runAsUid);
 
