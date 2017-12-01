@@ -28,12 +28,11 @@ TEST_CASE("Process command and args generated correctly", "[ProcessCommand]")
             "--profile-dir " + profileDir.string() + " "
             "--log " + logPath.string() + " "
             "-c " + configPath.string() + " "
-            "--address :24800");
+            "--address 127.0.0.1:24800");
     }
 
     SECTION("Client command line")
     {
-        pc.setServerAddress("mock server address");
         auto command = pc.generate(false);
 
         // TODO: test each element instead of using string join
@@ -42,7 +41,6 @@ TEST_CASE("Process command and args generated correctly", "[ProcessCommand]")
             "--debug " + kCoreDebugLevel + " "
             "--name mock local hostname --enable-drag-drop "
             "--profile-dir " + profileDir.string() + " "
-            "--log " + logPath.string() + " "
-            "mock server address");
+            "--log " + logPath.string() + " 127.0.0.1:24801");
     }
 }
