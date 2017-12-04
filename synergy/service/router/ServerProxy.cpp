@@ -22,7 +22,6 @@ public:
 
     void operator() (Message const&, std::uint32_t source) const;
     void handle (CoreMessage const&, std::uint32_t source) const;
-    void handle (ProxyServerClaim const&, std::uint32_t source) const;
 
     template <typename T>
     void handle (T const&,  std::uint32_t) const;
@@ -275,11 +274,6 @@ ServerProxyMessageHandler::operator() (Message const& message,
         [this, source](auto& body) { this->handle (body, source); },
         message.body()
     );
-}
-
-void
-ServerProxyMessageHandler::handle (ProxyServerClaim const& psc,
-                                   std::uint32_t) const {
 }
 
 void
