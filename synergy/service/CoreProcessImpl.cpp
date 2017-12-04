@@ -52,8 +52,9 @@ CoreProcessImpl::start () {
         bp::std_in.close(),
         bp::std_out > m_outPipe,
         bp::std_err > m_errorPipe,
-        bp::on_exit = [this](int, std::error_code const&) {
-            serviceLog()->debug("core process exited: code={} expected={}", exit, m_expectingExit);
+        bp::on_exit = [this](int exit_code, std::error_code const&) {
+            serviceLog()->debug("core process exited: code={} expected={}", exit_code,
+                                 m_expectingExit);
 
             try {
                 m_process->wait();
