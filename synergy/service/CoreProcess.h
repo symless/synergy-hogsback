@@ -13,6 +13,7 @@
 class Screen;
 class UserConfig;
 class CoreProcessImpl;
+class ClaimMessageHandler;
 
 class CoreProcess final {
 public:
@@ -22,6 +23,8 @@ public:
     CoreProcess (CoreProcess const&) = delete;
     CoreProcess& operator= (CoreProcess const&) = delete;
     ~CoreProcess() noexcept;
+
+    friend class ClaimMessageHandler;
 
     void shutdown();
 
@@ -59,6 +62,7 @@ private:
     std::vector<std::string> m_nextCommand;
     std::vector<std::string> m_lastCommand;
     std::string m_runAsUid;
+    std::unique_ptr<ClaimMessageHandler> m_messageHandler;
 };
 
 #endif // SYNERGY_SERVICE_PROCESSMANAGER_H

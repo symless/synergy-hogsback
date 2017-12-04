@@ -9,6 +9,8 @@
 #include <synergy/common/NetworkParameters.h>
 #include <synergy/service/ServiceLogs.h>
 #include <synergy/service/CoreProcessImpl.h>
+#include <synergy/service/router/protocol/v2/MessageTypes.hpp>
+#include <synergy/service/router/Router.hpp>
 
 #include <cassert>
 #include <vector>
@@ -18,6 +20,52 @@
 #include <boost/algorithm/string/join.hpp>
 
 auto const kUnexpectedExitRetryTime = std::chrono::seconds (2);
+
+class ClaimMessageHandler final {
+public:
+    explicit ClaimMessageHandler (CoreProcess& coreProcess) :
+        m_coreProcess(coreProcess)
+    {
+    }
+
+    void operator() (Message const&, std::uint32_t source) const;
+    void handle (ServerClaim const&, std::uint32_t source) const;
+
+    template <typename T>
+    void handle (T const&,  std::uint32_t) const;
+
+private:
+    CoreProcess& m_coreProcess;
+};
+
+void
+ClaimMessageHandler::operator() (Message const& message,
+                                       std::uint32_t const source) const {
+    boost::apply_visitor (
+        [this, source](auto& body) { this->handle (body, source); },
+        message.body()
+    );
+}
+
+void
+ClaimMessageHandler::handle (const ServerClaim &msg,
+                                   std::uint32_t) const {
+    if (msg.profile_id != m_coreProcess.m_userConfig->profileId()) {
+        serviceLog()->debug ("ignore a server claim message from a different profile, current profile:{}, calim message in profile:{}",
+                             m_coreProcess.m_userConfig->profileId(), msg.profile_id);
+        return;
+    }
+
+    serviceLog()->debug("handling router message: server claim, mode={} thisId={} serverId={} lastServerId={}",
+        processModeToString(m_coreProcess.m_processMode), m_coreProcess.m_userConfig->screenId(), msg.screen_id, m_coreProcess.m_currentServerId);
+
+    m_coreProcess.onServerChanged(msg.screen_id);
+}
+
+template <typename T> inline
+void
+ClaimMessageHandler::handle (T const&, std::uint32_t) const {
+}
 
 CoreProcess::CoreProcess (boost::asio::io_service& io,
                           std::shared_ptr<UserConfig> userConfig,
@@ -29,8 +77,12 @@ CoreProcess::CoreProcess (boost::asio::io_service& io,
     m_processMode(ProcessMode::kUnknown),
     m_currentServerId(-1)
 {
+    m_messageHandler = std::make_unique<ClaimMessageHandler> (*this);
     m_localProfileConfig->profileServerChanged.connect([this](int64_t const serverId) {
         m_ioService.post([this, serverId] () {
+            serviceLog()->debug("handling cloud message: server claim, mode={} thisId={} serverId={} lastServerId={}",
+                processModeToString(m_processMode), m_userConfig->screenId(), serverId, m_currentServerId);
+
             onServerChanged(serverId);
         });
     });
@@ -345,9 +397,6 @@ CoreProcess::setRunAsUid(std::string runAsUid)
 void
 CoreProcess::onServerChanged(int64_t const serverId)
 {
-    serviceLog()->debug("handling local profile server changed, mode={} thisId={} serverId={} lastServerId={}",
-        processModeToString(m_processMode), m_userConfig->screenId(), serverId, m_currentServerId);
-
     switch (m_processMode) {
         case ProcessMode::kServer: {
             // when server changes from local screen to another screen
