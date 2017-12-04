@@ -10,6 +10,7 @@
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <sys/socket.h>
+#include <fcntl.h>
 
 #ifdef __APPLE__
 using tcp_keep_alive_idle =
@@ -76,6 +77,29 @@ set_tcp_keep_alive_options (tcp::socket& socket, int const idle,
     success &= !ec;
 
     return success;
+#else
+    return false;
+#endif
+}
+
+template <typename Socket> inline
+bool
+set_socket_to_close_on_exec (Socket& sock, boost::system::error_code& ec) {
+#if defined(__APPLE__) || defined(__linux__)
+    errno = 0;
+    int flags = ::fcntl(sock.native_handle(), F_GETFD);
+    if (flags < 0) {
+        ec = boost::system::error_code (errno,
+                                        boost::system::generic_category());
+        return false;
+    }
+    flags |= FD_CLOEXEC;
+    if (-1 == ::fcntl (sock.native_handle(), F_SETFD, flags)) {
+        ec = boost::system::error_code (errno,
+                                        boost::system::generic_category());
+        return false;
+    }
+    return true;
 #else
     return false;
 #endif

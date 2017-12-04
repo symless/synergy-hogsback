@@ -31,6 +31,11 @@ Connection::Connection (tcp::socket&& socket,
         routerLog ()->warn ("Failed to enable TCP keepalive on connection {}",
                             id ());
     }
+
+    if (!set_socket_to_close_on_exec (socket_, ec)) {
+        routerLog ()->critical ("Failed to set socket to close-on-exec for "
+                                "connection {}: {}", id (), ec.message());
+    }
 }
 
 Connection::~Connection () noexcept {

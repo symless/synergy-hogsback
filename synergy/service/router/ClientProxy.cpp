@@ -87,6 +87,7 @@ ClientProxy::connect (int32_t client_id, const std::string& screen_name) {
 
             if (!ec) {
                 socket.set_option (tcp::no_delay (true), ec);
+
                 connections_.emplace_back (std::make_shared<ClientProxyConnection> (
                     std::move (socket), client_id, std::move (screen_name)));
 

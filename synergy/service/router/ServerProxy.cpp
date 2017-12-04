@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <synergy/service/ServiceLogs.h>
 #include <synergy/service/router/Router.hpp>
+#include <synergy/service/router/KeepAlive.hpp>
 
 class ServerProxyMessageHandler final {
 public:
@@ -65,13 +66,18 @@ ServerProxy::ServerProxy (asio::io_service& io, Router& router,
 
     tcp::endpoint endpoint (ip::address::from_string("127.0.0.1"), port);
     acceptor_.open (endpoint.protocol ());
+
+    boost::system::error_code ec;
+    if (!set_socket_to_close_on_exec (acceptor_, ec)) {
+        routerLog ()->critical ("Failed to set server proxy to close-on-exec: "
+                                "{}", ec.message());
+    }
     acceptor_.set_option (tcp::socket::reuse_address (true));
     acceptor_.bind (endpoint);
 
     /* On individual connections, the socket buffer size must be set prior to
-     * the listen(2) or connect(2) calls in order to have any effect
+     * the listen(2) or connect(2) calls in order to have it take effect
      */
-    boost::system::error_code ec;
     restrict_tcp_socket_buffer_sizes (acceptor_, ec);
     acceptor_.listen ();
     router_.on_receive.connect (*message_handler_);
@@ -82,7 +88,7 @@ ServerProxy::~ServerProxy () noexcept = default;
 void
 ServerProxy::start (std::int64_t const server_id) {
     if (server_id < -1) {
-        throw std::logic_error ("Invalid server ID passed to ServerProxy");
+        throw std::logic_error ("Invalid server ID passed to server proxy");
     } else if (server_id == this->server_id_) {
         return;
     } else if (server_id == -1) {
@@ -107,6 +113,8 @@ ServerProxy::start (std::int64_t const server_id) {
             } else if (ec) {
                 throw boost::system::system_error (ec, ec.message ());
             }
+
+            connection->socket ().set_option (tcp::no_delay (true), ec);
 
             connection->on_hello_back.connect (
                 [this](std::string screen_name) {
@@ -238,7 +246,7 @@ void
 ServerProxyConnection::write (std::vector<uint8_t> data) {
     asio::spawn (socket_.get_io_service (),
                  [this, data = std::move(data)](auto ctx) {
-        auto size = boost::numeric_cast<int32_t> (data.size ());
+        auto size = boost::numeric_cast<uint32_t> (data.size ());
         boost::endian::native_to_big_inplace (size);
 
         std::array<asio::const_buffer, 2> const buffers = {

@@ -7,6 +7,7 @@
 #include <iterator>
 #include <sstream>
 #include <synergy/service/ServiceLogs.h>
+#include <synergy/service/router/KeepAlive.hpp>
 #include <tuple>
 
 static auto const kHelloInterval        = std::chrono::seconds (3);
@@ -118,14 +119,19 @@ Router::Router (asio::io_service& io, std::uint16_t const port)
         acceptor_.open (endpoint.protocol ());
         acceptor_.set_option (tcp::socket::reuse_address (true));
 
-        routerLog()->debug("binding router to {}:{}",
-            endpoint.address().to_string(), endpoint.port());
+        boost::system::error_code ec;
+        if (!set_socket_to_close_on_exec (acceptor_, ec)) {
+            routerLog ()->critical ("Failed to set router port to "
+                                    "close-on-exec: {}", ec.message());
+        }
+
+        routerLog()->debug("binding to {}:{}", endpoint.address().to_string(),
+                           endpoint.port());
         acceptor_.bind (endpoint);
 
         /* The socket buffer size must be set prior to the listen() or connect()
          * calls in order to have it take effect
          */
-        boost::system::error_code ec;
         restrict_tcp_socket_buffer_sizes (acceptor_, ec);
         acceptor_.listen ();
 
