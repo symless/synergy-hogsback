@@ -101,6 +101,9 @@ set_socket_to_close_on_exec (Socket& sock, boost::system::error_code& ec) {
     }
     return true;
 #else
-    return false;
+    /* Boost Process seems to call CreateProcess with bInheritHandles=FALSE,
+     * so we shouldn't need to do anything...
+     */
+    return true;
 #endif
 }
