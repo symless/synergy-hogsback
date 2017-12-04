@@ -133,22 +133,20 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_localProfileConfig->profileServerChanged.connect
         ([this](int64_t const server) { m_serverProxy.start (server); });
 
-    m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen> added, std::vector<Screen>){
-        m_ioService.post([this, added] () {
-            for (const auto& screen : added) {
-                std::vector<std::string> ipList;
-                std::string ipListStr = screen.ipList();
+    m_localProfileConfig->screenOnline.connect([this](Screen screen){
+        m_ioService.post([this, screen] () {
+            std::vector<std::string> ipList;
+            std::string ipListStr = screen.ipList();
 
-                if (ipListStr.empty()) {
-                    continue;
-                }
+            if (ipListStr.empty()) {
+                return;
+            }
 
-                boost::split(ipList, ipListStr, boost::is_any_of(","));
+            boost::split(ipList, ipListStr, boost::is_any_of(","));
 
-                for(const auto& ipStr : ipList) {
-                    ip::address ip = ip::address::from_string (ipStr);
-                    m_router.add(tcp::endpoint (ip, kNodePort));
-                }
+            for(const auto& ipStr : ipList) {
+                ip::address ip = ip::address::from_string (ipStr);
+                m_router.add(tcp::endpoint (ip, kNodePort));
             }
         });
     });
