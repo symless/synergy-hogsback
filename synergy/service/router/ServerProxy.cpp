@@ -11,9 +11,9 @@
 #include <boost/endian/conversion.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 #include <cstdint>
+#include <synergy/common/SocketOptions.hpp>
 #include <synergy/service/ServiceLogs.h>
 #include <synergy/service/router/Router.hpp>
-#include <synergy/service/router/KeepAlive.hpp>
 
 class ServerProxyMessageHandler final {
 public:
