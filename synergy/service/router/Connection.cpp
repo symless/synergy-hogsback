@@ -1,10 +1,10 @@
 #include "Connection.hpp"
-#include "KeepAlive.hpp"
 #include "Message.hpp"
 #include "MessageReader.hpp"
 #include "MessageWriter.hpp"
 #include <fmt/format.h>
 #include <iostream>
+#include <synergy/common/SocketOptions.hpp>
 #include <synergy/service/ServiceLogs.h>
 
 uint32_t Connection::next_connection_id_ = 0;

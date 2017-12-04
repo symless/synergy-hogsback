@@ -6,8 +6,8 @@
 #include <iostream>
 #include <iterator>
 #include <sstream>
+#include <synergy/common/SocketOptions.hpp>
 #include <synergy/service/ServiceLogs.h>
-#include <synergy/service/router/KeepAlive.hpp>
 #include <tuple>
 
 static auto const kHelloInterval        = std::chrono::seconds (3);
