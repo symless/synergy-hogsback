@@ -114,7 +114,7 @@ Router::Router (asio::io_service& io, std::uint16_t const port)
 {
     try {
         loadRawCertificate();
-        tcp::endpoint endpoint (ip::address::from_string("127.0.0.1"), port);
+        tcp::endpoint endpoint (ip::address(), port);
         acceptor_.open (endpoint.protocol ());
         acceptor_.set_option (tcp::socket::reuse_address (true));
 
