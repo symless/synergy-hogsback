@@ -1,0 +1,6 @@
+namespace synergy.protocol.v2.fb;
+
+table ServerClaim {
+    profile_id: uint;
+    screen_id: uint;
+}

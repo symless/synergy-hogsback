@@ -6,6 +6,7 @@
 #include <synergy/service/router/protocol/v2/Route_generated.h>
 #include <synergy/service/router/protocol/v2/Proxy_generated.h>
 #include <synergy/service/router/protocol/v2/Core_generated.h>
+#include <synergy/service/router/protocol/v2/Claim_generated.h>
 // clang-format on
 
 namespace synergy {
@@ -16,7 +17,7 @@ using HelloMessage       = fb::HelloT;
 using Route              = fb::RouteT;
 using RouteAdvertisement = fb::RouteAdvertisementT;
 using ProxyClientConnect = fb::ProxyClientConnectT;
-using ProxyServerClaim   = fb::ProxyServerClaimT;
+using ServerClaim        = fb::ServerClaimT;
 using CoreMessage        = fb::CoreMessageT;
 
 struct RouteRevocation : RouteAdvertisement {};

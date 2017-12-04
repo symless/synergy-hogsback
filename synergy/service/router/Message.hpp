@@ -28,7 +28,7 @@ private:
         v2::RouteAdvertisement,
         v2::RouteRevocation,
         v2::ProxyClientConnect,
-        v2::ProxyServerClaim,
+        v2::ServerClaim,
         v2::CoreMessage
     >;
 
