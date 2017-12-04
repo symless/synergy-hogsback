@@ -12,6 +12,7 @@
 #include <synergy/common/NetworkParameters.h>
 #include <synergy/service/CoreProcess.h>
 #include <synergy/service/WebsocketError.h>
+#include <synergy/service/router/protocol/v2/MessageTypes.hpp>
 
 #include <boost/asio.hpp>
 #include <boost/algorithm/string.hpp>
@@ -101,8 +102,12 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     });
 
     m_coreProcess->localInputDetected.connect([this](){
-        serviceLog()->debug("local input detected, claiming this computer as server");
-        m_cloudClient->claimServer(m_userConfig->screenId());
+        serviceLog()->debug("local input detected, claiming this computer as server within local network");
+
+        ServerClaim serverClaimMessage;
+        serverClaimMessage.profile_id = m_userConfig.profileId();
+        serverClaimMessage.screen_id = m_userConfig.screenId();
+        m_router.broadcast(serverClaimMessage);
     });
 
 #if __linux__
