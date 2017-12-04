@@ -30,12 +30,10 @@ public:
     Q_INVOKABLE void checkUpdate();
     Q_INVOKABLE QString serverHostname() const;
     Q_INVOKABLE QString loginClientId();
-    Q_INVOKABLE void switchServer(int screenId);
 
     QNetworkRequest newRequest(QUrl url);
     void report(int destId, QString successfulIp, QString failedIp);
     void updateProfileConfig(QJsonDocument& doc);
-    void claimServer();
     void updateScreen(const UIScreen& screen);
     void uploadLogFile(QString source, QString target);
     void receivedScreensInterface(QByteArray msg);
@@ -83,7 +81,6 @@ private:
     QUrl m_identifyUrl;
     QUrl m_updateProfileConfigUrl;
     QUrl m_reportUrl;
-    QUrl m_claimServerUrl;
     QUrl m_updateScreenUrl;
     QUrl m_checkUpdateUrl;
 
