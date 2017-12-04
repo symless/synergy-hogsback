@@ -42,6 +42,7 @@ public:
     void setRunAsUid (std::string runAsUid);
     int currentServerId() const;
     ProcessMode processMode() const;
+    void switchServer(int64_t serverId);
 
 private:
     void onServerChanged(int64_t serverId);

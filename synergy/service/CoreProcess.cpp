@@ -59,7 +59,7 @@ ClaimMessageHandler::handle (const ServerClaim &msg,
     serviceLog()->debug("handling router message: server claim, mode={} thisId={} serverId={} lastServerId={}",
         processModeToString(m_coreProcess.m_processMode), m_coreProcess.m_userConfig->screenId(), msg.screen_id, m_coreProcess.m_currentServerId);
 
-    m_coreProcess.onServerChanged(msg.screen_id);
+    m_coreProcess.switchServer(msg.screen_id);
 }
 
 template <typename T> inline
@@ -380,6 +380,12 @@ ProcessMode
 CoreProcess::processMode() const
 {
     return m_processMode;
+}
+
+void
+CoreProcess::switchServer(int64_t serverId)
+{
+    onServerChanged(serverId);
 }
 
 int
