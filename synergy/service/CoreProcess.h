@@ -46,7 +46,6 @@ private:
     void writeConfigurationFile();
     void startServer();
     void startClient(int serverId);
-    void join();
 
 private:
     boost::asio::io_service& m_ioService;

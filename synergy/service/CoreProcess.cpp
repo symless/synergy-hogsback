@@ -37,7 +37,8 @@ CoreProcess::CoreProcess (boost::asio::io_service& io,
 
     m_localProfileConfig->screenPositionChanged.connect([this](int64_t const /* targetScreenID */){
         m_ioService.post([this]() {
-            serviceLog()->debug ("handling local profile screen position change, mode={}",
+            serviceLog()->debug ("restarting core because local profile screen "
+                                 "position changed, mode={}",
                                  processModeToString(m_processMode));
             if (m_processMode == ProcessMode::kServer) {
                 startServer();
@@ -48,7 +49,8 @@ CoreProcess::CoreProcess (boost::asio::io_service& io,
     m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen> const&,
                                                           std::vector<Screen> const&) {
         m_ioService.post([this]() {
-            serviceLog()->debug ("handling local profile screen set changed, mode={}",
+            serviceLog()->debug ("restarting core because local profile screen "
+                                 "set changed, mode={}",
                                  processModeToString(m_processMode));
             if (m_processMode == ProcessMode::kServer) {
                 startServer();
@@ -57,22 +59,19 @@ CoreProcess::CoreProcess (boost::asio::io_service& io,
     });
 
     expectedExit.connect ([this]() {
-        this->join();
+        m_impl.reset();
         if (!m_nextCommand.empty()) {
             this->start (std::move (m_nextCommand));
         }
     });
 
     unexpectedExit.connect ([this]() {
-        m_impl->m_outPipe.cancel();
-        m_impl->m_errorPipe.cancel();
-        m_ioService.poll();
-        this->join();
+        m_impl.reset();
         if (!m_lastCommand.empty()) {
             boost::system::error_code ec;
-            m_retryTimer.cancel(ec);
             m_retryTimer.expires_from_now (kUnexpectedExitRetryTime);
-            m_retryTimer.async_wait ([&, command = std::move(m_lastCommand)](auto const ec) {
+            m_retryTimer.async_wait ([&, command = std::move(m_lastCommand)]
+                                     (auto const ec) {
                 if (ec == boost::asio::error::operation_aborted) {
                     return;
                 } else if (ec) {
@@ -100,7 +99,8 @@ static std::string
 getCommandLocalScreenName (std::vector<std::string> const& command) {
     auto nameArg = std::find (begin(command), end(command), "--name");
     if ((nameArg == end(command)) || (++nameArg == end(command))) {
-        throw std::runtime_error("Unable to determine local screen name from core process command.");
+        throw std::runtime_error("Unable to determine local screen name from "
+                                 "core process command line.");
     }
     return *nameArg;
 }
@@ -115,14 +115,14 @@ getCommandProcessMode (std::vector<std::string> const& command) {
     if (serverArg != end(command)) {
         return *serverArg;
     }
-    throw std::runtime_error("Unable to determine core process mode from core process command.");
+    throw std::runtime_error("Unable to determine core process mode from core "
+                             "process command line.");
 }
 
 void
 CoreProcess::start (std::vector<std::string> command)
 {
     using boost::algorithm::contains;
-
     boost::system::error_code ec;
     m_retryTimer.cancel (ec);
 
@@ -136,11 +136,12 @@ CoreProcess::start (std::vector<std::string> command)
     serviceLog()->debug("starting core process with command: {}",
                         boost::algorithm::join(command, " "));
 
+    m_lastCommand = command;
     auto const localScreenName = getCommandLocalScreenName (command);
     auto const processMode = getCommandProcessMode (command);
-    m_lastCommand = command;
-    m_impl = std::make_unique<CoreProcessImpl>(*this, m_ioService, std::move (command));
 
+    m_impl = std::make_unique<CoreProcessImpl>(*this, m_ioService,
+                                               std::move (command));
     auto& localScreenState = m_impl->m_screenStates[localScreenName];
     auto& signals = m_impl->m_signals;
 
@@ -152,7 +153,6 @@ CoreProcess::start (std::vector<std::string> command)
                 if (!contains (line, "connected to server")) {
                     return;
                 }
-                //assert (localScreenState == ScreenStatus::kConnecting);
                 localScreenState = ScreenStatus::kConnected;
                 screenStatusChanged(localScreenName, localScreenState);
             }, boost::signals2::at_front)
@@ -163,7 +163,6 @@ CoreProcess::start (std::vector<std::string> command)
                 if (!contains (line, "disconnected from server")) {
                     return;
                 }
-                //assert (localScreenState != ScreenStatus::kDisconnected);
                 localScreenState = ScreenStatus::kDisconnected;
                 screenStatusChanged(localScreenName, localScreenState);
             }, boost::signals2::at_front)
@@ -197,7 +196,6 @@ CoreProcess::start (std::vector<std::string> command)
                     return;
                 }
                 connection.disconnect();
-                //assert (localScreenState == ScreenStatus::kConnecting);
                 localScreenState = ScreenStatus::kConnected;
                 screenStatusChanged(localScreenName, localScreenState);
             }, boost::signals2::at_front)
@@ -210,7 +208,6 @@ CoreProcess::start (std::vector<std::string> command)
                 if (!regex_search (line, results, rgx)) {
                     return;
                 }
-                //assert (results.size() == 2);
                 auto clientScreenName = results[1].str();
                 auto& clientScreenStatus = m_impl->m_screenStates[clientScreenName];
                 clientScreenStatus = ScreenStatus::kConnected;
@@ -225,10 +222,8 @@ CoreProcess::start (std::vector<std::string> command)
                 if (!regex_search (line, results, rgx)) {
                     return;
                 }
-                //assert (results.size() == 2);
                 auto clientScreenName = results[1].str();
                 auto& clientScreenStatus = m_impl->m_screenStates[clientScreenName];
-                //assert (clientScreenStatus == ScreenStatus::kConnected);
                 clientScreenStatus = ScreenStatus::kDisconnected;
                 screenStatusChanged(std::move (clientScreenName), clientScreenStatus);
             }, boost::signals2::at_front)
@@ -242,36 +237,11 @@ CoreProcess::start (std::vector<std::string> command)
 void
 CoreProcess::shutdown() {
     if (!m_impl) {
-        serviceLog()->debug("ignoring shutdown request, core process is not running");
+        serviceLog()->debug("ignoring core process shutdown request, core is "
+                            "not running");
         return;
     }
-
-    if (m_impl->m_expectingExit) {
-        serviceLog()->debug("ignoring duplicate shutdown request");
-        return;
-    }
-
-    m_impl->m_expectingExit = true;
     m_impl->shutdown();
-}
-
-void
-CoreProcess::join()
-{
-    if (m_impl && m_impl->m_process) {
-        try {
-            m_impl->m_process->join();
-        } catch (const std::exception& ex) {
-            serviceLog()->error("can't join core process: {}", ex.what());
-        } catch (...) {
-            serviceLog()->error("can't join core process: exception thrown");
-        }
-    } else {
-        serviceLog()->error("can't join core process, not initialized");
-    }
-
-    m_impl.reset();
-    serviceLog()->debug("core process shutdown complete");
 }
 
 void
