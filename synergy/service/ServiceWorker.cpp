@@ -194,6 +194,7 @@ ServiceWorker::provideRpcEndpoints()
     provideHello();
     provideCloud();
     provideLog();
+    provideServerClaim();
 
     serviceLog()->debug("rpc endpoints created");
 }
@@ -309,5 +310,17 @@ ServiceWorker::provideLog()
         "synergy.log.config", [this](std::string logLine) {
 
         configLog()->debug(logLine);
+    });
+}
+
+void ServiceWorker::provideServerClaim()
+{
+    m_rpc->server()->provide(
+        "synergy.server.claim", [this](int serverId) {
+
+        ServerClaim serverClaimMessage;
+        serverClaimMessage.profile_id = serverId;
+        serverClaimMessage.screen_id = m_userConfig.screenId();
+        m_router.broadcast(serverClaimMessage);
     });
 }

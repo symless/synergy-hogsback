@@ -387,7 +387,7 @@ Rectangle {
                                         screenIndex = screenManager.getModelIndex(
                                                     op(screenIcon.x + 45),
                                                     op(screenIcon.y + 45))
-                                        screenManager.switchServer(screenIndex)
+                                        screenManager.serverClaim(screenIndex)
                                     }
                                 }
                             }

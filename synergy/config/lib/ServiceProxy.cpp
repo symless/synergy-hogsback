@@ -186,6 +186,11 @@ void ServiceProxy::requestProfileSnapshot()
     }
 }
 
+void ServiceProxy::serverClaim(int screenId)
+{
+    m_wampClient.call<void> ("synergy.server.claim",screenId);
+}
+
 WampClient&
 ServiceProxy::wampClient()
 {

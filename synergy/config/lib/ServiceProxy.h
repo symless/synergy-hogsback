@@ -29,6 +29,7 @@ public:
     std::shared_ptr<ErrorView> errorView() const;
     void setErrorView(const std::shared_ptr<ErrorView>& errorView);
     void requestProfileSnapshot();
+    void serverClaim(int screenId);
 
 signals:
     void screenStatusChanged(QPair<QString, ScreenStatus>);

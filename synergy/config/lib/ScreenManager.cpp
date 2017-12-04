@@ -145,11 +145,11 @@ void ScreenManager::unlockScreen(int index)
     m_screenListModel->unlockScreen(index);
 }
 
-void ScreenManager::switchServer(int index)
+void ScreenManager::serverClaim(int index)
 {
     const UIScreen& s = m_screenListModel->getScreen(index);
 
-    m_cloudClient->switchServer(s.id());
+    m_serviceProxy->serverClaim(s.id());
 
     if (s.status() != ScreenStatus::kConnected) {
         LogManager::warning("sharing from computer that is not connected");

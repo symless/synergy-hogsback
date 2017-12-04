@@ -32,6 +32,7 @@ private:
     void provideHello();
     void provideCloud();
     void provideLog();
+    void provideServerClaim();
 
 private:
     boost::asio::io_service&        m_ioService;
