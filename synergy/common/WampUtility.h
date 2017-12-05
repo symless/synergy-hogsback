@@ -12,7 +12,7 @@ struct make_tuple {
     }
 };
 
-const char* kKeepAliveFunction = "synergy.network.noop";
+static const char* const kKeepAliveFunction = "synergy.network.noop";
 
 }
 

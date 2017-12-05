@@ -137,9 +137,11 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     }
     else {
         m_userConfig->updated.connect_extended ([this](const auto& connection) {
-            m_router.start (m_userConfig->screenId(), boost::asio::ip::host_name());
-            m_clientProxy.start ();
-            connection.disconnect();
+            if (m_userConfig->screenId() != -1) {
+                m_router.start (m_userConfig->screenId(), boost::asio::ip::host_name());
+                m_clientProxy.start ();
+                connection.disconnect();
+            }
         });
     }
 

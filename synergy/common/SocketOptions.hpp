@@ -1,5 +1,5 @@
 #pragma once
-#include "Asio.hpp"
+#include <boost/asio/ip/tcp.hpp>
 
 #ifdef _WIN32
 #include <Mstcpip.h>
@@ -14,27 +14,27 @@
 
 #ifdef __APPLE__
 using tcp_keep_alive_idle =
-    asio::detail::socket_option::integer<BOOST_ASIO_OS_DEF (IPPROTO_TCP),
-                                         TCP_KEEPALIVE>;
+    boost::asio::detail::socket_option::integer<BOOST_ASIO_OS_DEF (IPPROTO_TCP),
+                                                TCP_KEEPALIVE>;
 
 #elif __linux__
 using tcp_keep_alive_idle =
-    asio::detail::socket_option::integer<BOOST_ASIO_OS_DEF (IPPROTO_TCP),
-                                         TCP_KEEPIDLE>;
+    boost::asio::detail::socket_option::integer<BOOST_ASIO_OS_DEF (IPPROTO_TCP),
+                                                TCP_KEEPIDLE>;
 
 #endif
 
 using tcp_keep_alive_count =
-    asio::detail::socket_option::integer<BOOST_ASIO_OS_DEF (IPPROTO_TCP),
-                                         TCP_KEEPCNT>;
+    boost::asio::detail::socket_option::integer<BOOST_ASIO_OS_DEF (IPPROTO_TCP),
+                                                TCP_KEEPCNT>;
 
 using tcp_keep_alive_interval =
-    asio::detail::socket_option::integer<BOOST_ASIO_OS_DEF (IPPROTO_TCP),
-                                         TCP_KEEPINTVL>;
+    boost::asio::detail::socket_option::integer<BOOST_ASIO_OS_DEF (IPPROTO_TCP),
+                                                TCP_KEEPINTVL>;
 #endif
 
 inline bool
-set_tcp_keep_alive_options (tcp::socket& socket, int const idle,
+set_tcp_keep_alive_options (boost::asio::ip::tcp::socket& socket, int const idle,
                             int const interval, int const count) {
 #ifdef _WIN32
     /* https://msdn.microsoft.com/en-us/library/windows/desktop/dd877220(v=vs.85).aspx
@@ -64,7 +64,7 @@ set_tcp_keep_alive_options (tcp::socket& socket, int const idle,
     boost::system::error_code ec;
     bool success = true;
 
-    socket.set_option (tcp::socket::keep_alive (true), ec);
+    socket.set_option (boost::asio::ip::tcp::socket::keep_alive (true), ec);
     success &= !ec;
 
     socket.set_option (tcp_keep_alive_idle (idle), ec);
@@ -101,6 +101,9 @@ set_socket_to_close_on_exec (Socket& sock, boost::system::error_code& ec) {
     }
     return true;
 #else
-    return false;
+    /* Boost Process seems to call CreateProcess with bInheritHandles=FALSE,
+     * so we shouldn't need to do anything...
+     */
+    return true;
 #endif
 }

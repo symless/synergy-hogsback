@@ -1,4 +1,6 @@
 #include <synergy/common/WampRouter.h>
+#include <synergy/common/SocketOptions.hpp>
+#include <synergy/common/Logs.h>
 #include <bonefish/serialization/wamp_serializers.hpp>
 #include <bonefish/serialization/msgpack_serializer.hpp>
 #include <bonefish/router/wamp_router.hpp>
@@ -34,12 +36,18 @@ WampRouter::~WampRouter()
 void
 WampRouter::start (std::string const& ip, int port)
 {
+    auto listener = std::make_shared<bonefish::tcp_listener>
+                        (m_ioService, boost::asio::ip::address::from_string(ip), port);
+
     m_rawsocketServer->attach_listener
-        (std::static_pointer_cast<bonefish::rawsocket_listener>
-            (std::make_shared<bonefish::tcp_listener>
-                (m_ioService, boost::asio::ip::address_v4::from_string(ip),
-                    port)));
+        (std::static_pointer_cast<bonefish::rawsocket_listener> (listener));
     m_rawsocketServer->start();
+
+    boost::system::error_code ec;
+    if (!set_socket_to_close_on_exec (listener->acceptor(), ec)) {
+        commonLog()->critical ("Failed to set RPC port to close-on-exec: {}", ec.message());
+    }
+
     ready();
 }
 
