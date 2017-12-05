@@ -102,14 +102,16 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     });
 
     m_coreProcess->localInputDetected.connect([this](){
+        m_ioService.post([this] () {
+            m_coreProcess->switchServer(m_userConfig->screenId());
+
+            ServerClaim serverClaimMessage;
+            serverClaimMessage.profile_id = m_userConfig->profileId();
+            serverClaimMessage.screen_id = m_userConfig->screenId();
+            m_router.broadcast(serverClaimMessage);
+        });
+
         serviceLog()->debug("local input detected, claiming this computer as server in local network");
-
-        m_coreProcess->switchServer(m_userConfig->screenId());
-
-        ServerClaim serverClaimMessage;
-        serverClaimMessage.profile_id = m_userConfig->profileId();
-        serverClaimMessage.screen_id = m_userConfig->screenId();
-        m_router.broadcast(serverClaimMessage);
     });
 
     m_coreProcess->serverReady.connect([this](){
