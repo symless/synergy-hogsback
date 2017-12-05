@@ -414,6 +414,9 @@ CoreProcess::onServerChanged(int64_t const serverId)
             if (m_userConfig->screenId() != serverId) {
                startClient(serverId);
             }
+            else {
+                serviceLog()->debug("core is already in server mode, ingore switching");
+            }
 
             break;
         }
@@ -425,6 +428,9 @@ CoreProcess::onServerChanged(int64_t const serverId)
             // when another screen, not local screen, claims to be the server
             else if (m_currentServerId != serverId) {
                 startClient(serverId);
+            }
+            else {
+                serviceLog()->debug("core is already connecting to server {}, ingore restarting", serverId);
             }
 
             break;
