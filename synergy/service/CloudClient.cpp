@@ -103,6 +103,17 @@ void CloudClient::report(int screenId, const std::string &successfulIp, const st
 
 void CloudClient::claimServer()
 {
+    boost::posix_time::ptime current = boost::posix_time::second_clock::local_time();
+    static auto allowNextTime = current;
+    static const auto kMinRequestInterval = boost::posix_time::seconds(1);
+    if (current >= allowNextTime) {
+        allowNextTime = current + kMinRequestInterval;
+    }
+    else {
+        serviceLog()->warn("ignored sending claim server request, operation too frequent");
+        return;
+    }
+
     auto profileId = m_userConfig->profileId();
     auto serverId = m_userConfig->screenId();
     serviceLog()->debug("sending claim server message, serverId={} profileId={}", serverId, profileId);
