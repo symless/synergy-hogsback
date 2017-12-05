@@ -102,7 +102,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     });
 
     m_coreProcess->localInputDetected.connect([this](){
-        serviceLog()->debug("local input detected, claiming this computer as server within local network");
+        serviceLog()->debug("local input detected, claiming this computer as server in local network");
 
         m_coreProcess->switchServer(m_userConfig->screenId());
 
