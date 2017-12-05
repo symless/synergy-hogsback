@@ -112,6 +112,11 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         m_router.broadcast(serverClaimMessage);
     });
 
+    m_coreProcess->serverReady.connect([this](){
+        serviceLog()->debug("core server is ready, notifying API cloud");
+        m_cloudClient->claimServer();
+    });
+
 #if __linux__
     std::string coreUid = m_userConfig->systemUid();
     if (!coreUid.empty()) {

@@ -27,10 +27,6 @@ CloudClient::CloudClient(boost::asio::io_service& ioService,
     m_userConfig->updated.connect ([this]() { this->load (*m_userConfig); });
     load (*m_userConfig);
 
-    m_remoteProfileConfig->profileServerChanged.connect([this](int64_t serverId){
-        claimServer(serverId);
-    });
-
     m_remoteProfileConfig->screenTestResultChanged.connect(
         [this](int64_t screenId, std::string successfulIp, std::string failedIp) {
             report(screenId, successfulIp, failedIp);
@@ -105,9 +101,10 @@ void CloudClient::report(int screenId, const std::string &successfulIp, const st
     httpSession->post(kUrlTarget, tao::json::to_string(root));
 }
 
-void CloudClient::claimServer(int64_t serverId)
+void CloudClient::claimServer()
 {
     auto profileId = m_userConfig->profileId();
+    auto serverId = m_userConfig->screenId();
     serviceLog()->debug("sending claim server message, serverId={} profileId={}", serverId, profileId);
 
     static const std::string kUrlTarget = "/profile/server/claim";

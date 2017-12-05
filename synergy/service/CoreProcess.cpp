@@ -252,6 +252,7 @@ CoreProcess::start (std::vector<std::string> command)
                 //assert (localScreenState == ScreenStatus::kConnecting);
                 localScreenState = ScreenStatus::kConnected;
                 screenStatusChanged(localScreenName, localScreenState);
+                serverReady();
             }, boost::signals2::at_front)
         );
 

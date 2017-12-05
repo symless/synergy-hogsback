@@ -35,6 +35,7 @@ public:
     signal<void()> expectedExit;
     signal<void()> unexpectedExit;
     signal<void()> localInputDetected;
+    signal<void()> serverReady;
     signal<void(std::string const& line)> output;
     signal<void(std::string const& screenName)> screenConnectionError;
     signal<void(std::string const& screenName, ScreenStatus status)> screenStatusChanged;
