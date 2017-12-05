@@ -1,6 +1,7 @@
 #include <synergy/service/CoreProcess.h>
 #include <synergy/common/UserConfig.h>
 #include <synergy/common/ProfileConfig.h>
+#include <synergy/service/router/Router.hpp>
 
 #include <catch.hpp>
 #include <fakeit.hpp>
@@ -16,7 +17,7 @@ const float kSignalDelay = 0.5f;
 const float kMinRestartDelay = 0.05f;
 const float kMaxRestartDelay = 0.3f;
 const float kStartProcessPadding = 0.5f;
-
+const int kTestNodePort = 24812;
 void repeatServerChangeFunc(const boost::system::error_code&,
                             ProfileConfig* profileConfig,
                             int& startCount, boost::asio::deadline_timer* timer)
@@ -42,8 +43,8 @@ TEST_CASE("Start and stop core process in different modes", "[CoreProcess]" ) {
     Method(userConfigMock,screenId) = 1;
 
     auto profileConfig = std::make_shared<ProfileConfig>();
-
-    CoreProcess coreProcess(ioService, std::shared_ptr<UserConfig>(&userConfigMock.get()), profileConfig);
+    Router router(ioService, kTestNodePort);
+    CoreProcess coreProcess(ioService, std::shared_ptr<UserConfig>(&userConfigMock.get()), profileConfig, router);
 
     float finishTime = kMaxmiumStartTime * kMaxRestartDelay + kSignalDelay + kStartProcessPadding;
     boost::asio::deadline_timer timer(ioService, boost::posix_time::seconds(finishTime));

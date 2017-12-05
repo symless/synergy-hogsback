@@ -11,6 +11,9 @@ set(SERVICE_SOURCES
     ../service/ServiceLogs.cpp
     ../service/CoreProcess.cpp
     ../service/CoreProcessImpl.cpp
+    ../service/router/Router.cpp
+    ../service/router/Message.cpp
+    ../service/router/Connection.cpp
 )
 
 add_executable (${PROJECT_NAME}

@@ -41,8 +41,8 @@ private:
     std::shared_ptr<ProfileConfig>  m_localProfileConfig;
     std::unique_ptr<RpcManager>     m_rpc;
     std::unique_ptr<CloudClient>    m_cloudClient;
-    std::unique_ptr<CoreProcess>    m_coreProcess;
     Router                          m_router;
+    std::unique_ptr<CoreProcess>    m_coreProcess;
     ServerProxy                     m_serverProxy;
     ClientProxy                     m_clientProxy;
     std::shared_ptr<boost::asio::io_service::work> m_work;

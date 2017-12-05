@@ -69,15 +69,19 @@ ClaimMessageHandler::handle (T const&, std::uint32_t) const {
 
 CoreProcess::CoreProcess (boost::asio::io_service& io,
                           std::shared_ptr<UserConfig> userConfig,
-                          std::shared_ptr<ProfileConfig> localProfileConfig):
+                          std::shared_ptr<ProfileConfig> localProfileConfig,
+                          Router& router):
     m_ioService (io),
     m_userConfig (std::move (userConfig)),
     m_localProfileConfig (std::move (localProfileConfig)),
     m_retryTimer (io),
     m_processMode(ProcessMode::kUnknown),
-    m_currentServerId(-1)
+    m_currentServerId(-1),
+    m_router(router)
 {
     m_messageHandler = std::make_unique<ClaimMessageHandler> (*this);
+    m_router.on_receive.connect (*m_messageHandler);
+
     m_localProfileConfig->profileServerChanged.connect([this](int64_t const serverId) {
         m_ioService.post([this, serverId] () {
             serviceLog()->debug("handling cloud message: server claim, mode={} thisId={} serverId={} lastServerId={}",

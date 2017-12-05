@@ -14,12 +14,13 @@ class Screen;
 class UserConfig;
 class CoreProcessImpl;
 class ClaimMessageHandler;
+class Router;
 
 class CoreProcess final {
 public:
     explicit CoreProcess (boost::asio::io_service& io,
                              std::shared_ptr<UserConfig> userConfig,
-                             std::shared_ptr<ProfileConfig> localProfileConfig);
+                             std::shared_ptr<ProfileConfig> localProfileConfig, Router &router);
     CoreProcess (CoreProcess const&) = delete;
     CoreProcess& operator= (CoreProcess const&) = delete;
     ~CoreProcess() noexcept;
@@ -65,6 +66,7 @@ private:
     std::vector<std::string> m_lastCommand;
     std::string m_runAsUid;
     std::unique_ptr<ClaimMessageHandler> m_messageHandler;
+    Router& m_router;
 };
 
 #endif // SYNERGY_SERVICE_PROCESSMANAGER_H
