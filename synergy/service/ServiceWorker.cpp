@@ -113,7 +113,6 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     });
 
     m_coreProcess->serverReady.connect([this](){
-        serviceLog()->debug("core server is ready, notifying API cloud");
         m_cloudClient->claimServer();
     });
 
