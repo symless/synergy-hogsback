@@ -325,9 +325,7 @@ void ServiceWorker::provideServerClaim()
     m_rpc->server()->provide(
         "synergy.server.claim", [this](int serverId) {
 
-        if (serverId == m_userConfig->screenId()) {
-            m_coreProcess->switchServer(serverId);
-        }
+        m_coreProcess->switchServer(serverId);
 
         ServerClaim serverClaimMessage;
         serverClaimMessage.profile_id = m_userConfig->profileId();
