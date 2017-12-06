@@ -97,6 +97,15 @@ CoreProcess::CoreProcess (boost::asio::io_service& io,
                                  "position changed, mode={}",
                                  processModeToString(m_processMode));
             if (m_processMode == ProcessMode::kServer) {
+                // HACK: send server claim in local network
+                // reason: when there is a screen position change, server needs to restart itself
+                // on the client side, it relis on connection timeout to reconnect to the new server
+                // sending this local claim will trigger clients to reconnect immediately
+                ServerClaim serverClaimMessage;
+                serverClaimMessage.profile_id = m_userConfig->profileId();
+                serverClaimMessage.screen_id = m_userConfig->screenId();
+                m_router.broadcast(serverClaimMessage);
+
                 startServer();
             }
         });
@@ -109,6 +118,15 @@ CoreProcess::CoreProcess (boost::asio::io_service& io,
                                  "set changed, mode={}",
                                  processModeToString(m_processMode));
             if (m_processMode == ProcessMode::kServer) {
+                // HACK: send server claim in local network
+                // reason: when there is a new screen added or removed, server needs to restart itself
+                // on the client side, it relis on connection timeout to reconnect to the new server
+                // sending this local claim will trigger clients to reconnect immediately
+                ServerClaim serverClaimMessage;
+                serverClaimMessage.profile_id = m_userConfig->profileId();
+                serverClaimMessage.screen_id = m_userConfig->screenId();
+                m_router.broadcast(serverClaimMessage);
+
                 startServer();
             }
         });
