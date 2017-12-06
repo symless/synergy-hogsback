@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <QObject>
 #include <QQmlEngine>
+#include <boost/optional.hpp>
 
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -37,6 +38,7 @@ public:
     void updateScreen(const UIScreen& screen);
     void uploadLogFile(QString source, QString target);
     void receivedScreensInterface(QByteArray msg);
+    void enableVersionCheck();
 
     static QObject* instance(QQmlEngine* engine = NULL, QJSEngine* scriptEngine = NULL);
 
@@ -83,6 +85,7 @@ private:
     QUrl m_reportUrl;
     QUrl m_updateScreenUrl;
     QUrl m_checkUpdateUrl;
+    bool m_versionCheck = false;
 
 };
 

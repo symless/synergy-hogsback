@@ -299,6 +299,10 @@ ServiceWorker::provideHello()
 
             m_cloudClient->reconnectWebsocket();
         }
+
+        if (m_userConfig->versionCheck()) {
+            m_rpc->server()->publish("synergy.version.check");
+        }
     });
 }
 

@@ -162,7 +162,6 @@ App::run(int argc, char* argv[])
 
     options.add_options()
       ("help", "Print command line argument help")
-      ("disable-version-check", "Disable version check")
       ("use-test-cloud", "Connect to the test cloud server")
 #ifdef Q_OS_OSX
       ("disable-install", "Disables automatic install (Mac only)")

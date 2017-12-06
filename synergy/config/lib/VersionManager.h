@@ -19,6 +19,7 @@ public:
     void setVersion(const QString v);
     void checkUpdate(QJsonDocument& updateReplyDoc);
     QString currentVersion() const;
+    bool updateRequired() const;
 
 protected:
     VersionManager();
@@ -29,6 +30,7 @@ signals:
 private:
     QString m_version;
     QString m_latestVersion;
+    bool m_updateRequired = false;
 };
 
 #endif // VERSIONMANAGER_H
