@@ -59,7 +59,7 @@ ClaimMessageHandler::handle (const ServerClaim &msg,
     serviceLog()->debug("handling router message: server claim, mode={} thisId={} serverId={} lastServerId={}",
         processModeToString(m_coreProcess.m_processMode), m_coreProcess.m_userConfig->screenId(), msg.screen_id, m_coreProcess.m_currentServerId);
 
-    m_coreProcess.switchServer(msg.screen_id);
+    m_coreProcess.onServerChanged(msg.screen_id);
 }
 
 template <typename T> inline
@@ -96,17 +96,14 @@ CoreProcess::CoreProcess (boost::asio::io_service& io,
             serviceLog()->debug ("restarting core because local profile screen "
                                  "position changed, mode={}",
                                  processModeToString(m_processMode));
-            if (m_processMode == ProcessMode::kServer) {
+            if (m_processMode == ProcessMode::kServer) {  
+                startServer();
+
                 // HACK: send server claim in local network
                 // reason: when there is a screen position change, server needs to restart itself
                 // on the client side, it relis on connection timeout to reconnect to the new server
                 // sending this local claim will trigger clients to reconnect immediately
-                ServerClaim serverClaimMessage;
-                serverClaimMessage.profile_id = m_userConfig->profileId();
-                serverClaimMessage.screen_id = m_userConfig->screenId();
-                m_router.broadcast(serverClaimMessage);
-
-                startServer();
+                broadcastServerClaim(m_userConfig->screenId());
             }
         });
     });
@@ -118,16 +115,13 @@ CoreProcess::CoreProcess (boost::asio::io_service& io,
                                  "set changed, mode={}",
                                  processModeToString(m_processMode));
             if (m_processMode == ProcessMode::kServer) {
+                startServer();
+
                 // HACK: send server claim in local network
                 // reason: when there is a new screen added or removed, server needs to restart itself
                 // on the client side, it relis on connection timeout to reconnect to the new server
                 // sending this local claim will trigger clients to reconnect immediately
-                ServerClaim serverClaimMessage;
-                serverClaimMessage.profile_id = m_userConfig->profileId();
-                serverClaimMessage.screen_id = m_userConfig->screenId();
-                m_router.broadcast(serverClaimMessage);
-
-                startServer();
+                broadcastServerClaim(m_userConfig->screenId());
             }
         });
     });
@@ -379,6 +373,15 @@ void
 CoreProcess::switchServer(int64_t serverId)
 {
     onServerChanged(serverId);
+}
+
+void
+CoreProcess::broadcastServerClaim(int64_t serverId)
+{
+    ServerClaim serverClaimMessage;
+    serverClaimMessage.profile_id = m_userConfig->profileId();
+    serverClaimMessage.screen_id = serverId;
+    m_router.broadcast(serverClaimMessage);
 }
 
 int
