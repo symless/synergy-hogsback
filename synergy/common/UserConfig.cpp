@@ -71,17 +71,13 @@ UserConfig::update(ConfigParser& parser)
         m_systemUid = systemConfig.get_value<std::string>("uid");
     }
 
+    auto developerConfig = parser.get_section("developer");
+    m_hasDeveloperConfig = developerConfig.isValid();
+    if (m_hasDeveloperConfig) {
+        m_versionCheck = systemConfig.get_value<bool>("version-check");
+    }
+
     updated();
-}
-
-std::string UserConfig::systemUid() const
-{
-    return m_systemUid;
-}
-
-void UserConfig::setSystemUid(const std::string &systemUid)
-{
-    m_systemUid = systemUid;
 }
 
 void
@@ -90,19 +86,26 @@ UserConfig::makeTable(std::shared_ptr<cpptoml::table>& root)
     auto authTable = cpptoml::make_table();
     authTable->insert("user-id", m_userId);
     authTable->insert("user-token", m_userToken);
+    root->insert("auth", authTable);
 
     auto profileTable = cpptoml::make_table();
     profileTable->insert("profile-id", m_profileId);
     profileTable->insert("screen-id", m_screenId);
     profileTable->insert("drag-and-drop", m_dragAndDrop);
     profileTable->insert("debug-level", (int)m_debugLevel);
+    root->insert("profile", profileTable);
 
     auto systemTable = cpptoml::make_table();
     systemTable->insert("uid", m_systemUid);
-
-    root->insert("auth", authTable);
-    root->insert("profile", profileTable);
     root->insert("system", systemTable);
+
+    // only save developer section if there was one when we read
+    // the config, which hides developer options from end-users
+    if (m_hasDeveloperConfig) {
+        auto developerTable = cpptoml::make_table();
+        developerTable->insert("version-check", m_versionCheck);
+        root->insert("developer", developerTable);
+    }
 }
 
 void
@@ -190,4 +193,24 @@ bool UserConfig::dragAndDrop() const
 void UserConfig::setDragAndDrop(bool dragAndDrop)
 {
     m_dragAndDrop = dragAndDrop;
+}
+
+bool UserConfig::versionCheck() const
+{
+    return m_versionCheck;
+}
+
+void UserConfig::setVersionCheck(bool versionCheck)
+{
+    m_versionCheck = versionCheck;
+}
+
+std::string UserConfig::systemUid() const
+{
+    return m_systemUid;
+}
+
+void UserConfig::setSystemUid(const std::string &systemUid)
+{
+    m_systemUid = systemUid;
 }
