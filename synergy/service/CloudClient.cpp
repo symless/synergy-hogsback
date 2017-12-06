@@ -62,17 +62,17 @@ CloudClient::load(UserConfig const& userConfig)
 
     if ((profileId != m_lastProfileId) || (userToken != m_lastUserToken)) {
 
-        auto checkVersion = !App::options().count("disable-version-check");
+        auto versionCheck = userConfig.versionCheck();
         auto versionString = SYNERGY_VERSION_STRING;
 
         serviceLog()->debug("setting websocket headers, channel={} auth={} version={} check={}",
-                            profileId, userToken, versionString, checkVersion);
+                            profileId, userToken, versionString, versionCheck);
 
         m_websocket.addHeader("X-Channel-Id", std::to_string(profileId));
         m_websocket.addHeader("X-Auth-Token", userToken);
         m_websocket.addHeader("X-Synergy-Version", versionString);
 
-        if (!checkVersion) {
+        if (!versionCheck) {
             m_websocket.addHeader("X-Version-Check", "False");
         }
 

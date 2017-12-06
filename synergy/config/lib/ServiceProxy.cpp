@@ -6,6 +6,7 @@
 #include "LogManager.h"
 #include "ProcessMode.h"
 #include "AppConfig.h"
+#include "synergy/config/lib/CloudClient.h"
 
 #include <boost/asio/deadline_timer.hpp>
 #include <QtNetwork>
@@ -38,6 +39,9 @@ ServiceProxy::ServiceProxy() :
 
     connect (this, &ServiceProxy::rpcAuthLogout, this,
              &ServiceProxy::onRpcAuthLogout, Qt::QueuedConnection);
+
+    connect (this, &ServiceProxy::rpcVersionCheck, this,
+             &ServiceProxy::onRpcVersionCheck, Qt::QueuedConnection);
 
     m_wampClient.connectionError.connect([&]() {
         m_errorView->setMode(ErrorViewMode::kServiceError);
@@ -92,6 +96,10 @@ ServiceProxy::ServiceProxy() :
 
         m_wampClient.subscribe ("synergy.auth.logout", [this]() {
             emit rpcAuthLogout();
+        });
+
+        m_wampClient.subscribe ("synergy.version.check", [this]() {
+            emit rpcVersionCheck();
         });
 
         LogManager::debug("saying hello to background service");
@@ -159,6 +167,13 @@ void ServiceProxy::onRpcCloudOnline()
 void ServiceProxy::onRpcAuthLogout()
 {
     emit authLogout();
+}
+
+void ServiceProxy::onRpcVersionCheck()
+{
+    CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
+    cloudClient->enableVersionCheck();
+    cloudClient->checkUpdate();
 }
 
 std::shared_ptr<ErrorView>

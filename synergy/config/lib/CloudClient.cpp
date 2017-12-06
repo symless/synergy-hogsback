@@ -342,16 +342,23 @@ void CloudClient::userProfiles()
 
 void CloudClient::checkUpdate()
 {
-    if (App::options().count("disable-version-check")) {
+    if (!m_versionCheck) {
         LogManager::warning("version check disabled, skipping");
         return;
     }
 
     try {
+        VersionManager* versionManager = qobject_cast<VersionManager*>(VersionManager::instance());
+
+        // stop the update check running twice (showing 2 dialogs).
+        if (versionManager->updateRequired()) {
+            LogManager::warning("check already run, update required");
+            return;
+        }
+
         auto req = newRequest(m_checkUpdateUrl);
         req.setHeader(QNetworkRequest::ContentTypeHeader,QVariant("application/json"));
 
-        VersionManager* versionManager = qobject_cast<VersionManager*>(VersionManager::instance());
         QString currentVersion = versionManager->currentVersion();
         QJsonObject jsonObject;
         jsonObject.insert("currentVersion", currentVersion);
@@ -591,6 +598,11 @@ bool CloudClient::replyHasError(QNetworkReply* reply)
     }
 
     return result;
+}
+
+void CloudClient::enableVersionCheck()
+{
+    m_versionCheck = true;
 }
 
 
