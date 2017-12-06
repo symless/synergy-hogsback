@@ -116,12 +116,12 @@ ConfigParser::get_value_ptr (char const* const key) const noexcept {
 ConfigParser::value_type
 ConfigParser::get_value_of (std::shared_ptr<void const> const& value_ptr) const {
     if (!value_ptr) {
-        throw;
+        throw std::runtime_error("Config value missing.");
     }
     auto base = std::static_pointer_cast<cpptoml::base const> (value_ptr);
     value_type value;
     if (!extract_value (*base, value)) {
-        throw;
+        throw std::runtime_error("Can't get config value.");
     }
     return value;
 }

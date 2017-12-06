@@ -32,9 +32,9 @@ UserConfig::defaultFilePath()
 }
 
 void
-UserConfig::load(std::istream& outputStream)
+UserConfig::load(std::istream& stream)
 {
-    ConfigParser parser = ConfigParser::parse_memory(outputStream);
+    ConfigParser parser = ConfigParser::parse_memory(stream);
     update(parser);
 }
 
@@ -74,7 +74,7 @@ UserConfig::update(ConfigParser& parser)
     auto developerConfig = parser.get_section("developer");
     m_hasDeveloperConfig = developerConfig.isValid();
     if (m_hasDeveloperConfig) {
-        m_versionCheck = systemConfig.get_value<bool>("version-check");
+        m_versionCheck = developerConfig.get_value<bool>("version-check");
     }
 
     updated();
