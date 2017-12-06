@@ -45,6 +45,7 @@ public:
     int currentServerId() const;
     ProcessMode processMode() const;
     void switchServer(int64_t serverId);
+    void broadcastServerClaim(int64_t serverId);
 
 private:
     void onServerChanged(int64_t serverId);

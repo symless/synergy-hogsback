@@ -104,11 +104,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_coreProcess->localInputDetected.connect([this](){
         m_ioService.post([this] () {
             m_coreProcess->switchServer(m_userConfig->screenId());
-
-            ServerClaim serverClaimMessage;
-            serverClaimMessage.profile_id = m_userConfig->profileId();
-            serverClaimMessage.screen_id = m_userConfig->screenId();
-            m_router.broadcast(serverClaimMessage);
+            m_coreProcess->broadcastServerClaim(m_userConfig->screenId());
         });
 
         serviceLog()->debug("local input detected, claiming this computer as server in local network");
@@ -333,10 +329,6 @@ void ServiceWorker::provideServerClaim()
         "synergy.server.claim", [this](int serverId) {
 
         m_coreProcess->switchServer(serverId);
-
-        ServerClaim serverClaimMessage;
-        serverClaimMessage.profile_id = m_userConfig->profileId();
-        serverClaimMessage.screen_id = serverId;
-        m_router.broadcast(serverClaimMessage);
+        m_coreProcess->broadcastServerClaim(serverId);
     });
 }
