@@ -3,6 +3,8 @@
 #include <sstream>
 #include <iostream>
 
+using Catch::Matchers::Contains;
+
 TEST_CASE("User config read and write", "[UserConfig]" ) {
 
     UserConfig userConfig;
@@ -26,12 +28,7 @@ TEST_CASE("User config read and write", "[UserConfig]" ) {
         userConfig.setSystemUid("mock");
         userConfig.save(ss);
 
-        std::string section1, value1;
-        std::getline(ss, section1);
-        std::getline(ss, value1);
-
-        REQUIRE(section1 == "[system]");
-        REQUIRE(value1 == "	uid = \"mock\"");
+        REQUIRE_THAT(ss.str(), Contains("[system]\n	uid = \"mock\""));
     }
 
     SECTION ("Read config file with developer section") {
@@ -58,7 +55,6 @@ TEST_CASE("User config read and write", "[UserConfig]" ) {
         std::getline(ss2, section1);
         std::getline(ss2, value1);
 
-        REQUIRE(section1 == "[developer]");
-        REQUIRE(value1 == "	version-check = false");
+        REQUIRE_THAT(ss2.str(), Contains("[developer]\n	version-check = false"));
     }
 }
