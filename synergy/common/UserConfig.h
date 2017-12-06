@@ -47,6 +47,9 @@ public:
     std::string systemUid() const;
     void setSystemUid(const std::string &systemUid);
 
+    bool versionCheck() const;
+    void setVersionCheck(bool versionCheck);
+
 private:
     void makeTable(std::shared_ptr<cpptoml::table>& root);
     void update(ConfigParser& configParser);
@@ -58,6 +61,8 @@ private:
     int64_t m_profileId;
     int64_t m_screenId;
     std::string m_systemUid = "";
+    bool m_hasDeveloperConfig = false;
+    bool m_versionCheck = true;
 
     /* Process options */
     DebugLevel m_debugLevel = kInfo;
