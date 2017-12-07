@@ -13,10 +13,7 @@
 
 ScreenManager::ScreenManager() :
     m_screenListModel(NULL),
-    m_screenListSnapshotManager(NULL),
-    m_latestConfigSerial(0),
-    m_configVersion(-1),
-    m_previousServerId(-1)
+    m_screenListSnapshotManager(NULL)
 {
     m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
     m_localHostname = QHostInfo::localHostName();
@@ -185,7 +182,6 @@ bool ScreenManager::removeScreen(QString name, bool notify)
 void ScreenManager::updateScreens(QByteArray reply)
 {
     bool updateLocalHost = false;
-    int serverId = m_previousServerId;
 
     QJsonDocument doc = QJsonDocument::fromJson(reply);
     if (!doc.isNull()) {
@@ -198,7 +194,10 @@ void ScreenManager::updateScreens(QByteArray reply)
                 return;
             }
             m_configVersion = configVersion;
-            serverId = profileObject["server"].toInt();
+            if (m_serverId != profileObject["server"].toInt()) {
+                m_serverId = profileObject["server"].toInt();
+                serverIdChanged();
+            }
 
             QJsonArray screens = obj["screens"].toArray();
             QList<UIScreen> latestScreenList;

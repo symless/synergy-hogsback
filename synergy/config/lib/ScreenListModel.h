@@ -18,7 +18,8 @@ public:
         kScreenStatusRole,
         kScreenLastErrorCode,
         kErrorMessageRole,
-        kHelpLinkRole
+        kHelpLinkRole,
+        kIdRole
     };
 
     ScreenListModel();

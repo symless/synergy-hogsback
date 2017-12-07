@@ -26,6 +26,7 @@ public:
     Q_PROPERTY(int viewWidth WRITE setViewWidth)
     Q_PROPERTY(int viewHeight WRITE setViewHeight)
     Q_PROPERTY(QString configHint READ configHint NOTIFY configHintChanged)
+    Q_PROPERTY(int server MEMBER m_serverId NOTIFY serverIdChanged)
 
     Q_INVOKABLE int getModelIndex(int x, int y);
     Q_INVOKABLE void moveModel(int index, int offsetX, int offsetY);
@@ -52,6 +53,7 @@ signals:
     void newServer(int serverId);
     void localhostUnsubscribed();
     void configHintChanged();
+    void serverIdChanged();
 
 private slots:
     void updateScreens(QByteArray reply);
@@ -72,9 +74,9 @@ private:
     QMap<int, bool> m_defaultServerReplies;
     QSet<QString> m_screenNameSet;
     QString m_localHostname;
-    int m_latestConfigSerial;
-    int m_configVersion;
-    int m_previousServerId;
+    int m_latestConfigSerial = 0;
+    int m_configVersion = -1;
+    int m_serverId = -1;
     QString m_configHint = "";
 };
 
