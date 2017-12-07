@@ -327,7 +327,7 @@ void ServiceWorker::provideServerClaim()
 {
     m_rpc->server()->provide(
         "synergy.server.claim", [this](int serverId) {
-
+        m_serverProxy.start(serverId);
         m_coreProcess->switchServer(serverId);
         m_coreProcess->broadcastServerClaim(serverId);
     });
