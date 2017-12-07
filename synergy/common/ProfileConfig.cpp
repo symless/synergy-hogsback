@@ -161,7 +161,7 @@ void ProfileConfig::clone (ProfileConfig const& src)
     m_screens = src.m_screens;
 }
 
-std::vector<Screen> ProfileConfig::screens() const
+const std::vector<Screen> & ProfileConfig::screens() const
 {
     return m_screens;
 }
