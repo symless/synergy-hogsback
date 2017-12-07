@@ -47,6 +47,7 @@ public:
     }
 
     void start (ClientProxy& proxy);
+    void stop ();
     void write (std::vector<uint8_t> const& data);
 
     int32_t client_id_;
@@ -166,7 +167,9 @@ ClientProxyConnection::start (ClientProxy& proxy) {
                               asio::transfer_exactly (size),
                               ctx[ec]);
             if (ec) {
-                if (ec == boost::asio::error::connection_reset) {
+                if  (ec == boost::asio::error::operation_aborted) {
+                    break;
+                } else if (ec == boost::asio::error::connection_reset) {
                     break;
                 }
 
@@ -188,6 +191,13 @@ ClientProxyConnection::start (ClientProxy& proxy) {
         routerLog ()->debug ("Terminating core server read loop");
         on_disconnect (self);
     });
+}
+
+void
+ClientProxyConnection::stop () {
+    boost::system::error_code ec;
+    socket_.cancel(ec);
+    socket_.get_io_service().poll();
 }
 
 void
@@ -232,14 +242,17 @@ ClientProxyMessageHandler::handle (ProxyClientConnect const& pcc,
         source);
 
     auto& connections = proxy ().connections_;
-    auto it           = std::find_if (
+
+    auto it = std::find_if (
         begin (connections), end (connections), [source](auto& connection) {
             return connection->client_id_ == source;
         });
 
-    if (it == end (connections)) {
-        proxy ().connect (source, pcc.screen);
+    if (it != end (connections)) {
+        (*it)->stop();
     }
+
+    proxy ().connect (source, pcc.screen);
 }
 
 void
