@@ -451,6 +451,16 @@ Rectangle {
                                 visible: screenImage.source != "qrc:/res/image/screen-edit.png"
                             }
 
+                            Rectangle {
+                                color: "#fff"
+                                width: 6
+                                height: 6
+                                radius: 3
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                anchors.bottom: parent.bottom
+                                visible: screenManager.server === id
+                            }
+
                             // connecting prograss bar background
                             Rectangle {
                                 id: connectingBar
