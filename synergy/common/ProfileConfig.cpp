@@ -145,6 +145,13 @@ bool ProfileConfig::compare(ProfileConfig const& target)
         serviceLog()->debug("profile screen set changed, added={} removed={}",
             added.size(), removed.size());
         screenSetChanged(added, removed);
+
+        for (auto& addedScreen: added) {
+            if (addedScreen.active()) {
+                screenOnline (addedScreen);
+            }
+        }
+
         different = true;
     }
 
