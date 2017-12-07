@@ -145,13 +145,13 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         ([this](int64_t const server) { m_serverProxy.start (server); });
 
     m_localProfileConfig->screenOnline.connect([this](Screen screen){
+        if (m_userConfig->screenId() == screen.id()) {
+            return;
+        }
+
         m_ioService.post([this, screen] () {
             std::vector<std::string> ipList;
             std::string ipListStr = screen.ipList();
-
-            if (ipListStr.empty()) {
-                return;
-            }
 
             boost::split(ipList, ipListStr, boost::is_any_of(","));
 
