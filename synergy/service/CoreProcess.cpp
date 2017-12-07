@@ -409,7 +409,7 @@ CoreProcess::onServerChanged(int64_t const serverId)
                startClient(serverId);
             }
             else {
-                serviceLog()->debug("core is already in server mode, ingore switching");
+                serviceLog()->debug("core is already in server mode, ignoring switch");
             }
 
             break;
