@@ -69,7 +69,7 @@ struct RouteBuilder {
   void add_path(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> path) {
     fbb_.AddOffset(Route::VT_PATH, path);
   }
-  RouteBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit RouteBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
@@ -150,7 +150,7 @@ struct RouteAdvertisementBuilder {
   void add_routes(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Route>>> routes) {
     fbb_.AddOffset(RouteAdvertisement::VT_ROUTES, routes);
   }
-  RouteAdvertisementBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit RouteAdvertisementBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }

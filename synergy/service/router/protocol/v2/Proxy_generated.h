@@ -14,9 +14,6 @@ namespace fb {
 struct ProxyClientConnect;
 struct ProxyClientConnectT;
 
-struct ProxyServerClaim;
-struct ProxyServerClaimT;
-
 struct ProxyClientConnectT : public flatbuffers::NativeTable {
   typedef ProxyClientConnect TableType;
   std::string screen;
@@ -49,7 +46,7 @@ struct ProxyClientConnectBuilder {
   void add_screen(flatbuffers::Offset<flatbuffers::String> screen) {
     fbb_.AddOffset(ProxyClientConnect::VT_SCREEN, screen);
   }
-  ProxyClientConnectBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit ProxyClientConnectBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
@@ -79,46 +76,6 @@ inline flatbuffers::Offset<ProxyClientConnect> CreateProxyClientConnectDirect(
 
 flatbuffers::Offset<ProxyClientConnect> CreateProxyClientConnect(flatbuffers::FlatBufferBuilder &_fbb, const ProxyClientConnectT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
-struct ProxyServerClaimT : public flatbuffers::NativeTable {
-  typedef ProxyServerClaim TableType;
-  ProxyServerClaimT() {
-  }
-};
-
-struct ProxyServerClaim FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef ProxyServerClaimT NativeTableType;
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           verifier.EndTable();
-  }
-  ProxyServerClaimT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(ProxyServerClaimT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<ProxyServerClaim> Pack(flatbuffers::FlatBufferBuilder &_fbb, const ProxyServerClaimT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-};
-
-struct ProxyServerClaimBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  ProxyServerClaimBuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
-  ProxyServerClaimBuilder &operator=(const ProxyServerClaimBuilder &);
-  flatbuffers::Offset<ProxyServerClaim> Finish() {
-    const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<ProxyServerClaim>(end);
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<ProxyServerClaim> CreateProxyServerClaim(
-    flatbuffers::FlatBufferBuilder &_fbb) {
-  ProxyServerClaimBuilder builder_(_fbb);
-  return builder_.Finish();
-}
-
-flatbuffers::Offset<ProxyServerClaim> CreateProxyServerClaim(flatbuffers::FlatBufferBuilder &_fbb, const ProxyServerClaimT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-
 inline ProxyClientConnectT *ProxyClientConnect::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
   auto _o = new ProxyClientConnectT();
   UnPackTo(_o, _resolver);
@@ -143,29 +100,6 @@ inline flatbuffers::Offset<ProxyClientConnect> CreateProxyClientConnect(flatbuff
   return synergy::protocol::v2::fb::CreateProxyClientConnect(
       _fbb,
       _screen);
-}
-
-inline ProxyServerClaimT *ProxyServerClaim::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new ProxyServerClaimT();
-  UnPackTo(_o, _resolver);
-  return _o;
-}
-
-inline void ProxyServerClaim::UnPackTo(ProxyServerClaimT *_o, const flatbuffers::resolver_function_t *_resolver) const {
-  (void)_o;
-  (void)_resolver;
-}
-
-inline flatbuffers::Offset<ProxyServerClaim> ProxyServerClaim::Pack(flatbuffers::FlatBufferBuilder &_fbb, const ProxyServerClaimT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateProxyServerClaim(_fbb, _o, _rehasher);
-}
-
-inline flatbuffers::Offset<ProxyServerClaim> CreateProxyServerClaim(flatbuffers::FlatBufferBuilder &_fbb, const ProxyServerClaimT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
-  (void)_rehasher;
-  (void)_o;
-  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const ProxyServerClaimT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
-  return synergy::protocol::v2::fb::CreateProxyServerClaim(
-      _fbb);
 }
 
 }  // namespace fb

@@ -46,7 +46,7 @@ struct CoreMessageBuilder {
   void add_data(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> data) {
     fbb_.AddOffset(CoreMessage::VT_DATA, data);
   }
-  CoreMessageBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit CoreMessageBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }

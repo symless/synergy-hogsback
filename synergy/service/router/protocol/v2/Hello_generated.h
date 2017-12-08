@@ -19,9 +19,9 @@ struct HelloT;
 
 enum class OS : uint8_t {
   Unknown = 0,
-  Linux = 64,
-  macOS = 128,
-  Windows = 192,
+  Linux = 32,
+  macOS = 64,
+  Windows = 128,
   MIN = Unknown,
   MAX = Windows
 };
@@ -108,7 +108,7 @@ struct VersionBuilder {
   void add_revision(flatbuffers::Offset<flatbuffers::String> revision) {
     fbb_.AddOffset(Version::VT_REVISION, revision);
   }
-  VersionBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit VersionBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
@@ -216,7 +216,7 @@ struct HelloBuilder {
   void add_os(OS os) {
     fbb_.AddElement<uint8_t>(Hello::VT_OS, static_cast<uint8_t>(os), 0);
   }
-  HelloBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit HelloBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
