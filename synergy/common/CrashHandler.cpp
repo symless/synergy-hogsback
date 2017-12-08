@@ -56,8 +56,6 @@ startCrashHandler()
 #endif
 
     std::vector<std::string> arguments;
-    arguments.push_back ("--no-rate-limit");
-
     CrashpadClient client;
     bool rc = client.StartHandler (handler, db, db, url, annotations, arguments,
         true, /* restartable */
