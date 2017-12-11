@@ -16,6 +16,10 @@ TEST_CASE("Process command and args generated correctly", "[ProcessCommand]")
     auto corePath = installDir / kCoreProgram;
     auto logPath = systemLogDir / kCoreLogFile;
 
+#ifdef __APPLE__
+    corePath = corePath.parent_path() / "Resources" / kCoreProgram;
+#endif
+
     SECTION("Server command line")
     {
         auto command = pc.generate(true);

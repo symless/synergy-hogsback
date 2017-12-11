@@ -19,9 +19,7 @@ ProcessCommand::generate(bool const serverMode) const
     auto installDir = DirectoryManager::instance()->installDir();
 
 #ifdef __APPLE__
-    #ifdef TEST_ENV
     installDir = installDir.parent_path() / "Resources";
-    #endif
 #endif
 
     std::vector<std::string> args;
