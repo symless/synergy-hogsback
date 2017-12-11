@@ -18,6 +18,10 @@ ProcessCommand::generate(bool const serverMode) const
     auto profileDir = DirectoryManager::instance()->profileDir();
     auto installDir = DirectoryManager::instance()->installDir();
 
+#ifdef __APPLE__
+    installDir = installDir.parent_path() / "Resources";
+#endif
+
     std::vector<std::string> args;
 
     auto programPath = installDir / kCoreProgram;
