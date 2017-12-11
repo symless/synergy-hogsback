@@ -11,7 +11,9 @@ extern const std::string kCoreProgram;
 class ProcessCommand
 {
 public:
-    std::vector<std::string> generate(bool serverMode) const;
+    virtual ~ProcessCommand() = default;
+
+    virtual std::vector<std::string> generate(bool serverMode) const;
     void setLocalHostname(const std::string& localHostname);
     void setRunAsUid(const std::string& runAsUid);
 

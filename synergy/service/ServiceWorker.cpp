@@ -10,6 +10,8 @@
 #include <synergy/common/ScreenStatus.h>
 #include <synergy/common/Profile.h>
 #include <synergy/common/NetworkParameters.h>
+#include <synergy/common/ProcessCommand.h>
+
 #include <synergy/service/CoreProcess.h>
 #include <synergy/service/WebsocketError.h>
 
@@ -25,12 +27,15 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_localProfileConfig (std::make_shared<ProfileConfig>()),
     m_rpc (std::make_unique<RpcManager>(m_ioService)),
     m_cloudClient (std::make_unique<CloudClient>(ioService, m_userConfig, m_remoteProfileConfig)),
-    m_coreProcess (std::make_unique<CoreProcess>(m_ioService, m_userConfig, m_localProfileConfig)),
+    m_processCommand(std::make_shared<ProcessCommand>()),
+    m_coreProcess (std::make_unique<CoreProcess>(m_ioService, m_userConfig, m_localProfileConfig, m_processCommand)),
     m_router (ioService, kNodePort),
     m_serverProxy (ioService, m_router, kServerProxyPort),
     m_clientProxy (ioService, m_router, kServerPort),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService))
 {
+    m_processCommand->setLocalHostname(boost::asio::ip::host_name());
+
     g_commonLog.onLogLine.connect([this](std::string logLine) {
         auto server = m_rpc->server();
         server->publish ("synergy.service.log", std::move(logLine));
@@ -109,7 +114,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     std::string coreUid = m_userConfig->systemUid();
     if (!coreUid.empty()) {
         serviceLog()->debug("setting core uid from config: {}", coreUid);
-        m_coreProcess->setRunAsUid(coreUid);
+        m_processCommand->setRunAsUid(coreUid);
     }
     else {
         serviceLog()->debug("core uid is unknown");
@@ -204,7 +209,7 @@ ServiceWorker::provideCore()
         [this](std::string uid) {
         serviceLog()->debug("setting core uid from rpc: {}", uid);
         m_userConfig->setSystemUid(uid);
-        m_coreProcess->setRunAsUid(uid);
+        m_processCommand->setRunAsUid(uid);
     });
 
     m_coreProcess->output.connect(

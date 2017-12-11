@@ -13,6 +13,7 @@ class CoreProcess;
 class CloudClient;
 class UserConfig;
 class ProfileConfig;
+class ProcessCommand;
 
 class ServiceWorker final
 {
@@ -40,6 +41,7 @@ private:
     std::shared_ptr<ProfileConfig>  m_localProfileConfig;
     std::unique_ptr<RpcManager>     m_rpc;
     std::unique_ptr<CloudClient>    m_cloudClient;
+    std::shared_ptr<ProcessCommand> m_processCommand;
     std::unique_ptr<CoreProcess>    m_coreProcess;
     Router                          m_router;
     ServerProxy                     m_serverProxy;

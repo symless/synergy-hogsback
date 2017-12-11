@@ -21,13 +21,15 @@ auto const kUnexpectedExitRetryTime = std::chrono::seconds (2);
 
 CoreProcess::CoreProcess (boost::asio::io_service& io,
                           std::shared_ptr<UserConfig> userConfig,
-                          std::shared_ptr<ProfileConfig> localProfileConfig):
+                          std::shared_ptr<ProfileConfig> localProfileConfig,
+                          std::shared_ptr<ProcessCommand> processCommand) :
     m_ioService (io),
     m_userConfig (std::move (userConfig)),
     m_localProfileConfig (std::move (localProfileConfig)),
     m_retryTimer (io),
     m_processMode(ProcessMode::kUnknown),
-    m_currentServerId(-1)
+    m_currentServerId(-1),
+    m_processCommand(processCommand)
 {
     m_localProfileConfig->profileServerChanged.connect([this](int64_t const serverId) {
         m_ioService.post([this, serverId] () {
@@ -290,12 +292,8 @@ CoreProcess::startServer()
     m_currentServerId = m_userConfig->screenId();
     writeConfigurationFile();
 
-    ProcessCommand command;
-    command.setLocalHostname(boost::asio::ip::host_name());
-    command.setRunAsUid(m_runAsUid);
-
     try {
-        start(command.generate(true));
+        start(m_processCommand->generate(true));
     } catch (const std::exception& ex) {
         serviceLog()->error ("failed to start server core process: {}", ex.what());
         m_impl.reset();
@@ -311,12 +309,8 @@ CoreProcess::startClient(int const serverId)
     m_processMode = ProcessMode::kClient;
     m_currentServerId = serverId;
 
-    ProcessCommand command;
-    command.setLocalHostname(boost::asio::ip::host_name());
-    command.setRunAsUid(m_runAsUid);
-
     try {
-        start (command.generate(false));
+        start (m_processCommand->generate(false));
     } catch (const std::exception& ex) {
         serviceLog()->error("failed to start client core process: {}", ex.what());
         m_impl.reset();
@@ -334,12 +328,6 @@ int
 CoreProcess::currentServerId() const
 {
     return m_currentServerId;
-}
-
-void
-CoreProcess::setRunAsUid(std::string runAsUid)
-{
-    m_runAsUid = std::move (runAsUid);
 }
 
 void
