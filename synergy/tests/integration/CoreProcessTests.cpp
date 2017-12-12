@@ -46,7 +46,7 @@ TEST_CASE("Start and stop core process in different modes", "[CoreProcess]" ) {
 
     fakeit::Mock<ProcessCommand> processCommandMock;
     fakeit::Fake(Dtor(processCommandMock));
-    processCommandMock.get().setLocalHostname(boost::asio::ip::host_name());
+
     fakeit::When(Method(processCommandMock, generate).Using(true)).AlwaysDo([](...){
         ProcessCommand tempProcessCommand;
         tempProcessCommand.setLocalHostname(boost::asio::ip::host_name());
