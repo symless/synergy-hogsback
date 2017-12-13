@@ -95,7 +95,6 @@
                 <File Source="$(var.BinPath)/synergy-service.exe">
                     <fire:FirewallException Id="ServerFirewallException" IgnoreFailure="yes" Name="$(var.Name)" Scope="any"/>
                 </File>
-                <File Source="$(var.BinPath)/synwinhk.dll"/>
                 <File Source="$(var.BinPath)/synergy-core.exe"/>
                 <File Source="$(var.BinPath)/synergy-service-controller.exe" KeyPath="yes" />
                 <File Source="$(var.OpenSSLBinPath)/libeay32.dll"/>

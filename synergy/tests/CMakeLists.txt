@@ -3,6 +3,8 @@ cmake_minimum_required (VERSION 3.4)
 
 file(GLOB_RECURSE TEST_SOURCES "*.cpp")
 
+add_definitions (-DTEST_ENV)
+
 # TODO: use lib instead of including sources
 set(SERVICE_SOURCES
     ../service/WebsocketSession.cpp

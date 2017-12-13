@@ -2,6 +2,7 @@
 #include <synergy/common/UserConfig.h>
 #include <synergy/common/ProfileConfig.h>
 #include <synergy/service/router/Router.hpp>
+#include <synergy/common/ProcessCommand.h>
 
 #include <catch.hpp>
 #include <fakeit.hpp>
@@ -43,8 +44,31 @@ TEST_CASE("Start and stop core process in different modes", "[CoreProcess]" ) {
     Method(userConfigMock,screenId) = 1;
 
     auto profileConfig = std::make_shared<ProfileConfig>();
+
     Router router(ioService, kTestNodePort);
-    CoreProcess coreProcess(ioService, std::shared_ptr<UserConfig>(&userConfigMock.get()), profileConfig, router);
+    fakeit::Mock<ProcessCommand> processCommandMock;
+    fakeit::Fake(Dtor(processCommandMock));
+
+    fakeit::When(Method(processCommandMock, generate).Using(true)).AlwaysDo([](...){
+        ProcessCommand tempProcessCommand;
+        tempProcessCommand.setLocalHostname(boost::asio::ip::host_name());
+        std::vector<std::string> cmds = tempProcessCommand.generate(true);
+        cmds[0] = "synergy-core";
+        return cmds;
+    });
+    fakeit::When(Method(processCommandMock, generate).Using(false)).AlwaysDo([](...){
+        ProcessCommand tempProcessCommand;
+        tempProcessCommand.setLocalHostname(boost::asio::ip::host_name());
+        std::vector<std::string> cmds = tempProcessCommand.generate(false);
+        cmds[0] = "synergy-core";
+        return cmds;
+    });
+
+    CoreProcess coreProcess(ioService,
+                            std::shared_ptr<UserConfig>(&userConfigMock.get()),
+                            profileConfig,
+                            router,
+                            std::shared_ptr<ProcessCommand>(&processCommandMock.get()));
 
     float finishTime = kMaxmiumStartTime * kMaxRestartDelay + kSignalDelay + kStartProcessPadding;
     boost::asio::deadline_timer timer(ioService, boost::posix_time::seconds(finishTime));

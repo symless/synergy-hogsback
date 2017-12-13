@@ -18,6 +18,14 @@ ProcessCommand::generate(bool const serverMode) const
     auto profileDir = DirectoryManager::instance()->profileDir();
     auto installDir = DirectoryManager::instance()->installDir();
 
+#ifdef __APPLE__
+    // NOTE: synergy-core is in Resources folder on Mac
+    // if we put core in the same folder as synergy-config,
+    // system would consider it as the bundle which causes
+    // users can't open UI while core is running
+    installDir = installDir.parent_path() / "Resources";
+#endif
+
     std::vector<std::string> args;
 
     auto programPath = installDir / kCoreProgram;
