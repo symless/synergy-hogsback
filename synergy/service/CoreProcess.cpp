@@ -376,9 +376,8 @@ CoreProcess::broadcastServerClaim(int64_t serverId)
     serverClaimMessage.profile_id = m_userConfig->profileId();
     serverClaimMessage.screen_id = serverId;
     Message message(serverClaimMessage);
-    message.setTtl(m_localProfileConfig->screens().size());
 
-    m_router.broadcast(message);
+    m_router.notifyOtherNodes(message);
 }
 
 int

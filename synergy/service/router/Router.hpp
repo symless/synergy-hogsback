@@ -68,6 +68,7 @@ public:
     void flood (Message message, std::uint32_t source);
     void broadcast (Message message);
     bool forward (MessageHeader const& header, Message message);
+    void notifyOtherNodes (Message message);
 
 protected:
     bool add (tcp::socket, bool const is_server, asio::yield_context ctx);

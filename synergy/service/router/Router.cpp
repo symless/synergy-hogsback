@@ -631,6 +631,17 @@ Router::forward (MessageHeader const& header, Message message) {
     return true;
 }
 
+void Router::notifyOtherNodes(Message message)
+{
+    uint32_t lastDestId = -1;
+    for (auto& route : route_table_) {
+        if (lastDestId != route.dest) {
+            lastDestId = route.dest;
+            send(message, lastDestId);
+        }
+    }
+}
+
 void
 Router::flood (Message message, std::uint32_t const source) {
     auto connections = connections_;
