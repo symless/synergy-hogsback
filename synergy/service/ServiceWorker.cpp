@@ -105,7 +105,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     std::string coreUid = m_userConfig->systemUid();
     if (!coreUid.empty()) {
         serviceLog()->debug("setting core uid from config: {}", coreUid);
-        m_processCommand->setRunAsUid(coreUid);
+        m_coreManager->setRunAsUid(uid);
     }
     else {
         serviceLog()->debug("core uid is unknown");
