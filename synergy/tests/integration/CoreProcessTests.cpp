@@ -20,17 +20,17 @@ const float kMaxRestartDelay = 0.3f;
 const float kStartProcessPadding = 0.5f;
 const int kTestNodePort = 24812;
 void repeatServerChangeFunc(const boost::system::error_code&,
-                            ProfileConfig* profileConfig,
+                            CoreProcess* coreProcess,
                             int& startCount, boost::asio::deadline_timer* timer)
 {
     startCount++;
     if (startCount <= kMaxmiumStartTime) {
-        profileConfig->profileServerChanged((startCount % 2) + 1);
+        coreProcess->switchServer((startCount % 2) + 1);
 
         float randomDelay = kMinRestartDelay + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (kMaxRestartDelay - kMinRestartDelay)));
 
         timer->expires_at(timer->expires_at() + boost::posix_time::seconds(randomDelay));
-        timer->async_wait(boost::bind(repeatServerChangeFunc, boost::asio::placeholders::error, profileConfig, startCount, timer));
+        timer->async_wait(boost::bind(repeatServerChangeFunc, boost::asio::placeholders::error, coreProcess, startCount, timer));
     }
 }
 
@@ -88,7 +88,7 @@ TEST_CASE("Start and stop core process in different modes", "[CoreProcess]" ) {
         testFinished();
     });
 
-    signalDelayTimer.async_wait(boost::bind(repeatServerChangeFunc, boost::asio::placeholders::error, profileConfig.get(), startCount, &signalDelayTimer));
+    signalDelayTimer.async_wait(boost::bind(repeatServerChangeFunc, boost::asio::placeholders::error, &coreProcess, startCount, &signalDelayTimer));
 
     ioService.run();
 }
