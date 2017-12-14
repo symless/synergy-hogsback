@@ -60,14 +60,6 @@ public:
         return ttl_;
     }
 
-    void setTtl(int t) {
-        ttl_ = t;
-    }
-
-    void ageing(int age = 1) {
-        ttl_ -= age;
-    }
-
 private:
     Body body_;
     int type_ = 0;  // default: UnknownMessage
@@ -75,7 +67,8 @@ private:
 };
 
 template <typename T> inline
-Message::Message (T&& body,
+Message::Message (
+    T&& body,
     std::enable_if_t<!std::is_same<std::decay_t<T>, Message>::value, void*>)
     : body_ (std::forward<T> (body)), type_ (body_.which ()) {
     static_assert (boost::mpl::contains<typename Body::types,

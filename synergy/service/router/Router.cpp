@@ -352,16 +352,9 @@ Router::add (tcp::socket socket, bool const is_server,
                                            Message& message,
                                            std::shared_ptr<Connection>
                                                connection) {
-        // forward any unicast messages that are not to current node
         if ((header.dest != id ()) && (header.dest != 0xFFFFFFFF)) {
             forward (header, message);
             return;
-        }
-
-        // forward broadcast messages that with TTL greater than 0
-        if ((header.dest == 0xFFFFFFFF) && (message.ttl() > 0)) {
-            message.ageing();
-            flood(message, connection->id ());
         }
 
         MessageHandler handler (this);
