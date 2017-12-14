@@ -9,11 +9,10 @@
 #include <boost/signals2.hpp>
 
 class RpcManager;
-class CoreProcess;
+class CoreManager;
 class CloudClient;
 class UserConfig;
 class ProfileConfig;
-class ProcessCommand;
 
 class ServiceWorker final
 {
@@ -41,10 +40,9 @@ private:
     std::shared_ptr<ProfileConfig>  m_remoteProfileConfig;
     std::shared_ptr<ProfileConfig>  m_localProfileConfig;
     std::unique_ptr<RpcManager>     m_rpc;
-    std::unique_ptr<CloudClient>    m_cloudClient;
-    std::shared_ptr<ProcessCommand> m_processCommand;
+    std::shared_ptr<CloudClient>    m_cloudClient;
     Router                          m_router;
-    std::unique_ptr<CoreProcess>    m_coreProcess;
+    std::unique_ptr<CoreManager>    m_coreManager;
     ServerProxy                     m_serverProxy;
     ClientProxy                     m_clientProxy;
     std::shared_ptr<boost::asio::io_service::work> m_work;

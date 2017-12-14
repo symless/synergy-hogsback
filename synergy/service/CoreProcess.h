@@ -1,5 +1,4 @@
-#ifndef SYNERGY_SERVICE_PROCESSMANAGER_H
-#define SYNERGY_SERVICE_PROCESSMANAGER_H
+#pragma once
 
 #include <synergy/common/ProfileConfig.h>
 #include <synergy/common/ProcessMode.h>
@@ -10,28 +9,27 @@
 #include <string>
 #include <boost/asio/steady_timer.hpp>
 
-class Screen;
 class UserConfig;
-class CoreProcessImpl;
-class ClaimMessageHandler;
-class Router;
 class ProcessCommand;
+class CoreProcessImpl;
 
 class CoreProcess final {
 public:
     explicit CoreProcess (boost::asio::io_service& io,
                              std::shared_ptr<UserConfig> userConfig,
                              std::shared_ptr<ProfileConfig> localProfileConfig,
-                             Router &router,
                              std::shared_ptr<ProcessCommand> processCommand);
 
     CoreProcess (CoreProcess const&) = delete;
     CoreProcess& operator= (CoreProcess const&) = delete;
     ~CoreProcess() noexcept;
 
-    friend class ClaimMessageHandler;
-
+    int currentServerId() const;
+    ProcessMode processMode() const;
     void shutdown();
+    void switchServer(int64_t serverId);
+    void startServer();
+    void startClient(int serverId);
 
 public:
     template <typename... Args>
@@ -45,17 +43,9 @@ public:
     signal<void(std::string const& screenName)> screenConnectionError;
     signal<void(std::string const& screenName, ScreenStatus status)> screenStatusChanged;
 
-    int currentServerId() const;
-    ProcessMode processMode() const;
-    void switchServer(int64_t serverId);
-    void broadcastServerClaim(int64_t serverId);
-
 private:
-    void onServerChanged(int64_t serverId);
     void start (std::vector<std::string> command);
     void writeConfigurationFile();
-    void startServer();
-    void startClient(int serverId);
 
 private:
     boost::asio::io_service& m_ioService;
@@ -67,9 +57,5 @@ private:
     int m_currentServerId;
     std::vector<std::string> m_nextCommand;
     std::vector<std::string> m_lastCommand;
-    std::unique_ptr<ClaimMessageHandler> m_messageHandler;
-    Router& m_router;
     std::shared_ptr<ProcessCommand> m_processCommand;
 };
-
-#endif // SYNERGY_SERVICE_PROCESSMANAGER_H

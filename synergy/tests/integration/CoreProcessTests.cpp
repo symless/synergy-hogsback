@@ -67,7 +67,6 @@ TEST_CASE("Start and stop core process in different modes", "[CoreProcess]" ) {
     CoreProcess coreProcess(ioService,
                             std::shared_ptr<UserConfig>(&userConfigMock.get()),
                             profileConfig,
-                            router,
                             std::shared_ptr<ProcessCommand>(&processCommandMock.get()));
 
     float finishTime = kMaxmiumStartTime * kMaxRestartDelay + kSignalDelay + kStartProcessPadding;

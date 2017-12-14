@@ -1,20 +1,18 @@
 #include "ServiceWorker.h"
 
-#include <synergy/common/ProfileConfig.h>
 #include <synergy/service/CloudClient.h>
 #include <synergy/service/ServiceLogs.h>
+#include <synergy/service/CoreManager.h>
+#include <synergy/service/WebsocketError.h>
+#include <synergy/service/router/protocol/v2/MessageTypes.hpp>
 #include <synergy/common/UserConfig.h>
 #include <synergy/common/RpcManager.h>
 #include <synergy/common/WampServer.h>
 #include <synergy/common/WampRouter.h>
 #include <synergy/common/ScreenStatus.h>
 #include <synergy/common/Profile.h>
+#include <synergy/common/ProfileConfig.h>
 #include <synergy/common/NetworkParameters.h>
-#include <synergy/common/ProcessCommand.h>
-
-#include <synergy/service/CoreProcess.h>
-#include <synergy/service/WebsocketError.h>
-#include <synergy/service/router/protocol/v2/MessageTypes.hpp>
 
 #include <boost/asio.hpp>
 #include <boost/algorithm/string.hpp>
@@ -27,16 +25,13 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_remoteProfileConfig (std::make_shared<ProfileConfig>()),
     m_localProfileConfig (std::make_shared<ProfileConfig>()),
     m_rpc (std::make_unique<RpcManager>(m_ioService)),
-    m_cloudClient (std::make_unique<CloudClient>(ioService, m_userConfig, m_remoteProfileConfig)),
-    m_processCommand(std::make_shared<ProcessCommand>()),
+    m_cloudClient (std::make_shared<CloudClient>(ioService, m_userConfig, m_remoteProfileConfig)),
     m_router (ioService, kNodePort),
-    m_coreProcess (std::make_unique<CoreProcess>(m_ioService, m_userConfig, m_localProfileConfig, m_router, m_processCommand)),
+    m_coreManager (std::make_unique<CoreManager>(m_ioService, m_userConfig, m_localProfileConfig, m_cloudClient, *m_rpc, m_router)),
     m_serverProxy (ioService, m_router, kServerProxyPort),
     m_clientProxy (ioService, m_router, kServerPort),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService))
 {
-    m_processCommand->setLocalHostname(boost::asio::ip::host_name());
-
     g_commonLog.onLogLine.connect([this](std::string logLine) {
         auto server = m_rpc->server();
         server->publish ("synergy.service.log", std::move(logLine));
@@ -106,19 +101,6 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         });
     });
 
-    m_coreProcess->localInputDetected.connect([this](){
-        m_ioService.post([this] () {
-            m_coreProcess->switchServer(m_userConfig->screenId());
-            m_coreProcess->broadcastServerClaim(m_userConfig->screenId());
-        });
-
-        serviceLog()->debug("local input detected, claiming this computer as server in local network");
-    });
-
-    m_coreProcess->serverReady.connect([this](){
-        m_cloudClient->claimServer();
-    });
-
 #if __linux__
     std::string coreUid = m_userConfig->systemUid();
     if (!coreUid.empty()) {
@@ -185,7 +167,7 @@ ServiceWorker::start()
 void
 ServiceWorker::shutdown()
 {
-    m_coreProcess->shutdown();
+    m_coreManager->shutdown();
     m_rpc->stop();
     m_work.reset();
 
@@ -219,33 +201,8 @@ ServiceWorker::provideCore()
         [this](std::string uid) {
         serviceLog()->debug("setting core uid from rpc: {}", uid);
         m_userConfig->setSystemUid(uid);
-        m_processCommand->setRunAsUid(uid);
+        m_coreManager->setRunAsUid(uid);
     });
-
-    m_coreProcess->output.connect(
-        [server](std::string line) {
-            coreLog()->debug(line);
-            server->publish ("synergy.core.log", std::move(line));
-        }
-    );
-
-    m_coreProcess->screenStatusChanged.connect(
-        [server](std::string const& screenName, ScreenStatus state) {
-            server->publish ("synergy.screen.status", screenName, int(state));
-        }
-    );
-
-    m_coreProcess->screenConnectionError.connect(
-        [server](std::string const& screenName) {
-
-            // TODO: get error code
-            int ec = 0;
-            server->publish ("synergy.screen.error", screenName,
-                                (int)ec);
-            server->publish ("synergy.screen.status", screenName,
-                                (int)ScreenStatus::kConnectingWithError);
-        }
-    );
 }
 
 void
@@ -333,7 +290,8 @@ void ServiceWorker::provideServerClaim()
     m_rpc->server()->provide(
         "synergy.server.claim", [this](int serverId) {
         m_serverProxy.start(serverId);
-        m_coreProcess->switchServer(serverId);
-        m_coreProcess->broadcastServerClaim(serverId);
+
+        m_coreManager->switchServer(serverId);
+        m_coreManager->notifyServerClaim(serverId);
     });
 }

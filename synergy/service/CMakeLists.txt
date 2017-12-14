@@ -6,6 +6,7 @@ set (SERVICE_SOURCES
     App.cpp
     CoreProcessImpl.cpp
     CoreProcess.cpp
+    CoreManager.cpp
     ServiceWorker.cpp
     CloudClient.cpp
     SecuredTcpSession.cpp
