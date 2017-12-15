@@ -210,7 +210,7 @@ CoreManager::switchServer(int64_t serverId)
         case ProcessMode::kServer: {
             // when server changes from local screen to another screen
             if (m_userConfig->screenId() != serverId) {
-                // jerry restart server proxy and start client
+                m_serverProxy.start(serverId);
                 m_process->startClient(serverId);
             }
             else {
@@ -227,7 +227,7 @@ CoreManager::switchServer(int64_t serverId)
             }
 
             // when another screen, not local screen, claims to be the server
-            // jerry restart server proxy
+            m_serverProxy.start(serverId);
             m_process->startClient(serverId);
 
             break;
@@ -237,7 +237,7 @@ CoreManager::switchServer(int64_t serverId)
                 m_process->startServer();
             }
             else {
-                // jerry start server proxy then start core client
+                m_serverProxy.start(serverId);
                 m_process->startClient(serverId);
             }
 
