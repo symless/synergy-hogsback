@@ -34,7 +34,6 @@ public:
     signal<void (Screen screen)> screenOnline;
 
     const std::vector<Screen>& screens() const;
-    void updateScreenTestResult(int screenId, std::string successfulIp, std::string failedIp);
     Screen& getScreen(int screenId);
     int profileId() const { return m_profile.id(); }
 

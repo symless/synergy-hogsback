@@ -173,15 +173,6 @@ const std::vector<Screen> & ProfileConfig::screens() const
     return m_screens;
 }
 
-void ProfileConfig::updateScreenTestResult(int screenId, std::string successfulIp, std::string failedIp)
-{
-    auto& screen = getScreen(screenId);
-    screen.m_successfulTestIp = successfulIp;
-    screen.m_failedTestIp = failedIp;
-
-    modified();
-}
-
 Screen& ProfileConfig::getScreen(int screenId)
 {
     for (auto& screen : m_screens) {
