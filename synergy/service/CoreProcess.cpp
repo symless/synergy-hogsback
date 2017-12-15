@@ -116,46 +116,6 @@ CoreProcess::shutdown() {
 }
 
 void
-CoreProcess::switchServer(int64_t serverId)
-{
-    switch (m_processMode) {
-        case ProcessMode::kServer: {
-            // when server changes from local screen to another screen
-            if (m_userConfig->screenId() != serverId) {
-               startClient(serverId);
-            }
-            else {
-                serviceLog()->debug("core is already in server mode, ignoring switch");
-            }
-
-            break;
-        }
-        case ProcessMode::kClient: {
-            // when local screen becomes the server
-            if (m_userConfig->screenId() == serverId) {
-                startServer();
-                break;
-            }
-
-            // when another screen, not local screen, claims to be the server
-            startClient(serverId);
-
-            break;
-        }
-        case ProcessMode::kUnknown: {
-            if (m_userConfig->screenId() == serverId) {
-                startServer();
-            }
-            else {
-                startClient(serverId);
-            }
-
-            break;
-        }
-    }
-}
-
-void
 CoreProcess::startServer()
 {
     serviceLog()->debug("starting core server process");

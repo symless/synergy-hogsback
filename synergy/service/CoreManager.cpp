@@ -55,7 +55,7 @@ ClaimMessageHandler::handle (const ServerClaim &msg,
     serviceLog()->debug("handling router message: server claim, mode={} thisId={} serverId={} lastServerId={}",
         processModeToString(process.processMode()), userConfig->screenId(), msg.screen_id, process.currentServerId());
 
-    process.switchServer(msg.screen_id);
+    m_coreManager.switchServer(msg.screen_id);
 }
 
 template <typename T> inline
@@ -128,7 +128,7 @@ CoreManager::CoreManager (boost::asio::io_service& io,
             serviceLog()->debug("handling cloud message: server claim, mode={} thisId={} serverId={} lastServerId={}",
                 processModeToString(m_process->processMode()), m_userConfig->screenId(), serverId, m_process->currentServerId());
 
-            m_process->switchServer(serverId);
+            switchServer(serverId);
         });
     });
 
@@ -189,7 +189,44 @@ CoreManager::setRunAsUid(const std::string &runAsUid)
 void
 CoreManager::switchServer(int64_t serverId)
 {
-    m_process->switchServer(serverId);
+    switch (m_process->processMode()) {
+        case ProcessMode::kServer: {
+            // when server changes from local screen to another screen
+            if (m_userConfig->screenId() != serverId) {
+                // jerry restart server proxy and start client
+                m_process->startClient(serverId);
+            }
+            else {
+                serviceLog()->debug("core is already in server mode, ignoring switch");
+            }
+
+            break;
+        }
+        case ProcessMode::kClient: {
+            // when local screen becomes the server
+            if (m_userConfig->screenId() == serverId) {
+                m_process->startServer();
+                break;
+            }
+
+            // when another screen, not local screen, claims to be the server
+            // jerry restart server proxy
+            m_process->startClient(serverId);
+
+            break;
+        }
+        case ProcessMode::kUnknown: {
+            if (m_userConfig->screenId() == serverId) {
+                m_process->startServer();
+            }
+            else {
+                // jerry start server proxy then start core client
+                m_process->startClient(serverId);
+            }
+
+            break;
+        }
+    }
 }
 
 void

@@ -19,13 +19,21 @@ const float kMinRestartDelay = 0.05f;
 const float kMaxRestartDelay = 0.3f;
 const float kStartProcessPadding = 0.5f;
 const int kTestNodePort = 24812;
+const int kTestScreenId = 1;
 void repeatServerChangeFunc(const boost::system::error_code&,
                             CoreProcess* coreProcess,
                             int& startCount, boost::asio::deadline_timer* timer)
 {
     startCount++;
     if (startCount <= kMaxmiumStartTime) {
-        coreProcess->switchServer((startCount % 2) + 1);
+        int newId = (startCount % 2) + 1;
+
+        if (newId == kTestScreenId) {
+            coreProcess->startServer();
+        }
+        else {
+            coreProcess->startClient(newId);
+        }
 
         float randomDelay = kMinRestartDelay + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (kMaxRestartDelay - kMinRestartDelay)));
 
@@ -41,7 +49,7 @@ TEST_CASE("Start and stop core process in different modes", "[CoreProcess]" ) {
 
     fakeit::Mock<UserConfig> userConfigMock;
     fakeit::Fake(Dtor(userConfigMock));
-    Method(userConfigMock,screenId) = 1;
+    Method(userConfigMock,screenId) = kTestScreenId;
 
     auto profileConfig = std::make_shared<ProfileConfig>();
 

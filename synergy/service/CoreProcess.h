@@ -27,7 +27,6 @@ public:
     int currentServerId() const;
     ProcessMode processMode() const;
     void shutdown();
-    void switchServer(int64_t serverId);
     void startServer();
     void startClient(int serverId);
 
