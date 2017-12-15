@@ -2,8 +2,6 @@
 #define SERVICEWORKER_H
 
 #include <synergy/service/router/Router.hpp>
-#include <synergy/service/router/ClientProxy.hpp>
-#include <synergy/service/router/ServerProxy.hpp>
 
 #include <boost/asio/io_service.hpp>
 #include <boost/signals2.hpp>
@@ -43,8 +41,6 @@ private:
     std::shared_ptr<CloudClient>    m_cloudClient;
     Router                          m_router;
     std::unique_ptr<CoreManager>    m_coreManager;
-    ServerProxy                     m_serverProxy;
-    ClientProxy                     m_clientProxy;
     std::shared_ptr<boost::asio::io_service::work> m_work;
     boost::signals2::connection m_logSender;
     std::string m_lastProfileSnapshot = "";

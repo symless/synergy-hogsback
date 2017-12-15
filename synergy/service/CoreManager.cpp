@@ -9,6 +9,7 @@
 #include <synergy/service/CloudClient.h>
 #include <synergy/service/router/protocol/v2/MessageTypes.hpp>
 #include <synergy/service/router/Router.hpp>
+#include <synergy/common/NetworkParameters.h>
 
 #include <cassert>
 #include <vector>
@@ -75,7 +76,9 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     m_processCommand (std::make_shared<ProcessCommand>()),
     m_process (std::make_unique<CoreProcess>(m_ioService, m_userConfig, m_localProfileConfig, m_processCommand)),
     m_rpc (rpc),
-    m_router (router)
+    m_router (router),
+    m_serverProxy (io, m_router, kServerProxyPort),
+    m_clientProxy (io, m_router, kServerPort)
 {
 
     m_processCommand->setLocalHostname(boost::asio::ip::host_name());
@@ -169,6 +172,20 @@ CoreManager::CoreManager (boost::asio::io_service& io,
             }
         });
     });
+
+    if (m_userConfig->screenId() != -1) {
+        m_router.start (m_userConfig->screenId(), boost::asio::ip::host_name());
+        m_clientProxy.start ();
+    }
+    else {
+        m_userConfig->updated.connect_extended ([this](const auto& connection) {
+            if (m_userConfig->screenId() != -1) {
+                m_router.start (m_userConfig->screenId(), boost::asio::ip::host_name());
+                m_clientProxy.start ();
+                connection.disconnect();
+            }
+        });
+    }
 }
 
 CoreManager::~CoreManager () noexcept {

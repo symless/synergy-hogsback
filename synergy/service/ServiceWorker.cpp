@@ -28,8 +28,6 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_cloudClient (std::make_shared<CloudClient>(ioService, m_userConfig, m_remoteProfileConfig)),
     m_router (ioService, kNodePort),
     m_coreManager (std::make_unique<CoreManager>(m_ioService, m_userConfig, m_localProfileConfig, m_cloudClient, *m_rpc, m_router)),
-    m_serverProxy (ioService, m_router, kServerProxyPort),
-    m_clientProxy (ioService, m_router, kServerPort),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService))
 {
     g_commonLog.onLogLine.connect([this](std::string logLine) {
@@ -113,23 +111,6 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
 #endif
 
     m_rpc->start();
-
-    if (m_userConfig->screenId() != -1) {
-        m_router.start (m_userConfig->screenId(), boost::asio::ip::host_name());
-        m_clientProxy.start ();
-    }
-    else {
-        m_userConfig->updated.connect_extended ([this](const auto& connection) {
-            if (m_userConfig->screenId() != -1) {
-                m_router.start (m_userConfig->screenId(), boost::asio::ip::host_name());
-                m_clientProxy.start ();
-                connection.disconnect();
-            }
-        });
-    }
-
-    m_localProfileConfig->profileServerChanged.connect
-        ([this](int64_t const server) { m_serverProxy.start (server); });
 
     m_localProfileConfig->screenOnline.connect([this](Screen screen){
         if (m_userConfig->screenId() == screen.id()) {
@@ -289,8 +270,6 @@ void ServiceWorker::provideServerClaim()
 {
     m_rpc->server()->provide(
         "synergy.server.claim", [this](int serverId) {
-        m_serverProxy.start(serverId);
-
         m_coreManager->switchServer(serverId);
         m_coreManager->notifyServerClaim(serverId);
     });

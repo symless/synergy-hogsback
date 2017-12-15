@@ -2,7 +2,8 @@
 
 #include <synergy/common/ProfileConfig.h>
 #include <synergy/common/ProcessMode.h>
-
+#include <synergy/service/router/ClientProxy.hpp>
+#include <synergy/service/router/ServerProxy.hpp>
 
 #include <boost/asio/steady_timer.hpp>
 #include <boost/asio.hpp>
@@ -48,4 +49,6 @@ private:
     std::unique_ptr<CoreProcess> m_process;
     RpcManager& m_rpc;
     Router& m_router;
+    ServerProxy m_serverProxy;
+    ClientProxy m_clientProxy;
 };
