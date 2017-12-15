@@ -6,12 +6,11 @@ Current Versions
 ===========================================
     
     Oldest first:
-    - fmtlib        3.0.1   released  1 November 2016 
-    - Qt            5.8.0   released 23 January 2017
-    - OpenSSL       1.0.2k  released 27 January 2017
-    - Flatbuffers   1.6.0   released 15 February 2017
-    - ZeroZMQ       4.2.2   released 17 February 2017
-    - libsodium     1.0.12  released 12 March 2017
+    - fmtlib        git snapshot
+    - flatbuffers     git snapshot
+    - libsodium     1.0.15  released 1 October 2017
+    - Qt            5.9.3   released 22 November 2017
+    - OpenSSL       1.0.2n  released 7 December 2017
     - Boost         1.64.0  released 19 April 2017
 
 Windows
@@ -27,8 +26,8 @@ Precompiled:
                  unzipped to C:\libsodium)
 
     - OpenSSL   (from https://www.openssl.org/source/
-                 built on the build slave from source using NASM and Strawberry Perl
-                 in tree under synergy/core/ext/openssl)
+                 built from source using NASM and Strawberry Perl. In tree under 
+                 third_party/precompiled/openssl)
 
 CentOS 7
 ========
