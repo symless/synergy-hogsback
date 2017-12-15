@@ -10,9 +10,6 @@ TEST_CASE("Profile config", "[ProfileConfig]" ) {
         ProfileConfig profileConfig1 = ProfileConfig::fromJsonSnapshot(jsonMock1);
         ProfileConfig profileConfig2 = ProfileConfig::fromJsonSnapshot(jsonMock2);
 
-        profileConfig1.updateScreenTestResult(1, "1.1.1.1", "2.2.2.2");
-        profileConfig2.updateScreenTestResult(1, "3.3.3.3", "4.4.4.4");
-
         // TODO: also assert that all signals get called
         REQUIRE(profileConfig1.compare(profileConfig2) == true);
     }
@@ -23,9 +20,6 @@ TEST_CASE("Profile config", "[ProfileConfig]" ) {
 
         ProfileConfig profileConfig1 = ProfileConfig::fromJsonSnapshot(jsonMock1);
         ProfileConfig profileConfig2 = ProfileConfig::fromJsonSnapshot(jsonMock2);
-
-        profileConfig1.updateScreenTestResult(1, "1.1.1.1", "2.2.2.2");
-        profileConfig2.updateScreenTestResult(1, "3.3.3.3", "4.4.4.4");
 
         // TODO: also assert that all signals get called
         REQUIRE(profileConfig1.compare(profileConfig2) == true);

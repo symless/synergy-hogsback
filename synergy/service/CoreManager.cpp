@@ -97,7 +97,7 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     });
 
     m_process->serverReady.connect([this](){
-        m_cloudClient->claimServer();
+        m_localProfileConfig->claimServer(m_userConfig->screenId());
     });
 
     auto server = m_rpc.server();

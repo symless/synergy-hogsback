@@ -33,6 +33,12 @@ CloudClient::CloudClient(boost::asio::io_service& ioService,
         }
     );
 
+    m_remoteProfileConfig->profileServerChanged.connect(
+        [this](int64_t serverId) {
+            claimServer(serverId);
+        }
+    );
+
     m_websocket.messageReceived.connect([this](std::string msg) {
         websocketMessageReceived(std::move(msg));
     });
@@ -101,7 +107,7 @@ void CloudClient::report(int screenId, const std::string &successfulIp, const st
     httpSession->post(kUrlTarget, tao::json::to_string(root));
 }
 
-void CloudClient::claimServer()
+void CloudClient::claimServer(int64_t serverId)
 {
     boost::posix_time::ptime current = boost::posix_time::second_clock::local_time();
     static auto allowNextTime = current;
@@ -115,7 +121,6 @@ void CloudClient::claimServer()
     }
 
     auto profileId = m_userConfig->profileId();
-    auto serverId = m_userConfig->screenId();
     serviceLog()->debug("sending claim server message, serverId={} profileId={}", serverId, profileId);
 
     static const std::string kUrlTarget = "/profile/server/claim";
