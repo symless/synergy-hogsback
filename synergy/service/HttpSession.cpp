@@ -59,7 +59,7 @@ void HttpSession::onTcpClientConnected()
 
 void HttpSession::setupRequest(http::verb method, const std::string &target, const std::string &body)
 {
-    m_request.version = kHttpVersion;
+    m_request.version(kHttpVersion);
     m_request.method(method);
     m_request.target(std::move(target));
     m_request.set(http::field::host, m_tcpClient.address().c_str());
@@ -67,7 +67,7 @@ void HttpSession::setupRequest(http::verb method, const std::string &target, con
 
     if (!body.empty()) {
         m_request.set(http::field::content_type, "application/json");
-        m_request.body = body.c_str();
+        m_request.body() = body;
 
         for (auto const& i : m_headers) {
             m_request.set(i.first, i.second);
@@ -104,10 +104,10 @@ void HttpSession::onReadFinished(errorCode ec)
     }
 
     if (m_response.result() != http::status::ok) {
-        serviceLog()->debug("invalid http request: {}", m_response.body);
-        requestFailed(this, m_response.body);
+        serviceLog()->debug("invalid http request: {}", m_response.body());
+        requestFailed(this, m_response.body());
         return;
     }
 
-    requestSuccess(this, m_response.body);
+    requestSuccess(this, m_response.body());
 }
