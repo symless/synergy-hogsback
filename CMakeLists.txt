@@ -50,18 +50,14 @@ elseif (UNIX)
         set (SYNERGY_CXX_FLAGS_RELEASE "-O3 -fvisibility=hidden -DNDEBUG")
     endif()
 
-    if (NOT DEFINED SYNERGY_SCAN_BUILD)
-        add_definitions (${SYNERGY_WARNING_FLAGS})
-    endif()
-
-    # set (SYNERGY_CXX_FLAGS_DEBUG "-fsanitize=address")
-
     if ((DEFINED SYNERGY_CXX_FLAGS_RELEASE) AND (CMAKE_BUILD_TYPE STREQUAL "Release"))
         set (CMAKE_CXX_FLAGS_RELEASE ${SYNERGY_CXX_FLAGS_RELEASE})
     elseif ((DEFINED SYNERGY_CXX_FLAGS_DEBUG) AND (CMAKE_BUILD_TYPE STREQUAL "Debug"))
         set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${SYNERGY_CXX_FLAGS_DEBUG}")
     endif()
 endif()
+
+add_definitions (${SYNERGY_WARNING_FLAGS})
 
 #
 # Non-CMake Dependencies
