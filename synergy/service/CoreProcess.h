@@ -26,6 +26,7 @@ public:
 
     int currentServerId() const;
     ProcessMode processMode() const;
+    void start (std::vector<std::string> command);
     void shutdown();
     void startServer();
     void startClient(int serverId);
@@ -43,7 +44,6 @@ public:
     signal<void(std::string const& screenName, ScreenStatus status)> screenStatusChanged;
 
 private:
-    void start (std::vector<std::string> command);
     void writeConfigurationFile();
 
 private:

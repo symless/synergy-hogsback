@@ -15,12 +15,14 @@ public:
 
     virtual std::vector<std::string> generate(bool serverMode) const;
     void setLocalHostname(const std::string& localHostname);
-    void setRunAsUid(const std::string& runAsUid);
+    bool setRunAsUid(std::string runAsUid);
+    bool setDisplay(std::string display);
 
 private:
-    std::string m_serverAddress = "";
-    std::string m_localHostname = "";
-    std::string m_runAsUid = "";
+    std::string m_serverAddress;
+    std::string m_localHostname;
+    std::string m_runAsUid;
+    std::string m_display;
 };
 
 const std::string kCoreLogFile = "synergy-core.log";

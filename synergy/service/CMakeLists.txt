@@ -1,6 +1,10 @@
 project (synergy-service CXX)
 cmake_minimum_required (VERSION 3.4)
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    set (SYSTEMD_LIBRARIES "systemd")
+endif()
+
 set (SERVICE_SOURCES
     main.cpp
     App.cpp
@@ -15,13 +19,13 @@ set (SERVICE_SOURCES
     WebsocketSession.cpp
     TerminationSignalListener.cpp
     ServiceLogs.cpp
+    SessionMonitor.cpp
 )
 
 add_executable (${PROJECT_NAME} ${SERVICE_SOURCES})
 
 target_include_directories (${PROJECT_NAME} SYSTEM PUBLIC
-    ${Boost_INCLUDE_DIRS}
-)
+                            ${Boost_INCLUDE_DIRS})
 
 #
 # OpenSSL
@@ -62,15 +66,17 @@ target_link_libraries (${PROJECT_NAME}
     commonlib
     router
     ${Boost_LIBRARIES}
-    ${CMAKE_THREAD_LIBS_INIT}
     ${OPENSSL_LIBS}
+    ${SYSTEMD_LIBRARIES}
+    ${CMAKE_THREAD_LIBS_INIT}
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     install (TARGETS ${PROJECT_NAME} DESTINATION ${SYNERGY_BUNDLE_BINARY_DIR})
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     install (TARGETS ${PROJECT_NAME} DESTINATION bin)
-    install (FILES ${CMAKE_SOURCE_DIR}/debian/synergy.service DESTINATION lib/systemd/system)
+    install (FILES ${CMAKE_SOURCE_DIR}/debian/synergy.service
+             DESTINATION lib/systemd/system)
 endif()
 
 

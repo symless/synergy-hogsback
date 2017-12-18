@@ -2,7 +2,6 @@
 #define SERVICEWORKER_H
 
 #include <synergy/service/router/Router.hpp>
-
 #include <boost/asio/io_service.hpp>
 #include <boost/signals2.hpp>
 
@@ -11,6 +10,7 @@ class CoreManager;
 class CloudClient;
 class UserConfig;
 class ProfileConfig;
+class SessionMonitor;
 
 class ServiceWorker final
 {
@@ -41,9 +41,10 @@ private:
     std::shared_ptr<CloudClient>    m_cloudClient;
     Router                          m_router;
     std::unique_ptr<CoreManager>    m_coreManager;
+    std::unique_ptr<SessionMonitor> m_sessionMonitor;
     std::shared_ptr<boost::asio::io_service::work> m_work;
-    boost::signals2::connection m_logSender;
-    std::string m_lastProfileSnapshot = "";
+    boost::signals2::connection     m_logSender;
+    std::string                     m_lastProfileSnapshot;
 };
 
 #endif // SERVICEWORKER_H

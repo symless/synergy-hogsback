@@ -49,6 +49,11 @@ ProcessCommand::generate(bool const serverMode) const
         args.push_back("--run-as-uid");
         args.push_back(m_runAsUid);
     }
+
+    if (!m_display.empty()) {
+        args.push_back ("--display");
+        args.push_back (m_display);
+    }
 #endif
 
     args.push_back("--debug");
@@ -93,7 +98,17 @@ ProcessCommand::setLocalHostname(const std::string& localHostname)
     m_localHostname = localHostname;
 }
 
-void ProcessCommand::setRunAsUid(const std::string& runAsUid)
+bool
+ProcessCommand::setRunAsUid(std::string runAsUid)
 {
-    m_runAsUid = runAsUid;
+    auto const set = (m_runAsUid == runAsUid);
+    m_runAsUid = std::move(runAsUid);
+    return set;
+}
+
+bool ProcessCommand::setDisplay(std::string display)
+{
+    auto const set = (m_display == display);
+    m_display = std::move(display);
+    return set;
 }

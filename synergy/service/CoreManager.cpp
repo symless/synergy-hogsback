@@ -80,7 +80,6 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     m_serverProxy (io, m_router, kServerProxyPort),
     m_clientProxy (io, m_router, kServerPort)
 {
-
     m_processCommand->setLocalHostname(boost::asio::ip::host_name());
 
     m_messageHandler = std::make_unique<ClaimMessageHandler> (*this);
@@ -197,10 +196,35 @@ CoreManager::shutdown() {
     m_process->shutdown();
 }
 
-void
-CoreManager::setRunAsUid(const std::string &runAsUid)
+bool
+CoreManager::restart()
 {
-    m_processCommand->setRunAsUid(runAsUid);
+    if (m_process->processMode() == ProcessMode::kUnknown) {
+        /* Don't restart when we don't have a mode */
+        return false;
+    }
+
+    m_process->start (m_processCommand->generate
+                      (m_process->processMode() == ProcessMode::kServer));
+    return true;
+}
+
+bool
+CoreManager::setRunAsUid(std::string runAsUid)
+{
+    if (m_processCommand->setRunAsUid (std::move (runAsUid))) {
+        return restart();
+    }
+    return false;
+}
+
+bool
+CoreManager::setDisplay(std::string display)
+{
+    if (m_processCommand->setDisplay (std::move (display))) {
+        return restart();
+    }
+    return false;
 }
 
 void

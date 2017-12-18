@@ -35,7 +35,9 @@ public:
     friend class ClaimMessageHandler;
 
     void shutdown();
-    void setRunAsUid(const std::string& runAsUid);
+    bool restart();
+    bool setRunAsUid(std::string runAsUid);
+    bool setDisplay(std::string);
     void switchServer(int64_t serverId);
     void notifyServerClaim(int64_t serverId);
 

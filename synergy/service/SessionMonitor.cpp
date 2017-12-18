@@ -1,32 +1,4 @@
-#include <boost/asio.hpp>
-#include <boost/optional.hpp>
-#include <boost/signals2.hpp>
-#include <memory>
-#include <string>
-#include <vector>
-
-class SessionMonitor final {
-public:
-    explicit SessionMonitor (boost::asio::io_service&);
-    ~SessionMonitor ();
-
-    void start ();
-    void stop ();
-    std::vector<std::string> sessions ();
-    void poll ();
-
-private:
-    struct Impl;
-    std::unique_ptr<Impl> impl_;
-    boost::asio::io_service& ios_;
-
-public:
-    boost::signals2::signal<void(boost::optional<std::string>)>
-        activeUserChanged;
-    
-    boost::signals2::signal<void(boost::optional<std::string>)>
-        activeDisplayChanged;
-};
+#include <synergy/service/SessionMonitor.h>
 
 #include <algorithm>
 #include <boost/asio/posix/stream_descriptor.hpp>
@@ -35,21 +7,27 @@ public:
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
-#include <iostream>
 #include <stdexcept>
 #include <systemd/sd-login.h>
+#include <synergy/service/ServiceLogs.h>
+#include <fmt/ostream.h>
+#include <boost/optional.hpp>
+#include <boost/optional/optional_io.hpp>
 
 struct SessionMonitor::Impl {
     sd_login_monitor* monitor = nullptr;
     boost::asio::posix::stream_descriptor fd;
     boost::asio::null_buffers nullBuffers;
+    boost::optional<std::string> activeXSession;
+    boost::optional<std::string> activeXDisplay;
     boost::optional<uid_t> activeUser;
-    boost::optional<std::string> activeDisplay;
     bool stopped = true;
 
     Impl (boost::asio::io_service& ios) : fd (ios) {
         if (sd_login_monitor_new ("session", &monitor) < 0) {
-            throw std::runtime_error ("Failed to create sd-login monitor");
+            serviceLog()->critical ("Failed to instantiate systemd session "
+                                    "monitor");
+            return;
         }
         fd.assign (sd_login_monitor_get_fd (monitor));
     }
@@ -84,31 +62,38 @@ free_and_null_array (T**& arr_in, Size& size_in) noexcept {
 }
 
 SessionMonitor::SessionMonitor (boost::asio::io_service& ios)
-    : impl_ (std::make_unique<Impl> (ios)), ios_ (ios) {
-    start ();
+    : impl_ (std::make_unique<Impl> (ios)), ioService_ (ios) {
 }
 
 SessionMonitor::~SessionMonitor () = default;
 
 void
 SessionMonitor::start () {
-    if (!this->impl_->stopped) {
+    if (!this->impl_->stopped || !this->impl_->monitor) {
         return;
     }
 
-    boost::asio::spawn (ios_, [this](auto ctx) {
+    boost::asio::spawn (ioService_, [this](auto ctx) {
         while (!this->impl_->stopped) {
             boost::system::error_code ec;
             this->impl_->fd.async_read_some (impl_->nullBuffers, ctx[ec]);
             if (ec == boost::asio::error::operation_aborted) {
                 this->impl_->stopped = true;
+                serviceLog()->info ("Session monitor stopped");
                 break;
             } else if (ec) {
+                serviceLog()->error ("Polling session monitor  failed with "
+                                     "error: {}", ec.message());
+                serviceLog()->critical ("Session monitor disabled");
                 break;
             }
             sd_login_monitor_flush (this->impl_->monitor);
             this->poll ();
         }
+
+        this->impl_->activeXSession.reset();
+        this->impl_->activeUser.reset();
+        this->impl_->activeXDisplay.reset();
     });
 
     this->impl_->stopped = false;
@@ -120,7 +105,7 @@ SessionMonitor::stop () {
         return;
     }
     impl_->fd.cancel ();
-    ios_.poll ();
+    ioService_.poll ();
     assert (impl_->stopped);
 }
 
@@ -150,55 +135,59 @@ SessionMonitor::poll () {
             BOOST_SCOPE_EXIT_END
 
             if (sd_session_get_type (session.c_str (), &type) < 0) {
-                throw std::runtime_error (
-                    "Couldn't determine type of active session");
+                serviceLog()->error ("Couldn't determine type of active login "
+                                     "session: {}", session);
+                return;
             }
             if (strcmp (type, "x11") != 0) {
+                serviceLog()->warn ("Active session is not running an X server. "
+                                    "Ignoring session: ", session);
                 return;
             }
 
-            uid_t user;
-            if (sd_session_get_uid (session.c_str (), &user) < 0) {
-                throw std::runtime_error (
-                    "Couldn't determine user of active session");
-            }
-            if (!impl_->activeUser || (*impl_->activeUser != user)) {
-                impl_->activeUser = user;
-                activeUserChanged (std::to_string (user));
+            if (!impl_->activeXSession || (session != *impl_->activeXSession)) {
+                serviceLog()->info ("New active X session: {}", session);
             }
 
+            uid_t user;
             char* display = nullptr;
             BOOST_SCOPE_EXIT (&display) {
                 free_and_null (display);
             }
             BOOST_SCOPE_EXIT_END
+
+            if (sd_session_get_uid (session.c_str (), &user) < 0) {
+                serviceLog()->critical ("Couldn't determine user of active X "
+                                        "session: {}. Ignoring", session);
+                return;
+            }
+
             if (sd_session_get_display (session.c_str (), &display) < 0) {
-                throw std::runtime_error ("Couldn't determine active display");
+                serviceLog()->critical ("Couldn't determine active X"
+                                        "display: {}. Ignoring",
+                                        session);
+                return;
             }
-            if (!impl_->activeDisplay || (*impl_->activeDisplay != display)) {
-                impl_->activeDisplay = display;
-                activeDisplayChanged (impl_->activeDisplay);
+
+            /* TODO: avoid restarting core twice if *both* the display and
+             * active user change.
+             */
+            if (!impl_->activeUser || (*impl_->activeUser != user)) {
+                serviceLog()->info ("New active X user: {} -> {}",
+                                    impl_->activeUser, user);
+                impl_->activeUser = user;
+                activeUserChanged (std::to_string (user));
             }
+
+            if (!impl_->activeXDisplay || (*impl_->activeXDisplay != display)) {
+                serviceLog()->info ("New active X display: {} -> {}",
+                                    impl_->activeXDisplay, display);
+                impl_->activeXDisplay = display;
+                activeDisplayChanged (display);
+            }
+
             return;
         }
     }
 }
 
-#include <iostream>
-#include <boost/optional/optional_io.hpp>
-
-int
-main () {
-    boost::asio::io_service ios;
-    SessionMonitor sm (ios);
-
-    sm.activeUserChanged.connect([](auto user) {
-    	std::cout << "new active user: " << user << "\n";
-    });
-
-    sm.activeDisplayChanged.connect([](auto display) {
-    	std::cout << "new active display: " << display << "\n";
-    });
-
-    ios.run ();
-}

@@ -3,6 +3,7 @@
 #include <synergy/service/CloudClient.h>
 #include <synergy/service/ServiceLogs.h>
 #include <synergy/service/CoreManager.h>
+#include <synergy/service/SessionMonitor.h>
 #include <synergy/service/WebsocketError.h>
 #include <synergy/service/router/protocol/v2/MessageTypes.hpp>
 #include <synergy/common/UserConfig.h>
@@ -28,6 +29,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_cloudClient (std::make_shared<CloudClient>(ioService, m_userConfig, m_remoteProfileConfig)),
     m_router (ioService, kNodePort),
     m_coreManager (std::make_unique<CoreManager>(m_ioService, m_userConfig, m_localProfileConfig, m_cloudClient, *m_rpc, m_router)),
+    m_sessionMonitor (std::make_unique<SessionMonitor>(ioService)),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService))
 {
     g_commonLog.onLogLine.connect([this](std::string logLine) {
@@ -99,6 +101,14 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         });
     });
 
+    m_sessionMonitor->activeUserChanged.connect([this](std::string user) {
+        this->m_coreManager->setRunAsUid (std::move (user));
+    });
+
+    m_sessionMonitor->activeDisplayChanged.connect([this](std::string display) {
+        this->m_coreManager->setDisplay (std::move (display));
+    });
+
 #if __linux__
     std::string coreUid = m_userConfig->systemUid();
     if (!coreUid.empty()) {
@@ -106,11 +116,9 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         m_coreManager->setRunAsUid(coreUid);
     }
     else {
-        serviceLog()->debug("core uid is unknown");
+        serviceLog()->warn("core uid is not set in config file");
     }
 #endif
-
-    m_rpc->start();
 
     m_localProfileConfig->screenOnline.connect([this](Screen screen){
         if (m_userConfig->screenId() == screen.id()) {
@@ -129,6 +137,9 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             }
         });
     });
+
+    m_sessionMonitor->start();
+    m_rpc->start();
 }
 
 ServiceWorker::~ServiceWorker()
@@ -148,6 +159,7 @@ ServiceWorker::start()
 void
 ServiceWorker::shutdown()
 {
+    m_sessionMonitor->stop();
     m_coreManager->shutdown();
     m_rpc->stop();
     m_work.reset();
