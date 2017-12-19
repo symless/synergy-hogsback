@@ -145,8 +145,20 @@ SessionMonitor::poll () {
                 return;
             }
 
+            char* sclass = nullptr;
+            BOOST_SCOPE_EXIT (&sclass) {
+                free_and_null (sclass);
+            }
+            BOOST_SCOPE_EXIT_END
+
+            if (sd_session_get_class (session.c_str (), &sclass) < 0) {
+                serviceLog()->critical ("Couldn't determine 'class' of active X "
+                                        "session: {}. Ignoring", session);
+                return;
+            }
+
             if (!impl_->activeXSession || (session != *impl_->activeXSession)) {
-                serviceLog()->info ("New active X session: {}", session);
+                serviceLog()->info ("New active X session: {}, class: {}", session, sclass);
             }
 
             uid_t user;
@@ -155,6 +167,7 @@ SessionMonitor::poll () {
                 free_and_null (display);
             }
             BOOST_SCOPE_EXIT_END
+
 
             if (sd_session_get_uid (session.c_str (), &user) < 0) {
                 serviceLog()->critical ("Couldn't determine user of active X "
