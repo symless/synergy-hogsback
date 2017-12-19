@@ -101,14 +101,14 @@ ProcessCommand::setLocalHostname(const std::string& localHostname)
 bool
 ProcessCommand::setRunAsUid(std::string runAsUid)
 {
-    auto const set = (m_runAsUid == runAsUid);
+    auto const set = (m_runAsUid != runAsUid);
     m_runAsUid = std::move(runAsUid);
     return set;
 }
 
 bool ProcessCommand::setDisplay(std::string display)
 {
-    auto const set = (m_display == display);
+    auto const set = (m_display != display);
     m_display = std::move(display);
     return set;
 }
