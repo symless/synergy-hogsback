@@ -426,7 +426,7 @@ CloudClient::uploadLogFile(QString source, QString target)
         "Symless User ID: %1\r\n"
         "Operating System: %2\r\n"
         "Synergy Version: %3\r\n"
-        "System name: %4\r\n"
+        "System Name: %4\r\n"
         "\r\n").arg(appConfig->userId())
                .arg(QSysInfo::productType() + " " + QSysInfo::productVersion())
                .arg(SYNERGY_VERSION_STRING)
