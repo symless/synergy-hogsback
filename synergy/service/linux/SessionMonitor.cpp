@@ -188,6 +188,10 @@ SessionMonitor::poll () {
             if (!impl_->activeUser || (*impl_->activeUser != user)) {
                 serviceLog()->info ("New active X user: {} -> {}",
                                     impl_->activeUser, user);
+                if (user < 1000) {
+                    serviceLog()->warn ("Ignoring X session switch to system user {}", user);
+                    continue;
+                }
                 impl_->activeUser = user;
                 activeUserChanged (std::to_string (user));
             }
