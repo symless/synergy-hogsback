@@ -3,6 +3,9 @@ cmake_minimum_required (VERSION 3.4)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set (SYSTEMD_LIBRARIES "systemd")
+    set (SERVICE_SM_SOURCES "linux/SessionMonitor.cpp")
+else()
+    set (SERVICE_SM_SOURCES "common/SessionMonitor.cpp")
 endif()
 
 set (SERVICE_SOURCES
@@ -19,7 +22,7 @@ set (SERVICE_SOURCES
     WebsocketSession.cpp
     TerminationSignalListener.cpp
     ServiceLogs.cpp
-    SessionMonitor.cpp
+    ${SERVICE_SM_SOURCES}
 )
 
 add_executable (${PROJECT_NAME} ${SERVICE_SOURCES})

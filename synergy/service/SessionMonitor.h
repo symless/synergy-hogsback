@@ -14,7 +14,7 @@ public:
     void start ();
     void stop ();
 
-    // TODO: make these functions private
+    // TODO: make these functions private/impl
     void poll ();
     std::vector<std::string> sessions ();
 
