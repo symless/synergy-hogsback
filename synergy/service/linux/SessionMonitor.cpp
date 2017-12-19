@@ -73,30 +73,33 @@ SessionMonitor::start () {
         return;
     }
 
+    this->impl_->stopped = false;
+
     boost::asio::spawn (ioService_, [this](auto ctx) {
+        this->poll();
+
         while (!this->impl_->stopped) {
             boost::system::error_code ec;
             this->impl_->fd.async_read_some (impl_->nullBuffers, ctx[ec]);
             if (ec == boost::asio::error::operation_aborted) {
                 this->impl_->stopped = true;
-                serviceLog()->info ("Session monitor stopped");
                 break;
             } else if (ec) {
-                serviceLog()->error ("Polling session monitor  failed with "
+                serviceLog()->error ("Session monitor poll operation failed with "
                                      "error: {}", ec.message());
-                serviceLog()->critical ("Session monitor disabled");
                 break;
             }
             sd_login_monitor_flush (this->impl_->monitor);
             this->poll ();
         }
 
+        serviceLog()->info ("Session monitor stopped");
         this->impl_->activeXSession.reset();
-        this->impl_->activeUser.reset();
         this->impl_->activeXDisplay.reset();
+        this->impl_->activeUser.reset();
     });
 
-    this->impl_->stopped = false;
+    serviceLog()->info ("Session monitor started");
 }
 
 void
@@ -136,12 +139,12 @@ SessionMonitor::poll () {
 
             if (sd_session_get_type (session.c_str (), &type) < 0) {
                 serviceLog()->error ("Couldn't determine type of active login "
-                                     "session: {}", session);
+                                     "session \"{}\"", session);
                 return;
             }
             if (strcmp (type, "x11") != 0) {
-                serviceLog()->warn ("Active session is not running an X server. "
-                                    "Ignoring session: ", session);
+                serviceLog()->warn ("Active login session \"{}\" is not running "
+                                    "an X server. Ignoring.", session);
                 return;
             }
 
@@ -152,13 +155,20 @@ SessionMonitor::poll () {
             BOOST_SCOPE_EXIT_END
 
             if (sd_session_get_class (session.c_str (), &sclass) < 0) {
-                serviceLog()->critical ("Couldn't determine 'class' of active X "
-                                        "session: {}. Ignoring", session);
+                serviceLog()->critical ("Couldn't determine the 'class' of active "
+                                        "X session \"{}\". Ignoring", session);
+                return;
+            }
+
+            if (strcmp (sclass, "user") != 0) {
+                serviceLog()->warn ("Active X \"{}\" session \"{}\" ignored",
+                                    sclass, session);
                 return;
             }
 
             if (!impl_->activeXSession || (session != *impl_->activeXSession)) {
-                serviceLog()->info ("New active X session: {}, class: {}", session, sclass);
+                serviceLog()->info ("Active X session changed from \"{}\" to \"{}\"",
+                                    impl_->activeXSession, session);
             }
 
             uid_t user;
@@ -170,30 +180,29 @@ SessionMonitor::poll () {
 
 
             if (sd_session_get_uid (session.c_str (), &user) < 0) {
-                serviceLog()->critical ("Couldn't determine user of active X "
-                                        "session: {}. Ignoring", session);
+                serviceLog()->critical ("Couldn't determine user of the active X "
+                                        "session \"{}\". Ignoring switch", session);
                 return;
             }
 
             if (sd_session_get_display (session.c_str (), &display) < 0) {
-                serviceLog()->critical ("Couldn't determine active X"
-                                        "display: {}. Ignoring",
-                                        session);
+                serviceLog()->critical ("Couldn't determine display for active X "
+                                        "session \"{}\". Ignoring switch", session);
                 return;
             }
 
-            /* TODO: avoid restarting core twice if *both* the display and
-             * active user change.
+            /* TODO: avoid restarting the core twice if *both* the active display 
+             * and active user change.
              */
             if (!impl_->activeUser || (*impl_->activeUser != user)) {
-                serviceLog()->info ("New active X user: {} -> {}",
+                serviceLog()->info ("Active X user changed from \"{}\" to \"{}\"",
                                     impl_->activeUser, user);
                 impl_->activeUser = user;
                 activeUserChanged (std::to_string (user));
             }
 
             if (!impl_->activeXDisplay || (*impl_->activeXDisplay != display)) {
-                serviceLog()->info ("New active X display: {} -> {}",
+                serviceLog()->info ("Active X display changed from \"{}\" to \"{}\"",
                                     impl_->activeXDisplay, display);
                 impl_->activeXDisplay = display;
                 activeDisplayChanged (display);
