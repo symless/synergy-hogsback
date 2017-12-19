@@ -396,7 +396,8 @@ void CloudClient::updateScreen(const UIScreen& screen)
     }
 }
 
-void CloudClient::uploadLogFile(QString source, QString target)
+void
+CloudClient::uploadLogFile(QString source, QString target)
 {
     AppConfig* appConfig =
             qobject_cast<AppConfig*>(AppConfig::instance());
@@ -407,19 +408,38 @@ void CloudClient::uploadLogFile(QString source, QString target)
     QHttpMultiPart* multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
     QHttpPart logIdPart;
-    logIdPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"logId\""));
+    logIdPart.setHeader(QNetworkRequest::ContentDispositionHeader,
+                        QVariant("form-data; name=\"logId\""));
     logIdPart.setBody(withoutExt.toUtf8());
 
     QHttpPart userIdPart;
-    userIdPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"userId\""));
+    userIdPart.setHeader(QNetworkRequest::ContentDispositionHeader,
+                         QVariant("form-data; name=\"userId\""));
     userIdPart.setBody(QString::number(appConfig->userId()).toUtf8());
 
     QHttpPart logPart;
-    logPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"log\"; filename=\"" + withoutPath + "\""));
+    logPart.setHeader(QNetworkRequest::ContentDispositionHeader,
+                      QVariant("form-data; name=\"log\"; filename=\"" +
+                               withoutPath + "\""));
 
+    QString header = QString::fromUtf8(
+        "Symless User ID: %1\r\n"
+        "Operating System: %2\r\n"
+        "Synergy Version: %3\r\n"
+        "System name: %4\r\n"
+        "\r\n").arg(appConfig->userId())
+               .arg(QSysInfo::productType() + " " + QSysInfo::productVersion())
+               .arg(SYNERGY_VERSION_STRING)
+               .arg(QHostInfo::localHostName());
+
+    // NOTE: The log can grow while we're reading the file here, which is why
+    //       we cannot use setBodyDevice() instead of reading the file in to
+    //       memory. Ref: https://bugreports.qt.io/browse/QTBUG-58360
+    //
+    //       Fortunately, the log is (supposed to) to be limited to 1MB.
     QFile file(source);
     file.open(QIODevice::ReadOnly | QIODevice::Text);
-    logPart.setBody(file.readAll());
+    logPart.setBody(header.toUtf8().append(file.readAll()));
     file.close();
 
     multiPart->append(logIdPart);
@@ -436,6 +456,7 @@ void CloudClient::uploadLogFile(QString source, QString target)
     connect (reply, &QNetworkReply::finished, [this, reply]{
         onUploadLogFileFinished (reply);
     });
+
     connect(reply, SIGNAL(uploadProgress(qint64, qint64)),
             this, SLOT  (onUploadProgress(qint64, qint64)));
 }
