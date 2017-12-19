@@ -3,7 +3,9 @@ cmake_minimum_required (VERSION 3.4)
 # Remove additional compiler flags for third party libraries. 
 # We don't care about their issues.
 
-remove_definitions (${SYNERGY_WARNING_FLAGS})
+if (UNIX)
+    remove_definitions (${SYNERGY_WARNING_FLAGS})
+endif()
 
 #
 # fmt library
