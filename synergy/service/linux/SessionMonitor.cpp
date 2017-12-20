@@ -166,11 +166,6 @@ SessionMonitor::poll () {
                 return;
             }
 
-            if (!impl_->activeXSession || (session != *impl_->activeXSession)) {
-                serviceLog()->info ("Active X session changed from \"{}\" to \"{}\"",
-                                    impl_->activeXSession, session);
-            }
-
             uid_t user;
             char* display = nullptr;
             BOOST_SCOPE_EXIT (&display) {
@@ -178,17 +173,22 @@ SessionMonitor::poll () {
             }
             BOOST_SCOPE_EXIT_END
 
-
             if (sd_session_get_uid (session.c_str (), &user) < 0) {
-                serviceLog()->critical ("Couldn't determine user of the active X "
+                serviceLog()->critical ("Couldn't determine user of the newly activated X "
                                         "session \"{}\". Ignoring switch", session);
                 return;
             }
 
             if (sd_session_get_display (session.c_str (), &display) < 0) {
-                serviceLog()->critical ("Couldn't determine display for active X "
+                serviceLog()->critical ("Couldn't determine X display for newly activated X "
                                         "session \"{}\". Ignoring switch", session);
                 return;
+            }
+          
+            if (!impl_->activeXSession || (session != *impl_->activeXSession)) {
+                serviceLog()->info ("Active X session changed from \"{}\" to \"{}\"",
+                                    impl_->activeXSession, session);
+                impl_->activeXSession = session;
             }
 
             /* TODO: avoid restarting the core twice if *both* the active display 
