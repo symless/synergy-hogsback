@@ -1,6 +1,7 @@
 #include "SecuredTcpClient.h"
 
 #include <boost/asio/connect.hpp>
+#include <boost/asio/ssl/rfc2818_verification.hpp>
 #include <synergy/service/ServiceLogs.h>
 
 static
