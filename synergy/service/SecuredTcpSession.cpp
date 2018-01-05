@@ -5,8 +5,7 @@
 
 SecuredTcpSession::SecuredTcpSession(boost::asio::io_service& ioService, ssl::context &context) :
     m_ioService(ioService),
-    m_sslContext(context),
-    m_stream(ioService, m_sslContext)
+    m_stream(ioService, context)
 {
 }
 

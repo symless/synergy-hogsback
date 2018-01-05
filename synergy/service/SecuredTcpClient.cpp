@@ -3,13 +3,24 @@
 #include <boost/asio/connect.hpp>
 #include <synergy/service/ServiceLogs.h>
 
+static
+boost::asio::ssl::context
+createTLSContext (std::string const& hostname) {
+    boost::asio::ssl::context ctx (boost::asio::ssl::context::tlsv12_client);
+    ctx.set_default_verify_paths();
+    ctx.set_verify_mode (boost::asio::ssl::verify_peer);
+    ctx.set_verify_callback (boost::asio::ssl::rfc2818_verification (hostname));
+    return ctx;
+}
+
+
 SecuredTcpClient::SecuredTcpClient(boost::asio::io_service &ioService, std::string hostname, std::string port) :
     m_ioService(ioService),
-    m_sslContext(ssl::context::tls_client),
+    m_sslContext(createTLSContext(hostname)),
     m_session(ioService, m_sslContext),
     m_resolver(ioService),
-    m_address(hostname),
-    m_port(port),
+    m_address(std::move(hostname)),
+    m_port(std::move(port)),
     m_connected(false)
 {
 }
@@ -67,6 +78,8 @@ void SecuredTcpClient::onConnectFinished(errorCode ec)
         connectFailed(this);
         return;
     }
+
+    m_session.stream().lowest_layer().set_option(tcp::no_delay(true));
 
     m_session.stream().async_handshake(
         ssl::stream_base::client,

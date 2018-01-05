@@ -21,7 +21,6 @@ public:
 
 private:
     boost::asio::io_service& m_ioService;
-    boost::asio::ssl::context& m_sslContext;
     ssl::stream<tcp::socket> m_stream;
 };
 
