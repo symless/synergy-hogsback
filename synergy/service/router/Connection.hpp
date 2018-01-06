@@ -18,11 +18,15 @@ public:
 
     Connection (tcp::socket&& socket, boost::asio::ssl::context& context);
     ~Connection () noexcept;
+
     uint32_t id () const noexcept;
+
     bool start (ssl_stream::handshake_type, asio::yield_context ctx);
     void stop ();
+
     bool send (Message const&);
     bool send (MessageHeader const&, Message const&);
+
     tcp::endpoint endpoint () const;
 
 private:

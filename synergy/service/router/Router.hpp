@@ -60,7 +60,7 @@ public:
     bool started () const noexcept;
     void start (const uint32_t id, std::string name);
     void shutdown ();
-    void add (tcp::endpoint endpoint);
+    void add (tcp::endpoint endpoint, bool immediate = false);
     void add (std::vector<tcp::endpoint> const& endpoints);
     void remove (std::shared_ptr<Connection>);
 

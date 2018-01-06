@@ -93,6 +93,7 @@ Connection::start (Connection::ssl_stream::handshake_type handshake,
     return true;
 }
 
+/* TODO: call shutdown and close() */
 void
 Connection::stop () {
     if (!enabled_) {

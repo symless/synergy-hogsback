@@ -1,6 +1,7 @@
 #include "Router.hpp"
 #include "Connection.hpp"
 #include "utils/tcp.hpp"
+#include <boost/scope_exit.hpp>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <iostream>
@@ -34,77 +35,102 @@ comma_separate (std::vector<uint32_t> const& path) {
 void
 Router::add (std::vector<tcp::endpoint> const& endpoints) {
     for (auto& endpoint : endpoints) {
-        add (endpoint);
+        add (endpoint, true);
     }
 }
 
 void
-Router::add (tcp::endpoint endpoint) {
+Router::add (tcp::endpoint endpoint, bool const immediate) {
     auto it = std::find (begin (known_peers_), end (known_peers_), endpoint);
     if (it != end (known_peers_)) {
         return;
     }
 
-    routerLog()->debug("Adding {}", endpoint);
+    routerLog()->debug("Adding peer discovered at {}", endpoint);
     known_peers_.push_back (endpoint);
 
     /* Connect thread */
-    asio::spawn (acceptor_.get_io_service (), [this, endpoint](auto ctx) {
-        tcp::socket socket (acceptor_.get_io_service ());
-        asio::steady_timer timer (socket.get_io_service ());
+    asio::spawn (acceptor_.get_io_service (), [this, endpoint, immediate](auto ctx) {
+        bool connected = false;
+        BOOST_SCOPE_EXIT_ALL(&connected, &endpoint, this) {
+            if (!connected) {
+                auto it = std::find (begin (known_peers_), end (known_peers_),
+                                     endpoint);
+                if (it != end (known_peers_)) {
+                    known_peers_.erase (it);
+                }
+            }
+        };
 
-        socket.open (endpoint.protocol ());
-        boost::system::error_code ec;
-        restrict_tcp_socket_buffer_sizes (socket, ec);
+        /* TODO: cleanup this code duplication */
+        if (!running_) {
+            routerLog()->debug("Aborting connection to peer at {}", endpoint);
+            return;
+        }
 
-        for (int attempt = 1; attempt <= kConnectRetryLimit; ++attempt) {
+        asio::steady_timer timer (acceptor_.get_io_service ());
+
+        /* Delay the first connection attempt if requested. This happens e.g.
+         * when reconnecting after an unexpected disconnect.
+         */
+        if (!immediate) {
+            boost::system::error_code ec;
+            timer.expires_from_now (kConnectRetryInterval);
+            timer.async_wait (ctx[ec]);
+        }
+
+        int attempt = 1;
+
+        for (; attempt <= kConnectRetryLimit; ++attempt) {
             if (!running_) {
-                return;
+                routerLog()->debug("Aborting connection to peer at {}", endpoint);
+                break;
             }
 
-            routerLog()->debug("Connecting to {} (attempt {}/{})",
+            tcp::socket socket (acceptor_.get_io_service ());
+            socket.open (endpoint.protocol ());
+            boost::system::error_code ec;
+            restrict_tcp_socket_buffer_sizes (socket, ec);
+
+            routerLog()->debug("Connecting to peer at {} (attempt {}/{})",
                                 endpoint, attempt, kConnectRetryLimit);
 
-            bool timed_out = false;
             timer.expires_from_now (kConnectTimeout);
-            timer.async_wait ([&](auto const ec) {
+            timer.async_wait ([&socket](auto const ec) {
                 if (ec == asio::error::operation_aborted) {
                     return;
                 } else if (ec) {
                     throw boost::system::system_error (ec, ec.message ());
                 }
-                timed_out = true;
                 socket.cancel ();
             });
 
-            boost::system::error_code ec;
             socket.async_connect (endpoint, ctx[ec]);
             timer.cancel ();
 
-            if ((ec == asio::error::operation_aborted) && !timed_out) {
-                routerLog()->debug("Aborting connection to {}", endpoint);
-                return;
+            if (ec == asio::error::operation_aborted) {
+                routerLog()->info("Connection {} to peer at {} timed out.", endpoint);
+                continue;
             }
 
             if (ec) {
-                routerLog()->error("Connection to {} failed: {} (code {})",
+                routerLog()->error("Connection to peer at {} failed: {} (code {})",
                                    endpoint, ec.message(), ec.value());
                 timer.expires_from_now (kConnectRetryInterval);
                 timer.async_wait (ctx[ec]);
-                socket.close ();
+                socket.shutdown (boost::asio::ip::tcp::socket::shutdown_both, ec);
+                socket.close (ec);
                 continue;
             }
 
             if (this->add (std::move (socket), false, ctx)) {
-                return;
+                connected = true;
+                break;
             }
         }
 
-        routerLog()->debug("Gave up trying to connect to {}", endpoint);
-        auto it = std::find (begin (known_peers_), end (known_peers_),
-                             endpoint);
-        if (it != end (known_peers_)) {
-            known_peers_.erase (it);
+        if (kConnectRetryLimit < attempt) {
+            routerLog()->debug("Gave up trying to connect to peer at {}", endpoint);
         }
     });
 }
@@ -345,7 +371,7 @@ Router::add (tcp::socket socket, bool const is_server,
                                  connection->id());
             auto remote = connection->endpoint ();
             this->remove (std::move (connection));
-            this->add (remote);
+            this->add (std::move (remote));
         });
 
     connection->on_message.connect ([this](MessageHeader const& header,
@@ -560,7 +586,7 @@ Router::integrate (RouteAdvertisement& ra, std::shared_ptr<Connection> source) {
 
 void
 Router::remove (std::shared_ptr<Connection> connection) {
-    routerLog()->debug("Disabling connection {}", connection->id ());
+    routerLog()->debug("Removing connection {}", connection->id ());
     connection->stop ();
 
     auto dead_routes =
