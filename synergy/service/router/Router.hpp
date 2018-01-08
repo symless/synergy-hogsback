@@ -60,18 +60,19 @@ public:
     bool started () const noexcept;
     void start (const uint32_t id, std::string name);
     void shutdown ();
-    void add (tcp::endpoint endpoint, bool immediate = false);
-    void add (std::vector<tcp::endpoint> const& endpoints);
+
+    void add_peer (boost::asio::ip::tcp::endpoint, bool immediate = false);
     void remove (std::shared_ptr<Connection>);
 
     bool send (Message message, std::uint32_t dest);
+
     void flood (Message message, std::uint32_t source);
     void broadcast (Message message);
     bool forward (MessageHeader const& header, Message message);
     void notifyOtherNodes (Message message);
 
 protected:
-    bool add (tcp::socket, bool const is_server, asio::yield_context ctx);
+    void add (std::shared_ptr<Connection>);
     bool integrate (Route, std::shared_ptr<Connection> source);
     void integrate (RouteRevocation&, std::shared_ptr<Connection>);
     void integrate (RouteAdvertisement&, std::shared_ptr<Connection>);

@@ -13,7 +13,7 @@ Connection::Connection (tcp::socket&& socket,
                         boost::asio::ssl::context& context):
         id_ (++next_connection_id_),
         socket_ (std::move (socket)),
-        endpoint_ (socket_.remote_endpoint ()),
+        remote_endpoint_ (socket_.remote_endpoint ()),
         stream_ (socket_, context),
         reader_ (stream_),
         writer_ (stream_)
@@ -42,18 +42,8 @@ Connection::~Connection () noexcept {
     routerLog ()->debug ("Connection {} destroyed", id ());
 }
 
-bool
-Connection::start (Connection::ssl_stream::handshake_type handshake,
-                   asio::yield_context ctx) {  
-    boost::system::error_code ec;
-    stream_.async_handshake (handshake, ctx[ec]);
-
-    if (ec) {
-        routerLog ()->error ("Connection {} failed to complete SSL handshake"
-                             ": {}",  this->id (), ec.message());
-        return false;
-    }
-
+void
+Connection::start () {
     asio::spawn (
         socket_.get_io_service (),
         [ this, self = this->shared_from_this () ](auto ctx) {
@@ -90,10 +80,8 @@ Connection::start (Connection::ssl_stream::handshake_type handshake,
     });
 
     on_connected (this->shared_from_this ());
-    return true;
 }
 
-/* TODO: call shutdown and close() */
 void
 Connection::stop () {
     if (!enabled_) {
@@ -129,6 +117,6 @@ Connection::send (MessageHeader const& header, Message const& message) {
 }
 
 tcp::endpoint
-Connection::endpoint () const {
-    return tcp::endpoint (endpoint_.address (), 24802);
+Connection::remote_acceptor_endpoint () const {
+    return tcp::endpoint (remote_endpoint_.address (), 24802);
 }

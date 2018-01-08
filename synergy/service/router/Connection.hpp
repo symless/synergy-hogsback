@@ -14,29 +14,34 @@ class Message;
 
 class Connection final : public std::enable_shared_from_this<Connection> {
 public:
-    using ssl_stream = boost::asio::ssl::stream<boost::asio::ip::tcp::socket&>;
+    using stream_type = boost::asio::ssl::stream<boost::asio::ip::tcp::socket&>;
 
     Connection (tcp::socket&& socket, boost::asio::ssl::context& context);
     ~Connection () noexcept;
 
     uint32_t id () const noexcept;
+    stream_type& stream() noexcept;
+    tcp::endpoint remote_acceptor_endpoint () const;
 
-    bool start (ssl_stream::handshake_type, asio::yield_context ctx);
+    void start ();
     void stop ();
 
     bool send (Message const&);
     bool send (MessageHeader const&, Message const&);
 
-    tcp::endpoint endpoint () const;
-
 private:
     static uint32_t next_connection_id_;
     uint32_t id_;
     tcp::socket socket_;
-    tcp::endpoint endpoint_;
-    ssl_stream stream_;
-    MessageReader<ssl_stream> reader_;
-    MessageWriter<ssl_stream> writer_;
+
+    /* We need this because once the socket has been disconnected you can no
+     * longer call the remote_endpoint() function on it. */
+    tcp::endpoint remote_endpoint_;
+
+    stream_type stream_;
+    MessageReader<stream_type> reader_;
+    MessageWriter<stream_type> writer_;
+
     std::deque<std::pair<MessageHeader, Message>> message_queue_;
     bool enabled_ = false;
 
@@ -53,4 +58,9 @@ public:
 inline uint32_t
 Connection::id () const noexcept {
     return id_;
+}
+
+inline Connection::stream_type&
+Connection::stream() noexcept {
+    return stream_;
 }

@@ -33,14 +33,7 @@ comma_separate (std::vector<uint32_t> const& path) {
 }
 
 void
-Router::add (std::vector<tcp::endpoint> const& endpoints) {
-    for (auto& endpoint : endpoints) {
-        add (endpoint, true);
-    }
-}
-
-void
-Router::add (tcp::endpoint endpoint, bool const immediate) {
+Router::add_peer (tcp::endpoint endpoint, bool const immediate) {
     auto it = std::find (begin (known_peers_), end (known_peers_), endpoint);
     if (it != end (known_peers_)) {
         return;
@@ -125,10 +118,21 @@ Router::add (tcp::endpoint endpoint, bool const immediate) {
 
             routerLog ()->debug ("Connected to {}", socket.remote_endpoint());
 
-            if (this->add (std::move (socket), false, ctx)) {
-                connected = true;
-                break;
+            auto connection = std::make_shared<Connection> (std::move (socket),
+                                                            ssl_context_);
+            connection->stream().async_handshake
+                (Connection::stream_type::client, ctx[ec]);
+
+            if (ec) {
+                routerLog ()->error ("Connection {} failed to complete SSL "
+                                     "handshake: {}",  connection->id (),
+                                     ec.message());
+                continue;
             }
+
+            this->add (std::move(connection));
+            connected = true;
+            break;
         }
 
         if (kConnectRetryLimit < attempt) {
@@ -206,7 +210,19 @@ Router::start (uint32_t const id, std::string name) {
 
             routerLog()->debug("Accepted connection from router {}",
                                 socket.remote_endpoint ());
-            add (std::move (socket), true, ctx);
+
+            auto connection = std::make_shared<Connection> (std::move(socket),
+                                                            ssl_context_);
+            connection->stream().async_handshake (Connection::stream_type::server,
+                                                  ctx[ec]);
+            if (ec) {
+                routerLog ()->error ("Connection {} failed to complete SSL "
+                                     "handshake: {}",  connection->id (),
+                                     ec.message());
+                continue;
+            }
+
+            add (std::move (connection));
         }
     });
 
@@ -283,17 +299,18 @@ Router::dump_table () {
 }
 
 struct MessageHandler {
-    explicit MessageHandler (Router* router) : router_ (router) {
+    explicit MessageHandler (Router* const router) : router_ (router) {
+    }
+
+    template <typename T>
+    void
+    operator() (T&, std::shared_ptr<Connection>) const {
     }
 
     void operator() (HelloMessage&, std::shared_ptr<Connection>) const;
     void operator() (UnknownMessage&, std::shared_ptr<Connection>) const;
     void operator() (RouteAdvertisement&, std::shared_ptr<Connection>) const;
     void operator() (RouteRevocation& rr, std::shared_ptr<Connection>) const;
-    template <typename T>
-    void
-    operator() (T&, std::shared_ptr<Connection>) const {
-    }
 
 private:
     Router* router_;
@@ -335,11 +352,9 @@ operator() (RouteRevocation& rr, std::shared_ptr<Connection> source) const {
     router_->integrate (rr, std::move (source));
 }
 
-bool
-Router::add (tcp::socket socket, bool const is_server,
-             asio::yield_context ctx) {
-    auto connection = std::make_shared<Connection> (std::move (socket),
-                                                    ssl_context_);
+void
+Router::add
+(std::shared_ptr<Connection> connection) {
     connection->on_connected.connect (
         [this](std::shared_ptr<Connection> connection) {
             connections_.push_back (connection);
@@ -368,9 +383,9 @@ Router::add (tcp::socket socket, bool const is_server,
         [this](std::shared_ptr<Connection> connection) {
             routerLog ()->debug ("Connection {} disconnected",
                                  connection->id());
-            auto remote = connection->endpoint ();
+            auto remote = connection->remote_acceptor_endpoint ();
             this->remove (std::move (connection));
-            this->add (std::move (remote));
+            this->add_peer (std::move (remote));
         });
 
     connection->on_message.connect ([this](MessageHeader const& header,
@@ -392,8 +407,7 @@ Router::add (tcp::socket socket, bool const is_server,
         on_receive (message, header.source);
     });
 
-    return connection->start (is_server ? Connection::ssl_stream::server
-                                        : Connection::ssl_stream::client, ctx);
+    return connection->start ();
 }
 
 bool
@@ -614,7 +628,7 @@ Router::remove (std::shared_ptr<Connection> connection) {
                                                  dead_routes.second);
     dump_table ();
 
-    auto remote = connection->endpoint ();
+    auto remote = connection->remote_acceptor_endpoint ();
     connections_.erase (
         std::remove (begin (connections_), end (connections_), connection),
         end (connections_)
