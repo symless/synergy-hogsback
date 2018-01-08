@@ -64,7 +64,7 @@ Router::add (tcp::endpoint endpoint, bool const immediate) {
 
         /* TODO: cleanup this code duplication */
         if (!running_) {
-            routerLog()->debug("Aborting connection to peer at {}", endpoint);
+            routerLog()->debug("Aborting connection to {}", endpoint);
             return;
         }
 
@@ -83,7 +83,7 @@ Router::add (tcp::endpoint endpoint, bool const immediate) {
 
         for (; attempt <= kConnectRetryLimit; ++attempt) {
             if (!running_) {
-                routerLog()->debug("Aborting connection to peer at {}", endpoint);
+                routerLog()->debug("Aborting connection to {}", endpoint);
                 break;
             }
 
@@ -92,7 +92,7 @@ Router::add (tcp::endpoint endpoint, bool const immediate) {
             boost::system::error_code ec;
             restrict_tcp_socket_buffer_sizes (socket, ec);
 
-            routerLog()->debug("Connecting to peer at {} (attempt {}/{})",
+            routerLog()->debug("Connecting to {} (attempt {}/{})",
                                 endpoint, attempt, kConnectRetryLimit);
 
             timer.expires_from_now (kConnectTimeout);
@@ -109,19 +109,21 @@ Router::add (tcp::endpoint endpoint, bool const immediate) {
             timer.cancel ();
 
             if (ec == asio::error::operation_aborted) {
-                routerLog()->info("Connection {} to peer at {} timed out.", endpoint);
+                routerLog()->info("Connection {} to {} timed out.", endpoint);
                 continue;
             }
 
             if (ec) {
-                routerLog()->error("Connection to peer at {} failed: {} (code {})",
+                routerLog()->error("Connection to {} failed: {} (code {})",
                                    endpoint, ec.message(), ec.value());
-                timer.expires_from_now (kConnectRetryInterval);
-                timer.async_wait (ctx[ec]);
                 socket.shutdown (boost::asio::ip::tcp::socket::shutdown_both, ec);
                 socket.close (ec);
+                timer.expires_from_now (kConnectRetryInterval);
+                timer.async_wait (ctx[ec]);
                 continue;
             }
+
+            routerLog ()->debug ("Connected to {}", socket.remote_endpoint());
 
             if (this->add (std::move (socket), false, ctx)) {
                 connected = true;
@@ -130,7 +132,7 @@ Router::add (tcp::endpoint endpoint, bool const immediate) {
         }
 
         if (kConnectRetryLimit < attempt) {
-            routerLog()->debug("Gave up trying to connect to peer at {}", endpoint);
+            routerLog()->debug("Gave up trying to connect to {}", endpoint);
         }
     });
 }
@@ -340,9 +342,6 @@ Router::add (tcp::socket socket, bool const is_server,
                                                     ssl_context_);
     connection->on_connected.connect (
         [this](std::shared_ptr<Connection> connection) {
-            routerLog ()->debug ("Successfully connected to {}",
-                                 connection->endpoint());
-
             connections_.push_back (connection);
 
             RouteAdvertisement advert;
