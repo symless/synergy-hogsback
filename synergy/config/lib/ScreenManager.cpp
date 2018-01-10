@@ -297,8 +297,11 @@ void ScreenManager::onScreenStatusChanged(QPair<QString, ScreenStatus> r)
 {
     int index = m_screenListModel->findScreen(r.first);
     if (index != -1) {
-        m_screenListModel->setScreenStatus(index, r.second);
         const UIScreen& s = m_screenListModel->getScreen(index);
+        QString orignialStatus = QString::fromStdString(screenStatusToString(s.status()));
+        QString newStatus = QString::fromStdString(screenStatusToString(r.second));
+        LogManager::debug(QString("update screen status: %1 -> %2").arg(orignialStatus).arg(newStatus));
+        m_screenListModel->setScreenStatus(index, r.second);
 
         m_cloudClient->updateScreen(s);
     }
