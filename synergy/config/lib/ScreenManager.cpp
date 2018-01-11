@@ -298,6 +298,11 @@ void ScreenManager::onScreenStatusChanged(QPair<QString, ScreenStatus> r)
     int index = m_screenListModel->findScreen(r.first);
     if (index != -1) {
         const UIScreen& s = m_screenListModel->getScreen(index);
+
+        if (s.status() == r.second) {
+            return;
+        }
+
         QString screenName = s.name();
         QString orignialStatus = QString::fromStdString(screenStatusToString(s.status()));
         QString newStatus = QString::fromStdString(screenStatusToString(r.second));
