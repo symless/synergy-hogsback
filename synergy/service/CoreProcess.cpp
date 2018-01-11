@@ -174,11 +174,10 @@ CoreProcess::start (std::vector<std::string> command)
     m_impl = std::make_unique<CoreProcessImpl>(*this, m_ioService,
                                                std::move (command));
     auto& localScreenState = m_impl->m_screenStates[localScreenName];
+    localScreenState = ScreenStatus::kConnecting;
     auto& signals = m_impl->m_signals;
 
     if (processMode == "--client") {
-        localScreenState = ScreenStatus::kDisconnected;
-
         signals.emplace_back (
             output.connect ([this, &localScreenState, localScreenName](std::string const& line) {
                 if (!contains (line, "connected to server")) {
@@ -218,8 +217,6 @@ CoreProcess::start (std::vector<std::string> command)
         );
     }
     else if (processMode == "--server") {
-        localScreenState = ScreenStatus::kConnecting;
-
         signals.emplace_back (
             output.connect_extended ( [this, &localScreenState, localScreenName]
                                       (auto& connection, std::string const& line) {
