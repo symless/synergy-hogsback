@@ -187,6 +187,6 @@ Screen& ProfileConfig::getScreen(int screenId)
 void ProfileConfig::claimServer(int64_t serverId)
 {
     m_profile.setServer(serverId);
-
+    m_profile.touch();
     modified();
 }

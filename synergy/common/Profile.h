@@ -14,6 +14,7 @@ public:
     int64_t server() const;
     void setServer(const int64_t &server);
     std::string name() const;
+    void touch();
 
 private:
     Profile() = default;
