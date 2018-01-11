@@ -193,8 +193,8 @@ CoreProcess::start (std::vector<std::string> command)
                 if (!contains (line, "disconnected from server")) {
                     return;
                 }
-                localScreenState = ScreenStatus::kDisconnected;
-                screenStatusChanged(localScreenName, localScreenState);
+
+                startClient(currentServerId());
             }, boost::signals2::at_front)
         );
 
