@@ -123,6 +123,11 @@ void UIScreen::setVersion(int version)
     m_version = version;
 }
 
+void UIScreen::touch()
+{
+    m_version++;
+}
+
 void UIScreen::setLastErrorCode(const ErrorCode &lastErrorCode)
 {
     m_lastErrorCode = lastErrorCode;

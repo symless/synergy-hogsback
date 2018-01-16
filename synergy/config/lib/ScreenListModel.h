@@ -54,6 +54,7 @@ public:
     void unlockScreen(int index);
     void setScreenStatus(int index, ScreenStatus status);
     void setScreenErrorCode(int index, ErrorCode ec);
+    void touchScreen(int index);
 
 signals:
     void scaleChanged();

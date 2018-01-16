@@ -386,7 +386,7 @@ void CloudClient::updateScreen(const UIScreen& screen)
         screenObject.insert("id", screen.id());
         screenObject.insert("name", screen.name());
         screenObject.insert("status", QString::fromStdString(screenStatusToString(screen.status())));
-
+        screenObject.insert("version", screen.version());
         QJsonDocument doc(screenObject);
 
         m_networkManager->post(req, doc.toJson());

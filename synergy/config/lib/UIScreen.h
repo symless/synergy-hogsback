@@ -52,6 +52,7 @@ public:
 
     int version() const;
     void setVersion(int version);
+    void touch();
 
 private:
     int m_id;

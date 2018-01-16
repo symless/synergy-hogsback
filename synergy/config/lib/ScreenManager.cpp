@@ -213,6 +213,7 @@ void ScreenManager::updateScreens(QByteArray reply)
                 int index = m_screenListModel->findScreen(screenName);
                 if (index != -1) {
                     const UIScreen& s = m_screenListModel->getScreen(index);
+
                     if (s.locked()) {
                         continue;
                     }
@@ -318,8 +319,10 @@ void ScreenManager::onScreenStatusChanged(QPair<QString, ScreenStatus> r)
         QString orignialStatus = QString::fromStdString(screenStatusToString(s.status()));
         QString newStatus = QString::fromStdString(screenStatusToString(r.second));
         LogManager::debug(QString("update screen %1 status: %2 -> %3").arg(screenName).arg(orignialStatus).arg(newStatus));
+
         m_screenListModel->setScreenStatus(index, r.second);
 
+        m_screenListModel->touchScreen(index);
         m_cloudClient->updateScreen(s);
     }
 }

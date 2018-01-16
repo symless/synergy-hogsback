@@ -191,6 +191,11 @@ void ScreenListModel::setScreenErrorCode(int index, ErrorCode ec)
     dataChanged(getIndex(index), getIndex(index));
 }
 
+void ScreenListModel::touchScreen(int index)
+{
+    m_screens[index].touch();
+}
+
 int ScreenListModel::findScreen(QString name)
 {
     for (int index = 0; index < m_screens.count(); index++) {
