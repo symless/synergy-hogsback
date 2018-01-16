@@ -72,7 +72,6 @@ private:
     AppConfig* m_appConfig;
     CloudClient* m_cloudClient;
     QSet<QString> m_screenNameSet;
-    QMap<int, unsigned> m_screenVersionTracker;
     QString m_localHostname;
     int m_latestConfigSerial = 0;
     int m_configVersion = -1;

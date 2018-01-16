@@ -17,7 +17,8 @@ UIScreen::UIScreen(QString name) :
     m_name(name),
     m_status(ScreenStatus::kInactive),
     m_locked(false),
-    m_lastErrorCode(kNoError)
+    m_lastErrorCode(kNoError),
+    m_version(-1)
 {
     m_statusImage = m_statusImages[m_status];
 }
@@ -110,6 +111,16 @@ ScreenStatus UIScreen::status() const
 ErrorCode UIScreen::lastErrorCode() const
 {
     return m_lastErrorCode;
+}
+
+int UIScreen::version() const
+{
+    return m_version;
+}
+
+void UIScreen::setVersion(int version)
+{
+    m_version = version;
 }
 
 void UIScreen::setLastErrorCode(const ErrorCode &lastErrorCode)

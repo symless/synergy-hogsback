@@ -50,6 +50,9 @@ public:
     ScreenStatus status() const;
     ErrorCode lastErrorCode() const;
 
+    int version() const;
+    void setVersion(int version);
+
 private:
     int m_id;
     int m_posX;
@@ -60,4 +63,5 @@ private:
     bool m_locked;
     static QHash<ScreenStatus, QString> m_statusImages;
     ErrorCode m_lastErrorCode;
+    int m_version;
 };

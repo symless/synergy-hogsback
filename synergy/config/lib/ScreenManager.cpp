@@ -206,22 +206,19 @@ void ScreenManager::updateScreens(QByteArray reply)
                 QJsonObject obj = v.toObject();
                 int screenId = obj["id"].toInt();
 
-                auto it = m_screenVersionTracker.find(screenId);
-                if (it != m_screenVersionTracker.end()) {
-                    if (obj["version"].toInt() < it.value()) {
-                        LogManager::debug(QString("skip stale screen %1: %2 < %3").arg(screenId).arg(obj["version"].toInt()).arg(it.value()));
-                        continue;
-                    }
-                }
-
-                m_screenVersionTracker[screenId] = obj["version"].toInt();
-
                 QString screenName = obj["name"].toString();
+                int screenVersion = obj["version"].toInt();
+
                 latestScreenNameSet.insert(screenName);
                 int index = m_screenListModel->findScreen(screenName);
                 if (index != -1) {
                     const UIScreen& s = m_screenListModel->getScreen(index);
                     if (s.locked()) {
+                        continue;
+                    }
+
+                    if (s.version() > screenVersion) {
+                        LogManager::debug(QString("skip stale screen %1: %2 > %3").arg(screenId).arg(s.version()).arg(screenVersion));
                         continue;
                     }
                 }
@@ -234,6 +231,8 @@ void ScreenManager::updateScreens(QByteArray reply)
                 if (!obj["active"].toBool()) {
                     screen.setStatus(ScreenStatus::kInactive);
                 }
+                screen.setVersion(screenVersion);
+
                 latestScreenList.push_back(screen);
             }
 
