@@ -111,10 +111,21 @@ CoreManager::CoreManager (boost::asio::io_service& io,
         [server, this](std::string const& screenName, ScreenStatus state) {
             server->publish ("synergy.screen.status", screenName, int(state));
 
-            auto screen = m_localProfileConfig->getScreen(screenName);
-            if (screen.status() != state) {
+            // HACK: use a status record
+            // reason: currently we still relying on UI to send status update
+            // so we can't garantee always receive the lastest snapshot
+            // solution: after moving request into service, we can use localProfileConfig
+            static std::map<std::string, ScreenStatus> lastSeenStatus;
+            auto it = lastSeenStatus.find(screenName);
+            if (it == lastSeenStatus.end()) {
+                lastSeenStatus[screenName] = ScreenStatus::kDisconnected;
+            }
+
+            if (lastSeenStatus[screenName] != state) {
                 m_cloudClient->fakeScreenStatusUpdate();
             }
+
+            lastSeenStatus[screenName] = state;
         }
     );
 
