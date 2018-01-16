@@ -50,6 +50,7 @@ private:
     int64_t         m_y       = 0;
     int64_t         m_width   = 0;
     int64_t         m_height  = 0;
+    uint64_t        m_version = 0;
     ScreenStatus    m_status  = ScreenStatus::kDisconnected;
     std::string     m_ipList;
 };

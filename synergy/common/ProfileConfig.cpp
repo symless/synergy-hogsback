@@ -77,6 +77,10 @@ bool ProfileConfig::compare(ProfileConfig const& target)
             if (screen.m_id == targetScreen.m_id) {
                 found = true;
 
+                if (screen.m_version < targetScreen.m_version) {
+                    continue;
+                }
+
                 if (screen.m_name != targetScreen.m_name) {
                     serviceLog()->debug("profile screen name changed, screenId={} {}->{}",
                         screen.m_id, screen.m_name, targetScreen.m_name);

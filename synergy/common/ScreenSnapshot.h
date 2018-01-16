@@ -13,6 +13,7 @@ struct ScreenSnapshot {
     bool            active;
     std::string     status;
     std::string     ipList;
+    uint64_t        version;
 };
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -24,4 +25,5 @@ BOOST_FUSION_ADAPT_STRUCT(
     (bool,          active)
     (std::string,   status)
     (std::string,   ipList)
+    (uint64_t,   version)
 )

@@ -71,8 +71,8 @@ private:
     ScreenListSnapshotManager* m_screenListSnapshotManager;
     AppConfig* m_appConfig;
     CloudClient* m_cloudClient;
-    QMap<int, bool> m_defaultServerReplies;
     QSet<QString> m_screenNameSet;
+    QMap<int, unsigned> m_screenVersionTracker;
     QString m_localHostname;
     int m_latestConfigSerial = 0;
     int m_configVersion = -1;

@@ -204,6 +204,18 @@ void ScreenManager::updateScreens(QByteArray reply)
             QSet<QString> latestScreenNameSet;
             foreach (QJsonValue const& v, screens) {
                 QJsonObject obj = v.toObject();
+                int screenId = obj["id"].toInt();
+
+                auto it = m_screenVersionTracker.find(screenId);
+                if (it != m_screenVersionTracker.end()) {
+                    if (obj["version"].toInt() < it.value()) {
+                        LogManager::debug(QString("skip stale screen %1: %2 < %3").arg(screenId).arg(obj["version"].toInt()).arg(it.value()));
+                        continue;
+                    }
+                }
+
+                m_screenVersionTracker[screenId] = obj["version"].toInt();
+
                 QString screenName = obj["name"].toString();
                 latestScreenNameSet.insert(screenName);
                 int index = m_screenListModel->findScreen(screenName);
@@ -215,7 +227,7 @@ void ScreenManager::updateScreens(QByteArray reply)
                 }
 
                 UIScreen screen(screenName);
-                screen.setId(obj["id"].toInt());
+                screen.setId(screenId);
                 screen.setPosX(obj["x_pos"].toInt());
                 screen.setPosY(obj["y_pos"].toInt());
                 screen.setStatus(obj["status"].toString());
