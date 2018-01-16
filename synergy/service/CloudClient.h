@@ -19,7 +19,6 @@ public:
                  std::shared_ptr<UserConfig> userConfig,
                  std::shared_ptr<ProfileConfig> remoteProfileConfig);
 
-    void report(int screenId, const std::string& successfulIp, const std::string& failedIp);
     void claimServer(int64_t serverId);
     void reconnectWebsocket();
     bool isWebsocketConnected() const;

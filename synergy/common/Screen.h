@@ -36,9 +36,6 @@ public:
     void status(ScreenStatus);
     ScreenStatus status() const noexcept;
 
-    std::string successfulTestIp() const;
-    std::string failedTestIp() const;
-
     std::string ipList() const;
 
     bool active() const;
@@ -54,8 +51,6 @@ private:
     int64_t         m_width   = 0;
     int64_t         m_height  = 0;
     ScreenStatus    m_status  = ScreenStatus::kDisconnected;
-    std::string     m_successfulTestIp;
-    std::string     m_failedTestIp;
     std::string     m_ipList;
 };
 

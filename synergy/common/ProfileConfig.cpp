@@ -109,15 +109,6 @@ bool ProfileConfig::compare(ProfileConfig const& target)
                     screenStatusChanged(targetScreen.m_id);
                     different = true;
                 }
-
-                if ((screen.m_successfulTestIp != targetScreen.m_successfulTestIp) ||
-                    (screen.m_failedTestIp != targetScreen.m_failedTestIp)) {
-                    serviceLog()->debug("profile screen test result changed, screenId={} success=`{}`->`{}` failed=`{}`->`{}`",
-                        screen.m_id, screen.m_successfulTestIp, targetScreen.m_successfulTestIp,
-                        screen.m_failedTestIp, targetScreen.m_failedTestIp);
-                    screenTestResultChanged(targetScreen.m_id, targetScreen.m_successfulTestIp, targetScreen.m_failedTestIp);
-                    different = true;
-                }
             }
         }
 

@@ -78,16 +78,6 @@ Screen::status() const noexcept {
     return m_status;
 }
 
-std::string Screen::successfulTestIp() const
-{
-    return m_successfulTestIp;
-}
-
-std::string Screen::failedTestIp() const
-{
-    return m_failedTestIp;
-}
-
 std::string Screen::ipList() const
 {
     return m_ipList;
