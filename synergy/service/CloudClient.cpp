@@ -124,6 +124,14 @@ CloudClient::isWebsocketConnected() const
     return m_websocket.isConnected();
 }
 
+void CloudClient::fakeScreenStatusUpdate()
+{
+    static const std::string kUrlTarget = "/dummy/screen/status/update";
+    HttpSession* httpSession = newHttpSession();
+
+    httpSession->get(kUrlTarget);
+}
+
 HttpSession* CloudClient::newHttpSession()
 {
     // TODO: add lifetime management or make http session reusable

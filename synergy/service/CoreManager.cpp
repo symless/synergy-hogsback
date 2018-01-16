@@ -108,8 +108,13 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     );
 
     m_process->screenStatusChanged.connect(
-        [server](std::string const& screenName, ScreenStatus state) {
+        [server, this](std::string const& screenName, ScreenStatus state) {
             server->publish ("synergy.screen.status", screenName, int(state));
+
+            auto screen = m_localProfileConfig->getScreen(screenName);
+            if (screen.status() != state) {
+                m_cloudClient->fakeScreenStatusUpdate();
+            }
         }
     );
 

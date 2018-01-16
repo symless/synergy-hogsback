@@ -168,7 +168,7 @@ const std::vector<Screen> & ProfileConfig::screens() const
     return m_screens;
 }
 
-Screen& ProfileConfig::getScreen(int screenId)
+Screen& ProfileConfig::getScreen(const int screenId)
 {
     for (auto& screen : m_screens) {
         if (screen.id() == screenId) {
@@ -177,6 +177,17 @@ Screen& ProfileConfig::getScreen(int screenId)
     }
 
     throw std::runtime_error("Can't find screen with ID: " + std::to_string(screenId));
+}
+
+Screen& ProfileConfig::getScreen(const std::string& screenName)
+{
+    for (auto& screen : m_screens) {
+        if (screen.name() == screenName) {
+            return screen;
+        }
+    }
+
+    throw std::runtime_error("Can't find screen: " + screenName);
 }
 
 void ProfileConfig::claimServer(int64_t serverId)

@@ -33,7 +33,8 @@ public:
     signal<void (Screen screen)> screenOnline;
 
     const std::vector<Screen>& screens() const;
-    Screen& getScreen(int screenId);
+    Screen& getScreen(const int screenId);
+    Screen& getScreen(const std::string& screenName);
     int profileId() const { return m_profile.id(); }
     void claimServer(int64_t serverId);
 
