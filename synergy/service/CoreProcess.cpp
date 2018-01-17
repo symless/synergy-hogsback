@@ -210,6 +210,17 @@ CoreProcess::start (std::vector<std::string> command)
 
         signals.emplace_back (
             output.connect ([this](std::string const& line) {
+                if (!contains (line, "server is dead")) {
+                    return;
+                }
+
+                Screen& screen = m_localProfileConfig->getScreen(m_currentServerId);
+                screenStatusChanged(screen.name(), ScreenStatus::kDisconnected);
+            }, boost::signals2::at_front)
+        );
+
+        signals.emplace_back (
+            output.connect ([this](std::string const& line) {
                 if (contains (line, "local input detected")) {
                     localInputDetected();
                 }
