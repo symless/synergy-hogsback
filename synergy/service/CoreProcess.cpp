@@ -243,6 +243,20 @@ CoreProcess::start (std::vector<std::string> command)
                 screenStatusChanged(std::move (clientScreenName), clientScreenStatus);
             }, boost::signals2::at_front)
         );
+
+        signals.emplace_back (
+            output.connect ([this](std::string const& line) {
+                static boost::regex const rgx ("client \"(.*)\" is dead$");
+                boost::match_results<std::string::const_iterator> results;
+                if (!regex_search (line, results, rgx)) {
+                    return;
+                }
+                auto clientScreenName = results[1].str();
+                auto& clientScreenStatus = m_impl->m_screenStates[clientScreenName];
+                clientScreenStatus = ScreenStatus::kDisconnected;
+                screenStatusChanged(std::move (clientScreenName), clientScreenStatus);
+            }, boost::signals2::at_front)
+        );
     }
 
     screenStatusChanged(localScreenName, localScreenState);
