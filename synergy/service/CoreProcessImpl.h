@@ -1,10 +1,10 @@
 #pragma once
 
+#include <synergy/common/ScreenStatus.h>
+
 #include <boost/asio.hpp>
-#include <boost/asio/steady_timer.hpp>
 #include <boost/signals2.hpp>
 #include <boost/process.hpp>
-#include <synergy/common/ScreenStatus.h>
 
 class CoreProcess;
 
@@ -21,7 +21,6 @@ public:
     void start();
     void shutdown();
     boost::asio::io_service& getIoService();
-    void onScreenStatusChanged (std::string screenName, ScreenStatus status);
 
 private:
     CoreProcess& m_interface;
@@ -33,7 +32,6 @@ private:
     boost::process::async_pipe m_outPipe;
     boost::process::async_pipe m_errorPipe;
     boost::optional<boost::process::child> m_process;
-    boost::asio::steady_timer m_connectionTimer;
 
 public:
     /* TODO: these should probably be moved back out to the interface class? */
@@ -42,4 +40,5 @@ public:
 
 private:
     bool m_expectingExit = false;
+    boost::asio::io_service& m_io;
 };

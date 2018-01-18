@@ -1,5 +1,6 @@
-#include <synergy/service/CoreProcess.h>
 #include <synergy/service/CoreProcessImpl.h>
+
+#include <synergy/service/CoreProcess.h>
 #include <synergy/service/ServiceLogs.h>
 #include <boost/algorithm/string/trim.hpp>
 
@@ -37,7 +38,7 @@ CoreProcessImpl::CoreProcessImpl (
     m_command(std::move(command)),
     m_outPipe (io),
     m_errorPipe (io),
-    m_connectionTimer(io) {
+    m_io(io) {
 }
 
 CoreProcessImpl::~CoreProcessImpl() noexcept = default;
@@ -69,8 +70,6 @@ CoreProcessImpl::start () {
                 return m_interface.expectedExit();
             } else {
                 /* Cancel the standard stream I/O loops */
-                boost::system::error_code ignored_ec;
-                m_connectionTimer.cancel(ignored_ec);
                 m_outPipe.cancel ();
                 m_errorPipe.cancel ();
                 getIoService().poll();
@@ -126,8 +125,6 @@ CoreProcessImpl::shutdown()
     m_expectingExit = true;
 
     /* Cancel the standard stream I/O loops */
-    boost::system::error_code ignored_ec;
-    m_connectionTimer.cancel(ignored_ec);
     m_outPipe.cancel ();
     m_errorPipe.cancel ();
     getIoService().poll();
@@ -145,28 +142,5 @@ CoreProcessImpl::shutdown()
 
 boost::asio::io_service&
 CoreProcessImpl::getIoService() {
-    return m_connectionTimer.get_io_service();
-}
-
-void
-CoreProcessImpl::onScreenStatusChanged (
-    std::string screenName,
-    ScreenStatus const screenStatus
-){
-    auto& timer = m_connectionTimer;
-    if (screenStatus == ScreenStatus::kConnecting) {
-        timer.expires_from_now (kConnectingTimeout);
-        timer.async_wait ([this, screenName = std::move(screenName)]
-                          (auto const ec) {
-            if (ec == boost::asio::error::operation_aborted) {
-                return;
-            } else if (ec) {
-                throw boost::system::system_error (ec, ec.message());
-            }
-            m_interface.screenConnectionError (std::move (screenName));
-        });
-    } else {
-        boost::system::error_code ec;
-        timer.cancel (ec);
-    }
+    return m_io;
 }

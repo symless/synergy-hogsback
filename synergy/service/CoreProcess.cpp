@@ -55,14 +55,6 @@ CoreProcess::CoreProcess (boost::asio::io_service& io,
             });
         }
     });
-
-    screenStatusChanged.connect (
-        [this](std::string const& screenName, ScreenStatus const status) {
-            if (m_impl) {
-                m_impl->onScreenStatusChanged (screenName, status);
-            }
-        }
-    );
 }
 
 CoreProcess::~CoreProcess () noexcept {
