@@ -315,6 +315,14 @@ void ScreenManager::onScreenStatusChanged(QPair<QString, ScreenStatus> r)
             return;
         }
 
+        // HACK: force disconnected can only happen from connected
+        // reason: that is the only case becoming disconnected makes sense
+
+        if (r.second == ScreenStatus::kDisconnected &&
+            s.status() != ScreenStatus::kConnected) {
+            return;
+        }
+
         QString screenName = s.name();
         QString orignialStatus = QString::fromStdString(screenStatusToString(s.status()));
         QString newStatus = QString::fromStdString(screenStatusToString(r.second));
