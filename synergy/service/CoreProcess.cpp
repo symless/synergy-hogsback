@@ -75,30 +75,6 @@ CoreProcess::~CoreProcess () noexcept {
     shutdown();
 }
 
-static std::string
-getCommandLocalScreenName (std::vector<std::string> const& command) {
-    auto nameArg = std::find (begin(command), end(command), "--name");
-    if ((nameArg == end(command)) || (++nameArg == end(command))) {
-        throw std::runtime_error("Unable to determine local screen name from "
-                                 "core process command line.");
-    }
-    return *nameArg;
-}
-
-static std::string
-getCommandProcessMode (std::vector<std::string> const& command) {
-    auto const clientArg = std::find (begin(command), end(command), "--client");
-    if (clientArg != end(command)) {
-        return *clientArg;
-    }
-    auto const serverArg = std::find (begin(command), end(command), "--server");
-    if (serverArg != end(command)) {
-        return *serverArg;
-    }
-    throw std::runtime_error("Unable to determine core process mode from core "
-                             "process command line.");
-}
-
 int
 CoreProcess::currentServerId() const
 {
@@ -173,11 +149,12 @@ CoreProcess::start (std::vector<std::string> command)
                         boost::algorithm::join(command, " "));
 
     m_lastCommand = command;
-    auto const localScreenName = getCommandLocalScreenName (command);
-    auto const processMode = getCommandProcessMode (command);
 
     m_impl = std::make_unique<CoreProcessImpl>(*this, m_ioService,
                                                std::move (command));
+
+    Screen& localScreen = m_localProfileConfig->getScreen(m_userConfig->screenId());
+    std::string localScreenName = localScreen.name();
 
      m_statusMonitor->update(localScreenName, ScreenStatus::kConnecting);
      m_statusMonitor->monitor(*this);
