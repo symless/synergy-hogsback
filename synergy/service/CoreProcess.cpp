@@ -7,6 +7,7 @@
 #include <synergy/common/ConfigGen.h>
 #include <synergy/common/UserConfig.h>
 #include <synergy/common/NetworkParameters.h>
+#include <synergy/service/CoreStatusMonitor.h>
 #include <synergy/service/ServiceLogs.h>
 #include <synergy/service/CoreProcessImpl.h>
 #include <synergy/service/router/protocol/v2/MessageTypes.hpp>
@@ -14,8 +15,6 @@
 #include <cassert>
 #include <vector>
 #include <string>
-#include <boost/regex.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/join.hpp>
 
 auto const kUnexpectedExitRetryTime = std::chrono::seconds (2);
@@ -30,7 +29,8 @@ CoreProcess::CoreProcess (boost::asio::io_service& io,
     m_retryTimer (io),
     m_processMode(ProcessMode::kUnknown),
     m_currentServerId(-1),
-    m_processCommand(processCommand)
+    m_processCommand(processCommand),
+    m_statusMonitor(std::make_unique<CoreStatusMonitor>(localProfileConfig))
 {
     expectedExit.connect ([this]() {
         m_impl.reset();
@@ -55,6 +55,20 @@ CoreProcess::CoreProcess (boost::asio::io_service& io,
             });
         }
     });
+
+    output.connect (
+        [this](std::string const& line) {
+            if (line.find("local input detected") != std::string::npos) {
+                localInputDetected();
+            }
+        });
+
+    output.connect (
+        [this] (std::string const& line) {
+            if (line.find("started server, waiting for clients") != std::string::npos) {
+                serverReady();
+            }
+        });
 }
 
 CoreProcess::~CoreProcess () noexcept {
@@ -145,7 +159,6 @@ CoreProcess::startClient(int const serverId)
 void
 CoreProcess::start (std::vector<std::string> command)
 {
-    using boost::algorithm::contains;
     boost::system::error_code ec;
     m_retryTimer.cancel (ec);
 
@@ -165,104 +178,10 @@ CoreProcess::start (std::vector<std::string> command)
 
     m_impl = std::make_unique<CoreProcessImpl>(*this, m_ioService,
                                                std::move (command));
-    auto& localScreenState = m_impl->m_screenStates[localScreenName];
-    localScreenState = ScreenStatus::kConnecting;
-    auto& signals = m_impl->m_signals;
 
-    if (processMode == "--client") {
-        signals.emplace_back (
-            output.connect ([this, &localScreenState, localScreenName](std::string const& line) {
-                if (!contains (line, "connected to server")) {
-                    return;
-                }
-                localScreenState = ScreenStatus::kConnected;
-                screenStatusChanged(localScreenName, localScreenState);
-            }, boost::signals2::at_front)
-        );
+     m_statusMonitor->update(localScreenName, ScreenStatus::kConnecting);
+     m_statusMonitor->monitor(*this);
 
-        signals.emplace_back (
-            output.connect ([this, &localScreenState, localScreenName](std::string const& line) {
-                if (!contains (line, "disconnected from server")) {
-                    return;
-                }
-
-                startClient(currentServerId());
-            }, boost::signals2::at_front)
-        );
-
-        signals.emplace_back (
-            output.connect ([this, &localScreenState, localScreenName](std::string const& line) {
-                if (!contains (line, "connecting to")) {
-                    return;
-                }
-                localScreenState = ScreenStatus::kConnecting;
-                screenStatusChanged(localScreenName, localScreenState);
-            }, boost::signals2::at_front)
-        );
-
-        signals.emplace_back (
-            output.connect ([this](std::string const& line) {
-                if (!contains (line, "server is dead")) {
-                    return;
-                }
-
-                Screen& screen = m_localProfileConfig->getScreen(m_currentServerId);
-                screenStatusChanged(screen.name(), ScreenStatus::kDisconnected);
-            }, boost::signals2::at_front)
-        );
-
-        signals.emplace_back (
-            output.connect ([this](std::string const& line) {
-                if (contains (line, "local input detected")) {
-                    localInputDetected();
-                }
-            }, boost::signals2::at_front)
-        );
-    }
-    else if (processMode == "--server") {
-        signals.emplace_back (
-            output.connect_extended ( [this, &localScreenState, localScreenName]
-                                      (auto& connection, std::string const& line) {
-                if (!contains (line, "started server, waiting for clients")) {
-                    return;
-                }
-                connection.disconnect();
-                localScreenState = ScreenStatus::kConnected;
-                screenStatusChanged(localScreenName, localScreenState);
-                serverReady();
-            }, boost::signals2::at_front)
-        );
-
-        signals.emplace_back (
-            output.connect ([this](std::string const& line) {
-                static boost::regex const rgx ("client \"(.*)\" has disconnected$");
-                boost::match_results<std::string::const_iterator> results;
-                if (!regex_search (line, results, rgx)) {
-                    return;
-                }
-                auto clientScreenName = results[1].str();
-                auto& clientScreenStatus = m_impl->m_screenStates[clientScreenName];
-                clientScreenStatus = ScreenStatus::kDisconnected;
-                screenStatusChanged(std::move (clientScreenName), clientScreenStatus);
-            }, boost::signals2::at_front)
-        );
-
-        signals.emplace_back (
-            output.connect ([this](std::string const& line) {
-                static boost::regex const rgx ("client \"(.*)\" is dead$");
-                boost::match_results<std::string::const_iterator> results;
-                if (!regex_search (line, results, rgx)) {
-                    return;
-                }
-                auto clientScreenName = results[1].str();
-                auto& clientScreenStatus = m_impl->m_screenStates[clientScreenName];
-                clientScreenStatus = ScreenStatus::kDisconnected;
-                screenStatusChanged(std::move (clientScreenName), clientScreenStatus);
-            }, boost::signals2::at_front)
-        );
-    }
-
-    screenStatusChanged(localScreenName, localScreenState);
     m_impl->start();
 }
 

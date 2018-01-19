@@ -12,6 +12,7 @@ set(SERVICE_SOURCES
     ../service/SecuredTcpClient.cpp
     ../service/ServiceLogs.cpp
     ../service/CoreProcess.cpp
+    ../service/CoreStatusMonitor.cpp
     ../service/CoreProcessImpl.cpp
     ../service/router/Router.cpp
     ../service/router/Message.cpp

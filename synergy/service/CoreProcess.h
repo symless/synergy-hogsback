@@ -12,6 +12,7 @@
 class UserConfig;
 class ProcessCommand;
 class CoreProcessImpl;
+class CoreStatusMonitor;
 
 class CoreProcess final {
 public:
@@ -57,4 +58,5 @@ private:
     std::vector<std::string> m_nextCommand;
     std::vector<std::string> m_lastCommand;
     std::shared_ptr<ProcessCommand> m_processCommand;
+    std::unique_ptr<CoreStatusMonitor> m_statusMonitor;
 };

@@ -33,11 +33,6 @@ private:
     boost::process::async_pipe m_errorPipe;
     boost::optional<boost::process::child> m_process;
 
-public:
-    /* TODO: these should probably be moved back out to the interface class? */
-    std::vector<boost::signals2::connection> m_signals;
-    std::map<std::string, ScreenStatus> m_screenStates;
-
 private:
     bool m_expectingExit = false;
     boost::asio::io_service& m_io;

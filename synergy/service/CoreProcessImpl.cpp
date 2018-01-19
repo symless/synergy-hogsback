@@ -6,7 +6,6 @@
 
 namespace bs = boost::system;
 namespace bp = boost::process;
-static auto const kConnectingTimeout = std::chrono::seconds (3);
 
 template <typename Pipe, typename Buffer, typename Line> static
 void
@@ -75,13 +74,6 @@ CoreProcessImpl::start () {
                 getIoService().poll();
                 serviceLog()->debug("core process I/O cancelled");
 
-                /* Disconnect internal signal handling */
-                for (auto& signal: m_signals) {
-                    signal.disconnect();
-                }
-                m_signals.clear();
-                serviceLog()->debug("core process event handlers disconnected");
-
                 return m_interface.unexpectedExit();
             }
         },
@@ -129,13 +121,6 @@ CoreProcessImpl::shutdown()
     m_errorPipe.cancel ();
     getIoService().poll();
     serviceLog()->debug("core process I/O cancelled");
-
-    /* Disconnect internal signal handling */
-    for (auto& signal: m_signals) {
-        signal.disconnect();
-    }
-    m_signals.clear();
-    serviceLog()->debug("core process event handlers disconnected");
 
     m_process->terminate();
 }

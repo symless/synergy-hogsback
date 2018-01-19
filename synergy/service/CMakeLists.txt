@@ -22,6 +22,7 @@ set (SERVICE_SOURCES
     WebsocketSession.cpp
     TerminationSignalListener.cpp
     ServiceLogs.cpp
+    CoreStatusMonitor.cpp
     ${SERVICE_SM_SOURCES}
 )
 
