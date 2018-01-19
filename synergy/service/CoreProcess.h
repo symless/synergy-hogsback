@@ -31,6 +31,7 @@ public:
     void shutdown();
     void startServer();
     void startClient(int serverId);
+    CoreStatusMonitor& statusMonitor() const;
 
 public:
     template <typename... Args>
@@ -42,7 +43,6 @@ public:
     signal<void()> serverReady;
     signal<void(std::string const& line)> output;
     signal<void(std::string const& screenName)> screenConnectionError;
-    signal<void(std::string const& screenName, ScreenStatus status)> screenStatusChanged;
 
 private:
     void writeConfigurationFile();

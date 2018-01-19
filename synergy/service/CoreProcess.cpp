@@ -191,3 +191,8 @@ CoreProcess::writeConfigurationFile()
     auto configPath = DirectoryManager::instance()->profileDir() / kCoreConfigFile;
     createConfigFile(configPath.string(), m_localProfileConfig->screens());
 }
+
+CoreStatusMonitor& CoreProcess::statusMonitor() const
+{
+    return *m_statusMonitor;
+}

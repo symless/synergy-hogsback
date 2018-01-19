@@ -6,6 +6,7 @@
 #include <synergy/common/UserConfig.h>
 #include <synergy/service/ServiceLogs.h>
 #include <synergy/service/CoreProcess.h>
+#include <synergy/service/CoreStatusMonitor.h>
 #include <synergy/service/CloudClient.h>
 #include <synergy/service/router/protocol/v2/MessageTypes.hpp>
 #include <synergy/service/router/Router.hpp>
@@ -107,7 +108,7 @@ CoreManager::CoreManager (boost::asio::io_service& io,
         }
     );
 
-    m_process->screenStatusChanged.connect(
+    m_process->statusMonitor().screenStatusChanged.connect(
         [server, this](std::string const& screenName, ScreenStatus state) {
             server->publish ("synergy.screen.status", screenName, int(state));
 
