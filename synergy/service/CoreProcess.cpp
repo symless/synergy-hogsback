@@ -30,7 +30,7 @@ CoreProcess::CoreProcess (boost::asio::io_service& io,
     m_processMode(ProcessMode::kUnknown),
     m_currentServerId(-1),
     m_processCommand(processCommand),
-    m_statusMonitor(std::make_unique<CoreStatusMonitor>(localProfileConfig))
+    m_statusMonitor(std::make_unique<CoreStatusMonitor>(m_userConfig, m_localProfileConfig))
 {
     expectedExit.connect ([this]() {
         m_impl.reset();

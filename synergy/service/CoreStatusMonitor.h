@@ -1,5 +1,6 @@
 #pragma once
 
+#include <synergy/common/UserConfig.h>
 #include <synergy/common/ProfileConfig.h>
 #include <synergy/common/ScreenStatus.h>
 
@@ -12,7 +13,7 @@ class CoreProcess;
 
 class CoreStatusMonitor final {
 public:
-    explicit CoreStatusMonitor(std::shared_ptr<ProfileConfig> localProfileConfig);
+    explicit CoreStatusMonitor(std::shared_ptr<UserConfig> userConfig, std::shared_ptr<ProfileConfig> localProfileConfig);
 
     void monitor(CoreProcess& process);
 
@@ -30,5 +31,6 @@ public:
 private:
     std::vector<boost::signals2::connection> m_signals;
     std::map<std::string, ScreenStatus> m_screenStates;
+    std::shared_ptr<UserConfig> m_userConfig;
     std::shared_ptr<ProfileConfig> m_localProfileConfig;
 };

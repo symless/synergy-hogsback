@@ -6,7 +6,8 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/join.hpp>
 
-CoreStatusMonitor::CoreStatusMonitor(std::shared_ptr<ProfileConfig> localProfileConfig) :
+CoreStatusMonitor::CoreStatusMonitor(std::shared_ptr<UserConfig> userConfig, std::shared_ptr<ProfileConfig> localProfileConfig) :
+    m_userConfig(userConfig),
     m_localProfileConfig(localProfileConfig)
 {
 }
@@ -16,12 +17,12 @@ void CoreStatusMonitor::monitor(CoreProcess& process)
     reset();
 
     using boost::algorithm::contains;
-    std::string localScreenName;
-    auto& localScreenState = m_screenStates[localScreenName];
+    Screen& localScreen = m_localProfileConfig->getScreen(m_userConfig->screenId());
+    std::string localScreenName = localScreen.name();
 
     if (process.processMode() == ProcessMode::kClient) {
         m_signals.emplace_back (
-            process.output.connect ([this, &localScreenState, localScreenName](std::string const& line) {
+            process.output.connect ([this, localScreenName](std::string const& line) {
                 if (!contains (line, "connected to server")) {
                     return;
                 }
@@ -31,7 +32,7 @@ void CoreStatusMonitor::monitor(CoreProcess& process)
         );
 
         m_signals.emplace_back (
-            process.output.connect ([this, &localScreenState, localScreenName](std::string const& line) {
+            process.output.connect ([this, localScreenName](std::string const& line) {
                 if (!contains (line, "connecting to")) {
                     return;
                 }
@@ -54,7 +55,7 @@ void CoreStatusMonitor::monitor(CoreProcess& process)
     }
     else if (process.processMode() == ProcessMode::kServer) {
         m_signals.emplace_back (
-            process.output.connect ( [this, &localScreenState, localScreenName] (std::string const& line) {
+            process.output.connect ( [this, localScreenName] (std::string const& line) {
                 if (!contains (line, "started server, waiting for clients")) {
                     return;
                 }
