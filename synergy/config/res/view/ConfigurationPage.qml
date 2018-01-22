@@ -448,9 +448,10 @@ Rectangle {
                                 color: screenStatus == "Connected" ? "black" : "white"
                                 horizontalAlignment: Text.AlignHCenter
                                 elide: Text.ElideRight
-                                visible: screenImage.source != "qrc:/res/image/screen-edit.png"
+                                visible: true
                             }
 
+                            // server indication
                             Rectangle {
                                 color: "#fff"
                                 width: 6
@@ -464,7 +465,7 @@ Rectangle {
                             // connecting prograss bar background
                             Rectangle {
                                 id: connectingBar
-                                visible: (screenStatus == "Connecting" || screenStatus == "ConnectingWithError") && screenImage.source != "qrc:/res/image/screen-edit.png"
+                                visible: screenStatus == "Connecting"
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 anchors.bottom: parent.bottom
                                 anchors.bottomMargin: dp(15)
@@ -480,7 +481,7 @@ Rectangle {
                                     x: -width
                                     width: dp(25)
                                     height: dp(4)
-                                    color: lastErrorCode === 0 ? "#96C13D" : "red"
+                                    color: errorCode === 0 ? "#96C13D" : "red"
                                     z: 1
                                     states: [
                                         State {
@@ -505,7 +506,7 @@ Rectangle {
                                 sourceSize.height: dp(14)
                                 anchors.horizontalCenter: connectingBar.horizontalCenter
                                 anchors.verticalCenter: connectingBar.verticalCenter
-                                visible: lastErrorCode !== 0
+                                visible: errorCode !== 0
                                 smooth: false
                                 source: "qrc:/res/image/error-indication.svg"
                                 z: 2
