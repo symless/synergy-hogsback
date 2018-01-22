@@ -69,10 +69,9 @@ void ScreenListModel::update(const QList<UIScreen>& screens)
     for (int i = 0; i < screens.count(); i++) {
         int r = findScreen(screens[i].name());
         if (r != -1) {
-            // TODO: sync error code to cloud
-            ErrorCode ec =m_screens[r].lastErrorCode();
+            ScreenError ec =m_screens[r].errorCode();
             m_screens[r] = screens[i];
-            m_screens[r].setLastErrorCode(ec);
+            m_screens[r].setErrorCode(ec);
             dataChanged(getIndex(r), getIndex(r));
         }
         else {
@@ -107,10 +106,10 @@ QVariant ScreenListModel::data(const QModelIndex& index, int role) const
         return screen.statusImage();
     else if (role == kScreenStatusRole)
         return QString::fromStdString(screenStatusToString(screen.status()));
-    else if (role == kScreenLastErrorCode)
-        return (int)screen.lastErrorCode();
+    else if (role == kScreenErrorCode)
+        return (int)screen.errorCode();
     else if (role == kErrorMessageRole)
-        return screen.lastErrorMessage();
+        return screen.errorMessage();
     else if (role == kHelpLinkRole)
         return screen.helpLink();
     else if (role == kIdRole)
@@ -137,7 +136,7 @@ QHash<int, QByteArray> ScreenListModel::roleNames() const
     roles[kScreenStatusRole] = "screenStatus";
     roles[kErrorMessageRole] = "errorMessage";
     roles[kHelpLinkRole] = "helpLink";
-    roles[kScreenLastErrorCode] = "lastErrorCode";
+    roles[kScreenErrorCode] = "errorCode";
 
     return roles;
 }
@@ -172,21 +171,6 @@ void ScreenListModel::setScreenStatus(int index, ScreenStatus status)
     }
 
     m_screens[index].setStatus(status);
-
-    if (status == ScreenStatus::kConnected) {
-        m_screens[index].setLastErrorCode(kNoError);
-    }
-
-    dataChanged(getIndex(index), getIndex(index));
-}
-
-void ScreenListModel::setScreenErrorCode(int index, ErrorCode ec)
-{
-    if (index < 0 || index > getScreenModeSize()) {
-        return;
-    }
-
-    m_screens[index].setLastErrorCode(ec);
 
     dataChanged(getIndex(index), getIndex(index));
 }

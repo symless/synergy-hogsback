@@ -337,13 +337,7 @@ void ScreenManager::onScreenStatusChanged(QPair<QString, ScreenStatus> r)
 
 void ScreenManager::onScreenError(QString screenName, int errorCode)
 {
-    int index = m_screenListModel->findScreen(screenName);
-    if (index != -1) {
-        m_screenListModel->setScreenErrorCode(index, (ErrorCode)errorCode);
-        const UIScreen& s = m_screenListModel->getScreen(index);
-
-        m_cloudClient->updateScreen(s);
-    }
+    // TODO: reimplement
 }
 
 QString ScreenManager::configHint()

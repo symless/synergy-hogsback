@@ -2,7 +2,7 @@
 
 #include "LibMacro.h"
 #include "synergy/common/ScreenStatus.h"
-#include "synergy/common/ErrorMessage.h"
+#include "synergy/common/ScreenError.h"
 
 #include <QString>
 #include <QHash>
@@ -34,7 +34,6 @@ public:
 	int posY() const;
     QString name() const;
     QString statusImage() const;
-    QString lastErrorMessage() const;
     QString helpLink() const;
 
 	void setPosX(int x);
@@ -42,17 +41,20 @@ public:
 	void setName(QString n);
     void setStatus(ScreenStatus s);
     void setStatus(QString s);
-    void setLastErrorCode(const ErrorCode &lastErrorCode);
+    void setErrorCode(const ScreenError &errorCode);
 
     bool locked() const;
     void setLocked(bool value);
 
     ScreenStatus status() const;
-    ErrorCode lastErrorCode() const;
+    ScreenError errorCode() const;
 
     int version() const;
     void setVersion(int version);
     void touch();
+
+    QString errorMessage() const;
+    void setErrorMessage(const QString &errorMessage);
 
 private:
     int m_id;
@@ -63,6 +65,7 @@ private:
     QString m_statusImage;
     bool m_locked;
     static QHash<ScreenStatus, QString> m_statusImages;
-    ErrorCode m_lastErrorCode;
+    ScreenError m_errorCode;
+    QString m_errorMessage;
     int m_version;
 };
