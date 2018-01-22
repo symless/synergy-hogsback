@@ -81,6 +81,7 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     m_serverProxy (io, m_router, kServerProxyPort),
     m_clientProxy (io, m_router, kServerPort)
 {
+    // TODO: unify hostname between UI and service
     m_processCommand->setLocalHostname(boost::asio::ip::host_name());
 
     m_messageHandler = std::make_unique<ClaimMessageHandler> (*this);
