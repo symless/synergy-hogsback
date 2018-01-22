@@ -5,7 +5,6 @@
 QHash<ScreenStatus, QString> UIScreen::m_statusImages = {
     {ScreenStatus::kConnected, "qrc:/res/image/screen-active.png"},
     {ScreenStatus::kConnecting, "qrc:/res/image/screen-inactive.png"},
-    {ScreenStatus::kConnectingWithError, "qrc:/res/image/screen-inactive.png"},
     {ScreenStatus::kDisconnected, "qrc:/res/image/screen-inactive.png"},
     {ScreenStatus::kInactive, "qrc:/res/image/screen-inactive.png"}
 };

@@ -7,8 +7,7 @@ enum class ScreenStatus: int {
     kConnected,
     kConnecting,
     kDisconnected,
-    kInactive,
-    kConnectingWithError
+    kInactive
 };
 
 inline ScreenStatus
@@ -21,9 +20,6 @@ stringToScreenStatus (std::string const& str)
     }
     else if (str == "Connecting") {
         status = ScreenStatus::kConnecting;
-    }
-    else if (str == "ConnectingWithError") {
-        status = ScreenStatus::kConnectingWithError;
     }
     else if (str == "Disconnected") {
         status = ScreenStatus::kDisconnected;
@@ -49,8 +45,6 @@ screenStatusToString(ScreenStatus s)
         return "Disconnected";
     case ScreenStatus::kInactive:
         return "Inactive";
-    case ScreenStatus::kConnectingWithError:
-        return "ConnectingWithError";
     }
 }
 

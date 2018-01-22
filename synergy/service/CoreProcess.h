@@ -42,7 +42,6 @@ public:
     signal<void()> localInputDetected;
     signal<void()> serverReady;
     signal<void(std::string const& line)> output;
-    signal<void(std::string const& screenName)> screenConnectionError;
 
 private:
     void writeConfigurationFile();

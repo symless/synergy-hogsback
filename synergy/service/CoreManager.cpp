@@ -131,18 +131,6 @@ CoreManager::CoreManager (boost::asio::io_service& io,
         }
     );
 
-    m_process->screenConnectionError.connect(
-        [server](std::string const& screenName) {
-
-            // TODO: get error code
-            int ec = 0;
-            server->publish ("synergy.screen.error", screenName,
-                                (int)ec);
-            server->publish ("synergy.screen.status", screenName,
-                                (int)ScreenStatus::kConnectingWithError);
-        }
-    );
-
     m_process->output.connect (
         [this](std::string const& line) {
             if (line.find("disconnected from server") != std::string::npos) {
