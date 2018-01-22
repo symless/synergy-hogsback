@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 enum class ScreenError: uint32_t {
+    kNone = 0,
     kRouterUnreachableNode = 0x10000001,
     kCoreZombieProcess = 0x20000001,
     kCoreDuplicateName = 0x20000002,

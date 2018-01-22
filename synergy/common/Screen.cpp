@@ -103,6 +103,9 @@ Screen::apply(ScreenSnapshot const& ss)
 
     m_status = stringToScreenStatus(ss.status);
     m_ipList = ss.ipList;
+
+    m_errorCode = static_cast<ScreenError>(ss.error_code);
+    m_errorMessage = ss.error_message;
 }
 
 ScreenError Screen::errorCode() const

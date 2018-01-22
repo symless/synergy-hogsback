@@ -14,6 +14,8 @@ struct ScreenSnapshot {
     std::string     status;
     std::string     ipList;
     uint64_t        version;
+    uint32_t        error_code;
+    std::string     error_message;
 };
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -26,4 +28,6 @@ BOOST_FUSION_ADAPT_STRUCT(
     (std::string,   status)
     (std::string,   ipList)
     (uint64_t,   version)
+    (uint32_t,      error_code)
+    (std::string,   error_message)
 )
