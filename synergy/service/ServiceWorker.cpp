@@ -3,6 +3,8 @@
 #include <synergy/service/CloudClient.h>
 #include <synergy/service/ServiceLogs.h>
 #include <synergy/service/CoreManager.h>
+#include <synergy/service/ErrorNotifier.h>
+#include <synergy/service/CoreErrorMonitor.h>
 #include <synergy/service/SessionMonitor.h>
 #include <synergy/service/WebsocketError.h>
 #include <synergy/service/router/protocol/v2/MessageTypes.hpp>
@@ -30,7 +32,9 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_router (ioService, kNodePort),
     m_coreManager (std::make_unique<CoreManager>(m_ioService, m_userConfig, m_localProfileConfig, m_cloudClient, *m_rpc, m_router)),
     m_sessionMonitor (std::make_unique<SessionMonitor>(ioService)),
-    m_work (std::make_shared<boost::asio::io_service::work>(ioService))
+    m_work (std::make_shared<boost::asio::io_service::work>(ioService)),
+    m_coreErrorMonitor(std::make_unique<CoreErrorMonitor>(boost::asio::ip::host_name())),
+    m_errorNotifier(std::make_unique<ErrorNotifier>(*m_cloudClient, *m_localProfileConfig))
 {
     g_commonLog.onLogLine.connect([this](std::string logLine) {
         auto server = m_rpc->server();
@@ -137,6 +141,8 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             }
         });
     });
+
+    m_errorNotifier->install(*m_coreErrorMonitor);
 
     m_sessionMonitor->start();
     m_rpc->start();

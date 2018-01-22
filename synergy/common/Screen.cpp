@@ -104,3 +104,28 @@ Screen::apply(ScreenSnapshot const& ss)
     m_status = stringToScreenStatus(ss.status);
     m_ipList = ss.ipList;
 }
+
+ScreenError Screen::errorCode() const
+{
+    return m_errorCode;
+}
+
+void Screen::setErrorCode(const ScreenError &errorCode)
+{
+    m_errorCode = errorCode;
+}
+
+std::string Screen::errorMessage() const
+{
+    return m_errorMessage;
+}
+
+void Screen::setErrorMessage(const std::string &errorMessage)
+{
+    m_errorMessage = errorMessage;
+}
+
+void Screen::touch()
+{
+    m_version++;
+}

@@ -3,6 +3,7 @@
 
 #include "synergy/service/WebsocketSession.h"
 #include "synergy/service/WebsocketError.h"
+#include "synergy/common/Screen.h"
 
 #include <boost/asio/io_service.hpp>
 #include <boost/signals2.hpp>
@@ -20,6 +21,7 @@ public:
                  std::shared_ptr<ProfileConfig> remoteProfileConfig);
 
     void claimServer(int64_t serverId);
+    void updateScreen(Screen& screen);
     void reconnectWebsocket();
     bool isWebsocketConnected() const;
     void fakeScreenStatusUpdate();

@@ -112,6 +112,11 @@ void CloudClient::claimServer(int64_t serverId)
     httpSession->post(kUrlTarget, tao::json::to_string(root));
 }
 
+void CloudClient::updateScreen(Screen& screen)
+{
+    // TODO:: implement this
+}
+
 void
 CloudClient::reconnectWebsocket()
 {
