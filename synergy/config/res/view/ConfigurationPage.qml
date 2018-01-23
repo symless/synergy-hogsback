@@ -177,7 +177,7 @@ Rectangle {
             anchors.top: logConsoleSeparator.bottom
             width: parent.width
             anchors.bottom: parent.bottom
-            color: applicationWindow.errorView.visible ? errorOverlay.color : "#3F95B8"
+            color: errorView.visible ? errorOverlay.color : "#3F95B8"
             z: 1
 
             MouseArea {
@@ -208,7 +208,7 @@ Rectangle {
             color: "#A9A9A9"
             opacity: 0.7
             z: 2
-            visible: applicationWindow.errorView.visible
+            visible: errorView.visible
 
             MouseArea {
                 anchors.fill: parent
@@ -222,13 +222,13 @@ Rectangle {
             width: parent.width
             height: dp(22)
             color: "#FFF1E1"
-            visible: applicationWindow.errorView.visible
+            visible: errorView.visible
             z: 1
 
             // error message
             Text {
                 id: errorMessageText
-                text: applicationWindow.errorView.message
+                text: errorView.message
                 color: "#8C4A00"
                 font.pixelSize: dp(12)
                 anchors.top: parent.top
@@ -247,14 +247,14 @@ Rectangle {
                 anchors.top: parent.top
                 anchors.left: errorMessageText.right
                 anchors.margins: errorMessageText.anchors.margins
-                visible: !applicationWindow.errorView.retrying
+                visible: !errorView.retrying
 
                 MouseArea {
                     anchors.fill: parent
                     acceptedButtons: Qt.LeftButton
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        applicationWindow.errorView.retry()
+                        errorView.retry()
                     }
                 }
             }
@@ -269,7 +269,7 @@ Rectangle {
                 anchors.top: parent.top
                 anchors.left: errorMessageText.right
                 anchors.margins: errorMessageText.anchors.margins
-                visible: applicationWindow.errorView.retrying
+                visible: errorView.retrying
             }
         }
 

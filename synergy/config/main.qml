@@ -13,7 +13,6 @@ ApplicationWindow {
     title: qsTr("Synergy")
     signal keyReceived(int key)
     property ServiceProxy serviceProxy: qmlServiceProxy
-    property ErrorView errorView: qmlErrorView
     property LogManager logManager: qmlLogManager
 
     function dp(v) {
