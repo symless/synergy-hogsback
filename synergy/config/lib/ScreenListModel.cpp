@@ -69,9 +69,7 @@ void ScreenListModel::update(const QList<UIScreen>& screens)
     for (int i = 0; i < screens.count(); i++) {
         int r = findScreen(screens[i].name());
         if (r != -1) {
-            ScreenError ec =m_screens[r].errorCode();
             m_screens[r] = screens[i];
-            m_screens[r].setErrorCode(ec);
             dataChanged(getIndex(r), getIndex(r));
         }
         else {
