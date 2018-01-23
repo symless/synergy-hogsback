@@ -114,7 +114,19 @@ void CloudClient::claimServer(int64_t serverId)
 
 void CloudClient::updateScreen(Screen& screen)
 {
-    // TODO:: implement this
+    static const std::string kUrlTarget = "/screen/update";
+    HttpSession* httpSession = newHttpSession();
+
+    tao::json::value root;
+    root["id"] = screen.id();
+    root["name"] = screen.name();
+    root["status"] = screenStatusToString(screen.status());
+    root["ipList"] = screen.ipList();
+    root["version"] = screen.version();
+    root["error_code"] = static_cast<uint32_t>(screen.errorCode());
+    root["error_message"] = screen.errorMessage();
+
+    httpSession->post(kUrlTarget, tao::json::to_string(root));
 }
 
 void

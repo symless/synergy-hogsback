@@ -51,6 +51,8 @@ public:
 
     void touch();
 
+    uint64_t version() const;
+
 private:
     ScreenID        m_id      = 0;
     std::string     m_name;

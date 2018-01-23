@@ -132,3 +132,8 @@ void Screen::touch()
 {
     m_version++;
 }
+
+uint64_t Screen::version() const
+{
+    return m_version;
+}
