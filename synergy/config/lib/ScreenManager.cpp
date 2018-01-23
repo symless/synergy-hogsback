@@ -230,7 +230,7 @@ void ScreenManager::updateScreens(QByteArray reply)
                 screen.setPosY(obj["y_pos"].toInt());
                 screen.setStatus(obj["status"].toString());
                 screen.setErrorCode(static_cast<ScreenError>(obj["error_code"].toInt()));
-                screen.setErrorMessage(obj["error_code"].toString());
+                screen.setErrorMessage(obj["error_message"].toString());
                 if (!obj["active"].toBool()) {
                     screen.setStatus(ScreenStatus::kInactive);
                 }
