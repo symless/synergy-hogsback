@@ -353,6 +353,7 @@ Rectangle {
                 id: screenArrangement
                 anchors.fill: parent
                 scale: screenListModel.scale
+                property int shownDialogIndex: -1
 
                 Repeater {
                     model: screenListModel
@@ -512,14 +513,17 @@ Rectangle {
                                 smooth: false
                                 source: "qrc:/res/image/error-indication.svg"
                                 z: 2
-                                property bool errorDialog: false
-
                                 MouseArea {
                                     anchors.fill: parent
                                     acceptedButtons: Qt.LeftButton
 
                                     onReleased: {
-                                        errorIndication.errorDialog = !errorIndication.errorDialog
+                                        if (screenArrangement.shownDialogIndex === index) {
+                                            screenArrangement.shownDialogIndex = -1
+                                        }
+                                        else {
+                                            screenArrangement.shownDialogIndex = index
+                                        }
                                     }
                                 }
                             }
@@ -532,7 +536,7 @@ Rectangle {
                                 width: dp(screenListModel.screenIconWidth() * 1.5)
                                 height: dp(screenListModel.screenIconHeight() * 1.5)
                                 smooth: true
-                                visible: errorIndication.errorDialog && errorIndication.visible
+                                visible: errorIndication.visible && screenArrangement.shownDialogIndex === index
                                 fillMode: Image.PreserveAspectFit
                                 source: "qrc:/res/image/error-message-dialog.png"
 
@@ -553,7 +557,7 @@ Rectangle {
                                         acceptedButtons: Qt.LeftButton
 
                                         onReleased: {
-                                            errorIndication.errorDialog = false
+                                            screenArrangement.shownDialogIndex = -1
                                         }
                                     }
                                 }
