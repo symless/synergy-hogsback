@@ -557,7 +557,7 @@ Rectangle {
                                 }
 
                                 Text {
-                                    id: errorMessageText
+                                    id: screenErrorMessageText
                                     width: parent.width - dp(5)
                                     font.pixelSize: dp(10)
                                     anchors.top: errorMessageDialog.top
@@ -576,7 +576,7 @@ Rectangle {
                                     id: helpLinkText
                                     width: parent.width
                                     font.pixelSize: dp(10)
-                                    anchors.top: errorMessageText.bottom
+                                    anchors.top: screenErrorMessageText.bottom
                                     anchors.topMargin: dp(7)
                                     horizontalAlignment: Text.AlignHCenter
                                     wrapMode: Text.WordWrap
