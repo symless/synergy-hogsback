@@ -11,7 +11,6 @@ class CloudClient;
 class UserConfig;
 class ProfileConfig;
 class SessionMonitor;
-class CoreErrorMonitor;
 class ErrorNotifier;
 
 class ServiceWorker final
@@ -47,8 +46,6 @@ private:
     std::shared_ptr<boost::asio::io_service::work> m_work;
     boost::signals2::connection     m_logSender;
     std::string                     m_lastProfileSnapshot;
-    std::unique_ptr<CoreErrorMonitor>
-                                    m_coreErrorMonitor;
     std::unique_ptr<ErrorNotifier>  m_errorNotifier;
 };
 

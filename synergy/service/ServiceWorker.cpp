@@ -33,8 +33,6 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_coreManager (std::make_unique<CoreManager>(m_ioService, m_userConfig, m_localProfileConfig, m_cloudClient, *m_rpc, m_router)),
     m_sessionMonitor (std::make_unique<SessionMonitor>(ioService)),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService)),
-    // TODO: unify hostname between UI and service
-    m_coreErrorMonitor(std::make_unique<CoreErrorMonitor>(boost::asio::ip::host_name())),
     m_errorNotifier(std::make_unique<ErrorNotifier>(*m_cloudClient, *m_localProfileConfig))
 {
     g_commonLog.onLogLine.connect([this](std::string logLine) {
@@ -143,7 +141,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         });
     });
 
-    m_errorNotifier->install(*m_coreErrorMonitor);
+    m_errorNotifier->install(m_coreManager->errorMonitor());
 
     m_sessionMonitor->start();
     m_rpc->start();

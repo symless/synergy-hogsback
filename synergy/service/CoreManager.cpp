@@ -7,6 +7,7 @@
 #include <synergy/service/ServiceLogs.h>
 #include <synergy/service/CoreProcess.h>
 #include <synergy/service/CoreStatusMonitor.h>
+#include <synergy/service/CoreErrorMonitor.h>
 #include <synergy/service/CloudClient.h>
 #include <synergy/service/router/protocol/v2/MessageTypes.hpp>
 #include <synergy/service/router/Router.hpp>
@@ -76,6 +77,8 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     m_cloudClient (CloudClient),
     m_processCommand (std::make_shared<ProcessCommand>()),
     m_process (std::make_unique<CoreProcess>(m_ioService, m_userConfig, m_localProfileConfig, m_processCommand)),
+    // TODO: unify hostname between UI and service
+    m_errorMonitor(std::make_unique<CoreErrorMonitor>(boost::asio::ip::host_name())),
     m_rpc (rpc),
     m_router (router),
     m_serverProxy (io, m_router, kServerProxyPort),
@@ -199,6 +202,8 @@ CoreManager::CoreManager (boost::asio::io_service& io,
             }
         });
     }
+
+    m_errorMonitor->monitor(*m_process);
 }
 
 CoreManager::~CoreManager () noexcept {
@@ -293,4 +298,10 @@ CoreManager::notifyServerClaim(int64_t serverId)
     Message message(serverClaimMessage);
 
     m_router.notifyOtherNodes(message);
+}
+
+CoreErrorMonitor&
+CoreManager::errorMonitor() const
+{
+    return *m_errorMonitor;
 }
