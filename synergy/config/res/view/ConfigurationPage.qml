@@ -432,7 +432,8 @@ Rectangle {
                         Image {
                             id: screenImage
                             parent: screenIcon
-                            anchors.fill: parent
+                            width: parent.width
+                            height: parent.height
                             fillMode: Image.Stretch
                             smooth: true
                             source: statusImage
@@ -465,6 +466,7 @@ Rectangle {
                             // connecting prograss bar background
                             Rectangle {
                                 id: connectingBar
+                                parent: screenImage
                                 visible: screenStatus == "Connecting"
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 anchors.bottom: parent.bottom
