@@ -18,6 +18,9 @@ public:
     Screen() = default;
     explicit Screen(ScreenID id) noexcept;
 
+    Screen(const Screen& s) = default;
+    Screen& operator= (const Screen& s) = default;
+
     void id (ScreenID);
     ScreenID id() const;
 
