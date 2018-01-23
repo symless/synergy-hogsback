@@ -45,8 +45,7 @@ QString UIScreen::statusImage() const
 QString
 UIScreen::helpLink() const
 {
-    // TODO: reimplement this
-    return  "help";
+    return QString::fromStdString(getHelpUrl(m_errorCode));
 }
 
 void UIScreen::setPosX(int const x)
@@ -124,7 +123,7 @@ void UIScreen::touch()
 
 QString UIScreen::errorMessage() const
 {
-    return m_errorMessage;
+    return m_errorMessage.isEmpty() ? QString::fromStdString(getDefaultErrorMessage()) : m_errorMessage;
 }
 
 void UIScreen::setErrorMessage(const QString &errorMessage)
