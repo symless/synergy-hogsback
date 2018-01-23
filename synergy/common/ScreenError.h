@@ -24,7 +24,7 @@ static const char* kSynergyHelpUrl = "https://symless.com/synergy/help/";
 static std::string
 getDefaultErrorMessage()
 {
-    return "";
+    return "There seem to be an error in this screen.";
 }
 
 static std::string
