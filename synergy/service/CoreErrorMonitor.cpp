@@ -16,8 +16,9 @@ void CoreErrorMonitor::monitor(CoreProcess& process)
     using boost::algorithm::contains;
 
     process.output.connect ([this](std::string const& line) {
-        if (contains (line, "Address already in use")) {
-            error(m_localScreenName, ScreenError::kCoreZombieProcess, "");
+        if (contains (line, "cannot bind address: Address already in use")) {
+            std::string message = "There seems to be a zombie core process";
+            error(m_localScreenName, ScreenError::kCoreZombieProcess, message);
         }
     });
 
