@@ -305,3 +305,9 @@ CoreManager::errorMonitor() const
 {
     return *m_errorMonitor;
 }
+
+CoreStatusMonitor&
+CoreManager::statusMonitor() const
+{
+    return m_process->statusMonitor();
+}

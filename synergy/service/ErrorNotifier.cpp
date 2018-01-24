@@ -1,5 +1,6 @@
 #include <synergy/service/ErrorNotifier.h>
 
+#include <synergy/service/CoreStatusMonitor.h>
 #include <synergy/service/CoreErrorMonitor.h>
 #include <synergy/service/CloudClient.h>
 #include <synergy/common/ProfileConfig.h>
@@ -20,5 +21,19 @@ void ErrorNotifier::install(CoreErrorMonitor& monitor)
         screen.touch();
 
         m_cloudClient.updateScreen(screen);
+    });
+}
+
+void ErrorNotifier::install(CoreStatusMonitor &monitor)
+{
+    monitor.screenStatusChanged.connect([this](std::string const& screenName, ScreenStatus state){
+        if (state == ScreenStatus::kConnected) {
+            Screen screen = m_profileConfig.getScreen(screenName);
+            screen.setErrorCode(ScreenError::kNone);
+            screen.setErrorMessage("");
+            screen.touch();
+
+            m_cloudClient.updateScreen(screen);
+        }
     });
 }

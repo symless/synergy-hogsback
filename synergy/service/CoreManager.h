@@ -19,6 +19,7 @@ class CloudClient;
 class ProcessCommand;
 class ClaimMessageHandler;
 class CoreErrorMonitor;
+class CoreStatusMonitor;
 
 class CoreManager final {
 public:
@@ -43,6 +44,7 @@ public:
     void notifyServerClaim(int64_t serverId);
 
     CoreErrorMonitor& errorMonitor() const;
+    CoreStatusMonitor& statusMonitor() const;
 
 private:
     boost::asio::io_service& m_ioService;
