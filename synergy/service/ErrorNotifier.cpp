@@ -2,6 +2,7 @@
 
 #include <synergy/service/CoreStatusMonitor.h>
 #include <synergy/service/CoreErrorMonitor.h>
+#include <synergy/service/RouterErrorMonitor.h>
 #include <synergy/service/CloudClient.h>
 #include <synergy/common/ProfileConfig.h>
 #include <synergy/common/ScreenError.h>
@@ -35,5 +36,26 @@ void ErrorNotifier::install(CoreStatusMonitor &monitor)
 
             m_cloudClient.updateScreen(screen);
         }
+    });
+}
+
+void ErrorNotifier::install(RouterErrorMonitor &monitor)
+{
+    monitor.screen_reached.connect([this](int64_t screen_id){
+        Screen screen = m_profileConfig.getScreen(screen_id);
+        screen.setErrorCode(ScreenError::kNone);
+        screen.setErrorMessage("");
+        screen.touch();
+
+        m_cloudClient.updateScreen(screen);
+    });
+
+    monitor.screen_disjoint.connect([this](int64_t screen_id){
+        Screen screen = m_profileConfig.getScreen(screen_id);
+        screen.setErrorCode(ScreenError::kRouterUnreachableNode);
+        screen.setErrorMessage("Can't reach this screen from your network");
+        screen.touch();
+
+        m_cloudClient.updateScreen(screen);
     });
 }

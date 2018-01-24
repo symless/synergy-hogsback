@@ -6,6 +6,7 @@ class CloudClient;
 class ProfileConfig;
 class CoreErrorMonitor;
 class CoreStatusMonitor;
+class RouterErrorMonitor;
 
 class ErrorNotifier final {
 public:
@@ -13,6 +14,7 @@ public:
 
     void install(CoreErrorMonitor& monitor);
     void install(CoreStatusMonitor& monitor);
+    void install(RouterErrorMonitor& monitor);
 
 public:
     template <typename... Args>

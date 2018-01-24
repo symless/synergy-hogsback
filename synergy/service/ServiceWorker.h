@@ -12,6 +12,7 @@ class UserConfig;
 class ProfileConfig;
 class SessionMonitor;
 class ErrorNotifier;
+class RouterErrorMonitor;
 
 class ServiceWorker final
 {
@@ -41,6 +42,8 @@ private:
     std::unique_ptr<RpcManager>     m_rpc;
     std::shared_ptr<CloudClient>    m_cloudClient;
     Router                          m_router;
+    std::unique_ptr<RouterErrorMonitor>
+                                    m_routerMonitor;
     std::unique_ptr<CoreManager>    m_coreManager;
     std::unique_ptr<SessionMonitor> m_sessionMonitor;
     std::shared_ptr<boost::asio::io_service::work> m_work;

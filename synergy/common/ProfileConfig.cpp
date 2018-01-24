@@ -95,6 +95,9 @@ bool ProfileConfig::compare(ProfileConfig const& target)
                     if (targetScreen.m_active) {
                         screenOnline(targetScreen);
                     }
+                    else {
+                        screenOffline(targetScreen);
+                    }
 
                     different = true;
                 }

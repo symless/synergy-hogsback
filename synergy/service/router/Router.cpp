@@ -33,7 +33,7 @@ comma_separate (std::vector<uint32_t> const& path) {
 }
 
 void
-Router::add_peer (tcp::endpoint endpoint, bool const immediate) {
+Router::add_peer (int64_t screenId, tcp::endpoint endpoint, bool const immediate) {
     auto it = std::find (begin (known_peers_), end (known_peers_), endpoint);
     if (it != end (known_peers_)) {
         return;
@@ -43,15 +43,17 @@ Router::add_peer (tcp::endpoint endpoint, bool const immediate) {
     known_peers_.push_back (endpoint);
 
     /* Connect thread */
-    asio::spawn (acceptor_.get_io_service (), [this, endpoint, immediate](auto ctx) {
+    asio::spawn (acceptor_.get_io_service (), [this, screenId, endpoint, immediate](auto ctx) {
         bool connected = false;
-        BOOST_SCOPE_EXIT_ALL(&connected, &endpoint, this) {
+        BOOST_SCOPE_EXIT_ALL(&connected, screenId, &endpoint, this) {
             if (!connected) {
                 auto it = std::find (begin (known_peers_), end (known_peers_),
                                      endpoint);
                 if (it != end (known_peers_)) {
                     known_peers_.erase (it);
                 }
+
+                on_connection_disconnected(screenId, endpoint.address().to_string());
             }
         };
 
@@ -118,7 +120,7 @@ Router::add_peer (tcp::endpoint endpoint, bool const immediate) {
 
             routerLog ()->debug ("Connected to {}", socket.remote_endpoint());
 
-            auto connection = std::make_shared<Connection> (std::move (socket),
+            auto connection = std::make_shared<Connection> (screenId, std::move (socket),
                                                             ssl_context_);
             connection->stream().async_handshake
                 (Connection::stream_type::client, ctx[ec]);
@@ -211,7 +213,7 @@ Router::start (uint32_t const id, std::string name) {
             routerLog()->debug("Accepted connection from router {}",
                                 socket.remote_endpoint ());
 
-            auto connection = std::make_shared<Connection> (std::move(socket),
+            auto connection = std::make_shared<Connection> (-1, std::move(socket),
                                                             ssl_context_);
             connection->stream().async_handshake (Connection::stream_type::server,
                                                   ctx[ec]);
@@ -377,6 +379,11 @@ Router::add
             );
 
             connection->send (std::move (advert));
+
+            if (connection->screen_id() != -1) {
+                on_connection_established(connection->screen_id(),
+                                          connection->endpoint().address().to_string());
+            }
         });
 
     connection->on_disconnect.connect (
@@ -385,7 +392,7 @@ Router::add
                                  connection->id());
             auto remote = connection->remote_acceptor_endpoint ();
             this->remove (std::move (connection));
-            this->add_peer (std::move (remote));
+            this->add_peer (connection->screen_id(), std::move (remote));
         });
 
     connection->on_message.connect ([this](MessageHeader const& header,
@@ -405,6 +412,11 @@ Router::add
             message.body ());
 
         on_receive (message, header.source);
+    });
+
+    connection->identified.connect([this](std::shared_ptr<Connection> connection){
+        on_connection_established(connection->screen_id(),
+                                  connection->endpoint().address().to_string());
     });
 
     return connection->start ();
@@ -540,6 +552,8 @@ Router::integrate (RouteAdvertisement& ra, std::shared_ptr<Connection> source) {
                            "This indicates a connect loop. Ignoring");
         return;
     }
+
+    source->set_screen_id(ra.sender);
 
     routerLog()->debug("Installing routes received from router {}", ra.sender);
     RouteAdvertisement advert;

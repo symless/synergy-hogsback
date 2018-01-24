@@ -31,6 +31,7 @@ public:
     signal<void (std::vector<Screen> added, std::vector<Screen> removed)>
         screenSetChanged;
     signal<void (Screen screen)> screenOnline;
+    signal<void (Screen screen)> screenOffline;
 
     const std::vector<Screen>& screens() const;
     Screen& getScreen(const int screenId);
