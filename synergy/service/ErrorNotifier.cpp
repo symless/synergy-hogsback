@@ -7,9 +7,10 @@
 #include <synergy/common/ProfileConfig.h>
 #include <synergy/common/ScreenError.h>
 
-ErrorNotifier::ErrorNotifier(CloudClient& cloudClient, ProfileConfig& profileConfig) :
+ErrorNotifier::ErrorNotifier(CloudClient& cloudClient, ProfileConfig& profileConfig, UserConfig& userConfig) :
     m_cloudClient(cloudClient),
-    m_profileConfig(profileConfig)
+    m_profileConfig(profileConfig),
+    m_userConfig(userConfig)
 {
 }
 
@@ -52,8 +53,12 @@ void ErrorNotifier::install(RouterErrorMonitor &monitor)
 
     monitor.screen_disjoint.connect([this](int64_t screen_id){
         Screen screen = m_profileConfig.getScreen(screen_id);
+        Screen localScreen = m_profileConfig.getScreen(m_userConfig.screenId());
         screen.setErrorCode(ScreenError::kRouterUnreachableNode);
-        screen.setErrorMessage("Can't reach this screen from your network");
+        std::string errorMessage;
+        errorMessage = localScreen.name();
+        errorMessage += " can't reach this screen within your network";
+        screen.setErrorMessage(errorMessage);
         screen.touch();
 
         m_cloudClient.updateScreen(screen);

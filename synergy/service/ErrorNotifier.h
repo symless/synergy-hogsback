@@ -7,10 +7,11 @@ class ProfileConfig;
 class CoreErrorMonitor;
 class CoreStatusMonitor;
 class RouterErrorMonitor;
+class UserConfig;
 
 class ErrorNotifier final {
 public:
-    explicit ErrorNotifier(CloudClient& cloudClient, ProfileConfig& profileConfig);
+    explicit ErrorNotifier(CloudClient& cloudClient, ProfileConfig& profileConfig, UserConfig& userConfig);
 
     void install(CoreErrorMonitor& monitor);
     void install(CoreStatusMonitor& monitor);
@@ -23,4 +24,5 @@ public:
 private:
     CloudClient& m_cloudClient;
     ProfileConfig& m_profileConfig;
+    UserConfig& m_userConfig;
 };
