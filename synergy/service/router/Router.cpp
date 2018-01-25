@@ -391,8 +391,9 @@ Router::add
             routerLog ()->debug ("Connection {} disconnected",
                                  connection->id());
             auto remote = connection->remote_acceptor_endpoint ();
+            int64_t screen_id = connection->screen_id();
             this->remove (std::move (connection));
-            this->add_peer (connection->screen_id(), std::move (remote));
+            this->add_peer (screen_id, std::move (remote));
         });
 
     connection->on_message.connect ([this](MessageHeader const& header,
