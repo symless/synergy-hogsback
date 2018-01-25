@@ -44,11 +44,14 @@ void ErrorNotifier::install(RouterErrorMonitor &monitor)
 {
     monitor.screen_reached.connect([this](int64_t screen_id){
         Screen screen = m_profileConfig.getScreen(screen_id);
-        screen.setErrorCode(ScreenError::kNone);
-        screen.setErrorMessage("");
-        screen.touch();
 
-        m_cloudClient.updateScreen(screen);
+        if (screen.errorCode() == ScreenError::kRouterUnreachableNode) {
+            screen.setErrorCode(ScreenError::kNone);
+            screen.setErrorMessage("");
+            screen.touch();
+
+            m_cloudClient.updateScreen(screen);
+        }
     });
 
     monitor.screen_disjoint.connect([this](int64_t screen_id){
