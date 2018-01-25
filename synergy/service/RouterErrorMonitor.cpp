@@ -1,6 +1,7 @@
 #include <synergy/service/RouterErrorMonitor.h>
 
 #include <synergy/service/router/Router.hpp>
+#include <synergy/service/ServiceLogs.h>
 #include <synergy/common/ProfileConfig.h>
 
 #include <boost/regex.hpp>
@@ -50,7 +51,12 @@ void RouterErrorMonitor::monitor(Router& router)
                 m_monitoringScreenIp.erase(it);
 
                 if (count - 1 == 0) {
+                    routerLog()->debug("Can't reach screen {} within your network", screen_id);
                     screen_disjoint(screen_id);
+                }
+                else {
+                    routerLog()->debug("Still trying to connect to other {} address{} for screen {}",
+                                       count - 1, count == 2 ? "" : "es", screen_id);
                 }
 
                 return;
