@@ -20,9 +20,8 @@ void ErrorNotifier::install(CoreErrorMonitor& monitor)
         Screen screen = m_profileConfig.getScreen(screenName);
         screen.setErrorCode(code);
         screen.setErrorMessage(message);
-        screen.touch();
 
-        m_cloudClient.updateScreen(screen);
+        m_cloudClient.updateScreenError(screen);
     });
 }
 
@@ -34,9 +33,8 @@ void ErrorNotifier::install(CoreStatusMonitor &monitor)
             if (screen.errorCode() != ScreenError::kNone) {
                 screen.setErrorCode(ScreenError::kNone);
                 screen.setErrorMessage("");
-                screen.touch();
 
-                m_cloudClient.updateScreen(screen);
+                m_cloudClient.updateScreenError(screen);
             }
         }
     });
@@ -50,9 +48,8 @@ void ErrorNotifier::install(RouterErrorMonitor &monitor)
         if (screen.errorCode() == ScreenError::kRouterUnreachableNode) {
             screen.setErrorCode(ScreenError::kNone);
             screen.setErrorMessage("");
-            screen.touch();
 
-            m_cloudClient.updateScreen(screen);
+            m_cloudClient.updateScreenError(screen);
         }
     });
 
@@ -64,8 +61,7 @@ void ErrorNotifier::install(RouterErrorMonitor &monitor)
         errorMessage = localScreen.name();
         errorMessage += " can't reach this screen within your network";
         screen.setErrorMessage(errorMessage);
-        screen.touch();
 
-        m_cloudClient.updateScreen(screen);
+        m_cloudClient.updateScreenError(screen);
     });
 }

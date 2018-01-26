@@ -129,6 +129,19 @@ void CloudClient::updateScreen(Screen& screen)
     httpSession->post(kUrlTarget, tao::json::to_string(root));
 }
 
+void CloudClient::updateScreenError(Screen &screen)
+{
+    static const std::string kUrlTarget = "/screen/error/update";
+    HttpSession* httpSession = newHttpSession();
+
+    tao::json::value root;
+    root["id"] = screen.id();
+    root["error_code"] = static_cast<uint32_t>(screen.errorCode());
+    root["error_message"] = screen.errorMessage();
+
+    httpSession->post(kUrlTarget, tao::json::to_string(root));
+}
+
 void
 CloudClient::reconnectWebsocket()
 {
