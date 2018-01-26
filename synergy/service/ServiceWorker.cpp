@@ -146,6 +146,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_routerMonitor->monitor(m_router);
 
     m_errorNotifier->install(m_coreManager->errorMonitor());
+    m_errorNotifier->install(m_coreManager->statusMonitor());
     m_errorNotifier->install(*m_routerMonitor);
 
     m_sessionMonitor->start();
