@@ -28,7 +28,7 @@ TEST_CASE("User config read and write", "[UserConfig]" ) {
         userConfig.setSystemUid("mock");
         userConfig.save(ss);
 
-        REQUIRE_THAT(ss.str(), Contains("[system]\n	uid = \"mock\""));
+        REQUIRE_THAT(ss.str(), Contains("uid = \"mock\""));
     }
 
     SECTION ("Read config file with developer section") {
@@ -57,4 +57,8 @@ TEST_CASE("User config read and write", "[UserConfig]" ) {
 
         REQUIRE_THAT(ss2.str(), Contains("[developer]\n	version-check = false"));
     }
+}
+
+TEST_CASE("Default server configuration check","[UserConfig]") {
+
 }
