@@ -19,7 +19,7 @@ CloudClient::CloudClient(boost::asio::io_service& ioService,
                          std::shared_ptr<ProfileConfig> remoteProfileConfig) :
     m_ioService(ioService),
     m_userConfig (std::move(userConfig)),
-    m_websocket(ioService, pubSubServerHostname(*userConfig), (*userConfig).pubSubServerPort()),
+    m_websocket(ioService, pubSubServerHostname(*m_userConfig), m_userConfig->pubSubServerPort()),
     m_remoteProfileConfig(remoteProfileConfig)
 {
     m_userConfig->updated.connect ([this]() { this->load (*m_userConfig); });
