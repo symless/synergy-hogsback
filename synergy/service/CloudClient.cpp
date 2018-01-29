@@ -7,13 +7,11 @@
 #include <synergy/service/App.h>
 
 #include <tao/json.hpp>
+#include "../common/UserConfig.h"
+#include "CloudClient.h"
 
-static const char* kLiveCloudServerHostname = "v1.api.cloud.symless.com";
-static const char* kLivePubSubServerHostname = "pubsub1.cloud.symless.com";
 static const char* kTestCloudServerHostname = "test-api.cloud.symless.com";
 static const char* kTestPubSubServerHostname = "test-pubsub.cloud.symless.com";
-static const char* kCloudServerPort = "443";
-static const char* kPubSubServerPort = "443";
 static const char* kSubTarget = "/synergy/sub/auth";
 
 CloudClient::CloudClient(boost::asio::io_service& ioService,
@@ -21,7 +19,7 @@ CloudClient::CloudClient(boost::asio::io_service& ioService,
                          std::shared_ptr<ProfileConfig> remoteProfileConfig) :
     m_ioService(ioService),
     m_userConfig (std::move(userConfig)),
-    m_websocket(ioService, pubSubServerHostname(), kPubSubServerPort),
+    m_websocket(ioService, pubSubServerHostname(*userConfig), (*userConfig).pubSubServerPort()),
     m_remoteProfileConfig(remoteProfileConfig)
 {
     m_userConfig->updated.connect ([this]() { this->load (*m_userConfig); });
@@ -135,7 +133,7 @@ void CloudClient::fakeScreenStatusUpdate()
 HttpSession* CloudClient::newHttpSession()
 {
     // TODO: add lifetime management or make http session reusable
-    HttpSession* httpSession = new HttpSession(m_ioService, cloudServerHostname(), kCloudServerPort);
+    HttpSession* httpSession = new HttpSession(m_ioService, cloudServerHostname(*m_userConfig), m_userConfig->cloudServerPort());
 
     httpSession->addHeader("X-Auth-Token", m_userConfig->userToken());
 
@@ -153,23 +151,23 @@ HttpSession* CloudClient::newHttpSession()
 }
 
 std::string
-CloudClient::pubSubServerHostname()
+CloudClient::pubSubServerHostname(UserConfig const& userConfig)
 {
     if (App::options().count("use-test-cloud")) {
         return kTestPubSubServerHostname;
     }
     else {
-        return kLivePubSubServerHostname;
+        return userConfig.pubSubServerHostname();
     }
 }
 
 std::string
-CloudClient::cloudServerHostname()
+CloudClient::cloudServerHostname(UserConfig const& userConfig)
 {
     if (App::options().count("use-test-cloud")) {
         return kTestCloudServerHostname;
     }
     else {
-        return kLiveCloudServerHostname;
+        return userConfig.cloudServerHostname();
     }
 }

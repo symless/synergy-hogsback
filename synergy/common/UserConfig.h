@@ -28,6 +28,18 @@ public:
     std::string userToken() const;
     void setUserToken(const std::string& userToken);
 
+    std::string cloudServerHostname() const;
+    void setCloudServerHostname(const std::string& cloudServerHostname);
+
+    std::string cloudServerPort() const;
+    void setCloudServerPort(const std::string& cloudServerPort);
+
+    std::string pubSubServerHostname() const;
+    void setPubSubServerHostname(const std::string& pubSubServerHostname);
+
+    std::string pubSubServerPort() const;
+    void setPubSubServerPort(const std::string& pubSubServerPort);
+
     int64_t userId() const;
     void setUserId(const int64_t& userId);
 
@@ -61,6 +73,10 @@ private:
     int64_t m_profileId;
     int64_t m_screenId;
     std::string m_systemUid = "";
+    std::string m_cloudServerHostname = "";
+    std::string m_cloudServerPort;
+    std::string m_pubSubServerHostname = "";
+    std::string m_pubSubServerPort;
     bool m_hasDeveloperConfig = false;
     bool m_versionCheck = true;
 

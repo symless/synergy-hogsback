@@ -8,8 +8,16 @@
 #include <fstream>
 
 static const char* const kUserConfigFilename = "synergy-user.cfg";
+static const char* kLiveCloudServerHostname = "v1.api.cloud.symless.com";
+static const char* kLivePubSubServerHostname = "pubsub1.cloud.symless.com";
+static const char* kCloudServerPort = "443";
+static const char* kPubSubServerPort = "443";
 
 UserConfig::UserConfig():
+    m_cloudServerHostname(kLiveCloudServerHostname),
+    m_cloudServerPort(kCloudServerPort),
+    m_pubSubServerHostname(kLivePubSubServerHostname),
+    m_pubSubServerPort(kPubSubServerPort),
     m_userToken(),
     m_userId(-1),
     m_profileId(-1),
@@ -69,6 +77,11 @@ UserConfig::update(ConfigParser& parser)
     auto systemConfig = parser.get_section("system");
     if (systemConfig.isValid()) {
         m_systemUid = systemConfig.get_value<std::string>("uid");
+        m_cloudServerHostname = systemConfig.get_value<std::string>("cloud-server-hostname");
+        m_cloudServerPort = systemConfig.get_value<std::string>("cloud-server-port");
+        m_pubSubServerHostname = systemConfig.get_value<std::string>("pubsub-server-hostname");
+        m_pubSubServerPort = systemConfig.get_value<std::string>("pubsub-server-port");
+
     }
 
     auto developerConfig = parser.get_section("developer");
@@ -97,6 +110,10 @@ UserConfig::makeTable(std::shared_ptr<cpptoml::table>& root)
 
     auto systemTable = cpptoml::make_table();
     systemTable->insert("uid", m_systemUid);
+    systemTable->insert("cloud-server-hostname", m_cloudServerHostname);
+    systemTable->insert("cloud-server-port", m_cloudServerPort);
+    systemTable->insert("pubsub-server-hostname", m_pubSubServerHostname);
+    systemTable->insert("pubsub-server-port", m_pubSubServerPort);
     root->insert("system", systemTable);
 
     // only save developer section if there was one when we read
@@ -153,6 +170,46 @@ std::string UserConfig::userToken() const
 void UserConfig::setUserToken(const std::string &userToken)
 {
     m_userToken = userToken;
+}
+
+std::string UserConfig::cloudServerHostname() const
+{
+    return m_cloudServerHostname;
+}
+
+void UserConfig::setCloudServerHostname(const std::string &cloudServerHostname)
+{
+    m_cloudServerHostname = cloudServerHostname;
+}
+
+std::string UserConfig::cloudServerPort() const
+{
+    return m_cloudServerPort;
+}
+
+void UserConfig::setCloudServerPort(const std::string &cloudServerPort)
+{
+    m_cloudServerPort = cloudServerPort;
+}
+
+std::string UserConfig::pubSubServerHostname() const
+{
+    return m_pubSubServerHostname;
+}
+
+void UserConfig::setPubSubServerHostname(const std::string &pubSubServerHostname)
+{
+    m_pubSubServerHostname = pubSubServerHostname;
+}
+
+std::string UserConfig::pubSubServerPort() const
+{
+    return m_pubSubServerPort;
+}
+
+void UserConfig::setPubSubServerPort(const std::string &pubSubServerPort)
+{
+    m_pubSubServerPort = pubSubServerPort;
 }
 
 int64_t UserConfig::userId() const

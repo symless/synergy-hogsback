@@ -27,8 +27,8 @@ public:
 private:
     void load(const UserConfig &userConfig);
     HttpSession* newHttpSession();
-    static std::string pubSubServerHostname();
-    static std::string cloudServerHostname();
+    static std::string pubSubServerHostname(UserConfig const& userConfig);
+    static std::string cloudServerHostname(UserConfig const& userConfig);
 
 public:
     template <typename... Args>
