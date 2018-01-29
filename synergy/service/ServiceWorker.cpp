@@ -64,6 +64,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         rpcServer->publish("synergy.profile.snapshot", std::move(json));
 
         // HACK: say that the cloud server is online when there is a snapshot
+        // reason: ?
         m_rpc->server()->publish("synergy.cloud.online");
     });
 
@@ -226,13 +227,11 @@ void ServiceWorker::provideSnapshot()
             m_rpc->server()->publish("synergy.profile.snapshot", m_lastProfileSnapshot);
 
             // HACK: say that the cloud server is online when there is a snapshot
+            // reason: ?
             m_rpc->server()->publish("synergy.cloud.online");
         }
         else {
             serviceLog()->error("can't send profile snapshot, not yet received from cloud");
-
-            // HACK: say that the cloud server is offline when there's no snapshot
-            m_rpc->server()->publish("synergy.cloud.offline");
         }
     });
 }
