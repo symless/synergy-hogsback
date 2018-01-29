@@ -77,7 +77,9 @@ bool ProfileConfig::compare(ProfileConfig const& target)
             if (screen.m_id == targetScreen.m_id) {
                 found = true;
 
-                if (screen.m_version < targetScreen.m_version) {
+                if (screen.m_version > targetScreen.m_version) {
+                    serviceLog()->debug("screen version is older ({} < {}), skip screen {}",
+                        targetScreen.m_version, screen.m_version, screen.m_id);
                     continue;
                 }
 
