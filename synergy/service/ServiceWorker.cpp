@@ -245,7 +245,8 @@ ServiceWorker::provideHello()
 
         serviceLog()->debug("saying hello to config ui");
 
-        if (!m_cloudClient->isWebsocketConnected()) {
+        if (!m_cloudClient->isWebsocketConnected() &&
+            m_userConfig->profileId() != -1) {
             m_rpc->server()->publish("synergy.cloud.offline");
 
             m_cloudClient->reconnectWebsocket();
