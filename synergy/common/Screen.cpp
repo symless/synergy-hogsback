@@ -103,4 +103,11 @@ Screen::apply(ScreenSnapshot const& ss)
 
     m_status = stringToScreenStatus(ss.status);
     m_ipList = ss.ipList;
+
+    m_version = ss.version;
+}
+
+uint64_t Screen::version() const
+{
+    return m_version;
 }

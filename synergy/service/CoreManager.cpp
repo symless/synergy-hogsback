@@ -122,7 +122,8 @@ CoreManager::CoreManager (boost::asio::io_service& io,
             }
 
             if (lastSeenStatus[screenName] != state) {
-                m_cloudClient->fakeScreenStatusUpdate();
+                Screen screen = m_localProfileConfig->getScreen(screenName);
+                m_cloudClient->fakeScreenStatusUpdate(screen);
             }
 
             lastSeenStatus[screenName] = state;

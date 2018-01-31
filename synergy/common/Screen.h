@@ -42,6 +42,8 @@ public:
 
     void apply (const ScreenSnapshot &ss);
 
+    uint64_t version() const;
+
 private:
     ScreenID        m_id      = 0;
     std::string     m_name;
