@@ -77,6 +77,9 @@ public:
 
     signal<void(Message const&, int32_t)> on_receive;
 
+    signal<void(int64_t screen_id)> on_node_discovered;
+    signal<void(int64_t screen_id)> on_node_lost;
+
 protected:
     void add (std::shared_ptr<Connection>);
     bool integrate (Route, std::shared_ptr<Connection> source);

@@ -440,13 +440,16 @@ Router::integrate (Route route, std::shared_ptr<Connection> source) {
     static_cast<Route&> (entry) = std::move (route);
     entry.connection            = source.get ();
 
-    auto installed = route_table_.insert (std::move (entry));
+    auto installed_pair = route_table_.insert (entry);
+    installed = installed_pair.second;
 
-    if (route_limit_reached && installed.second) {
+    if (route_limit_reached && installed) {
         auto rank_installed =
-            route_table_.get<by_destination> ().rank (installed.first);
+            route_table_.get<by_destination> ().rank (installed_pair.first);
+        assert (rank_installed >= rank_lower);
+        assert (rank_installed <= rank_higher);
 
-        if ((rank_installed >= rank_lower) && (rank_installed <= rank_higher)) {
+        if (rank_installed < rank_higher) {
             auto bumped = std::prev (existing_routes.second);
             routerLog()->debug("   Removed route: dest {}, cost {}, path [{}]",
                                 bumped->dest,
@@ -455,18 +458,25 @@ Router::integrate (Route route, std::shared_ptr<Connection> source) {
 
             routerLog()->debug(
                 "  ... to make way for: dest {}, cost {}, path [{}]",
-                installed.first->dest,
-                installed.first->cost,
-                comma_separate (installed.first->path)
+                installed_pair.first->dest,
+                installed_pair.first->cost,
+                comma_separate (installed_pair.first->path)
             );
 
             route_table_.get<by_destination> ().erase (bumped);
         } else {
-            route_table_.get<by_destination> ().erase (installed.first);
+            route_table_.get<by_destination> ().erase (installed_pair.first);
+            installed = false;
         }
     }
 
-    return installed.second;
+    new_destination &= installed;
+    if (new_destination) {
+        routerLog()->debug ("New node discovered: {}", entry.dest);
+        on_node_discovered (entry.dest);
+    }
+
+    return installed;
 }
 
 void
@@ -477,7 +487,7 @@ Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
         return;
     }
 
-    routerLog()->debug("Removing dead routes received from router {}",
+    routerLog()->debug("Removing dead routes received from node {}",
                         rr.sender);
 
     RouteRevocation revocation;
