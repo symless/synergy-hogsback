@@ -39,7 +39,7 @@ Router::add_peer (tcp::endpoint endpoint, bool const immediate) {
         return;
     }
 
-    routerLog()->debug("Adding peer discovered at {}", endpoint);
+    routerLog()->debug("Adding peer at {}", endpoint);
     known_peers_.push_back (endpoint);
 
     /* Connect thread */
@@ -472,8 +472,8 @@ Router::integrate (Route route, std::shared_ptr<Connection> source) {
 
     new_destination &= installed;
     if (new_destination) {
-        routerLog()->debug ("New node discovered: {}", entry.dest);
-        on_node_discovered (entry.dest);
+        routerLog()->debug ("Node {} is now reachable", entry.dest);
+        on_node_reachable (entry.dest);
     }
 
     return installed;
@@ -483,7 +483,7 @@ void
 Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
     if (rr.sender == id_) {
         routerLog()->debug("Received own route revocation. "
-                            "This indicates a loop. Ignoring");
+                            "This indicates a routing loop. Ignoring");
         return;
     }
 
@@ -493,6 +493,11 @@ Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
     RouteRevocation revocation;
     revocation.sender = id_;
     revocation.routes.reserve (rr.routes.size ());
+
+    /* Keep track of the destinations effected by the removal of this
+     * connection */
+    std::vector<uint32_t> dests_effected;
+    dests_effected.reserve (rr.routes.size ());
 
     bool routes_updated = false;
     auto route_n        = 0;
@@ -514,7 +519,7 @@ Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
         if (end (route->path) !=
             std::find (begin (route->path), end (route->path), id_)) {
             routerLog()->debug(
-                "   Route {}: ignored because it indicates a loop", route_n);
+                "   Route {}: ignored because it indicates a routing loop", route_n);
             continue;
         }
 
@@ -532,18 +537,45 @@ Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
         if (entry == end (route_table_)) {
             routerLog()->debug("    Route {}: not found", route_n);
         } else {
-            routerLog()->debug("    Route {}: removed", route_n);
+            dests_effected.push_back (entry->dest);
             route_table_.get<by_destination> ().erase (entry);
+            routerLog()->debug ("    Route {}: removed", route_n);
             routes_updated = true;
         }
 
+        /* TODO: Should this be inside the erase() branch, above? Do we need to
+         * propagate routes that we couldn't remove, alongside those that we
+         * could? For now it seems safer to propagate them */
         revocation.routes.emplace_back (std::move (new_route));
     }
 
     dump_table ();
 
     if (routes_updated) {
+        routerLog()->debug ("Forwarding route revocation");
         flood (std::move (revocation), source->id ());
+    }
+
+    /* Turn the effected destinations in to a set */
+    std::sort (begin(dests_effected), end(dests_effected));
+    dests_effected.erase (std::unique (begin(dests_effected),
+                                       end(dests_effected)),
+                          end(dests_effected));
+
+    /* Remove effected destinations if there is still a way to reach them */
+    dests_effected.erase (std::remove_if (begin(dests_effected),
+                                          end(dests_effected),
+        [this](auto dest) {
+            return route_table_.get<by_destination>().count(dest);
+        }),
+        end (dests_effected)
+    );
+
+    /* What remains is now a set of now unreachable nodes. Log it. */
+    for (auto dest: dests_effected) {
+        routerLog()->debug ("Node {} is now unreachable (announced by"
+                            " node {})", dest, rr.sender);
+        on_node_unreachable (dest);
     }
 }
 
@@ -551,11 +583,11 @@ void
 Router::integrate (RouteAdvertisement& ra, std::shared_ptr<Connection> source) {
     if (ra.sender == id_) {
         routerLog()->debug("Received own route advertisement. "
-                           "This indicates a connect loop. Ignoring");
+                           "This indicates a routing loop. Ignoring");
         return;
     }
 
-    routerLog()->debug("Installing routes received from router {}", ra.sender);
+    routerLog()->debug("Installing routes received from node {}", ra.sender);
     RouteAdvertisement advert;
     advert.sender = id_;
     advert.routes.reserve (1 + ra.routes.size ());
@@ -573,14 +605,15 @@ Router::integrate (RouteAdvertisement& ra, std::shared_ptr<Connection> source) {
 
         if (route->dest == id_) {
             routerLog()->debug("   Route {}: ignored because it leads back to "
-                               "this machine", route_n);
+                               "to me", route_n);
             continue;
         }
 
         if (end (route->path) !=
             std::find (begin (route->path), end (route->path), id_)) {
             routerLog()->debug(
-                "   Route {}: ignored because it would create a loop", route_n);
+                "   Route {}: ignored because it would create a routing loop",
+                        route_n);
             continue;
         }
 
@@ -598,7 +631,6 @@ Router::integrate (RouteAdvertisement& ra, std::shared_ptr<Connection> source) {
             advert.routes.emplace_back (std::move (new_route));
         } else {
             routerLog()->debug("   Route {}: not installed", route_n);
-
         }
 
         routes_updated |= installed;
@@ -632,8 +664,14 @@ Router::remove (std::shared_ptr<Connection> connection) {
     revocation.sender = id_;
     revocation.routes.reserve (n_dead_routes);
 
+    /* Keep track of the destinations effected by the removal of this connection
+     */
+    std::vector<uint32_t> dests_effected;
+    dests_effected.reserve (n_dead_routes);
+
     std::for_each (
         dead_routes.first, dead_routes.second, [&](Route const& route) {
+            dests_effected.push_back (route.dest);
             revocation.routes.emplace_back (std::make_unique<Route> (route));
         }
     );
@@ -656,6 +694,27 @@ Router::remove (std::shared_ptr<Connection> connection) {
     if (!revocation.routes.empty ()) {
         broadcast (std::move (revocation));
     }
+
+    /* Turn the effected destinations in to a set */
+    std::sort (begin(dests_effected), end(dests_effected));
+    dests_effected.erase (std::unique (begin(dests_effected),
+                                       end(dests_effected)),
+                          end(dests_effected));
+
+    /* Remove effected destinations if there is still a way to reach them */
+    dests_effected.erase (std::remove_if (begin(dests_effected),
+                                          end(dests_effected),
+        [this](auto dest) {
+            return route_table_.get<by_destination>().count(dest);
+        }),
+        end (dests_effected)
+    );
+
+    /* What remains is now a set of now unreachable nodes. Log it. */
+    for (auto dest: dests_effected) {
+        routerLog()->debug ("Node {} is now unreachable", dest);
+        on_node_unreachable (dest);
+    }
 }
 
 bool
@@ -672,14 +731,13 @@ Router::forward (MessageHeader const& header, Message message) {
     auto route    = by_dest.find (header.dest);
 
     if ((route == end (by_dest)) || !route->connection) {
-        routerLog()->error ("Router couldn't send message to {}, route is missing\n",
+        routerLog()->error ("Couldn't send message to node {}: no route to node\n",
                             header.dest);
         dump_table();
         return false;
     }
 
     /* TODO: enforce TTL */
-
     route->connection->send (header, std::move (message));
     return true;
 }
