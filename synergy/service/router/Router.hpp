@@ -61,7 +61,7 @@ public:
     void start (const uint32_t id, std::string name);
     void shutdown ();
 
-    void add_peer (int64_t screenId, boost::asio::ip::tcp::endpoint, bool immediate = false);
+    void add_peer (boost::asio::ip::tcp::endpoint, bool immediate = false);
     void remove (std::shared_ptr<Connection>);
 
     bool send (Message message, std::uint32_t dest);
@@ -76,8 +76,6 @@ public:
     using signal = boost::signals2::signal<Args...>;
 
     signal<void(Message const&, int32_t)> on_receive;
-    signal<void(int64_t screen_id, std::string ip_address)> on_connection_established;
-    signal<void(int64_t screen_id, std::string ip_address)> on_connection_disconnected;
 
 protected:
     void add (std::shared_ptr<Connection>);

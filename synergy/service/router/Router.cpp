@@ -33,7 +33,7 @@ comma_separate (std::vector<uint32_t> const& path) {
 }
 
 void
-Router::add_peer (int64_t screenId, tcp::endpoint endpoint, bool const immediate) {
+Router::add_peer (tcp::endpoint endpoint, bool const immediate) {
     auto it = std::find (begin (known_peers_), end (known_peers_), endpoint);
     if (it != end (known_peers_)) {
         return;
@@ -43,17 +43,15 @@ Router::add_peer (int64_t screenId, tcp::endpoint endpoint, bool const immediate
     known_peers_.push_back (endpoint);
 
     /* Connect thread */
-    asio::spawn (acceptor_.get_io_service (), [this, screenId, endpoint, immediate](auto ctx) {
+    asio::spawn (acceptor_.get_io_service (), [this, endpoint, immediate](auto ctx) {
         bool connected = false;
-        BOOST_SCOPE_EXIT_ALL(&connected, screenId, &endpoint, this) {
+        BOOST_SCOPE_EXIT_ALL(&connected, &endpoint, this) {
             if (!connected) {
                 auto it = std::find (begin (known_peers_), end (known_peers_),
                                      endpoint);
                 if (it != end (known_peers_)) {
                     known_peers_.erase (it);
                 }
-
-                on_connection_disconnected(screenId, endpoint.address().to_string());
             }
         };
 
@@ -120,7 +118,7 @@ Router::add_peer (int64_t screenId, tcp::endpoint endpoint, bool const immediate
 
             routerLog ()->debug ("Connected to {}", socket.remote_endpoint());
 
-            auto connection = std::make_shared<Connection> (screenId, std::move (socket),
+            auto connection = std::make_shared<Connection> (std::move (socket),
                                                             ssl_context_);
             connection->stream().async_handshake
                 (Connection::stream_type::client, ctx[ec]);
@@ -213,7 +211,7 @@ Router::start (uint32_t const id, std::string name) {
             routerLog()->debug("Accepted connection from router {}",
                                 socket.remote_endpoint ());
 
-            auto connection = std::make_shared<Connection> (-1, std::move(socket),
+            auto connection = std::make_shared<Connection> (std::move(socket),
                                                             ssl_context_);
             connection->stream().async_handshake (Connection::stream_type::server,
                                                   ctx[ec]);
@@ -379,11 +377,6 @@ Router::add
             );
 
             connection->send (std::move (advert));
-
-            if (connection->screen_id() != -1) {
-                on_connection_established(connection->screen_id(),
-                                          connection->endpoint().address().to_string());
-            }
         });
 
     connection->on_disconnect.connect (
@@ -391,9 +384,8 @@ Router::add
             routerLog ()->debug ("Connection {} disconnected",
                                  connection->id());
             auto remote = connection->remote_acceptor_endpoint ();
-            int64_t screen_id = connection->screen_id();
             this->remove (std::move (connection));
-            this->add_peer (screen_id, std::move (remote));
+            this->add_peer (std::move (remote));
         });
 
     connection->on_message.connect ([this](MessageHeader const& header,
@@ -415,11 +407,6 @@ Router::add
         on_receive (message, header.source);
     });
 
-    connection->identified.connect([this](std::shared_ptr<Connection> connection){
-        on_connection_established(connection->screen_id(),
-                                  connection->endpoint().address().to_string());
-    });
-
     return connection->start ();
 }
 
@@ -428,11 +415,15 @@ Router::integrate (Route route, std::shared_ptr<Connection> source) {
     size_t rank_lower        = 0;
     size_t rank_higher       = 0;
     bool route_limit_reached = false;
+    bool new_destination     = false;
+    bool installed           = false;
 
     auto existing_routes =
         route_table_.get<by_destination> ().equal_range (route.dest);
 
-    if (existing_routes.first != existing_routes.second) {
+    if (existing_routes.first == existing_routes.second) {
+        new_destination = true;
+    } else {
         rank_lower =
             route_table_.get<by_destination> ().rank (existing_routes.first);
         rank_higher =
@@ -513,7 +504,7 @@ Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
         if (end (route->path) !=
             std::find (begin (route->path), end (route->path), id_)) {
             routerLog()->debug(
-                "   Route {}: ignored because it includes a loop", route_n);
+                "   Route {}: ignored because it indicates a loop", route_n);
             continue;
         }
 
@@ -553,8 +544,6 @@ Router::integrate (RouteAdvertisement& ra, std::shared_ptr<Connection> source) {
                            "This indicates a connect loop. Ignoring");
         return;
     }
-
-    source->set_screen_id(ra.sender);
 
     routerLog()->debug("Installing routes received from router {}", ra.sender);
     RouteAdvertisement advert;

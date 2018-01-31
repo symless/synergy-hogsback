@@ -16,7 +16,7 @@ class Connection final : public std::enable_shared_from_this<Connection> {
 public:
     using stream_type = boost::asio::ssl::stream<boost::asio::ip::tcp::socket&>;
 
-    Connection (int64_t screenId, tcp::socket&& socket, boost::asio::ssl::context& context);
+    Connection (tcp::socket&& socket, boost::asio::ssl::context& context);
     ~Connection () noexcept;
 
     uint32_t id () const noexcept;
@@ -28,17 +28,12 @@ public:
 
     bool send (Message const&);
     bool send (MessageHeader const&, Message const&);
-
-    int64_t screen_id() const;
-    void set_screen_id(const int64_t &screen_id);
-
     tcp::endpoint endpoint() const;
 
 private:
     static uint32_t next_connection_id_;
     uint32_t id_;
     tcp::socket socket_;
-    int64_t screen_id_;
 
     /* We need this because once the socket has been disconnected you can no
      * longer call the remote_endpoint() function on it. */
@@ -57,7 +52,6 @@ public:
 
     signal<void(std::shared_ptr<Connection>)> on_connected;
     signal<void(std::shared_ptr<Connection>)> on_disconnect;
-    signal<void(std::shared_ptr<Connection>)> identified;
     signal<void(MessageHeader const&, Message&, std::shared_ptr<Connection>)>
         on_message;
 };

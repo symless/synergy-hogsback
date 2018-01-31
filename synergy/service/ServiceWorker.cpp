@@ -137,7 +137,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             boost::split(ipList, ipListStr, boost::is_any_of(","));
 
             for(const auto& ipStr : ipList) {
-                m_router.add_peer (screen.id(), tcp::endpoint
+                m_router.add_peer (tcp::endpoint
                                    (ip::address::from_string (ipStr), kNodePort));
             }
         });

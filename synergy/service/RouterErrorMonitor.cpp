@@ -30,39 +30,7 @@ RouterErrorMonitor::RouterErrorMonitor(std::shared_ptr<ProfileConfig> localProfi
 
 void RouterErrorMonitor::monitor(Router& router)
 {
-    router.on_connection_established.connect([this](int64_t screen_id, std::string ip_address){
-        auto ret = m_monitoringScreenIp.equal_range(screen_id);
-
-        for (auto it = ret.first; it != ret.second; ++it) {
-            if (it->second == ip_address) {
-                screen_reached(screen_id);
-
-                return;
-            }
-        }
-    });
-
-    router.on_connection_disconnected.connect([this](int64_t screen_id, std::string ip_address){
-        auto ret = m_monitoringScreenIp.equal_range(screen_id);
-        int count = m_monitoringScreenIp.count(screen_id);
-
-        for (auto it = ret.first; it != ret.second; ++it) {
-            if (it->second == ip_address) {
-                m_monitoringScreenIp.erase(it);
-
-                if (count - 1 == 0) {
-                    routerLog()->debug("Can't reach screen {} within your network", screen_id);
-                    screen_disjoint(screen_id);
-                }
-                else {
-                    routerLog()->debug("Still trying to connect to other {} address{} for screen {}",
-                                       count - 1, count == 2 ? "" : "es", screen_id);
-                }
-
-                return;
-            }
-        }
-    });
+    // TODO: implement
 }
 
 void RouterErrorMonitor::add(int64_t screenId, std::string Ip)

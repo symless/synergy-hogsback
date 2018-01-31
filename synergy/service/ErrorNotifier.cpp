@@ -42,7 +42,7 @@ void ErrorNotifier::install(CoreStatusMonitor &monitor)
 
 void ErrorNotifier::install(RouterErrorMonitor &monitor)
 {
-    monitor.screen_reached.connect([this](int64_t screen_id){
+    monitor.screenDiscovered.connect([this](int64_t screen_id){
         Screen screen = m_profileConfig.getScreen(screen_id);
 
         if (screen.errorCode() == ScreenError::kRouterUnreachableNode) {
@@ -53,7 +53,7 @@ void ErrorNotifier::install(RouterErrorMonitor &monitor)
         }
     });
 
-    monitor.screen_disjoint.connect([this](int64_t screen_id){
+    monitor.screenLost.connect([this](int64_t screen_id){
         Screen screen = m_profileConfig.getScreen(screen_id);
         Screen localScreen = m_profileConfig.getScreen(m_userConfig.screenId());
         screen.setErrorCode(ScreenError::kRouterUnreachableNode);

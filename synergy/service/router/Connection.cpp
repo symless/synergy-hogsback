@@ -9,11 +9,10 @@
 
 uint32_t Connection::next_connection_id_ = 0;
 
-Connection::Connection (int64_t screenId, tcp::socket&& socket,
+Connection::Connection (tcp::socket&& socket,
                         boost::asio::ssl::context& context):
         id_ (++next_connection_id_),
         socket_ (std::move (socket)),
-        screen_id_(screenId),
         remote_endpoint_ (socket_.remote_endpoint ()),
         stream_ (socket_, context),
         reader_ (stream_),
@@ -115,22 +114,6 @@ Connection::send (MessageHeader const& header, Message const& message) {
     }
 
     return true;
-}
-
-int64_t Connection::screen_id() const
-{
-    return screen_id_;
-}
-
-void Connection::set_screen_id(const int64_t &screen_id)
-{
-    auto original_screen_id = screen_id_;
-
-    screen_id_ = screen_id;
-
-    if (original_screen_id == -1 && screen_id_ != original_screen_id) {
-        identified(this->shared_from_this ());
-    }
 }
 
 tcp::endpoint Connection::endpoint() const

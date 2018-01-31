@@ -16,8 +16,8 @@ public:
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
 
-    signal<void(int64_t screen_id)> screen_reached;
-    signal<void(int64_t screen_id)> screen_disjoint;
+    signal<void(int64_t screen_id)> screenDiscovered;
+    signal<void(int64_t screen_id)> screenLost;
 
 private:
     void add(int64_t screenId, std::string Ip);
