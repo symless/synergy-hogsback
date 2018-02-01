@@ -106,9 +106,12 @@ void CloudClient::claimServer(int64_t serverId)
     static const std::string kUrlTarget = "/profile/server/claim";
     HttpSession* httpSession = newHttpSession();
 
+    int64_t profileVersion = m_remoteProfileConfig->profileVersion();
+
     tao::json::value root;
     root["screen_id"] = serverId;
     root["profile_id"] = profileId;
+    root["profile_version"] = profileVersion;
 
     httpSession->post(kUrlTarget, tao::json::to_string(root));
 }
