@@ -391,15 +391,14 @@ Rectangle {
                                     }
                                 }
 
+
                                 MenuItem {
                                     id: removeServerItem
-                                    property int screenIndex: -1
                                     onTriggered: {
-                                        screenIndex = screenManager.getModelIndex(
-                                                    op(screenIcon.x + 45),
-                                                    op(screenIcon.y + 45))
+                                        screenManager.removeScreen(name, true)
                                     }
                                 }
+
                             }
 
                             onPressed: {
@@ -413,7 +412,14 @@ Rectangle {
                                 }
                                 else {
                                     claimServerItem.text = "Share from " + name
-                                    removeServerItem.text = "Remove " + name
+                                    if (name != localHostname.hostname())
+                                    {
+                                        removeServerItem.text = "Remove " + name
+                                    }
+                                    else
+                                    {
+                                        removeServerItem.visible = false
+                                    }
                                     individualScreenMenu.popup()
                                 }
                             }
