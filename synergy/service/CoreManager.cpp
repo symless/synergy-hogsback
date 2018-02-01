@@ -108,25 +108,25 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     );
 
     m_process->screenStatusChanged.connect(
-        [server, this](std::string const& screenName, ScreenStatus state) {
-            server->publish ("synergy.screen.status", screenName, int(state));
+        [server, this](std::string const& screenName, ScreenStatus status) {
+            server->publish ("synergy.screen.status", screenName, int(status));
 
             // HACK: use a status record
             // reason: currently we still relying on UI to send status update
             // so we can't garantee always receive the lastest snapshot
             // solution: after moving request into service, we can use localProfileConfig
-            static std::map<std::string, ScreenStatus> lastSeenStatus;
-            auto it = lastSeenStatus.find(screenName);
-            if (it == lastSeenStatus.end()) {
-                lastSeenStatus[screenName] = ScreenStatus::kDisconnected;
+            auto it = m_lastSeenStatus.find(screenName);
+            if (it == m_lastSeenStatus.end()) {
+                m_lastSeenStatus[screenName] = ScreenStatus::kDisconnected;
             }
 
-            if (lastSeenStatus[screenName] != state) {
+            if (m_lastSeenStatus[screenName] != status) {
                 Screen screen = m_localProfileConfig->getScreen(screenName);
+                screen.status(status);
                 m_cloudClient->fakeScreenStatusUpdate(screen);
             }
 
-            lastSeenStatus[screenName] = state;
+            m_lastSeenStatus[screenName] = status;
         }
     );
 
@@ -186,6 +186,16 @@ CoreManager::CoreManager (boost::asio::io_service& io,
                 // sending this local claim will trigger clients to reconnect immediately
                 notifyServerClaim(m_userConfig->screenId());
             }
+        });
+    });
+
+    m_localProfileConfig->screenStatusChanged.connect([this](int64_t screenId){
+        m_ioService.post([this, screenId]() {
+            // HACK: update status record
+            // reason: this status record is used for adjusting the frequency of updating
+            // status after we moving update request into service
+            Screen screen = m_localProfileConfig->getScreen(screenId);
+            m_lastSeenStatus[screen.name()] = screen.status();
         });
     });
 
