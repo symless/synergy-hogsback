@@ -412,13 +412,10 @@ Rectangle {
                                 }
                                 else {
                                     claimServerItem.text = "Share from " + name
-                                    if (name != localHostname.hostname())
+                                    removeServerItem.text = "Remove " + name
+                                    if (name == localHostname.hostname() )
                                     {
-                                        removeServerItem.text = "Remove " + name
-                                    }
-                                    else
-                                    {
-                                        removeServerItem.visible = false
+                                        removeServerItem.enabled = false
                                     }
                                     individualScreenMenu.popup()
                                 }
