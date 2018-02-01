@@ -9,14 +9,19 @@
 
 static const char* const kUserConfigFilename = "synergy-user.cfg";
 
-UserConfig::UserConfig():
-    m_userToken(),
-    m_userId(-1),
-    m_profileId(-1),
-    m_screenId(-1),
-    m_debugLevel(kInfo),
-    m_dragAndDrop(false)
+UserConfig::UserConfig()
 {
+    reset();
+}
+
+void UserConfig::reset()
+{
+    m_userToken.clear();
+    m_userId = -1;
+    m_profileId = -1;
+    m_screenId = -1;
+    m_debugLevel = kInfo;
+    m_dragAndDrop = false;
 }
 
 std::string

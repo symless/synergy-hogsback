@@ -25,6 +25,7 @@ public:
     void write(std::string& message);
     void addHeader(std::string headerName, std::string headerContent);
     bool isConnected() const;
+    void shutdown() noexcept;
 
 public:
     template <typename... Args>
@@ -41,8 +42,6 @@ private:
     void onWebsocketHandshakeFinished(errorCode ec);
     void onReadFinished(errorCode ec);
     void onWriteFinished(errorCode ec);
-
-    void close() noexcept;
     void setTcpKeepAliveTimeout();
     void handleConnectError(bool reconnect, WebsocketError error = WebsocketError::kUnknown);
     void initSockets();
