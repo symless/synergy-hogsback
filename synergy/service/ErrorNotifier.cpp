@@ -30,7 +30,8 @@ void ErrorNotifier::install(CoreStatusMonitor &monitor)
     monitor.screenStatusChanged.connect([this](std::string const& screenName, ScreenStatus state){
         if (state == ScreenStatus::kConnected) {
             Screen screen = m_profileConfig.getScreen(screenName);
-            if (screen.errorCode() != ScreenError::kNone) {
+            if (screen.errorCode() != ScreenError::kRouterUnreachableNode &&
+                screen.errorCode() != ScreenError::kNone) {
                 screen.setErrorCode(ScreenError::kNone);
                 screen.setErrorMessage("");
 
