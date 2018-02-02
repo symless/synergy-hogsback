@@ -42,18 +42,17 @@ void ErrorNotifier::install(CoreStatusMonitor &monitor)
 
 void ErrorNotifier::install(RouterErrorMonitor &monitor)
 {
-    monitor.screenDiscovered.connect([this](int64_t screen_id){
+    monitor.screenReachable.connect([this](int64_t screen_id){
         Screen screen = m_profileConfig.getScreen(screen_id);
 
         if (screen.errorCode() == ScreenError::kRouterUnreachableNode) {
             screen.setErrorCode(ScreenError::kNone);
             screen.setErrorMessage("");
-
             m_cloudClient.updateScreenError(screen);
         }
     });
 
-    monitor.screenLost.connect([this](int64_t screen_id){
+    monitor.screenUnreachable.connect([this](int64_t screen_id){
         Screen screen = m_profileConfig.getScreen(screen_id);
         Screen localScreen = m_profileConfig.getScreen(m_userConfig.screenId());
         screen.setErrorCode(ScreenError::kRouterUnreachableNode);

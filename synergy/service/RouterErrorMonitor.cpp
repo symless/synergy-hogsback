@@ -1,52 +1,40 @@
 #include <synergy/service/RouterErrorMonitor.h>
-
 #include <synergy/service/router/Router.hpp>
 #include <synergy/service/ServiceLogs.h>
 #include <synergy/common/ProfileConfig.h>
 
-#include <boost/regex.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string/join.hpp>
-#include <boost/algorithm/string.hpp>
+struct RouterErrorScreenMonitor {
+    explicit RouterErrorScreenMonitor (int64_t screenId,
+                                       boost::asio::io_service&);
+    int64_t m_screenId;
+    boost::asio::steady_timer m_timer;
+    bool m_reachable = false;
+};
 
-RouterErrorMonitor::RouterErrorMonitor(std::shared_ptr<ProfileConfig> localProfileConfig) :
+RouterErrorMonitor::RouterErrorMonitor
+(std::shared_ptr<ProfileConfig> localProfileConfig, Router& router) :
     m_localProfileConfig (localProfileConfig)
 {
-    m_localProfileConfig->screenOnline.connect([this](Screen screen){
-        std::vector<std::string> ipList;
-        std::string ipListStr = screen.ipList();
+    m_localProfileConfig->screenSetChanged.connect
+    ([this](std::vector<Screen> addedScreens,
+            std::vector<Screen> removedScreens) {
 
-        boost::split(ipList, ipListStr, boost::is_any_of(","));
-
-        for(const auto& ipStr : ipList) {
-            add(screen.id(), ipStr);
+        /* Stop monitoring removed screens */
+        for (auto& removed: removedScreens) {
+            m_monitors.erase (std::remove_if (begin(m_monitors), end(m_monitors),
+                            [&](auto& monitor){
+                return (monitor->m_screenId == removed.id());
+            }), end(m_monitors));
         }
     });
-
-    m_localProfileConfig->screenOffline.connect([this](Screen screen){
-        remove(screen.id());
-    });
 }
 
-void RouterErrorMonitor::monitor(Router& router)
+RouterErrorMonitor::~RouterErrorMonitor()
 {
-    // TODO: implement
 }
 
-void RouterErrorMonitor::add(int64_t screenId, std::string Ip)
-{
-    auto ret = m_monitoringScreenIp.equal_range(screenId);
-
-    for (auto it = ret.first; it != ret.second; ++it) {
-        if (it->second == Ip) {
-            return;
-        }
-    }
-
-    m_monitoringScreenIp.insert(std::pair<int64_t, std::string>(screenId, Ip));
-}
-
-void RouterErrorMonitor::remove(int64_t screenId)
-{
-    m_monitoringScreenIp.erase(screenId);
+RouterErrorScreenMonitor::RouterErrorScreenMonitor
+(int64_t const screenId, asio::io_service& ioService):
+    m_screenId(screenId),
+    m_timer (ioService) {
 }

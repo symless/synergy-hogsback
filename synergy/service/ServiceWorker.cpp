@@ -31,7 +31,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_rpc (std::make_unique<RpcManager>(m_ioService)),
     m_cloudClient (std::make_shared<CloudClient>(ioService, m_userConfig, m_remoteProfileConfig)),
     m_router (ioService, kNodePort),
-    m_routerMonitor(std::make_unique<RouterErrorMonitor>(m_localProfileConfig)),
+    m_routerMonitor(std::make_unique<RouterErrorMonitor>(m_localProfileConfig, m_router)),
     m_coreManager (std::make_unique<CoreManager>(m_ioService, m_userConfig, m_localProfileConfig, m_cloudClient, *m_rpc, m_router)),
     m_sessionMonitor (std::make_unique<SessionMonitor>(ioService)),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService)),
@@ -142,8 +142,6 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             }
         });
     });
-
-    m_routerMonitor->monitor(m_router);
 
     m_errorNotifier->install(m_coreManager->errorMonitor());
     m_errorNotifier->install(m_coreManager->statusMonitor());

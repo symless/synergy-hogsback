@@ -18,7 +18,7 @@ stringToScreenStatus (std::string const& str)
     if (str == "Connected") {
         status = ScreenStatus::kConnected;
     }
-    else if (str == "Connecting") {
+    else if ((str == "Connecting") || (str == "ConnectingWithError")) {
         status = ScreenStatus::kConnecting;
     }
     else if (str == "Disconnected") {
@@ -27,7 +27,7 @@ stringToScreenStatus (std::string const& str)
     else if (str == "Inactive") {
         status = ScreenStatus::kInactive;
     } else {
-        throw;
+       throw;
     }
 
     return status;
