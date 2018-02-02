@@ -57,6 +57,8 @@ public:
         return id_;
     }
 
+    asio::io_service& getIoService();
+
     bool started () const noexcept;
     void start (const uint32_t id, std::string name);
     void shutdown ();

@@ -177,6 +177,12 @@ Router::Router (asio::io_service& io, std::uint16_t const port)
     }
 }
 
+asio::io_service&
+Router::getIoService()
+{
+    return acceptor_.get_io_service();
+}
+
 bool
 Router::started () const noexcept {
     return running_;

@@ -22,6 +22,7 @@ public:
     signal<void(int64_t)> screenUnreachable;
 
 private:
+    Router& m_router;
     std::shared_ptr<ProfileConfig> m_localProfileConfig;
     std::vector<std::unique_ptr<RouterErrorScreenMonitor>> m_monitors;
 };
