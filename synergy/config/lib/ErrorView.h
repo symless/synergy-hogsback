@@ -18,6 +18,7 @@ public:
     Q_PROPERTY(bool visible READ visible NOTIFY modeChanged)
     Q_PROPERTY(bool retrying READ retrying NOTIFY retryingChanged)
     Q_PROPERTY(QString message READ message NOTIFY modeChanged)
+    Q_PROPERTY(QString help READ help NOTIFY modeChanged)
 
     bool visible() const;
     bool retrying() const;
@@ -25,6 +26,7 @@ public:
     void setMode(const ErrorViewMode &mode);
     Q_INVOKABLE void retry();
     QString message() const;
+    QString help() const;
 
 private:
     void setRetrying(bool retrying);

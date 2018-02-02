@@ -271,6 +271,20 @@ Rectangle {
                 anchors.margins: errorMessageText.anchors.margins
                 visible: errorView.retrying
             }
+
+            // error help link
+            Text {
+                id: errorHelpLink
+                text: applicationWindow.errorView.help
+                font.underline: true
+                font.pixelSize: errorMessageText.font.pixelSize
+                color: errorMessageText.color
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.margins: errorMessageText.anchors.margins
+                onLinkActivated: Qt.openUrlExternally(link)
+
+            }
         }
 
         // log upload banner
