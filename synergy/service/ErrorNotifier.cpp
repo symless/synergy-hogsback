@@ -56,6 +56,12 @@ void ErrorNotifier::install(RouterErrorMonitor &monitor)
     monitor.screenUnreachable.connect([this](int64_t screen_id){
         Screen screen = m_profileConfig.getScreen(screen_id);
         Screen localScreen = m_profileConfig.getScreen(m_userConfig.screenId());
+
+        // local machine is always reachable to itself
+        if (screen.name() == localScreen.name()) {
+            return;
+        }
+
         screen.setErrorCode(ScreenError::kRouterUnreachableNode);
         std::string errorMessage;
         errorMessage = localScreen.name();
