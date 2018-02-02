@@ -22,6 +22,7 @@ public:
 
     void claimServer(int64_t serverId);
     void reconnectWebsocket();
+    void shutdownWebsocket();
     bool isWebsocketConnected() const;
     void fakeScreenStatusUpdate(Screen &screen);
 

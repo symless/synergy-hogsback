@@ -18,6 +18,8 @@ public:
     UserConfig();
     virtual ~UserConfig() = default;
 
+    void reset();
+
     static std::string defaultFilePath();
     void load (std::istream& outputStream);
     void load (std::string const& filepath = defaultFilePath());

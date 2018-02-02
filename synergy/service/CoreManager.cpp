@@ -170,14 +170,28 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     });
 
     m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen> const&,
-                                                          std::vector<Screen> const&) {
+                                                          std::vector<Screen> const& removed) {
+
+        auto removedLocal = std::find_if (begin(removed), end(removed), [this](auto const& screen) {
+            return (screen.id() == m_userConfig->screenId());
+        });
+
+        if (removedLocal != end(removed)) {
+            serviceLog()->debug ("Local screen removed from profile");
+            m_cloudClient->shutdownWebsocket();
+            m_userConfig->reset();
+            m_userConfig->save();
+            m_rpc.server()->publish ("synergy.auth.logout");
+            m_process->shutdown();
+            return;
+        }
+
         m_ioService.post([this]() {
             auto processMode = m_process->processMode();
-
-            serviceLog()->debug ("restarting core because local profile screen "
-                                 "set changed, mode={}",
-                                 processModeToString(processMode));
             if (processMode == ProcessMode::kServer) {
+                serviceLog()->debug ("restarting core because local profile screen "
+                                     "set changed, mode={}",
+                                     processModeToString(processMode));
                 m_process->startServer();
 
                 // HACK: send server claim in local network

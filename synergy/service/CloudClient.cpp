@@ -122,6 +122,11 @@ CloudClient::reconnectWebsocket()
     m_websocket.reconnect(true);
 }
 
+void CloudClient::shutdownWebsocket()
+{
+    m_websocket.shutdown();
+}
+
 bool
 CloudClient::isWebsocketConnected() const
 {
