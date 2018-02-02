@@ -23,24 +23,8 @@ RouterErrorMonitor::RouterErrorMonitor
     m_localProfileConfig (localProfileConfig)
 {
     m_localProfileConfig->screenSetChanged.connect
-    ([this](std::vector<Screen> addedScreens,
+    ([this](std::vector<Screen>,
             std::vector<Screen> removedScreens) {
-
-        /* Start monitoring added screens */
-        for (auto& screen: addedScreens) {
-            m_monitors.push_back (std::make_unique<RouterErrorScreenMonitor>
-                                  (screen.id(), m_router.getIoService()));
-            auto& monitor = m_monitors.back();
-
-            monitor->onReachable.connect ([this](int64_t const screenId) {
-                this->screenReachable (screenId);
-            });
-
-            monitor->onUnreachable.connect ([this](int64_t const screenId) {
-                this->screenUnreachable (screenId);
-            });
-        }
-
         /* Stop monitoring removed screens */
         for (auto& screen: removedScreens) {
             m_monitors.erase (std::remove_if (begin(m_monitors), end(m_monitors),
@@ -48,6 +32,27 @@ RouterErrorMonitor::RouterErrorMonitor
                 return (monitor->m_screenId == screen.id());
             }), end(m_monitors));
         }
+    });
+
+    m_localProfileConfig->screenOnline.connect ([this](Screen screen) {
+        m_monitors.push_back (std::make_unique<RouterErrorScreenMonitor>
+                              (screen.id(), m_router.getIoService()));
+        auto& monitor = m_monitors.back();
+
+        monitor->onReachable.connect ([this](int64_t const screenId) {
+            this->screenReachable (screenId);
+        });
+
+        monitor->onUnreachable.connect ([this](int64_t const screenId) {
+            this->screenUnreachable (screenId);
+        });
+    });
+
+    m_localProfileConfig->screenOffline.connect ([this](Screen screen) {
+        m_monitors.erase (std::remove_if (begin(m_monitors), end(m_monitors),
+                            [&](auto& monitor){
+            return (monitor->m_screenId == screen.id());
+        }), end(m_monitors));
     });
 
     m_router.on_node_reachable.connect([this](int64_t const screenId) {
