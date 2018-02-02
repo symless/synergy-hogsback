@@ -275,7 +275,7 @@ Rectangle {
             // error help link
             Text {
                 id: errorHelpLink
-                text: applicationWindow.errorView.help
+                text: errorView.help
                 font.underline: true
                 font.pixelSize: errorMessageText.font.pixelSize
                 color: errorMessageText.color
@@ -283,6 +283,7 @@ Rectangle {
                 anchors.right: parent.right
                 anchors.margins: errorMessageText.anchors.margins
                 onLinkActivated: Qt.openUrlExternally(link)
+                visible: true
 
             }
         }
