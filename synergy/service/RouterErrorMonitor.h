@@ -21,6 +21,8 @@ public:
     signal<void(int64_t)> screenReachable;
     signal<void(int64_t)> screenUnreachable;
 
+    RouterErrorScreenMonitor& addScreen (int64_t screenId, bool &added);
+
 private:
     Router& m_router;
     std::shared_ptr<ProfileConfig> m_localProfileConfig;
