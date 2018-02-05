@@ -6,6 +6,7 @@
 #include <synergy/service/CloudClient.h>
 #include <synergy/common/ProfileConfig.h>
 #include <synergy/common/ScreenError.h>
+#include <synergy/service/ServiceLogs.h>
 
 ErrorNotifier::ErrorNotifier(CloudClient& cloudClient, ProfileConfig& profileConfig, UserConfig& userConfig) :
     m_cloudClient(cloudClient),
@@ -47,9 +48,14 @@ void ErrorNotifier::install(RouterErrorMonitor &monitor)
         Screen screen = m_profileConfig.getScreen(screen_id);
 
         if (screen.errorCode() == ScreenError::kRouterUnreachableNode) {
+            serviceLog()->debug("Clearing screen {} error state", screen.id());
             screen.setErrorCode(ScreenError::kNone);
             screen.setErrorMessage("");
             m_cloudClient.updateScreenError(screen);
+        } else {
+            serviceLog()->debug("Ignoring reachable screen error update. Screen ID = {}, "
+                                "Existing error = '{}'",
+                                screen.id(), screen.errorMessage());
         }
     });
 

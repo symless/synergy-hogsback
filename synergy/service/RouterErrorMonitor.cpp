@@ -33,6 +33,7 @@ RouterErrorMonitor::RouterErrorMonitor
         }
         else {
             if (!screenMonitor.m_timerRunning) {
+                serviceLog()->debug ("Screen {} is now online", screen.id());
                 screenMonitor.notify();
             }
         }
@@ -53,6 +54,7 @@ RouterErrorMonitor::RouterErrorMonitor
 
         if (!added) {
             if (!screenMonitor.m_timerRunning) {
+                serviceLog()->debug ("Screen {} is now reachable over the LAN", screenId);
                 screenMonitor.notify();
             }
         }
@@ -128,12 +130,14 @@ void
 RouterErrorScreenMonitor::startTimer()
 {
     m_timer.expires_from_now (std::chrono::seconds(3));
+    serviceLog()->debug ("Waiting for screen {} to become reachable", m_screenId);
     m_timer.async_wait ([this](auto ec) {
         if (ec == boost::asio::error::operation_aborted) {
             return;
         } else if (ec) {
             // TODO
         }
+        serviceLog()->debug ("Screen {} reachable timer expired", m_screenId);
         this->notify();
     });
 }
@@ -142,8 +146,10 @@ void
 RouterErrorScreenMonitor::notify()
 {
     if (m_reachable) {
+        serviceLog()->debug ("Screen {} became reachable", m_screenId);
         onReachable (m_screenId);
     } else {
+        serviceLog()->debug ("Screen {} became unreachable", m_screenId);
         onUnreachable (m_screenId);
     }
 }
