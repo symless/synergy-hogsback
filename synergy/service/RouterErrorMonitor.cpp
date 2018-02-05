@@ -9,6 +9,7 @@ struct RouterErrorScreenMonitor {
 
     void setReachable(bool reachable);
     void startTimer();
+    void stopTimer();
     void notify();
 
     int64_t m_screenId;
@@ -34,16 +35,22 @@ RouterErrorMonitor::RouterErrorMonitor
         else {
             if (!screenMonitor.m_timerRunning) {
                 serviceLog()->debug ("Screen {} is now online", screen.id());
-                screenMonitor.notify();
+                screenMonitor.startTimer();
             }
         }
     });
 
     m_localProfileConfig->screenOffline.connect ([this](Screen const& screen) {
-        m_monitors.erase (std::remove_if (begin(m_monitors), end(m_monitors),
-                            [&](auto& monitor) {
-            return (monitor->m_screenId == screen.id());
-        }), end(m_monitors));
+        auto monitor = std::find_if (begin(m_monitors), end(m_monitors),
+                                     [screenId = screen.id()](auto& monitor){
+           return (monitor->m_screenId == screenId);
+        });
+
+        if (monitor == end(m_monitors)) {
+            return;
+        }
+
+        (*monitor)->stopTimer();
     });
 
     m_router.on_node_reachable.connect([this](int64_t const screenId) {
@@ -129,19 +136,31 @@ RouterErrorScreenMonitor::setReachable(bool reachable)
 void
 RouterErrorScreenMonitor::startTimer()
 {
-    m_timerRunning = true;
     m_timer.expires_from_now (std::chrono::seconds(3));
+    m_timerRunning = true;
+
     serviceLog()->debug ("Waiting for screen {} to become reachable", m_screenId);
     m_timer.async_wait ([this](auto ec) {
+        m_timerRunning = false;
         if (ec == boost::asio::error::operation_aborted) {
             return;
         } else if (ec) {
             // TODO
         }
-        m_timerRunning = false;
+
         serviceLog()->debug ("Screen {} reachable timer expired", m_screenId);
         this->notify();
     });
+}
+
+void
+RouterErrorScreenMonitor::stopTimer()
+{
+    if (!m_timerRunning) {
+        return;
+    }
+    m_timer.cancel();
+    m_timer.get_io_service().poll();
 }
 
 void
