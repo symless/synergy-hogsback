@@ -5,3 +5,5 @@ bin/
 *.pro.user
 *.DS_Store
 *.log
+/cmake-build-debug
+/.idea
