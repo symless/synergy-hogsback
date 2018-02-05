@@ -552,7 +552,7 @@ Rectangle {
                                 height: dp(screenListModel.screenIconHeight() * 1.5)
                                 smooth: true
                                 visible: errorIndication.visible && screenArrangement.shownDialogIndex === index
-                                fillMode: Image.PreserveAspectFit
+                                fillMode: Image.Stretch
                                 source: "qrc:/res/image/error-message-dialog.png"
 
                                 Image {
