@@ -113,8 +113,8 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     );
 
     m_process->statusMonitor().screenStatusChanged.connect(
-        [server, this](std::string const& screenName, ScreenStatus state) {
-            server->publish ("synergy.screen.status", screenName, int(state));
+        [server, this](std::string const& screenName, ScreenStatus status) {
+            server->publish ("synergy.screen.status", screenName, int(status));
 
             // HACK: use a status record
             // reason: currently we still relying on UI to send status update
