@@ -129,6 +129,7 @@ RouterErrorScreenMonitor::setReachable(bool reachable)
 void
 RouterErrorScreenMonitor::startTimer()
 {
+    m_timerRunning = true;
     m_timer.expires_from_now (std::chrono::seconds(3));
     serviceLog()->debug ("Waiting for screen {} to become reachable", m_screenId);
     m_timer.async_wait ([this](auto ec) {
@@ -137,6 +138,7 @@ RouterErrorScreenMonitor::startTimer()
         } else if (ec) {
             // TODO
         }
+        m_timerRunning = false;
         serviceLog()->debug ("Screen {} reachable timer expired", m_screenId);
         this->notify();
     });
