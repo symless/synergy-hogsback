@@ -12,6 +12,7 @@
 class UserConfig;
 class HttpSession;
 class ProfileConfig;
+class Screen;
 
 class CloudClient
 {
@@ -24,8 +25,9 @@ public:
     void updateScreen(Screen& screen);
     void updateScreenError(Screen& screen);
     void reconnectWebsocket();
+    void shutdownWebsocket();
     bool isWebsocketConnected() const;
-    void fakeScreenStatusUpdate();
+    void fakeScreenStatusUpdate(Screen &screen);
 
 private:
     void load(const UserConfig &userConfig);

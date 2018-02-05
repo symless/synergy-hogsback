@@ -67,9 +67,6 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         // forward the message via rpc server to config UI
         auto rpcServer = m_rpc->server();
         rpcServer->publish("synergy.profile.snapshot", std::move(json));
-
-        // HACK: say that the cloud server is online when there is a snapshot
-        m_rpc->server()->publish("synergy.cloud.online");
     });
 
     m_cloudClient->websocketConnected.connect([this](){
@@ -233,15 +230,9 @@ void ServiceWorker::provideSnapshot()
         if (!m_lastProfileSnapshot.empty()) {
             serviceLog()->debug("sending last profile snapshot");
             m_rpc->server()->publish("synergy.profile.snapshot", m_lastProfileSnapshot);
-
-            // HACK: say that the cloud server is online when there is a snapshot
-            m_rpc->server()->publish("synergy.cloud.online");
         }
         else {
             serviceLog()->error("can't send profile snapshot, not yet received from cloud");
-
-            // HACK: say that the cloud server is offline when there's no snapshot
-            m_rpc->server()->publish("synergy.cloud.offline");
         }
     });
 }
@@ -254,7 +245,8 @@ ServiceWorker::provideHello()
 
         serviceLog()->debug("saying hello to config ui");
 
-        if (!m_cloudClient->isWebsocketConnected()) {
+        if (!m_cloudClient->isWebsocketConnected() &&
+            m_userConfig->profileId() != -1) {
             m_rpc->server()->publish("synergy.cloud.offline");
 
             m_cloudClient->reconnectWebsocket();

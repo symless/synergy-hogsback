@@ -52,8 +52,6 @@ void ScreenManager::moveModel(int index, int offsetX, int offsetY)
 void ScreenManager::printBoundingBoxInfo()
 {
     m_arrangementStrategy->printDebugInfo();
-
-    LogManager::debug(QString("latest config serial: %1").arg(m_latestConfigSerial));
 }
 
 ScreenListModel* ScreenManager::screenListModel() const

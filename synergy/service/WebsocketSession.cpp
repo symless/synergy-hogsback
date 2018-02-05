@@ -48,7 +48,7 @@ WebsocketSession::WebsocketSession(boost::asio::io_service &ioService,
 
 WebsocketSession::~WebsocketSession()
 {
-    close();
+    shutdown();
 }
 
 void
@@ -102,7 +102,7 @@ WebsocketSession::reconnect(bool now)
         serviceLog()->debug("retrying websocket connection in {}s", reconnectDelay);
     }
 
-    close();
+    shutdown();
 
     m_reconnectTimer.cancel();
     m_reconnectTimer.expires_from_now(boost::posix_time::seconds(reconnectDelay));
@@ -255,7 +255,7 @@ WebsocketSession::onWriteFinished(errorCode ec)
     }
 }
 
-void WebsocketSession::close() noexcept
+void WebsocketSession::shutdown() noexcept
 {
     if (m_connected) {
         serviceLog()->debug("closing existing websocket connection");

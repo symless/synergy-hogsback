@@ -105,6 +105,7 @@ Screen::apply(ScreenSnapshot const& ss)
     m_ipList = ss.ipList;
 
     m_version = ss.version;
+
     m_errorCode = static_cast<ScreenError>(ss.error_code);
     m_errorMessage = ss.error_message;
 }

@@ -1,9 +1,10 @@
 #include <synergy/service/CloudClient.h>
 
 #include <synergy/service/ServiceLogs.h>
-#include <synergy/common/ProfileConfig.h>
 #include <synergy/service/HttpSession.h>
+#include <synergy/common/ProfileConfig.h>
 #include <synergy/common/UserConfig.h>
+#include <synergy/common/Screen.h>
 #include <synergy/service/App.h>
 
 #include <tao/json.hpp>
@@ -105,9 +106,12 @@ void CloudClient::claimServer(int64_t serverId)
     static const std::string kUrlTarget = "/profile/server/claim";
     HttpSession* httpSession = newHttpSession();
 
+    int64_t profileVersion = m_remoteProfileConfig->profileVersion();
+
     tao::json::value root;
     root["screen_id"] = serverId;
     root["profile_id"] = profileId;
+    root["profile_version"] = profileVersion;
 
     httpSession->post(kUrlTarget, tao::json::to_string(root));
 }
@@ -148,18 +152,29 @@ CloudClient::reconnectWebsocket()
     m_websocket.reconnect(true);
 }
 
+void CloudClient::shutdownWebsocket()
+{
+    m_websocket.shutdown();
+}
+
 bool
 CloudClient::isWebsocketConnected() const
 {
     return m_websocket.isConnected();
 }
 
-void CloudClient::fakeScreenStatusUpdate()
+void CloudClient::fakeScreenStatusUpdate(Screen& screen)
 {
     static const std::string kUrlTarget = "/dummy/screen/status/update";
     HttpSession* httpSession = newHttpSession();
 
-    httpSession->get(kUrlTarget);
+    tao::json::value root;
+    root["id"] = screen.id();
+    root["name"] = screen.name();
+    root["status"] = static_cast<int>(screen.status());
+    root["version"] = screen.version();
+
+    httpSession->post(kUrlTarget, tao::json::to_string(root));
 }
 
 HttpSession* CloudClient::newHttpSession()
