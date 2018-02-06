@@ -264,6 +264,8 @@ void WebsocketSession::shutdown() noexcept
     if (m_connected) {
         serviceLog()->debug("closing existing websocket connection");
         errorCode ec;
+        m_reconnectTimer.cancel();
+        m_reconnectTimer.get_io_service().poll();
         m_websocket->close(websocket::close_code::normal, ec);
         m_connecting = false;
         m_connected = false;
