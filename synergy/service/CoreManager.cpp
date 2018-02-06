@@ -4,6 +4,7 @@
 #include <synergy/common/RpcManager.h>
 #include <synergy/common/WampServer.h>
 #include <synergy/common/UserConfig.h>
+#include <synergy/common/Hostname.h>
 #include <synergy/service/ServiceLogs.h>
 #include <synergy/service/CoreProcess.h>
 #include <synergy/service/CloudClient.h>
@@ -80,7 +81,7 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     m_serverProxy (io, m_router, kServerProxyPort),
     m_clientProxy (io, m_router, kServerPort)
 {
-    m_processCommand->setLocalHostname(boost::asio::ip::host_name());
+    m_processCommand->setLocalHostname(localHostname());
 
     m_messageHandler = std::make_unique<ClaimMessageHandler> (*this);
     m_router.on_receive.connect (*m_messageHandler);
@@ -214,13 +215,13 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     });
 
     if (m_userConfig->screenId() != -1) {
-        m_router.start (m_userConfig->screenId(), boost::asio::ip::host_name());
+        m_router.start (m_userConfig->screenId(), localHostname());
         m_clientProxy.start ();
     }
     else {
         m_userConfig->updated.connect_extended ([this](const auto& connection) {
             if (m_userConfig->screenId() != -1) {
-                m_router.start (m_userConfig->screenId(), boost::asio::ip::host_name());
+                m_router.start (m_userConfig->screenId(), localHostname());
                 m_clientProxy.start ();
                 connection.disconnect();
             }
