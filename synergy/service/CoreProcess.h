@@ -32,6 +32,7 @@ public:
     void startServer();
     void startClient(int serverId);
     CoreStatusMonitor& statusMonitor() const;
+    void setDisabled(bool disabled);
 
 public:
     template <typename... Args>
@@ -42,6 +43,7 @@ public:
     signal<void()> localInputDetected;
     signal<void()> serverReady;
     signal<void(std::string const& line)> output;
+
 
 private:
     void writeConfigurationFile();
@@ -58,4 +60,5 @@ private:
     std::vector<std::string> m_lastCommand;
     std::shared_ptr<ProcessCommand> m_processCommand;
     std::unique_ptr<CoreStatusMonitor> m_statusMonitor;
+    bool m_disabled;
 };

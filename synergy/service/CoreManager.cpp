@@ -4,6 +4,7 @@
 #include <synergy/common/RpcManager.h>
 #include <synergy/common/WampServer.h>
 #include <synergy/common/UserConfig.h>
+#include <synergy/common/Hostname.h>
 #include <synergy/service/ServiceLogs.h>
 #include <synergy/service/CoreProcess.h>
 #include <synergy/service/CoreStatusMonitor.h>
@@ -84,8 +85,12 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     m_serverProxy (io, m_router, kServerProxyPort),
     m_clientProxy (io, m_router, kServerPort)
 {
+<<<<<<< HEAD
     // TODO: unify hostname between UI and service
     m_processCommand->setLocalHostname(boost::asio::ip::host_name());
+=======
+    m_processCommand->setLocalHostname(localHostname());
+>>>>>>> master
 
     m_messageHandler = std::make_unique<ClaimMessageHandler> (*this);
     m_router.on_receive.connect (*m_messageHandler);
@@ -170,7 +175,7 @@ CoreManager::CoreManager (boost::asio::io_service& io,
         });
     });
 
-    m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen> const&,
+    m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen> const& added,
                                                           std::vector<Screen> const& removed) {
 
         auto removedLocal = std::find_if (begin(removed), end(removed), [this](auto const& screen) {
@@ -183,7 +188,18 @@ CoreManager::CoreManager (boost::asio::io_service& io,
             m_userConfig->save();
             m_cloudClient->shutdownWebsocket();
             m_rpc.server()->publish ("synergy.auth.logout");
+            m_process->setDisabled(true);
             m_process->shutdown();
+            return;
+        }
+
+        auto addedLocal = std::find_if (begin(added), end(added), [this](auto const& screen) {
+            return (screen.id() == m_userConfig->screenId());
+        });
+
+        if (addedLocal != end(added)) {
+            m_process->setDisabled(false);
+            restart();
             return;
         }
 
@@ -215,13 +231,13 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     });
 
     if (m_userConfig->screenId() != -1) {
-        m_router.start (m_userConfig->screenId(), boost::asio::ip::host_name());
+        m_router.start (m_userConfig->screenId(), localHostname());
         m_clientProxy.start ();
     }
     else {
         m_userConfig->updated.connect_extended ([this](const auto& connection) {
             if (m_userConfig->screenId() != -1) {
-                m_router.start (m_userConfig->screenId(), boost::asio::ip::host_name());
+                m_router.start (m_userConfig->screenId(), localHostname());
                 m_clientProxy.start ();
                 connection.disconnect();
             }

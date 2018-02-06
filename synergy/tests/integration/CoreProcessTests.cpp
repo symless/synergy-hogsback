@@ -3,6 +3,7 @@
 #include <synergy/common/ProfileConfig.h>
 #include <synergy/service/router/Router.hpp>
 #include <synergy/common/ProcessCommand.h>
+#include <synergy/common/Hostname.h>
 
 #include <catch.hpp>
 #include <fakeit.hpp>
@@ -59,14 +60,14 @@ TEST_CASE("Start and stop core process in different modes", "[CoreProcess]" ) {
 
     fakeit::When(Method(processCommandMock, generate).Using(true)).AlwaysDo([](...){
         ProcessCommand tempProcessCommand;
-        tempProcessCommand.setLocalHostname(boost::asio::ip::host_name());
+        tempProcessCommand.setLocalHostname(localHostname());
         std::vector<std::string> cmds = tempProcessCommand.generate(true);
         cmds[0] = "synergy-core";
         return cmds;
     });
     fakeit::When(Method(processCommandMock, generate).Using(false)).AlwaysDo([](...){
         ProcessCommand tempProcessCommand;
-        tempProcessCommand.setLocalHostname(boost::asio::ip::host_name());
+        tempProcessCommand.setLocalHostname(localHostname());
         std::vector<std::string> cmds = tempProcessCommand.generate(false);
         cmds[0] = "synergy-core";
         return cmds;
