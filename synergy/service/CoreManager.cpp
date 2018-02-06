@@ -170,7 +170,7 @@ CoreManager::CoreManager (boost::asio::io_service& io,
         });
     });
 
-    m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen> const&,
+    m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen> const& added,
                                                           std::vector<Screen> const& removed) {
 
         auto removedLocal = std::find_if (begin(removed), end(removed), [this](auto const& screen) {
@@ -183,8 +183,17 @@ CoreManager::CoreManager (boost::asio::io_service& io,
             m_userConfig->save();
             m_cloudClient->shutdownWebsocket();
             m_rpc.server()->publish ("synergy.auth.logout");
+            m_process->setDisabled(true);
             m_process->shutdown();
             return;
+        }
+
+        auto addedLocal = std::find_if (begin(added), end(added), [this](auto const& screen) {
+            return (screen.id() == m_userConfig->screenId());
+        });
+
+        if (addedLocal != end(added)) {
+            m_process->setDisabled(false);
         }
 
         m_ioService.post([this]() {

@@ -30,6 +30,7 @@ public:
     void shutdown();
     void startServer();
     void startClient(int serverId);
+    void setDisabled(bool disabled);
 
 public:
     template <typename... Args>
@@ -42,6 +43,7 @@ public:
     signal<void(std::string const& line)> output;
     signal<void(std::string const& screenName)> screenConnectionError;
     signal<void(std::string const& screenName, ScreenStatus status)> screenStatusChanged;
+
 
 private:
     void writeConfigurationFile();
@@ -57,4 +59,5 @@ private:
     std::vector<std::string> m_nextCommand;
     std::vector<std::string> m_lastCommand;
     std::shared_ptr<ProcessCommand> m_processCommand;
+    bool m_disabled;
 };

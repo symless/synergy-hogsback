@@ -30,7 +30,8 @@ CoreProcess::CoreProcess (boost::asio::io_service& io,
     m_retryTimer (io),
     m_processMode(ProcessMode::kUnknown),
     m_currentServerId(-1),
-    m_processCommand(processCommand)
+    m_processCommand(processCommand),
+    m_disabled(false)
 {
     expectedExit.connect ([this]() {
         m_impl.reset();
@@ -153,6 +154,11 @@ CoreProcess::startClient(int const serverId)
 void
 CoreProcess::start (std::vector<std::string> command)
 {
+    if (m_disabled) {
+        serviceLog()->debug("core process is disabled");
+        return;
+    }
+
     using boost::algorithm::contains;
     boost::system::error_code ec;
     m_retryTimer.cancel (ec);
@@ -279,4 +285,9 @@ CoreProcess::writeConfigurationFile()
 {
     auto configPath = DirectoryManager::instance()->profileDir() / kCoreConfigFile;
     createConfigFile(configPath.string(), m_localProfileConfig->screens());
+}
+
+void CoreProcess::setDisabled(bool disabled)
+{
+    m_disabled = disabled;
 }
