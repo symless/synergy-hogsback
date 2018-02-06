@@ -127,7 +127,7 @@ void CloudClient::getUserId(bool initialCall)
     }
 }
 
-void CloudClient::unsubProfile(int screenId)
+void CloudClient::unsubProfile(int screenId, int profileVersion)
 {
     if (screenId == -1) {
         LogManager::debug(QString("can not unsub an unknown screen"));
@@ -141,6 +141,7 @@ void CloudClient::unsubProfile(int screenId)
     QJsonObject jsonObject;
     jsonObject.insert("screen_id", qint64(screenId));
     jsonObject.insert("profile_id", qint64(m_profileId));
+    jsonObject.insert("profile_version", qint64(profileVersion));
     QJsonDocument doc (jsonObject);
 
     auto reply = m_networkManager->post(req, doc.toJson());
