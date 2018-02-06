@@ -23,6 +23,10 @@ std::string const kServiceUserAgentFilename = "com.symless.synergy.synergy-servi
 auto const kServiceUserAgentPListTargetPath = "/Library/LaunchAgents/" + kServiceUserAgentFilename;
 auto const kServiceUserAgentPListSourcePath = kAppResourcePath + "/" + kServiceUserAgentFilename;
 
+std::string const kUserDirectory = ( getenv("HOME") );
+auto const kUserFilesDirectory = kUserDirectory + "/Library/Synergy";
+auto const kUserPreferencesDirectory = kUserDirectory + "/Library/Preferences/Symless";
+
 // This file was made redundant in v2.0-beta4. If you're reading this in 2018 or later, you can
 // probably remove this.
 auto const kServiceLegacyUserAgentPListPath = "/Library/LaunchAgents/com.symless.synergy.v2.synergyd.plist";
@@ -95,7 +99,21 @@ main (int, const char*[])
             boost::filesystem::remove (kHelperExecPath, ec);
             log() << fmt::format ("[{}] uninstalling helper executable... {}\n",
                                   timestamp(), ec ? "Failed" : "OK");
-            
+
+            // remove the preference and user files too
+
+            boost::filesystem::remove_all (kUserFilesDirectory, ec);
+            log() << fmt::format ("[{}] removing {} {}\n",
+                                  timestamp(),
+                                  kUserFilesDirectory,
+                                  ec ? "Failed" : "OK");
+
+            boost::filesystem::remove_all (kUserPreferencesDirectory, ec);
+            log() << fmt::format ("[{}] removing {} {}\n",
+                                  timestamp(),
+                                  kUserPreferencesDirectory,
+                                  ec ? "Failed" : "OK");
+
             return EXIT_SUCCESS;
         }
 
