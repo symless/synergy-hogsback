@@ -166,7 +166,8 @@ bool ScreenManager::removeScreen(QString name, bool notify)
 
         // notify cloud
         if (s.id() != -1) {
-            m_cloudClient->unsubProfile(s.id());
+            m_cloudClient->unsubProfile(s.id(), m_configVersion);
+            m_configVersion++;
         }
     }
 
