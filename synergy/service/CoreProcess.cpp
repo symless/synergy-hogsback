@@ -141,8 +141,6 @@ CoreProcess::start (std::vector<std::string> command)
         return;
     }
 
-    using boost::algorithm::contains;
-
     boost::system::error_code ec;
     m_retryTimer.cancel (ec);
 
