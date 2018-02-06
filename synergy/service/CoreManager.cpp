@@ -194,6 +194,8 @@ CoreManager::CoreManager (boost::asio::io_service& io,
 
         if (addedLocal != end(added)) {
             m_process->setDisabled(false);
+            restart();
+            return;
         }
 
         m_ioService.post([this]() {
