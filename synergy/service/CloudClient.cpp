@@ -57,7 +57,7 @@ CloudClient::load(UserConfig const& userConfig)
     auto const profileId = userConfig.profileId();
     auto const userToken = userConfig.userToken();
 
-    if ((profileId != m_lastProfileId) || (userToken != m_lastUserToken)) {
+    if ((profileId != -1) && ((profileId != m_lastProfileId) || (userToken != m_lastUserToken))) {
 
         auto versionCheck = userConfig.versionCheck();
         auto versionString = SYNERGY_VERSION_STRING;
