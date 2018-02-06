@@ -79,18 +79,13 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     m_processCommand (std::make_shared<ProcessCommand>()),
     m_process (std::make_unique<CoreProcess>(m_ioService, m_userConfig, m_localProfileConfig, m_processCommand)),
     // TODO: unify hostname between UI and service
-    m_errorMonitor(std::make_unique<CoreErrorMonitor>(boost::asio::ip::host_name())),
+    m_errorMonitor(std::make_unique<CoreErrorMonitor>(localHostname())),
     m_rpc (rpc),
     m_router (router),
     m_serverProxy (io, m_router, kServerProxyPort),
     m_clientProxy (io, m_router, kServerPort)
 {
-<<<<<<< HEAD
-    // TODO: unify hostname between UI and service
-    m_processCommand->setLocalHostname(boost::asio::ip::host_name());
-=======
     m_processCommand->setLocalHostname(localHostname());
->>>>>>> master
 
     m_messageHandler = std::make_unique<ClaimMessageHandler> (*this);
     m_router.on_receive.connect (*m_messageHandler);
