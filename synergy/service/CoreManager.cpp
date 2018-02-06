@@ -178,9 +178,9 @@ CoreManager::CoreManager (boost::asio::io_service& io,
 
         if (removedLocal != end(removed)) {
             serviceLog()->debug ("Local screen removed from profile");
-            m_cloudClient->shutdownWebsocket();
             m_userConfig->reset();
             m_userConfig->save();
+            m_cloudClient->shutdownWebsocket();
             m_rpc.server()->publish ("synergy.auth.logout");
             m_process->shutdown();
             return;
