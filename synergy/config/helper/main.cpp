@@ -149,7 +149,8 @@ main (int, const char*[])
         log() << fmt::format ("[{}] installed helper revision = {}\n", ts, SYNERGY_REVISION);
         log() << fmt::format ("[{}] installed app revision = {}\n", ts, version);
         log() << fmt::format ("[{}] home directory = {}\n", ts,  getenv("HOME"));
-        conf_out() << std::string(getenv("HOME"));
+        conf_out() << getenv("HOME");
+        conf_out().flush();
         conf_out().close();
 
         if (!installSynergyService (version != SYNERGY_REVISION)) {
