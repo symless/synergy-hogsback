@@ -188,15 +188,17 @@ CoreManager::CoreManager (boost::asio::io_service& io,
             return;
         }
 
-        auto addedLocal = std::find_if (begin(added), end(added), [this](auto const& screen) {
-            return (screen.id() == m_userConfig->screenId());
-        });
+        m_ioService.post([this, added]() {
+            auto addedLocal = std::find_if (begin(added), end(added), [this](auto const& screen) {
+                return (screen.id() == m_userConfig->screenId());
+            });
 
-        if (addedLocal != end(added)) {
-            m_process->setDisabled(false);
-            restart();
-            return;
-        }
+            if (addedLocal != end(added)) {
+                m_process->setDisabled(false);
+                restart();
+                return;
+            }
+        });
 
         m_ioService.post([this]() {
             auto processMode = m_process->processMode();
