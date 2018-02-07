@@ -7,6 +7,7 @@
 #include <synergy/common/ConfigGen.h>
 #include <synergy/common/UserConfig.h>
 #include <synergy/common/NetworkParameters.h>
+#include <synergy/common/Hostname.h>
 #include <synergy/service/CoreStatusMonitor.h>
 #include <synergy/service/ServiceLogs.h>
 #include <synergy/service/CoreProcessImpl.h>
@@ -159,10 +160,7 @@ CoreProcess::start (std::vector<std::string> command)
     m_impl = std::make_unique<CoreProcessImpl>(*this, m_ioService,
                                                std::move (command));
 
-    Screen& localScreen = m_localProfileConfig->getScreen(m_userConfig->screenId());
-    std::string localScreenName = localScreen.name();
-
-     m_statusMonitor->update(localScreenName, ScreenStatus::kConnecting);
+     m_statusMonitor->update(localHostname(), ScreenStatus::kConnecting);
      m_statusMonitor->monitor(*this);
 
     m_impl->start();

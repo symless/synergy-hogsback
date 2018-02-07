@@ -1,6 +1,7 @@
 #include <synergy/service/CoreStatusMonitor.h>
 
 #include <synergy/service/CoreProcess.h>
+#include <synergy/common/Hostname.h>
 
 #include <boost/regex.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -17,8 +18,7 @@ void CoreStatusMonitor::monitor(CoreProcess& process)
     reset();
 
     using boost::algorithm::contains;
-    Screen& localScreen = m_localProfileConfig->getScreen(m_userConfig->screenId());
-    std::string localScreenName = localScreen.name();
+    std::string localScreenName = localHostname();
 
     if (process.processMode() == ProcessMode::kClient) {
         m_signals.emplace_back (
