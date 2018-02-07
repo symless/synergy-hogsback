@@ -11,6 +11,7 @@
 #include <array>
 
 std::string const kSharedConfigPath ("/Users/Shared/Synergy");
+std::string const kSharedUserData (kSharedConfigPath + "/user.cfg");
 std::string const kAppPath ("/Applications/Synergy.app");
 std::string const kAppResourcePath (kAppPath + "/Contents/Resources");
 auto const kAppVersionFilePath = kAppResourcePath + "/Version.txt";
@@ -23,10 +24,6 @@ std::string const kServiceUserAgentFilename = "com.symless.synergy.synergy-servi
 auto const kServiceUserAgentPListTargetPath = "/Library/LaunchAgents/" + kServiceUserAgentFilename;
 auto const kServiceUserAgentPListSourcePath = kAppResourcePath + "/" + kServiceUserAgentFilename;
 
-std::string const kUserDirectory = ( getenv("HOME") );
-auto const kUserFilesDirectory = kUserDirectory + "/Library/Synergy";
-auto const kUserPreferencesDirectory = kUserDirectory + "/Library/Preferences/Symless";
-
 // This file was made redundant in v2.0-beta4. If you're reading this in 2018 or later, you can
 // probably remove this.
 auto const kServiceLegacyUserAgentPListPath = "/Library/LaunchAgents/com.symless.synergy.v2.synergyd.plist";
@@ -36,6 +33,20 @@ log() {
     static std::ofstream lofs(kSharedConfigPath + "/helper.log", std::ios::out | std::ios::app);
     assert (lofs.is_open());
     return lofs;
+}
+
+static std::ofstream&
+conf_out() {
+    static std::ofstream conf_out(kSharedUserData, std::ios::out | std::ios::trunc);
+    assert (conf_out.is_open());
+    return conf_out;
+}
+
+static std::ifstream&
+conf_in() {
+    static std::ifstream conf_in(kSharedUserData, std::ios::in);
+    assert (conf_in.is_open());
+    return conf_in;
 }
 
 static
@@ -101,6 +112,17 @@ main (int, const char*[])
                                   timestamp(), ec ? "Failed" : "OK");
 
             // remove the preference and user files too
+            std::string userHome;
+            conf_in() >> userHome;
+            conf_in().close();
+
+            log() << fmt::format ("[{}] userHome = {}\n",
+                                  timestamp(),
+                                  userHome);
+
+            auto const kUserFilesDirectory = userHome + "/Library/Synergy";
+            auto const kUserPreferencesDirectory = userHome + "/Library/Preferences/Symless";
+
 
             boost::filesystem::remove_all (kUserFilesDirectory, ec);
             log() << fmt::format ("[{}] removing {} {}\n",
@@ -126,6 +148,9 @@ main (int, const char*[])
                               getuid(), geteuid(), getpid());
         log() << fmt::format ("[{}] installed helper revision = {}\n", ts, SYNERGY_REVISION);
         log() << fmt::format ("[{}] installed app revision = {}\n", ts, version);
+        log() << fmt::format ("[{}] home directory = {}\n", ts,  getenv("HOME"));
+        conf_out() << std::string(getenv("HOME"));
+        conf_out().close();
 
         if (!installSynergyService (version != SYNERGY_REVISION)) {
             log() << fmt::format ("[{}] failed to install the service\n", timestamp());
@@ -144,6 +169,8 @@ main (int, const char*[])
         log() << fmt::format ("[{}] Unknown exception thrown\n", timestamp());
     }
 
+    conf_out().close();
+    conf_in().close();
     log().close();
     return EXIT_FAILURE; 
 }
