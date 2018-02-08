@@ -85,9 +85,13 @@ installSynergyService(bool const force = false)
 }
 
 int
-main (int, const char*[])
-{
-    boost::filesystem::create_directory (kSharedConfigPath);
+main (int argc, const char* argv[], const char* env[]) {
+    boost::filesystem::create_directory(kSharedConfigPath);
+
+    while (*env != NULL) {
+        log() << fmt::format ("[{}] var - {}\n", timestamp(), *env);
+        env++;
+    }
 
     try {
         std::ifstream appVersionFile;
