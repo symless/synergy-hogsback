@@ -9,6 +9,8 @@
 #include <cassert>
 #include <time.h>
 #include <array>
+#include <pwd.h>
+#include <sys/stat.h>
 
 std::string const kSharedConfigPath ("/Users/Shared/Synergy");
 std::string const kSharedUserData (kSharedConfigPath + "/user.cfg");
@@ -152,10 +154,16 @@ main (int argc, const char* argv[], const char* env[]) {
                               getuid(), geteuid(), getpid());
         log() << fmt::format ("[{}] installed helper revision = {}\n", ts, SYNERGY_REVISION);
         log() << fmt::format ("[{}] installed app revision = {}\n", ts, version);
-        log() << fmt::format ("[{}] home directory = {}\n", ts,  getenv("HOME"));
-        conf_out() << getenv("HOME");
+
+        // grab and store the home directory of the user who installed Synergy
+        struct stat fileInfo;
+        stat(kAppPath.data(), &fileInfo);
+        log() << fmt::format ("[{}] installing user homedir is {} \n", ts, getpwuid(fileInfo.st_uid)->pw_dir);
+        conf_out() << getpwuid(fileInfo.st_uid)->pw_dir;
         conf_out().flush();
         conf_out().close();
+
+        
 
         if (!installSynergyService (version != SYNERGY_REVISION)) {
             log() << fmt::format ("[{}] failed to install the service\n", timestamp());
