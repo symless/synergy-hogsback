@@ -285,6 +285,11 @@ Rectangle {
                 onLinkActivated: Qt.openUrlExternally(link)
                 visible: true
 
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.NoButton
+                    cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+                }
             }
         }
 
