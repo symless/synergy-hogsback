@@ -42,7 +42,7 @@ TEST_CASE("WAMP RPC core start call is recieved", "[Wamp]")
         provideCoreTest(rpcManager);
     });
 
-    WampClient wampClient(ioService);
+    WampClient wampClient(ioService, commonLog());
     serverReady.connect([&wampClient, &rpcManager]() {
         wampClient.connected.connect([&wampClient]() {
             std::vector<std::string> testCommand;
@@ -50,7 +50,7 @@ TEST_CASE("WAMP RPC core start call is recieved", "[Wamp]")
             testCommand.push_back("--arg1");
             wampClient.call<void> ("synergy.core.start.test", testCommand);
         });
-        wampClient.start(rpcManager.ipAddress(), rpcManager.port());
+        wampClient.start (rpcManager.ip(), rpcManager.port());
     });
 
     testFinished.connect([&ioService]() {
