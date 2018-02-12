@@ -225,10 +225,14 @@ void
 WebsocketSession::onReadFinished(errorCode ec)
 {
     if (ec) {
-        serviceLog()->error("websocket read error {}: {}", ec.value(), ec.message());
-        handleConnectError(true, WebsocketError::kRead);
+        if (ec != boost::asio::error::operation_aborted) {
+            serviceLog()->error("websocket read error {}: {}", ec.value(), ec.message());
+            handleConnectError(true, WebsocketError::kRead);
+        }
+
         return;
     }
+
 
     std::ostringstream stream;
     stream << boost::beast::buffers(m_readBuffer.data());
@@ -260,6 +264,7 @@ void WebsocketSession::shutdown() noexcept
     if (m_connected) {
         serviceLog()->debug("closing existing websocket connection");
         errorCode ec;
+        m_reconnectTimer.cancel();
         m_websocket->close(websocket::close_code::normal, ec);
         m_connecting = false;
         m_connected = false;

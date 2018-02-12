@@ -5,7 +5,6 @@
 QHash<ScreenStatus, QString> UIScreen::m_statusImages = {
     {ScreenStatus::kConnected, "qrc:/res/image/screen-active.png"},
     {ScreenStatus::kConnecting, "qrc:/res/image/screen-inactive.png"},
-    {ScreenStatus::kConnectingWithError, "qrc:/res/image/screen-inactive.png"},
     {ScreenStatus::kDisconnected, "qrc:/res/image/screen-inactive.png"},
     {ScreenStatus::kInactive, "qrc:/res/image/screen-inactive.png"}
 };
@@ -17,7 +16,7 @@ UIScreen::UIScreen(QString name) :
     m_name(name),
     m_status(ScreenStatus::kInactive),
     m_locked(false),
-    m_lastErrorCode(kNoError),
+    m_errorCode(ScreenError::kNone),
     m_version(-1)
 {
     m_statusImage = m_statusImages[m_status];
@@ -44,15 +43,9 @@ QString UIScreen::statusImage() const
 }
 
 QString
-UIScreen::lastErrorMessage() const
-{
-    return  QString::fromStdString(getErrorMessage(m_lastErrorCode));
-}
-
-QString
 UIScreen::helpLink() const
 {
-    return  QString::fromStdString(getHelpUrl(m_lastErrorCode));
+    return QString::fromStdString(getHelpUrl(m_errorCode));
 }
 
 void UIScreen::setPosX(int const x)
@@ -108,9 +101,9 @@ ScreenStatus UIScreen::status() const
     return m_status;
 }
 
-ErrorCode UIScreen::lastErrorCode() const
+ScreenError UIScreen::errorCode() const
 {
-    return m_lastErrorCode;
+    return m_errorCode;
 }
 
 int UIScreen::version() const
@@ -128,9 +121,19 @@ void UIScreen::touch()
     m_version++;
 }
 
-void UIScreen::setLastErrorCode(const ErrorCode &lastErrorCode)
+QString UIScreen::errorMessage() const
 {
-    m_lastErrorCode = lastErrorCode;
+    return m_errorMessage.isEmpty() ? QString::fromStdString(getDefaultErrorMessage()) : m_errorMessage;
+}
+
+void UIScreen::setErrorMessage(const QString &errorMessage)
+{
+    m_errorMessage = errorMessage;
+}
+
+void UIScreen::setErrorCode(const ScreenError &errorCode)
+{
+    m_errorCode = errorCode;
 }
 
 int UIScreen::id() const

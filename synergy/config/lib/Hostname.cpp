@@ -1,10 +1,12 @@
 #include "Hostname.h"
 
+#include <synergy/common/Hostname.h>
+
 #include <QHostInfo>
 
 Hostname::Hostname()
 {
-	m_hostname = QHostInfo::localHostName();
+    m_hostname = QString::fromStdString(localHostname());
 }
 
 QString Hostname::hostname()

@@ -57,7 +57,7 @@ CloudClient::load(UserConfig const& userConfig)
     auto const profileId = userConfig.profileId();
     auto const userToken = userConfig.userToken();
 
-    if ((profileId != m_lastProfileId) || (userToken != m_lastUserToken)) {
+    if ((profileId != -1) && ((profileId != m_lastProfileId) || (userToken != m_lastUserToken))) {
 
         auto versionCheck = userConfig.versionCheck();
         auto versionString = SYNERGY_VERSION_STRING;
@@ -112,6 +112,36 @@ void CloudClient::claimServer(int64_t serverId)
     root["screen_id"] = serverId;
     root["profile_id"] = profileId;
     root["profile_version"] = profileVersion;
+
+    httpSession->post(kUrlTarget, tao::json::to_string(root));
+}
+
+void CloudClient::updateScreen(Screen& screen)
+{
+    static const std::string kUrlTarget = "/screen/update";
+    HttpSession* httpSession = newHttpSession();
+
+    tao::json::value root;
+    root["id"] = screen.id();
+    root["name"] = screen.name();
+    root["status"] = screenStatusToString(screen.status());
+    root["ipList"] = screen.ipList();
+    root["version"] = screen.version();
+    root["error_code"] = static_cast<uint32_t>(screen.errorCode());
+    root["error_message"] = screen.errorMessage();
+
+    httpSession->post(kUrlTarget, tao::json::to_string(root));
+}
+
+void CloudClient::updateScreenError(Screen &screen)
+{
+    static const std::string kUrlTarget = "/screen/error/update";
+    HttpSession* httpSession = newHttpSession();
+
+    tao::json::value root;
+    root["id"] = screen.id();
+    root["error_code"] = static_cast<uint32_t>(screen.errorCode());
+    root["error_message"] = screen.errorMessage();
 
     httpSession->post(kUrlTarget, tao::json::to_string(root));
 }

@@ -166,7 +166,8 @@ bool ScreenManager::removeScreen(QString name, bool notify)
 
         // notify cloud
         if (s.id() != -1) {
-            m_cloudClient->unsubProfile(s.id());
+            m_cloudClient->unsubProfile(s.id(), m_configVersion);
+            m_configVersion++;
         }
     }
 
@@ -227,6 +228,8 @@ void ScreenManager::updateScreens(QByteArray reply)
                 screen.setPosX(obj["x_pos"].toInt());
                 screen.setPosY(obj["y_pos"].toInt());
                 screen.setStatus(obj["status"].toString());
+                screen.setErrorCode(static_cast<ScreenError>(obj["error_code"].toInt()));
+                screen.setErrorMessage(obj["error_message"].toString());
                 if (!obj["active"].toBool()) {
                     screen.setStatus(ScreenStatus::kInactive);
                 }
@@ -335,13 +338,7 @@ void ScreenManager::onScreenStatusChanged(QPair<QString, ScreenStatus> r)
 
 void ScreenManager::onScreenError(QString screenName, int errorCode)
 {
-    int index = m_screenListModel->findScreen(screenName);
-    if (index != -1) {
-        m_screenListModel->setScreenErrorCode(index, (ErrorCode)errorCode);
-        const UIScreen& s = m_screenListModel->getScreen(index);
-
-        m_cloudClient->updateScreen(s);
-    }
+    // TODO: reimplement
 }
 
 QString ScreenManager::configHint()

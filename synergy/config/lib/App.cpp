@@ -312,7 +312,7 @@ App::run(int argc, char* argv[])
     engine.rootContext()->setContextProperty
         ("qmlServiceProxy", static_cast<QObject*>(&serviceProxy));
     engine.rootContext()->setContextProperty
-        ("qmlErrorView", static_cast<QObject*>(errorView.get()));
+        ("errorView", errorView.get());
     engine.rootContext()->setContextProperty
         ("qmlLogManager", static_cast<QObject*>(logManager));
 

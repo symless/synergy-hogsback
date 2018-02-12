@@ -177,7 +177,7 @@ Rectangle {
             anchors.top: logConsoleSeparator.bottom
             width: parent.width
             anchors.bottom: parent.bottom
-            color: applicationWindow.errorView.visible ? errorOverlay.color : "#3F95B8"
+            color: errorView.visible ? errorOverlay.color : "#3F95B8"
             z: 1
 
             MouseArea {
@@ -208,7 +208,7 @@ Rectangle {
             color: "#A9A9A9"
             opacity: 0.7
             z: 2
-            visible: applicationWindow.errorView.visible
+            visible: errorView.visible
 
             MouseArea {
                 anchors.fill: parent
@@ -222,13 +222,13 @@ Rectangle {
             width: parent.width
             height: dp(22)
             color: "#FFF1E1"
-            visible: applicationWindow.errorView.visible
+            visible: errorView.visible
             z: 1
 
             // error message
             Text {
                 id: errorMessageText
-                text: applicationWindow.errorView.message
+                text: errorView.message
                 color: "#8C4A00"
                 font.pixelSize: dp(12)
                 anchors.top: parent.top
@@ -247,14 +247,14 @@ Rectangle {
                 anchors.top: parent.top
                 anchors.left: errorMessageText.right
                 anchors.margins: errorMessageText.anchors.margins
-                visible: !applicationWindow.errorView.retrying
+                visible: !errorView.retrying
 
                 MouseArea {
                     anchors.fill: parent
                     acceptedButtons: Qt.LeftButton
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        applicationWindow.errorView.retry()
+                        errorView.retry()
                     }
                 }
             }
@@ -269,7 +269,27 @@ Rectangle {
                 anchors.top: parent.top
                 anchors.left: errorMessageText.right
                 anchors.margins: errorMessageText.anchors.margins
-                visible: applicationWindow.errorView.retrying
+                visible: errorView.retrying
+            }
+
+            // error help link
+            Text {
+                id: errorHelpLink
+                text: errorView.help
+                font.underline: true
+                font.pixelSize: errorMessageText.font.pixelSize
+                color: errorMessageText.color
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.margins: errorMessageText.anchors.margins
+                onLinkActivated: Qt.openUrlExternally(link)
+                visible: true
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.NoButton
+                    cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+                }
             }
         }
 
@@ -353,6 +373,7 @@ Rectangle {
                 id: screenArrangement
                 anchors.fill: parent
                 scale: screenListModel.scale
+                property int shownDialogIndex: -1
 
                 Repeater {
                     model: screenListModel
@@ -446,7 +467,8 @@ Rectangle {
                         Image {
                             id: screenImage
                             parent: screenIcon
-                            anchors.fill: parent
+                            width: parent.width
+                            height: parent.height
                             fillMode: Image.Stretch
                             smooth: true
                             source: statusImage
@@ -462,9 +484,10 @@ Rectangle {
                                 color: screenStatus == "Connected" ? "black" : "white"
                                 horizontalAlignment: Text.AlignHCenter
                                 elide: Text.ElideRight
-                                visible: screenImage.source != "qrc:/res/image/screen-edit.png"
+                                visible: true
                             }
 
+                            // server indication
                             Rectangle {
                                 color: "#fff"
                                 width: 6
@@ -478,7 +501,8 @@ Rectangle {
                             // connecting prograss bar background
                             Rectangle {
                                 id: connectingBar
-                                visible: (screenStatus == "Connecting" || screenStatus == "ConnectingWithError") && screenImage.source != "qrc:/res/image/screen-edit.png"
+                                parent: screenImage
+                                visible: screenStatus == "Connecting"
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 anchors.bottom: parent.bottom
                                 anchors.bottomMargin: dp(15)
@@ -494,7 +518,7 @@ Rectangle {
                                     x: -width
                                     width: dp(25)
                                     height: dp(4)
-                                    color: lastErrorCode === 0 ? "#96C13D" : "red"
+                                    color: errorCode === 0 ? "#96C13D" : "red"
                                     z: 1
                                     states: [
                                         State {
@@ -519,18 +543,21 @@ Rectangle {
                                 sourceSize.height: dp(14)
                                 anchors.horizontalCenter: connectingBar.horizontalCenter
                                 anchors.verticalCenter: connectingBar.verticalCenter
-                                visible: lastErrorCode !== 0
+                                visible: errorCode !== 0
                                 smooth: false
                                 source: "qrc:/res/image/error-indication.svg"
                                 z: 2
-                                property bool errorDialog: false
-
                                 MouseArea {
                                     anchors.fill: parent
                                     acceptedButtons: Qt.LeftButton
 
                                     onReleased: {
-                                        errorIndication.errorDialog = !errorIndication.errorDialog
+                                        if (screenArrangement.shownDialogIndex === index) {
+                                            screenArrangement.shownDialogIndex = -1
+                                        }
+                                        else {
+                                            screenArrangement.shownDialogIndex = index
+                                        }
                                     }
                                 }
                             }
@@ -543,8 +570,8 @@ Rectangle {
                                 width: dp(screenListModel.screenIconWidth() * 1.5)
                                 height: dp(screenListModel.screenIconHeight() * 1.5)
                                 smooth: true
-                                visible: errorIndication.errorDialog && errorIndication.visible
-                                fillMode: Image.PreserveAspectFit
+                                visible: errorIndication.visible && screenArrangement.shownDialogIndex === index
+                                fillMode: Image.Stretch
                                 source: "qrc:/res/image/error-message-dialog.png"
 
                                 Image {
@@ -564,13 +591,13 @@ Rectangle {
                                         acceptedButtons: Qt.LeftButton
 
                                         onReleased: {
-                                            errorIndication.errorDialog = false
+                                            screenArrangement.shownDialogIndex = -1
                                         }
                                     }
                                 }
 
                                 Text {
-                                    id: errorMessageText
+                                    id: screenErrorMessageText
                                     width: parent.width - dp(5)
                                     font.pixelSize: dp(10)
                                     anchors.top: errorMessageDialog.top
@@ -589,7 +616,7 @@ Rectangle {
                                     id: helpLinkText
                                     width: parent.width
                                     font.pixelSize: dp(10)
-                                    anchors.top: errorMessageText.bottom
+                                    anchors.top: screenErrorMessageText.bottom
                                     anchors.topMargin: dp(7)
                                     horizontalAlignment: Text.AlignHCenter
                                     wrapMode: Text.WordWrap

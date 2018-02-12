@@ -57,6 +57,8 @@ public:
         return id_;
     }
 
+    asio::io_service& getIoService();
+
     bool started () const noexcept;
     void start (const uint32_t id, std::string name);
     void shutdown ();
@@ -70,6 +72,15 @@ public:
     void broadcast (Message message);
     bool forward (MessageHeader const& header, Message message);
     void notifyOtherNodes (Message message);
+
+public:
+    template <typename... Args>
+    using signal = boost::signals2::signal<Args...>;
+
+    signal<void(Message const&, int32_t)> on_receive;
+
+    signal<void(int64_t screen_id)> on_node_reachable;
+    signal<void(int64_t screen_id)> on_node_unreachable;
 
 protected:
     void add (std::shared_ptr<Connection>);
@@ -96,7 +107,4 @@ private:
     std::string name_;
     uint32_t id_ = 0;
     bool running_ = false;
-
-public:
-    boost::signals2::signal<void(Message const&, int32_t)> on_receive;
 };

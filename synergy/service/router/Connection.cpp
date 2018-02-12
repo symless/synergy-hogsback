@@ -116,6 +116,11 @@ Connection::send (MessageHeader const& header, Message const& message) {
     return true;
 }
 
+tcp::endpoint Connection::endpoint() const
+{
+    return remote_endpoint_;
+}
+
 tcp::endpoint
 Connection::remote_acceptor_endpoint () const {
     return tcp::endpoint (remote_endpoint_.address (), 24802);

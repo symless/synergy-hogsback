@@ -28,6 +28,7 @@ public:
 
     bool send (Message const&);
     bool send (MessageHeader const&, Message const&);
+    tcp::endpoint endpoint() const;
 
 private:
     static uint32_t next_connection_id_;

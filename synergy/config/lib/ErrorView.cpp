@@ -59,3 +59,16 @@ ErrorView::message() const
             return "";
     }
 }
+
+QString
+ErrorView::help() const
+{
+    switch (m_mode) {
+        case ErrorViewMode::kCloudError:
+            return "<a href='https://symless.com/synergy/help/connection/auto-config-service'>Help</a>";
+        case ErrorViewMode::kServiceError:
+            return "<a href='https://symless.com/synergy/help/connection/background-service'>Help</a>";
+        default:
+            return "";
+    }
+}

@@ -2,6 +2,7 @@
 #define SYNERGY_COMMON_SCREEN_H
 
 #include <synergy/common/ScreenStatus.h>
+#include <synergy/common/ScreenError.h>
 #include <cstdint>
 #include <string>
 #include <boost/signals2.hpp>
@@ -16,6 +17,9 @@ class Screen final {
 public:
     Screen() = default;
     explicit Screen(ScreenID id) noexcept;
+
+    Screen(const Screen& s) = default;
+    Screen& operator= (const Screen& s) = default;
 
     void id (ScreenID);
     ScreenID id() const;
@@ -42,6 +46,14 @@ public:
 
     void apply (const ScreenSnapshot &ss);
 
+    ScreenError errorCode() const;
+    void setErrorCode(const ScreenError &errorCode);
+
+    std::string errorMessage() const;
+    void setErrorMessage(const std::string &errorMessage);
+
+    void touch();
+
     uint64_t version() const;
 
 private:
@@ -55,6 +67,8 @@ private:
     uint64_t        m_version = 0;
     ScreenStatus    m_status  = ScreenStatus::kDisconnected;
     std::string     m_ipList;
+    ScreenError     m_errorCode;
+    std::string     m_errorMessage;
 };
 
 #endif

@@ -16,7 +16,7 @@ public:
         kNameRole,
         kStatusImageRole,
         kScreenStatusRole,
-        kScreenLastErrorCode,
+        kScreenErrorCode,
         kErrorMessageRole,
         kHelpLinkRole,
         kIdRole
@@ -53,7 +53,6 @@ public:
     void lockScreen(int index);
     void unlockScreen(int index);
     void setScreenStatus(int index, ScreenStatus status);
-    void setScreenErrorCode(int index, ErrorCode ec);
     void touchScreen(int index);
 
 signals:
