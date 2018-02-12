@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/synergy/tray">
+        <file>icon.svg</file>
+    </qresource>
+</RCC>
