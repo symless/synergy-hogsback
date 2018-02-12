@@ -10,17 +10,19 @@
 #include <bonefish/trace/trace.hpp>
 #include <boost/asio/ip/address.hpp>
 
-static bool const debug = false;
+static bool const kDebugWampRouter = false;
 
-WampRouter::WampRouter(boost::asio::io_service& ioService) :
+WampRouter::WampRouter (boost::asio::io_service& ioService,
+                        std::shared_ptr<spdlog::logger> log):
     m_ioService(ioService),
+    m_log (std::move (log)),
     m_routers(std::make_shared<bonefish::wamp_routers>()),
     m_serializers(std::make_shared<bonefish::wamp_serializers>())
 {
-    bonefish::trace::set_enabled(debug);
+    bonefish::trace::set_enabled (kDebugWampRouter);
 
     m_routers->add_router
-        (std::make_shared<bonefish::wamp_router>(m_ioService, "default"));
+        (std::make_shared<bonefish::wamp_router>(ioService, "default"));
 
     m_serializers->add_serializer
         (std::make_shared<bonefish::msgpack_serializer>());
@@ -29,32 +31,29 @@ WampRouter::WampRouter(boost::asio::io_service& ioService) :
         (m_routers, m_serializers);
 }
 
-WampRouter::~WampRouter()
-{
+WampRouter::~WampRouter() {
 }
 
 void
-WampRouter::start (std::string const& ip, int port)
-{
+WampRouter::start (std::string const& ip, int const port)  {
     auto listener = std::make_shared<bonefish::tcp_listener>
-                        (m_ioService, boost::asio::ip::address::from_string(ip), port);
+        (ioService(), boost::asio::ip::address::from_string(ip), port);
 
     m_rawsocketServer->attach_listener
         (std::static_pointer_cast<bonefish::rawsocket_listener> (listener));
+
     m_rawsocketServer->start();
 
     boost::system::error_code ec;
     if (!set_socket_to_close_on_exec (listener->acceptor(), ec)) {
-        commonLog()->critical ("Failed to set RPC port to close-on-exec: {}", ec.message());
+        log()->critical ("Failed to set RPC router port to close-on-exec: {}",
+                          ec.message());
     }
 
     ready();
 }
 
 void
-WampRouter::stop()
-{
-    if (m_rawsocketServer) {
-        m_rawsocketServer->shutdown();
-    }
+WampRouter::stop() {
+    m_rawsocketServer->shutdown();
 }

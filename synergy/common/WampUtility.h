@@ -12,8 +12,6 @@ struct make_tuple {
     }
 };
 
-static const char* const kKeepAliveFunction = "synergy.network.noop";
-
-}
+} // namespace
 
 #endif // WAMPUTILITY_H

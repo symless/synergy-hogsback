@@ -1,17 +1,22 @@
 #ifndef SYNERGY_COMMON_ASIO_EXECUTOR_HPP
 #define SYNERGY_COMMON_ASIO_EXECUTOR_HPP
 
-#include <boost/asio.hpp>
+#include <boost/asio/io_service.hpp>
 
 class AsioExecutor final {
 public:
     explicit AsioExecutor (boost::asio::io_service& io) noexcept:
-        m_io_service(io) {}
-    auto& get_io_service() const noexcept { return m_io_service; }
+        m_ioService(io) {
+    }
+
+    auto&
+    get_io_service() const noexcept {
+        return m_ioService;
+    }
 
     bool
     try_executing_one() {
-        return m_io_service.poll_one();
+        return m_ioService.poll_one();
     }
 
     template <typename Work>
@@ -20,18 +25,18 @@ public:
         if (closed()) {
             return;
         }
-        m_io_service.dispatch(std::forward<Work>(work));
+        m_ioService.dispatch(std::forward<Work>(work));
     }
 
     void
     close() {
         /* Pretty sure this should never be called */
-        m_io_service.stop();
+        m_ioService.stop();
     }
 
     bool
     closed() const noexcept {
-        return m_io_service.stopped();
+        return m_ioService.stopped();
     }
 
     template <typename Predicate>
@@ -39,7 +44,7 @@ public:
     reschedule_until (Predicate pred) {
         bool doneWork = false;
         do {
-            if (m_io_service.run_one() != 0) {
+            if (m_ioService.run_one() != 0) {
                 doneWork = true;
             }
         } while (!pred() && !closed());
@@ -47,7 +52,7 @@ public:
     }
 
 private:
-    boost::asio::io_service& m_io_service;
+    boost::asio::io_service& m_ioService;
 };
 
 #endif

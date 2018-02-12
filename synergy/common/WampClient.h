@@ -1,8 +1,7 @@
 #ifndef WAMPCLIENT_H
 #define WAMPCLIENT_H
 
-#include "WampUtility.h"
-
+#include <synergy/common/WampUtility.h>
 #include <synergy/common/Logs.h>
 #include <autobahn/autobahn.hpp>
 // TODO: Figure out why AsioExecutor has to be included after autobahn
@@ -18,8 +17,6 @@
 #include <boost/signals2.hpp>
 
 namespace {
-
-const int kKeepAliveIntervalSec = 5;
 
 template <typename R>
 struct WampCallHelper {
@@ -48,11 +45,12 @@ class WampEventHandler final {
         Handler m_handler;
 };
 
-template <typename Handler>
+template <typename Handler> inline
 void
 WampEventHandler<Handler>::operator()(autobahn::wamp_event const& event) {
     typename boost::fusion::result_of::invoke
-                <make_tuple, boost::callable_traits::args_t<Handler>>::type args;
+                <make_tuple, boost::callable_traits::args_t<Handler>>::type
+                    args;
     event.get_arguments (args);
     boost::fusion::invoke (m_handler, args);
 }
@@ -62,21 +60,27 @@ WampEventHandler<Handler>::operator()(autobahn::wamp_event const& event) {
 class WampClient
 {
 public:
-    explicit WampClient (boost::asio::io_service& io);
-    void start (std::string const& ip, int port);
+    WampClient (boost::asio::io_service& io,
+                std::shared_ptr<spdlog::logger> log = nullptr);
 
-    boost::asio::io_service&
+    void
+    start (std::string const& ip, int port);
+
+    auto
+    log() const {
+        return m_log;
+    }
+
+    auto&
     ioService() noexcept {
         return m_executor.underlying_executor().get_io_service();
     }
-
-    bool isConnected() const;
 
     template <typename Result, typename... Args>
     boost::future<Result>
     call (char const* const fun, Args&&... args) {
         /* Asio requires that handlers be copyable, but packaged_task isn't,
-         * so we have to allocate
+         * so we have to allocate.
          */
         auto task = std::make_shared<boost::packaged_task<Result()>> (
             [this, fun, args_tup = std::make_tuple (std::forward<Args>(args)...)]() mutable {
@@ -86,11 +90,11 @@ public:
                             return WampCallHelper<Result>::getReturnValue (result.get());
                         }
                         catch (...) {
-                            if (std::string(fun) == std::string(kKeepAliveFunction)) {
-                                commonLog()->debug("rpc keep alive failed");
+                            if (std::strcmp (fun, "synergy.noop") == 0) {
+                                log()->debug ("RPC keep alive failed");
                             }
                             else {
-                                commonLog()->error("rpc function call failed: {}", std::string(fun));
+                                log()->error ("RPC call failed: {}", std::string(fun));
                             }
                             connectionError();
                         }
@@ -99,9 +103,7 @@ public:
             }
         );
 
-        ioService().post(
-            boost::bind(&boost::packaged_task<Result()>::operator(), task)
-        );
+        ioService().post([task]() { (*task)(); });
 
         /* Actually returns a future<future<Result>, which means we depend on a
          * Boost extension which unwraps that in to a future<Result>
@@ -109,8 +111,6 @@ public:
         return task->get_future();
     }
 
-    /* TODO: return the subscription object so we can easily unsubscribe
-     */
     template <typename Handler>
     void
     subscribe (char const* const topic, Handler&& handler) {
@@ -122,6 +122,7 @@ public:
         });
     }
 
+    bool isConnected() const;
     boost::signals2::signal<void()> connected;
     boost::signals2::signal<void()> connecting;
     boost::signals2::signal<void()> connectionError;
@@ -136,7 +137,8 @@ private:
     std::shared_ptr<autobahn::wamp_transport> m_transport;
     autobahn::wamp_call_options m_defaultCallOptions;
     boost::asio::deadline_timer m_keepAliveTimer;
-    bool m_connected;
+    std::shared_ptr<spdlog::logger> m_log;
+    bool m_connected = false;
 };
 
 
