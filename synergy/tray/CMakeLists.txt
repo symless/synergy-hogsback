@@ -17,4 +17,5 @@ target_link_libraries (${PROJECT_NAME}
     commonlib
     Qt5::Core
     Qt5::Widgets
+    ${CMAKE_THREAD_LIBS_INIT}
 )
