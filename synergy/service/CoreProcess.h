@@ -42,7 +42,7 @@ public:
     signal<void()> unexpectedExit;
     signal<void()> localInputDetected;
     signal<void()> serverReady;
-    signal<void(std::string const& line)> output;
+    signal<void(std::string line)> output;
 
 
 private:
