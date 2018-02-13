@@ -135,14 +135,6 @@ CoreManager::CoreManager (boost::asio::io_service& io,
         }
     );
 
-    m_process->output.connect (
-        [this](std::string const& line) {
-            if (line.find("disconnected from server") != std::string::npos) {
-                this->restart();
-            }
-        },
-    boost::signals2::at_front);
-
     m_localProfileConfig->profileServerChanged.connect([this](int64_t const serverId) {
         m_ioService.post([this, serverId] () {
             serviceLog()->debug("handling cloud message: server claim, mode={} thisId={} serverId={} lastServerId={}",
