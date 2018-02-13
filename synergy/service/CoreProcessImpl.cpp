@@ -16,9 +16,6 @@ asyncReadLines (CoreProcess& interface, Pipe& pipe, Buffer& buffer,
         return;
     }
 
-    boost::algorithm::trim_right(line);
-    interface.output (line);
-
     boost::asio::async_read_until (
         pipe,
         buffer,
@@ -27,6 +24,9 @@ asyncReadLines (CoreProcess& interface, Pipe& pipe, Buffer& buffer,
             return asyncReadLines (interface, pipe, buffer, line, ec, bytes);
         }
     );
+
+    boost::algorithm::trim_right(line);
+    interface.output (line);
 }
 
 CoreProcessImpl::CoreProcessImpl (
@@ -52,9 +52,9 @@ CoreProcessImpl::start () {
         bp::std_in.close(),
         bp::std_out > m_outPipe,
         bp::std_err > m_errorPipe,
-        bp::on_exit = [this](int exit_code, std::error_code const&) {
-            serviceLog()->debug("core process exited: code={} expected={}", exit_code,
-                                 m_expectingExit);
+        bp::on_exit = [this](int exit_code, std::error_code const& ec) {
+            serviceLog()->debug("core process exited: exit code={} expected={} error={}", exit_code,
+                                 m_expectingExit, ec.message());
 
             try {
                 m_process->wait();
@@ -72,7 +72,7 @@ CoreProcessImpl::start () {
                 m_outPipe.cancel ();
                 m_errorPipe.cancel ();
                 getIoService().poll();
-                serviceLog()->debug("core process I/O cancelled");
+                serviceLog()->debug("core process I/O cancelled unexpectedly");
 
                 return m_interface.unexpectedExit();
             }
@@ -120,7 +120,7 @@ CoreProcessImpl::shutdown()
     m_outPipe.cancel ();
     m_errorPipe.cancel ();
     getIoService().poll();
-    serviceLog()->debug("core process I/O cancelled");
+    serviceLog()->debug("core process I/O cancelled after shutdown request");
 
     m_process->terminate();
 }

@@ -102,7 +102,7 @@ Router::add_peer (tcp::endpoint endpoint, bool const immediate) {
             timer.cancel ();
 
             if (ec == asio::error::operation_aborted) {
-                routerLog()->info("Connection {} to {} timed out.", endpoint);
+                routerLog()->info("Connection to {} timed out.", endpoint);
                 continue;
             }
 
