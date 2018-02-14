@@ -1,0 +1,6 @@
+# Docker image building
+
+```
+cd Docker
+docker build -f centos.Dockerfile -t symless/centos_build  .
+```
