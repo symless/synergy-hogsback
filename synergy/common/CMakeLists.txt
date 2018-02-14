@@ -14,6 +14,7 @@ set (COMMON_LIB_SOURCES
     UserConfig.cpp
     DirectoryManager.cpp
     RpcManager.cpp
+    RpcLogSink.cpp
     WampClient.cpp
     WampServer.cpp
     WampRouter.cpp

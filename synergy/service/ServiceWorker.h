@@ -31,7 +31,7 @@ private:
     void provideSnapshot();
     void provideHello();
     void provideCloud();
-    void provideLog();
+    void provideLogging();
     void provideServerClaim();
 
 private:

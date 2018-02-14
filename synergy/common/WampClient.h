@@ -61,14 +61,17 @@ class WampClient
 {
 public:
     WampClient (boost::asio::io_service& io,
-                std::shared_ptr<spdlog::logger> log = nullptr);
+                std::shared_ptr<spdlog::logger> logger);
 
     void
     start (std::string const& ip, int port);
 
+    void
+    stop();
+
     auto
     log() const {
-        return m_log;
+        return m_logger;
     }
 
     auto&
@@ -90,13 +93,8 @@ public:
                             return WampCallHelper<Result>::getReturnValue (result.get());
                         }
                         catch (...) {
-                            if (std::strcmp (fun, "synergy.noop") == 0) {
-                                log()->debug ("RPC keep alive failed");
-                            }
-                            else {
-                                log()->error ("RPC call failed: {}", std::string(fun));
-                            }
-                            connectionError();
+                            log()->error ("RPC call failed: {}", std::string(fun));
+                            disconnected();
                         }
                     }
                 );
@@ -125,8 +123,7 @@ public:
     bool isConnected() const;
     boost::signals2::signal<void()> connected;
     boost::signals2::signal<void()> connecting;
-    boost::signals2::signal<void()> connectionError;
-
+    boost::signals2::signal<void()> disconnected;
 private:
     void connect();
     void keepAlive();
@@ -137,7 +134,7 @@ private:
     std::shared_ptr<autobahn::wamp_transport> m_transport;
     autobahn::wamp_call_options m_defaultCallOptions;
     boost::asio::deadline_timer m_keepAliveTimer;
-    std::shared_ptr<spdlog::logger> m_log;
+    std::shared_ptr<spdlog::logger> m_logger;
     bool m_connected = false;
 };
 

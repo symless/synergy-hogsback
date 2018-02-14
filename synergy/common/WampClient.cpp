@@ -1,25 +1,26 @@
 #include <synergy/common/WampClient.h>
 
 static bool const kDebugWampClient = false;
-static boost::posix_time::seconds const kRPCKeepAliveInterval (5);
+static boost::posix_time::seconds const kRPCKeepAliveInterval (3);
 
 WampClient::WampClient(boost::asio::io_service& ioService,
-                       std::shared_ptr<spdlog::logger> log):
+                       std::shared_ptr<spdlog::logger> logger):
     m_executor (ioService),
     m_session (std::make_shared<autobahn::wamp_session>(ioService,
                                                         kDebugWampClient)),
     m_keepAliveTimer (ioService),
-    m_log (log)
+    m_logger (logger)
 {
     m_defaultCallOptions.set_timeout (std::chrono::seconds (3));
 
-    connectionError.connect ([this]() {
-        this->m_connected = false;
-        this->log()->error ("RPC connection failed");
-    });
-
     connected.connect ([this](){
         this->keepAlive();
+    });
+
+    disconnected.connect ([this]() {
+        m_connected = false;
+        m_keepAliveTimer.cancel();
+        this->log()->error ("RPC connection failed");
     });
 }
 
@@ -29,17 +30,24 @@ WampClient::isConnected() const {
 }
 
 void
-WampClient::start (std::string const& ip, int const port) {
-    auto endpoint = boost::asio::ip::tcp::endpoint
-                    (boost::asio::ip::address_v4::from_string(ip), port);
+WampClient::stop () {
     m_connected = false;
+    m_keepAliveTimer.cancel();
+
+    m_session->leave (""); // TODO: Reason string
+    m_session->stop ();
 
     if (m_transport) {
         m_transport->disconnect().get();
         m_transport->detach();
         m_transport.reset();
     }
+}
 
+void
+WampClient::start (std::string const& ip, int const port) {
+    auto endpoint = boost::asio::ip::tcp::endpoint
+                    (boost::asio::ip::address_v4::from_string(ip), port);
     m_transport = std::make_shared<autobahn::wamp_tcp_transport>
         (ioService(), endpoint, kDebugWampClient);
 
@@ -57,7 +65,7 @@ WampClient::connect() {
             connected.get();
         } catch (const std::exception& e) {
             log()->error ("RPC connect() failed: {}", e.what());
-            connectionError();
+            disconnected();
             return;
         }
         m_session->start().then(m_executor, [&](boost::future<void> started) {
@@ -65,7 +73,7 @@ WampClient::connect() {
                 started.get();
             } catch (const std::exception& e) {
                 log()->error ("RPC start() failed: {}", e.what());
-                connectionError();
+                disconnected();
                 return;
             }
             m_session->join("default").then(m_executor, [&](boost::future<uint64_t> joined) {
@@ -73,7 +81,7 @@ WampClient::connect() {
                     joined.get();
                 } catch (const std::exception& e) {
                     log()->error ("RPC join() failed: {}", e.what());
-                    connectionError();
+                    disconnected();
                     return;
                 }
                 m_connected = true;
@@ -86,12 +94,15 @@ WampClient::connect() {
 void
 WampClient::keepAlive() {
     m_keepAliveTimer.expires_from_now (kRPCKeepAliveInterval);
-    m_keepAliveTimer.async_wait ([this](auto const ec) {
-        if (ec || !this->isConnected()) {
-            this->log ()->warn ("RPC keepalive disabled");
+    m_keepAliveTimer.async_wait ([this](auto const errorCode) {
+        if (errorCode == boost::asio::error::operation_aborted) {
+            return;
+        } else if (errorCode || !this->isConnected()) {
+            log()->error ("RPC keepalive failed");
             return;
         }
-        this->call<void>("synergy.noop");
+
+        this->call<void>("synergy.keepalive");
         this->keepAlive();
     });
 }

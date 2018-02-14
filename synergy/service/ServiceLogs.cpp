@@ -130,6 +130,32 @@ initConfigLog() {
     return logger;
 }
 
+static std::shared_ptr<spdlog::logger>
+initTrayLog() {
+    std::vector<spdlog::sink_ptr> sinks;
+    sinks.push_back(combinedLogSink());
+
+#ifdef _WIN32
+    auto console = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
+#else // assume unix (linux and mac)
+    auto console = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
+#endif
+    sinks.push_back(console);
+
+    auto logDir = DirectoryManager::instance()->systemLogDir();
+    auto logPath = logDir / "synergy-tray.log";
+    auto rotating = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
+        logPath.string(), 1024 * 1024, 1);
+    sinks.push_back(rotating);
+
+    auto logger = std::make_shared<spdlog::logger>("main", begin(sinks), end(sinks));
+    logger->set_pattern("[  Tray   ] %v");
+    logger->flush_on(spdlog::level::debug);
+    logger->set_level(spdlog::level::debug);
+
+    return logger;
+}
+
 std::shared_ptr<spdlog::logger> const&
 serviceLog() noexcept {
     static auto log = initServiceLog();
@@ -151,5 +177,11 @@ routerLog() noexcept {
 std::shared_ptr<spdlog::logger> const&
 configLog() noexcept {
     static auto log = initConfigLog();
+    return log;
+}
+
+std::shared_ptr<spdlog::logger> const&
+trayLog() noexcept {
+    static auto log = initTrayLog();
     return log;
 }

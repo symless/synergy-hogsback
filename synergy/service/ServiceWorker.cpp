@@ -180,7 +180,7 @@ ServiceWorker::provideRpcEndpoints()
     provideSnapshot();
     provideHello();
     provideCloud();
-    provideLog();
+    provideLogging();
     provideServerClaim();
 
     serviceLog()->debug("rpc endpoints created");
@@ -265,12 +265,16 @@ ServiceWorker::provideCloud()
 }
 
 void
-ServiceWorker::provideLog()
+ServiceWorker::provideLogging()
 {
     m_rpc->server()->provide(
         "synergy.log.config", [this](std::string logLine) {
-
         configLog()->debug(logLine);
+    });
+
+    m_rpc->server()->provide(
+        "synergy.log.tray", [this](std::string logLine) {
+        trayLog()->debug(logLine);
     });
 }
 

@@ -3,16 +3,18 @@
 
 #include <memory>
 #include <boost/signals2.hpp>
+#include <spdlog/spdlog.h>
 
 class TrayControlsImpl;
 
-class TrayControls {
+class TrayControls final {
 public:
     TrayControls();
     ~TrayControls() noexcept;
 
     void pauseService();
     void restartService();
+    std::shared_ptr<spdlog::logger> log() const;
 
     boost::signals2::signal<void()> ready;
 

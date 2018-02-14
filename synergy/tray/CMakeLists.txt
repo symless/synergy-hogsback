@@ -10,7 +10,6 @@ find_package (Qt5 COMPONENTS Core Widgets)
 add_executable (${PROJECT_NAME}
     main.cpp
     Controls.cpp
-    Log.cpp
     tray.qrc
 )
 

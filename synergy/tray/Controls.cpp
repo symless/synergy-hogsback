@@ -1,28 +1,59 @@
 #include <synergy/tray/Controls.h>
-#include <synergy/tray/Log.h>
-#include <boost/asio/io_service.hpp>
 #include <synergy/common/WampClient.h>
+#include <synergy/common/DirectoryManager.h>
+#include <synergy/common/RpcLogSink.h>
+#include <boost/asio/io_service.hpp>
+#include <spdlog/sinks/sink.h>
 #include <thread>
+
+static auto const kTrayLogPattern = "[  Tray   ] [%Y-%m-%dT%T] %l: %v";
+static auto const kTrayLogLevel = spdlog::level::debug;
+
+static auto
+initTrayLogFileSink() {
+    auto const logDir = DirectoryManager::instance()->systemLogDir();
+    auto const logPath = logDir / "synergy-tray.log";
+
+    return std::make_shared<spdlog::sinks::rotating_file_sink_mt>
+                            (logPath.string(), 1024 * 1024, 1);
+}
 
 class TrayControlsImpl final {
 public:
-    TrayControlsImpl (TrayControls* interface,
-                      std::shared_ptr<spdlog::logger> log);
+    explicit TrayControlsImpl (TrayControls*);
+
     void start();
     void shutdown();
+    std::shared_ptr<spdlog::logger> log() const;
 
 private:
-    TrayControls* interface;
+    std::shared_ptr<spdlog::logger> fileLogger();
+    std::shared_ptr<spdlog::logger> rpcLogger();
+
+    TrayControls* interface = nullptr;
+    std::shared_ptr<spdlog::sinks::sink> logFileSink;
+    std::shared_ptr<spdlog::logger> logger;
     boost::asio::io_service ioService;
 
     std::thread rpcThread;
     WampClient rpcClient;
 };
 
-TrayControlsImpl::TrayControlsImpl (TrayControls* const ifc,
-                                    std::shared_ptr<spdlog::logger> log):
-    interface (interface),
-    rpcClient (ioService, log) {
+TrayControlsImpl::TrayControlsImpl (TrayControls* const ifc):
+    interface (ifc),
+    logFileSink (initTrayLogFileSink()),
+    logger (fileLogger()),
+    rpcClient (ioService, fileLogger()) {
+
+    /* When the RPC is up, switch to the RPC logger */
+    rpcClient.connected.connect ([&](){
+        this->logger = rpcLogger();
+    });
+
+    /* When the RPC goes down, switch to the file logger */
+    rpcClient.disconnected.connect ([&](){
+        this->logger = fileLogger();
+    });
 }
 
 void
@@ -31,23 +62,60 @@ TrayControlsImpl::start() {
         rpcClient.start ("127.0.0.1", 24888);
         try {
             ioService.run();
-        } catch (std::exception const& e) {
-            trayLog()->error ("Exception: ", e.what());
+        } catch (std::exception const&) {
+
         }
     });
 }
 
 void
 TrayControlsImpl::shutdown() {
-    ioService.stop();
+    ioService.dispatch ([this](){ rpcClient.stop(); });
     rpcThread.join();
 }
 
+std::shared_ptr<spdlog::logger>
+TrayControlsImpl::log() const {
+    return this->logger;
+}
+
+std::shared_ptr<spdlog::logger>
+TrayControlsImpl::fileLogger() {
+    std::vector<spdlog::sink_ptr> sinks = { logFileSink };
+
+    auto logger = std::make_shared<spdlog::logger>("tray",
+                                                   begin(sinks), end(sinks));
+    logger->set_pattern (kTrayLogPattern);
+    logger->set_level (kTrayLogLevel);
+    logger->flush_on (spdlog::level::debug);
+    return logger;
+}
+
+std::shared_ptr<spdlog::logger>
+TrayControlsImpl::rpcLogger() {
+    std::vector<spdlog::sink_ptr> sinks = {
+        logFileSink,
+        std::make_shared<RpcLogSink>(rpcClient, "tray")
+    };
+
+    auto logger = std::make_shared<spdlog::logger>("tray",
+                                                   begin(sinks), end(sinks));
+    logger->set_pattern (kTrayLogPattern);
+    logger->set_level (kTrayLogLevel);
+    logger->flush_on (spdlog::level::debug);
+    return logger;
+}
+
 TrayControls::TrayControls ():
-    m_impl (std::make_unique<TrayControlsImpl>(this, trayLog())) {
+    m_impl (std::make_unique<TrayControlsImpl>(this)) {
     m_impl->start();
 }
 
 TrayControls::~TrayControls() {
     m_impl->shutdown();
+}
+
+std::shared_ptr<spdlog::logger>
+TrayControls::log() const {
+    return m_impl->log();
 }

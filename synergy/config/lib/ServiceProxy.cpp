@@ -17,7 +17,7 @@
 #endif
 
 ServiceProxy::ServiceProxy() :
-    m_wampClient(m_io)
+    m_wampClient(m_io, nullptr) // TODO
 {
     connect (this, &ServiceProxy::rpcReceivedScreens, this,
              &ServiceProxy::onRpcReceivedScreens, Qt::QueuedConnection);
@@ -40,7 +40,7 @@ ServiceProxy::ServiceProxy() :
     connect (this, &ServiceProxy::rpcVersionCheck, this,
              &ServiceProxy::onRpcVersionCheck, Qt::QueuedConnection);
 
-    m_wampClient.connectionError.connect([&]() {
+    m_wampClient.disconnected.connect([&]() {
         m_errorView->setMode(ErrorViewMode::kServiceError);
     });
 
