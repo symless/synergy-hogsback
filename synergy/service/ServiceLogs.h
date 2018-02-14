@@ -1,5 +1,12 @@
 #pragma once
-#include <synergy/common/Logs.h>
+
+#include <memory>
+#include <spdlog/spdlog.h>
+#include <boost/signals2.hpp>
+
+struct Log {
+    boost::signals2::signal<void(std::string)> onLogLine;
+};
 
 extern Log g_serviceLog;
 

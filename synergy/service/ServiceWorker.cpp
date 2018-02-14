@@ -37,11 +37,6 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_work (std::make_shared<boost::asio::io_service::work>(ioService)),
     m_errorNotifier(std::make_unique<ErrorNotifier>(*m_cloudClient, *m_localProfileConfig, *m_userConfig))
 {
-    g_commonLog.onLogLine.connect([this](std::string logLine) {
-        auto server = m_rpc->server();
-        server->publish ("synergy.service.log", std::move(logLine));
-    });
-
     m_localProfileConfig->modified.connect([this](){
         serviceLog()->debug("local profile modified, id={}", m_localProfileConfig->profileId());
         m_remoteProfileConfig->compare(*m_localProfileConfig);

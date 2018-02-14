@@ -42,7 +42,7 @@ TEST_CASE("WAMP RPC core start call is recieved", "[Wamp]")
         provideCoreTest(rpcManager);
     });
 
-    WampClient wampClient(ioService, commonLog());
+    WampClient wampClient(ioService, nullptr);
     serverReady.connect([&wampClient, &rpcManager]() {
         wampClient.connected.connect([&wampClient]() {
             std::vector<std::string> testCommand;

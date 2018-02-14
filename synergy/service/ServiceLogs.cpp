@@ -2,70 +2,63 @@
 #include <synergy/common/DirectoryManager.h>
 
 Log g_serviceLog;
-static std::shared_ptr<spdlog::sinks::rotating_file_sink_mt> s_global = nullptr;
 
+class SignalLogSink : public spdlog::sinks::sink {
+    void flush() {}
 
-class LogSignalSink : public spdlog::sinks::sink
-{
-    void log(const spdlog::details::log_msg& logLine) override
-    {
-        g_serviceLog.onLogLine(logLine.formatted.str());
+    void
+    log (const spdlog::details::log_msg& logLine) override {
+        g_serviceLog.onLogLine (logLine.formatted.str());
     }
-
-    void flush() { }
 };
 
 static auto
-initGlobalSink()
-{
-    if (s_global != nullptr) {
-        return s_global;
-    }
+initCombinedLogSink() {
+    auto const logDir = DirectoryManager::instance()->systemLogDir();
+    auto const logPath = logDir / "synergy-combined.log";
 
-    auto logDir = DirectoryManager::instance()->systemLogDir();
-    auto logPath = logDir / "synergy-combined.log";
-    s_global = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
-        logPath.string(), 1024 * 1024, 1);
-    return s_global;
+    return std::make_shared<spdlog::sinks::rotating_file_sink_mt>
+                            (logPath.string(), 1024 * 1024, 1);
 }
 
 static auto
-initServiceLog()
-{
+combinedLogSink() {
+    static auto sink = initCombinedLogSink();
+    return sink;
+}
+
+static auto
+initServiceLog() {
     std::vector<spdlog::sink_ptr> sinks;
-    sinks.push_back(initGlobalSink());
+    sinks.push_back (combinedLogSink());
 
 #ifdef _WIN32
     auto console = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
-#else // assume unix (linux and mac)
+#else
     auto console = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
 #endif
-    sinks.push_back(console);
+    sinks.push_back (std::move (console));
 
     auto logDir = DirectoryManager::instance()->systemLogDir();
     auto logPath = logDir / "synergy-service.log";
-    auto rotating = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
-        logPath.string(), 1024 * 1024, 1);
-    sinks.push_back(rotating);
 
-    auto signal = std::make_shared<LogSignalSink>();
-    sinks.push_back(signal);
+    sinks.push_back (std::make_shared<spdlog::sinks::rotating_file_sink_mt>
+                        (logPath.string(), 1024 * 1024, 1));
+    sinks.push_back (std::make_shared<SignalLogSink>());
 
-    auto logger = std::make_shared<spdlog::logger>("main", begin(sinks), end(sinks));
-    logger->set_pattern("[ Service ] [%Y-%m-%dT%T] %l: %v");
-    logger->flush_on(spdlog::level::debug);
-    logger->set_level(spdlog::level::debug);
-
-    logger->debug("service log path: {}", logPath.string());
-
+    auto logger = std::make_shared<spdlog::logger>("main",
+                                                   begin(sinks), end(sinks));
+    logger->set_pattern ("[ Service ] [%Y-%m-%dT%T] %l: %v");
+    logger->flush_on (spdlog::level::debug);
+    logger->set_level (spdlog::level::debug);
+    logger->debug ("service log file path: {}", logPath.string());
     return logger;
 }
 
 static auto
-initCoreLog()
-{
+initCoreLog() {
     std::vector<spdlog::sink_ptr> sinks;
-    sinks.push_back(initGlobalSink());
+    sinks.push_back(combinedLogSink());
 
 #ifdef _WIN32
     auto console = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
@@ -83,10 +76,9 @@ initCoreLog()
 }
 
 static auto
-initRouterLog()
-{
+initRouterLog() {
     std::vector<spdlog::sink_ptr> sinks;
-    sinks.push_back(initGlobalSink());
+    sinks.push_back(combinedLogSink());
 
 #ifdef _WIN32
     auto console = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
@@ -101,7 +93,7 @@ initRouterLog()
         logPath.string(), 1024 * 1024, 1);
     sinks.push_back(rotating);
 
-    auto signal = std::make_shared<LogSignalSink>();
+    auto signal = std::make_shared<SignalLogSink>();
     sinks.push_back(signal);
 
     auto logger = std::make_shared<spdlog::logger>("main", begin(sinks), end(sinks));
@@ -113,10 +105,9 @@ initRouterLog()
 }
 
 static auto
-initConfigLog()
-{
+initConfigLog() {
     std::vector<spdlog::sink_ptr> sinks;
-    sinks.push_back(initGlobalSink());
+    sinks.push_back(combinedLogSink());
 
 #ifdef _WIN32
     auto console = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
@@ -140,30 +131,25 @@ initConfigLog()
 }
 
 std::shared_ptr<spdlog::logger> const&
-serviceLog() noexcept
-{
+serviceLog() noexcept {
     static auto log = initServiceLog();
     return log;
 }
 
 std::shared_ptr<spdlog::logger> const&
-coreLog() noexcept
-{
+coreLog() noexcept {
     static auto log = initCoreLog();
     return log;
 }
 
 std::shared_ptr<spdlog::logger> const&
-routerLog() noexcept
-{
+routerLog() noexcept {
     static auto log = initRouterLog();
     return log;
 }
 
-
 std::shared_ptr<spdlog::logger> const&
-configLog() noexcept
-{
+configLog() noexcept {
     static auto log = initConfigLog();
     return log;
 }

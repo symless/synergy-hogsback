@@ -2,7 +2,6 @@
 #define WAMPCLIENT_H
 
 #include <synergy/common/WampUtility.h>
-#include <synergy/common/Logs.h>
 #include <autobahn/autobahn.hpp>
 // TODO: Figure out why AsioExecutor has to be included after autobahn
 #include <synergy/common/AsioExecutor.h>
@@ -15,6 +14,7 @@
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/fusion/functional/invocation/invoke.hpp>
 #include <boost/signals2.hpp>
+#include <spdlog/spdlog.h>
 
 namespace {
 

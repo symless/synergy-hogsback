@@ -43,7 +43,6 @@ public:
 
 signals:
     void dialogChanged();
-    void commonLogLine(const QString& logLine);
     void logLine(const QString& logLine);
 
 private:

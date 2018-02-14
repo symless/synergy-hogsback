@@ -1,4 +1,5 @@
 #include <synergy/tray/Controls.h>
+#include <synergy/tray/Log.h>
 #include <boost/asio/io_service.hpp>
 #include <synergy/common/WampClient.h>
 #include <thread>
@@ -28,7 +29,11 @@ void
 TrayControlsImpl::start() {
     rpcThread = std::thread([this](){
         rpcClient.start ("127.0.0.1", 24888);
-        ioService.run();
+        try {
+            ioService.run();
+        } catch (std::exception const& e) {
+            trayLog()->error ("Exception: ", e.what());
+        }
     });
 }
 
@@ -39,7 +44,7 @@ TrayControlsImpl::shutdown() {
 }
 
 TrayControls::TrayControls ():
-    m_impl (std::make_unique<TrayControlsImpl>(this, commonLog())) {
+    m_impl (std::make_unique<TrayControlsImpl>(this, trayLog())) {
     m_impl->start();
 }
 

@@ -23,7 +23,6 @@ set (COMMON_LIB_SOURCES
     Screen.cpp
     ScreenLinks.cpp
     ProcessCommand.cpp
-    Logs.cpp
     ${platform_sources}
 )
 

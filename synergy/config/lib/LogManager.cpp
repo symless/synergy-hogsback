@@ -1,6 +1,5 @@
 #include "LogManager.h"
 
-#include <synergy/common/Logs.h>
 #include "CloudClient.h"
 #include "DirectoryManager.h"
 #include "AppConfig.h"
@@ -37,16 +36,6 @@ QObject* LogManager::instance(QQmlEngine* engine,
 
 LogManager::LogManager()
 {
-    // use a double signal to move threads
-    connect(this, &LogManager::commonLogLine, this,
-        [this](const QString& logLine) {
-            appendRaw(logLine);
-        },
-        Qt::QueuedConnection);
-
-    g_commonLog.onLogLine.connect([this](std::string logLine) {
-        emit commonLogLine(QString::fromStdString(logLine));
-    });
 }
 
 LogManager::~LogManager()

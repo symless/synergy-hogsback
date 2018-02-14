@@ -1,6 +1,5 @@
 #include <synergy/common/WampRouter.h>
 #include <synergy/common/SocketOptions.hpp>
-#include <synergy/common/Logs.h>
 #include <bonefish/serialization/wamp_serializers.hpp>
 #include <bonefish/serialization/msgpack_serializer.hpp>
 #include <bonefish/router/wamp_router.hpp>
