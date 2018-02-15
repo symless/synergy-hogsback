@@ -9,8 +9,11 @@
 #include <cassert>
 #include <time.h>
 #include <array>
+#include <pwd.h>
+#include <sys/stat.h>
 
 std::string const kSharedConfigPath ("/Users/Shared/Synergy");
+std::string const kSharedUserData (kSharedConfigPath + "/user.cfg");
 std::string const kAppPath ("/Applications/Synergy.app");
 std::string const kAppResourcePath (kAppPath + "/Contents/Resources");
 auto const kAppVersionFilePath = kAppResourcePath + "/Version.txt";
@@ -32,6 +35,20 @@ log() {
     static std::ofstream lofs(kSharedConfigPath + "/helper.log", std::ios::out | std::ios::app);
     assert (lofs.is_open());
     return lofs;
+}
+
+static std::ofstream&
+conf_out() {
+    static std::ofstream conf_out(kSharedUserData, std::ios::out | std::ios::trunc);
+    assert (conf_out.is_open());
+    return conf_out;
+}
+
+static std::ifstream&
+conf_in() {
+    static std::ifstream conf_in(kSharedUserData, std::ios::in);
+    assert (conf_in.is_open());
+    return conf_in;
 }
 
 static
@@ -70,9 +87,13 @@ installSynergyService(bool const force = false)
 }
 
 int
-main (int, const char*[])
-{
-    boost::filesystem::create_directory (kSharedConfigPath);
+main (int argc, const char* argv[], const char* env[]) {
+    boost::filesystem::create_directory(kSharedConfigPath);
+
+    while (*env != NULL) {
+        log() << fmt::format ("[{}] var - {}\n", timestamp(), *env);
+        env++;
+    }
 
     try {
         std::ifstream appVersionFile;
@@ -95,7 +116,32 @@ main (int, const char*[])
             boost::filesystem::remove (kHelperExecPath, ec);
             log() << fmt::format ("[{}] uninstalling helper executable... {}\n",
                                   timestamp(), ec ? "Failed" : "OK");
-            
+
+            // remove the preference and user files too
+            std::string userHome;
+            conf_in() >> userHome;
+            conf_in().close();
+
+            log() << fmt::format ("[{}] userHome = {}\n",
+                                  timestamp(),
+                                  userHome);
+
+            auto const kUserFilesDirectory = userHome + "/Library/Synergy";
+            auto const kUserPreferencesDirectory = userHome + "/Library/Preferences/Symless";
+
+
+            boost::filesystem::remove_all (kUserFilesDirectory, ec);
+            log() << fmt::format ("[{}] removing {} {}\n",
+                                  timestamp(),
+                                  kUserFilesDirectory,
+                                  ec ? "Failed" : "OK");
+
+            boost::filesystem::remove_all (kUserPreferencesDirectory, ec);
+            log() << fmt::format ("[{}] removing {} {}\n",
+                                  timestamp(),
+                                  kUserPreferencesDirectory,
+                                  ec ? "Failed" : "OK");
+
             return EXIT_SUCCESS;
         }
 
@@ -108,6 +154,16 @@ main (int, const char*[])
                               getuid(), geteuid(), getpid());
         log() << fmt::format ("[{}] installed helper revision = {}\n", ts, SYNERGY_REVISION);
         log() << fmt::format ("[{}] installed app revision = {}\n", ts, version);
+
+        // grab and store the home directory of the user who installed Synergy
+        struct stat fileInfo;
+        stat(kAppPath.data(), &fileInfo);
+        log() << fmt::format ("[{}] installing user homedir is {} \n", ts, getpwuid(fileInfo.st_uid)->pw_dir);
+        conf_out() << getpwuid(fileInfo.st_uid)->pw_dir;
+        conf_out().flush();
+        conf_out().close();
+
+        
 
         if (!installSynergyService (version != SYNERGY_REVISION)) {
             log() << fmt::format ("[{}] failed to install the service\n", timestamp());
@@ -126,6 +182,8 @@ main (int, const char*[])
         log() << fmt::format ("[{}] Unknown exception thrown\n", timestamp());
     }
 
+    conf_out().close();
+    conf_in().close();
     log().close();
     return EXIT_FAILURE; 
 }
