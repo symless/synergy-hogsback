@@ -32,6 +32,9 @@ systemctl start synergy.service
 %attr(644,-,-) %{_datarootdir}/icons/synergy.svg
 %attr(644,-,-) %{_unitdir}/synergy.service
 
+%postun
+echo $HOME
+
 %changelog
 * Wed May 17 2017 Symless <engineering@symless.com>
 - Initial version of the package
