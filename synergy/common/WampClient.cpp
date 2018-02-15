@@ -98,7 +98,7 @@ WampClient::keepAlive() {
         if (errorCode == boost::asio::error::operation_aborted) {
             return;
         } else if (errorCode || !this->isConnected()) {
-            log()->error ("RPC keepalive failed");
+            this->log()->error ("RPC keepalive failed");
             return;
         }
 

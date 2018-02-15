@@ -6,8 +6,9 @@
 #include <spdlog/sinks/sink.h>
 #include <thread>
 
-static auto const kTrayLogPattern = "[  Tray   ] [%Y-%m-%dT%T] %l: %v";
+static auto const kTrayLogPattern = "[ Tray    ] [%Y-%m-%dT%T] %l: %v";
 static auto const kTrayLogLevel = spdlog::level::debug;
+static auto const kTrayLogFlushLevel = spdlog::level::debug;
 
 static auto
 initTrayLogFileSink() {
@@ -48,6 +49,7 @@ TrayControlsImpl::TrayControlsImpl (TrayControls* const ifc):
     /* When the RPC is up, switch to the RPC logger */
     rpcClient.connected.connect ([&](){
         this->logger = rpcLogger();
+        rpcClient.call<bool>("synergy.tray.hello");
     });
 
     /* When the RPC goes down, switch to the file logger */
@@ -70,7 +72,10 @@ TrayControlsImpl::start() {
 
 void
 TrayControlsImpl::shutdown() {
-    ioService.dispatch ([this](){ rpcClient.stop(); });
+    ioService.dispatch ([this](){
+        rpcClient.call<bool>("synergy.tray.goodbye");
+        rpcClient.stop();
+    });
     rpcThread.join();
 }
 
@@ -87,7 +92,7 @@ TrayControlsImpl::fileLogger() {
                                                    begin(sinks), end(sinks));
     logger->set_pattern (kTrayLogPattern);
     logger->set_level (kTrayLogLevel);
-    logger->flush_on (spdlog::level::debug);
+    logger->flush_on (kTrayLogFlushLevel);
     return logger;
 }
 
@@ -102,7 +107,7 @@ TrayControlsImpl::rpcLogger() {
                                                    begin(sinks), end(sinks));
     logger->set_pattern (kTrayLogPattern);
     logger->set_level (kTrayLogLevel);
-    logger->flush_on (spdlog::level::debug);
+    logger->flush_on (kTrayLogFlushLevel);
     return logger;
 }
 

@@ -1,4 +1,4 @@
-#include "ServiceWorker.h"
+#include <synergy/service/ServiceWorker.h>
 
 #include <synergy/service/CloudClient.h>
 #include <synergy/service/ServiceLogs.h>
@@ -8,6 +8,7 @@
 #include <synergy/service/RouterErrorMonitor.h>
 #include <synergy/service/SessionMonitor.h>
 #include <synergy/service/WebsocketError.h>
+#include <synergy/service/TrayService.h>
 #include <synergy/service/router/protocol/v2/MessageTypes.hpp>
 #include <synergy/common/UserConfig.h>
 #include <synergy/common/RpcManager.h>
@@ -182,6 +183,7 @@ ServiceWorker::provideRpcEndpoints()
     provideCloud();
     provideLogging();
     provideServerClaim();
+    provideTray();
 
     serviceLog()->debug("rpc endpoints created");
 }
@@ -265,17 +267,39 @@ ServiceWorker::provideCloud()
 }
 
 void
+ServiceWorker::provideTray()
+{
+    m_rpc->server()->provide("synergy.log.tray", [this](std::string logLine) {
+        boost::algorithm::trim_right (logLine);
+        trayLog()->debug(logLine);
+    });
+
+    m_rpc->server()->provide("synergy.tray.hello", [this]() {
+        trayLog()->info("Tray process connected");
+        bool const kill = !m_trayService->start();
+        if (kill) {
+            trayLog()->info("A tray process is already running. Responding "
+                            "with kill command");
+        }
+        return kill;
+    });
+
+    m_rpc->server()->provide("synergy.tray.goodbye", [this]() {
+        m_trayService->stop();
+    });
+
+    m_rpc->server()->provide("synergy.tray.ping", [this]() {
+        trayLog()->debug ("Received ping");
+        m_trayService->ping();
+    });
+}
+
+void
 ServiceWorker::provideLogging()
 {
     m_rpc->server()->provide(
         "synergy.log.config", [this](std::string logLine) {
         configLog()->debug(logLine);
-    });
-
-    m_rpc->server()->provide(
-        "synergy.log.tray", [this](std::string logLine) {
-        boost::algorithm::trim_right (logLine);
-        trayLog()->debug(logLine);
     });
 }
 

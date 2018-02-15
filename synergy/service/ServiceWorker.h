@@ -13,6 +13,7 @@ class ProfileConfig;
 class SessionMonitor;
 class ErrorNotifier;
 class RouterErrorMonitor;
+class TrayService;
 
 class ServiceWorker final
 {
@@ -31,6 +32,7 @@ private:
     void provideSnapshot();
     void provideHello();
     void provideCloud();
+    void provideTray();
     void provideLogging();
     void provideServerClaim();
 
@@ -50,6 +52,7 @@ private:
     boost::signals2::connection     m_logSender;
     std::string                     m_lastProfileSnapshot;
     std::unique_ptr<ErrorNotifier>  m_errorNotifier;
+    std::unique_ptr<TrayService>    m_trayService;
 };
 
 #endif // SERVICEWORKER_H

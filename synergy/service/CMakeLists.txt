@@ -29,6 +29,7 @@ set (SERVICE_SOURCES
     CoreErrorMonitor.cpp
     RouterErrorMonitor.cpp
     ErrorNotifier.cpp
+    TrayService.cpp
     ${SERVICE_SM_SOURCES}
 )
 

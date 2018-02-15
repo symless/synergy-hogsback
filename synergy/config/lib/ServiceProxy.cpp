@@ -17,7 +17,7 @@
 #endif
 
 ServiceProxy::ServiceProxy() :
-    m_wampClient(m_io, nullptr) // TODO
+    m_wampClient(m_io, nullptr)
 {
     connect (this, &ServiceProxy::rpcReceivedScreens, this,
              &ServiceProxy::onRpcReceivedScreens, Qt::QueuedConnection);

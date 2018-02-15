@@ -21,7 +21,7 @@ namespace {
 template <typename R>
 struct WampCallHelper {
     template <typename Result> static
-    void
+    auto
     getReturnValue (Result&& result) {
         return result.template argument<R>(0);
     }
