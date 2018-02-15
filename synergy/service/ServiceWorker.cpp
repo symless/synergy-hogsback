@@ -274,6 +274,7 @@ ServiceWorker::provideLogging()
 
     m_rpc->server()->provide(
         "synergy.log.tray", [this](std::string logLine) {
+        boost::algorithm::trim_right (logLine);
         trayLog()->debug(logLine);
     });
 }
