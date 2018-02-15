@@ -144,7 +144,11 @@ initTrayLog() {
 
     auto logger = std::make_shared<spdlog::logger>("main", begin(sinks),
                                                    end(sinks));
-    logger->set_pattern("[  Tray   ] %v");
+
+    // The tray log is preformatted by the logger in the tray process. The
+    // reason for this is that the pattern is associated with the logger and
+    // not the sink.
+    logger->set_pattern("%v");
     logger->flush_on(spdlog::level::debug);
     logger->set_level(spdlog::level::debug);
 
