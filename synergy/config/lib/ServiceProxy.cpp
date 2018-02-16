@@ -106,7 +106,7 @@ ServiceProxy::~ServiceProxy()
 void ServiceProxy::start()
 {
     m_rpcThread = std::make_unique<std::thread>([this]{
-        m_wampClient.start("127.0.0.1", 24888);
+        m_wampClient.connect("127.0.0.1", 24888);
         m_io.run();
     });
 }

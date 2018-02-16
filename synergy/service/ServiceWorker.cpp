@@ -239,7 +239,7 @@ void ServiceWorker::provideSnapshot()
 void
 ServiceWorker::provideHello()
 {
-    m_rpc->server()->provide(
+    m_rpc->server()->provide (
         "synergy.hello", [this]() {
 
         serviceLog()->debug("saying hello to config ui");
@@ -277,11 +277,11 @@ ServiceWorker::provideTray()
     });
 
     m_rpc->server()->provide ("synergy.tray.hello", [this]() {
-        //serviceLog()->info("Tray process connected");
+        serviceLog()->info("Tray process connected");
         bool const kill = !m_trayService->start();
         if (kill) {
             serviceLog()->info ("A tray process is already running. Responding "
-                                "with kill command");
+                                "with the kill command");
         }
         return kill;
     });

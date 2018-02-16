@@ -3,18 +3,16 @@
 static bool const kDebugWampClient = false;
 static boost::posix_time::seconds const kRPCKeepAliveInterval (3);
 
-WampClient::WampClient(boost::asio::io_service& ioService,
-                       std::shared_ptr<spdlog::logger> logger):
+WampClient::WampClient (boost::asio::io_service& ioService,
+                        std::shared_ptr<spdlog::logger> logger):
     m_executor (ioService),
-    m_session (std::make_shared<autobahn::wamp_session>(ioService,
-                                                        kDebugWampClient)),
     m_keepAliveTimer (ioService),
     m_logger (std::move (logger))
 {
     m_defaultCallOptions.set_timeout (std::chrono::seconds (3));
 
     connected.connect ([this](){
-        //this->keepAlive();
+        this->keepAlive();
     });
 
     disconnected.connect ([this]() {
@@ -30,26 +28,39 @@ WampClient::isConnected() const {
 }
 
 void
-WampClient::shutdown () {
+WampClient::disconnect () {
     m_connected = false;
-    m_keepAliveTimer.cancel();
+    boost::system::error_code ec;
+    m_keepAliveTimer.cancel(ec);
 
-    m_session->leave (""); // TODO: Reason string
-    m_session->stop ();
+    if (m_session) {
+        m_session->leave ("");
+        m_session->stop ();
+    }
+
+    ioService().poll();
 
     if (m_transport) {
         m_transport->disconnect().get();
         m_transport->detach();
+        m_session.reset();
         m_transport.reset();
     }
+
+    ioService().poll();
 }
 
 void
-WampClient::start (std::string const& ip, int const port) {
+WampClient::connect (std::string const& ip, int const port) {
     auto endpoint = boost::asio::ip::tcp::endpoint
-                    (boost::asio::ip::address_v4::from_string(ip), port);
+                    (boost::asio::ip::address::from_string(ip), port);
+    disconnect();
+
     m_transport = std::make_shared<autobahn::wamp_tcp_transport>
         (ioService(), endpoint, kDebugWampClient);
+
+    m_session = std::make_shared<autobahn::wamp_session> (ioService(),
+                                                          kDebugWampClient);
 
     m_transport->attach
         (std::static_pointer_cast<autobahn::wamp_transport_handler>(m_session));

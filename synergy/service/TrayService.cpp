@@ -28,9 +28,10 @@ TrayService::ping() {
         if (ec == boost::asio::error::operation_aborted) {
             return;
         } else if (ec) {
-            serviceLog()->critical ("Tray service monitor failed.");
+            serviceLog()->critical ("System tray monitoring has failed.");
             return;
         }
+        serviceLog()->error ("System tray is not responding");
         m_trayRunning = false;
     });
 }

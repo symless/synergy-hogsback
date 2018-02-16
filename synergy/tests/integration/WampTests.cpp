@@ -50,7 +50,7 @@ TEST_CASE("WAMP RPC core start call is recieved", "[Wamp]")
             testCommand.push_back("--arg1");
             wampClient.call<void> ("synergy.core.start.test", testCommand);
         });
-        wampClient.start (rpcManager.ip(), rpcManager.port());
+        wampClient.connect (rpcManager.ip(), rpcManager.port());
     });
 
     testFinished.connect([&ioService]() {

@@ -67,10 +67,10 @@ public:
                 std::shared_ptr<spdlog::logger> logger);
 
     void
-    start (std::string const& ip, int port);
+    connect (std::string const& ip, int port);
 
     void
-    shutdown();
+    disconnect();
 
     auto
     log() const {
@@ -139,8 +139,8 @@ private:
 
 private:
     boost::executors::executor_adaptor<AsioExecutor> m_executor;
-    std::shared_ptr<autobahn::wamp_session> m_session;
     std::shared_ptr<autobahn::wamp_transport> m_transport;
+    std::shared_ptr<autobahn::wamp_session> m_session;
     autobahn::wamp_call_options m_defaultCallOptions;
     boost::asio::deadline_timer m_keepAliveTimer;
     std::shared_ptr<spdlog::logger> m_logger;

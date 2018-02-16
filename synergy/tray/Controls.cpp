@@ -22,6 +22,7 @@ initTrayLogFileSink() {
 class TrayControlsImpl final {
 public:
     explicit TrayControlsImpl (TrayControls*);
+    ~TrayControlsImpl();
 
     void start();
     void shutdown();
@@ -34,8 +35,8 @@ private:
     TrayControls* interface = nullptr;
     std::shared_ptr<spdlog::sinks::sink> logFileSink;
     std::shared_ptr<spdlog::logger> logger;
-    boost::asio::io_service ioService;
 
+    boost::asio::io_service ioService;
     std::thread rpcThread;
     WampClient rpcClient;
 };
@@ -46,30 +47,36 @@ TrayControlsImpl::TrayControlsImpl (TrayControls* const ifc):
     logger (fileLogger()),
     rpcClient (ioService, fileLogger()) {
 
-    // When the RPC is up, switch to the dual file/RPC logger
+    /* When the RPC is up, switch to the dual file/RPC logger */
     rpcClient.connected.connect ([&](){
         this->logger = rpcLogger();
-        rpcClient.call<bool>("synergy.tray.hello").then (rpcClient.executor(),
-            [](boost::future<bool> kill) {
-                // TODO
+
+        rpcClient.call<bool>("synergy.tray.hello")
+            .then (rpcClient.executor(), [this](boost::future<bool> kill) {
+            if (kill.get()) {
+                log()->info ("Received kill command.");
+                this->shutdown();
             }
-        );
+        });
     });
 
-    // When the RPC goes down, switch to the file logger
+    /* When the RPC goes down, switch to the file logger */
     rpcClient.disconnected.connect ([&](){
         this->logger = fileLogger();
     });
 }
 
+TrayControlsImpl::~TrayControlsImpl() {
+    rpcThread.join();
+}
+
 void
 TrayControlsImpl::start() {
     rpcThread = std::thread([this](){
-        rpcClient.start ("127.0.0.1", 24888);
+        rpcClient.connect ("127.0.0.1", 24888);
         try {
             ioService.run();
         } catch (std::exception const&) {
-
         }
     });
 }
@@ -78,9 +85,8 @@ void
 TrayControlsImpl::shutdown() {
     ioService.dispatch ([this](){
         rpcClient.call<bool>("synergy.tray.goodbye");
-        rpcClient.shutdown();
+        rpcClient.disconnect();
     });
-    rpcThread.join();
 }
 
 std::shared_ptr<spdlog::logger>
