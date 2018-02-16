@@ -46,13 +46,17 @@ TrayControlsImpl::TrayControlsImpl (TrayControls* const ifc):
     logger (fileLogger()),
     rpcClient (ioService, fileLogger()) {
 
-    /* When the RPC is up, switch to the RPC logger */
+    // When the RPC is up, switch to the dual file/RPC logger
     rpcClient.connected.connect ([&](){
         this->logger = rpcLogger();
-        rpcClient.call<bool>("synergy.tray.hello");
+        rpcClient.call<bool>("synergy.tray.hello").then (rpcClient.executor(),
+            [](boost::future<bool> kill) {
+                // TODO
+            }
+        );
     });
 
-    /* When the RPC goes down, switch to the file logger */
+    // When the RPC goes down, switch to the file logger
     rpcClient.disconnected.connect ([&](){
         this->logger = fileLogger();
     });
@@ -74,7 +78,7 @@ void
 TrayControlsImpl::shutdown() {
     ioService.dispatch ([this](){
         rpcClient.call<bool>("synergy.tray.goodbye");
-        rpcClient.stop();
+        rpcClient.shutdown();
     });
     rpcThread.join();
 }
@@ -111,7 +115,7 @@ TrayControlsImpl::rpcLogger() {
     return logger;
 }
 
-TrayControls::TrayControls ():
+TrayControls::TrayControls():
     m_impl (std::make_unique<TrayControlsImpl>(this)) {
     m_impl->start();
 }

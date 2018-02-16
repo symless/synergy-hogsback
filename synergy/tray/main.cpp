@@ -23,7 +23,6 @@ main (int argc, char* argv[]) {
     tray.show();
 
     app.exec();
-
     trayControls.log()->debug ("Tray process exited");
 }
 

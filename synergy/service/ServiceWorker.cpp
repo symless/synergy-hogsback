@@ -36,7 +36,9 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_coreManager (std::make_unique<CoreManager>(m_ioService, m_userConfig, m_localProfileConfig, m_cloudClient, *m_rpc, m_router)),
     m_sessionMonitor (std::make_unique<SessionMonitor>(ioService)),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService)),
-    m_errorNotifier(std::make_unique<ErrorNotifier>(*m_cloudClient, *m_localProfileConfig, *m_userConfig))
+    m_errorNotifier(std::make_unique<ErrorNotifier>(*m_cloudClient, *m_localProfileConfig, *m_userConfig)),
+    m_trayService(std::make_unique<TrayService>(m_ioService))
+
 {
     m_localProfileConfig->modified.connect([this](){
         serviceLog()->debug("local profile modified, id={}", m_localProfileConfig->profileId());
@@ -269,27 +271,27 @@ ServiceWorker::provideCloud()
 void
 ServiceWorker::provideTray()
 {
-    m_rpc->server()->provide("synergy.log.tray", [this](std::string logLine) {
+    m_rpc->server()->provide ("synergy.log.tray", [this](std::string logLine) {
         boost::algorithm::trim_right (logLine);
         trayLog()->debug(logLine);
     });
 
-    m_rpc->server()->provide("synergy.tray.hello", [this]() {
-        trayLog()->info("Tray process connected");
+    m_rpc->server()->provide ("synergy.tray.hello", [this]() {
+        //serviceLog()->info("Tray process connected");
         bool const kill = !m_trayService->start();
         if (kill) {
-            trayLog()->info("A tray process is already running. Responding "
-                            "with kill command");
+            serviceLog()->info ("A tray process is already running. Responding "
+                                "with kill command");
         }
         return kill;
     });
 
-    m_rpc->server()->provide("synergy.tray.goodbye", [this]() {
+    m_rpc->server()->provide ("synergy.tray.goodbye", [this]() {
         m_trayService->stop();
     });
 
-    m_rpc->server()->provide("synergy.tray.ping", [this]() {
-        trayLog()->debug ("Received ping");
+    m_rpc->server()->provide ("synergy.tray.ping", [this]() {
+        serviceLog()->debug ("Received ping from tray");
         m_trayService->ping();
     });
 }
