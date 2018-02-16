@@ -9,12 +9,12 @@ WampClient::WampClient(boost::asio::io_service& ioService,
     m_session (std::make_shared<autobahn::wamp_session>(ioService,
                                                         kDebugWampClient)),
     m_keepAliveTimer (ioService),
-    m_logger (logger)
+    m_logger (std::move (logger))
 {
     m_defaultCallOptions.set_timeout (std::chrono::seconds (3));
 
     connected.connect ([this](){
-        this->keepAlive();
+        //this->keepAlive();
     });
 
     disconnected.connect ([this]() {
@@ -30,7 +30,7 @@ WampClient::isConnected() const {
 }
 
 void
-WampClient::stop () {
+WampClient::shutdown () {
     m_connected = false;
     m_keepAliveTimer.cancel();
 

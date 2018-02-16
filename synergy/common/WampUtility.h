@@ -7,7 +7,8 @@ namespace {
 
 struct make_tuple {
     template <typename... Args>
-    auto operator()(Args&&... args) const {
+    auto
+    operator()(Args&&... args) const {
         return std::make_tuple (std::forward<Args>(args)...);
     }
 };

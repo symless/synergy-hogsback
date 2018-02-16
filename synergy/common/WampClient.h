@@ -18,12 +18,13 @@
 
 namespace {
 
-template <typename R>
+template <typename Result>
 struct WampCallHelper {
-    template <typename Result> static
-    auto
-    getReturnValue (Result&& result) {
-        return result.template argument<R>(0);
+    template <typename Arg> static
+    void
+    complete (boost::promise<Result>& promise, Arg&& result) {
+        auto value = result.template argument<Result>(0);
+        promise.set_value(value);
     }
 };
 
@@ -31,15 +32,16 @@ template <>
 struct WampCallHelper<void> {
     template <typename Result> static
     void
-    getReturnValue (Result&&) {
+    complete (boost::promise<void>& promise, Result&&) {
+        promise.set_value();
     }
 };
 
 template <typename Handler>
 class WampEventHandler final {
     public:
-        WampEventHandler (Handler&& handler): m_handler(std::move(handler)) {}
-        WampEventHandler (Handler const& handler): m_handler(handler) {}
+        WampEventHandler (Handler&& handler): m_handler (std::move(handler)) {}
+        WampEventHandler (Handler const& handler): m_handler (handler) {}
         void operator()(autobahn::wamp_event const& event);
     private:
         Handler m_handler;
@@ -47,7 +49,8 @@ class WampEventHandler final {
 
 template <typename Handler> inline
 void
-WampEventHandler<Handler>::operator()(autobahn::wamp_event const& event) {
+WampEventHandler<Handler>::operator()
+(autobahn::wamp_event const& event) {
     typename boost::fusion::result_of::invoke
                 <make_tuple, boost::callable_traits::args_t<Handler>>::type
                     args;
@@ -67,11 +70,16 @@ public:
     start (std::string const& ip, int port);
 
     void
-    stop();
+    shutdown();
 
     auto
     log() const {
         return m_logger;
+    }
+
+    auto&
+    executor() noexcept {
+        return m_executor;
     }
 
     auto&
@@ -82,40 +90,41 @@ public:
     template <typename Result, typename... Args>
     boost::future<Result>
     call (char const* const fun, Args&&... args) {
-        /* Asio requires that handlers be copyable, but packaged_task isn't,
-         * so we have to allocate.
-         */
-        auto task = std::make_shared<boost::packaged_task<Result()>> (
-            [this, fun, args_tup = std::make_tuple (std::forward<Args>(args)...)]() mutable {
-                return m_session->call (fun, std::move(args_tup), m_defaultCallOptions).then
-                    (m_executor, [&, fun](boost::future<autobahn::wamp_call_result> result) {
-                        try {
-                            return WampCallHelper<Result>::getReturnValue (result.get());
-                        }
-                        catch (...) {
-                            log()->error ("RPC call failed: {}", std::string(fun));
-                            disconnected();
-                        }
-                    }
-                );
-            }
-        );
+        auto promise = std::make_shared<boost::promise<Result>>();
+        auto future = promise->get_future();
 
-        ioService().post([task]() { (*task)(); });
+        ioService().dispatch ([
+            this,
+            fun,
+            argsTup = std::make_tuple (std::forward<Args>(args)...),
+            outerPromise = std::move (promise)
+        ]() mutable {
+            this->m_session->call (fun, std::move (argsTup),
+                                   m_defaultCallOptions)
+            .then (this->m_executor, [
+                this,
+                fun,
+                promise = std::move (outerPromise)
+            ](boost::future<autobahn::wamp_call_result> result) mutable {
+                try {
+                    WampCallHelper<Result>::complete (*promise, result.get());
+                } catch (...) {
+                    this->log()->error ("RPC call failed: {}", std::string(fun));
+                    this->disconnected();
+                }
+            });
+        });
 
-        /* Actually returns a future<future<Result>, which means we depend on a
-         * Boost extension which unwraps that in to a future<Result>
-         */
-        return task->get_future();
+        return future;
     }
 
     template <typename Handler>
     void
     subscribe (char const* const topic, Handler&& handler) {
         using handler_type = std::decay_t<Handler>;
-        ioService().post([this, topic,
-                         eventHandler = WampEventHandler<handler_type>
-                            (std::forward<Handler>(handler))]() mutable {
+        ioService().dispatch ([this, topic,
+                               eventHandler = WampEventHandler<handler_type>
+                                (std::forward<Handler>(handler))]() mutable {
             m_session->subscribe (topic, std::move(eventHandler));
         });
     }
