@@ -17,6 +17,6 @@ case "$1" in
     *)
         # do nothing
     ;;
-
+esac
 
 #DEBHELPER#
