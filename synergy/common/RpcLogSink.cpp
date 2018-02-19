@@ -8,7 +8,7 @@ RpcLogSink::RpcLogSink (WampClient& rpcClient, std::string const& log):
 
 void
 RpcLogSink::log (spdlog::details::log_msg const& msg) {
-    m_rpcClient->call<void> (m_rpcLogFunction.c_str(), msg.formatted.str()).get();
+    m_rpcClient->call<void> (m_rpcLogFunction.c_str(), msg.formatted.str());
 }
 
 void
