@@ -1,0 +1,22 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    purge|remove)
+        for dir in `cat /etc/passwd | cut -d : -f 6`
+        do
+            if [ -d "$dir/.config/Symless/" ]; then
+                rm -rf $dir/.config/Symless/
+            fi
+            if [ -d "$dir/.synergy/" ]; then
+                    rm -rf $dir/.synergy/
+            fi
+        done
+    ;;
+
+    *)
+        # do nothing
+    ;;
+
+
+#DEBHELPER#
