@@ -36,9 +36,15 @@ systemctl start synergy.service
 # The value of $1 indicates the type of install we are doing, a value of 1 here indicates an upgrade, 0 removal
 # see http://meinit.nl/rpm-spec-prepostpreunpostun-argument-values
 if [ $1 -gt 0 ]; then
-    rm -rf $HOME/.config/Symless/
-    rm -rf $HOME/.synergy/
-    echo $HOME
+    for dir in `cat /etc/passwd | cut -d : -f 6`
+    do
+        if [ -d "$dir/.config/Symless/" ]; then
+            rm -rf $dir/.config/Symless/
+        fi
+        if [ -d "$dir/.synergy/" ]; then
+                rm -rf $dir/.synergy/
+        fi
+    done
 fi
 
 %changelog
