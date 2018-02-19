@@ -12,14 +12,16 @@ public:
     TrayControls();
     ~TrayControls() noexcept;
 
+    void connect();
     void pauseService();
     void restartService();
     std::shared_ptr<spdlog::logger> log() const;
 
-    boost::signals2::signal<void()> ready;
-
 private:
     std::unique_ptr<TrayControlsImpl> m_impl;
+
+public:
+    boost::signals2::signal<void()> ready;
 };
 
 #endif // SYNERGY_TRAY_CONTROLS_H

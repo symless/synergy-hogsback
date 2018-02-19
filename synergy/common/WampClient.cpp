@@ -1,6 +1,6 @@
 #include <synergy/common/WampClient.h>
 
-static bool const kDebugWampClient = false;
+static bool const kDebugWampClient = true;
 static boost::posix_time::seconds const kRPCKeepAliveInterval (3);
 
 WampClient::WampClient (boost::asio::io_service& ioService,
@@ -27,35 +27,46 @@ WampClient::isConnected() const {
     return m_connected;
 }
 
+// TODO: make this return a future?
 void
 WampClient::disconnect () {
     m_connected = false;
     boost::system::error_code ec;
     m_keepAliveTimer.cancel(ec);
 
-    if (m_session) {
-        m_session->leave ("");
-        m_session->stop ();
+    disconnected();
+
+    if (!m_session) {
+        return;
     }
 
-    ioService().poll();
+    m_session->leave ("").then (this->executor(), [this](auto left) {
+        left.get();
 
-    if (m_transport) {
-        m_transport->disconnect().get();
-        m_transport->detach();
-        m_session.reset();
-        m_transport.reset();
-    }
+        m_session->stop ().then (this->executor(), [this](auto stopped) {
+            stopped.get();
 
-    ioService().poll();
+            if (!m_transport) {
+                ioService().poll();
+                m_session.reset();
+                return;
+            }
+
+            m_transport->disconnect().then(this->executor(),
+                                           [this](auto disconnected) {
+                disconnected.get();
+                m_transport->detach();
+                m_transport.reset();
+                m_session.reset();
+            });
+        });
+    });
 }
 
 void
 WampClient::connect (std::string const& ip, int const port) {
     auto endpoint = boost::asio::ip::tcp::endpoint
                     (boost::asio::ip::address::from_string(ip), port);
-    disconnect();
-
     m_transport = std::make_shared<autobahn::wamp_tcp_transport>
         (ioService(), endpoint, kDebugWampClient);
 

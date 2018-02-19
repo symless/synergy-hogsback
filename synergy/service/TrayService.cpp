@@ -1,7 +1,7 @@
 #include <synergy/service/TrayService.h>
 #include <synergy/service/ServiceLogs.h>
 
-static auto const kTrayPingTimeout = std::chrono::seconds (3);
+static auto const kTrayPingTimeout = std::chrono::seconds (9);
 
 bool
 TrayService::start() {
