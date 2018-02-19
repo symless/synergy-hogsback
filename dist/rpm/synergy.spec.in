@@ -33,7 +33,13 @@ systemctl start synergy.service
 %attr(644,-,-) %{_unitdir}/synergy.service
 
 %postun
-echo $HOME
+# The value of $1 indicates the type of install we are doing, a value of 1 here indicates an upgrade, 0 removal
+# see http://meinit.nl/rpm-spec-prepostpreunpostun-argument-values
+if [ $1 -gt 0 ]; then
+    rm -rf $HOME/.config/Symless/
+    rm -rf $HOME/.synergy/
+    echo $HOME
+fi
 
 %changelog
 * Wed May 17 2017 Symless <engineering@symless.com>
