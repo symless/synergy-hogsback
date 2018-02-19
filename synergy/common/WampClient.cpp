@@ -16,8 +16,8 @@ WampClient::WampClient (boost::asio::io_service& ioService,
     });
 
     disconnected.connect ([this]() {
-        m_connected = false;
-        m_keepAliveTimer.cancel();
+        this->m_connected = false;
+        this->m_keepAliveTimer.cancel();
         this->log()->error ("RPC connection failed");
     });
 }
@@ -43,21 +43,21 @@ WampClient::disconnect () {
     m_session->leave ("").then (this->executor(), [this](auto left) {
         left.get();
 
-        m_session->stop ().then (this->executor(), [this](auto stopped) {
+        this->m_session->stop ().then (this->executor(), [this](auto stopped) {
             stopped.get();
 
-            if (!m_transport) {
-                ioService().poll();
-                m_session.reset();
+            if (!this->m_transport) {
+                this->ioService().poll();
+                this->m_session.reset();
                 return;
             }
 
-            m_transport->disconnect().then(this->executor(),
+            this->m_transport->disconnect().then(this->executor(),
                                            [this](auto disconnected) {
                 disconnected.get();
-                m_transport->detach();
-                m_transport.reset();
-                m_session.reset();
+                this->m_transport->detach();
+                this->m_transport.reset();
+                this->m_session.reset();
             });
         });
     });
