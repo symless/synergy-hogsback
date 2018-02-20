@@ -35,7 +35,7 @@ systemctl start synergy.service
 %postun
 # The value of $1 indicates the type of install we are doing, a value of 1 here indicates an upgrade, 0 removal
 # see http://meinit.nl/rpm-spec-prepostpreunpostun-argument-values
-if [ $1 -gt 0 ]; then
+if [ $1 -eq 0 ]; then
     for dir in `cat /etc/passwd | cut -d : -f 6`
     do
         if [ -d "$dir/.config/Symless/" ]; then
