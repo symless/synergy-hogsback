@@ -57,7 +57,6 @@ WampClient::disconnect () {
                 disconnected.get();
                 this->m_transport->detach();
                 this->m_transport.reset();
-                this->m_session.reset();
             });
         });
     });
