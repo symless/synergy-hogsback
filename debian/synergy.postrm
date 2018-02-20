@@ -9,7 +9,7 @@ case "$1" in
                 rm -rf $dir/.config/Symless/
             fi
             if [ -d "$dir/.synergy/" ]; then
-                    rm -rf $dir/.synergy/
+                rm -rf $dir/.synergy/
             fi
         done
     ;;
