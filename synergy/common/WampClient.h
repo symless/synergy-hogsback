@@ -109,8 +109,9 @@ public:
                 try {
                     WampCallHelper<Result>::complete (*promise, result.get());
                 } catch (...) {
+                    promise->set_exception (std::current_exception());
                     this->log()->error ("RPC call failed: {}", std::string(fun));
-                    this->disconnected();
+                    this->disconnected(false);
                 }
             });
         });
@@ -132,7 +133,8 @@ public:
     bool isConnected() const;
     boost::signals2::signal<void()> connected;
     boost::signals2::signal<void()> connecting;
-    boost::signals2::signal<void()> disconnected;
+    boost::signals2::signal<void(bool)> disconnected;
+
 private:
     void connect();
     void keepAlive();

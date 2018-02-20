@@ -40,7 +40,7 @@ ServiceProxy::ServiceProxy() :
     connect (this, &ServiceProxy::rpcVersionCheck, this,
              &ServiceProxy::onRpcVersionCheck, Qt::QueuedConnection);
 
-    m_wampClient.disconnected.connect([&]() {
+    m_wampClient.disconnected.connect([&](bool) {
         m_errorView->setMode(ErrorViewMode::kServiceError);
     });
 

@@ -245,9 +245,8 @@ ServiceWorker::provideHello()
         serviceLog()->debug("saying hello to config ui");
 
         if (!m_cloudClient->isWebsocketConnected() &&
-            m_userConfig->profileId() != -1) {
+             m_userConfig->profileId() != -1) {
             m_rpc->server()->publish("synergy.cloud.offline");
-
             m_cloudClient->reconnectWebsocket();
         }
 
@@ -260,9 +259,7 @@ ServiceWorker::provideHello()
 void
 ServiceWorker::provideCloud()
 {
-    m_rpc->server()->provide(
-        "synergy.cloud.retry", [this]() {
-
+    m_rpc->server()->provide("synergy.cloud.retry", [this]() {
         serviceLog()->debug("retrying cloud connection");
         m_cloudClient->reconnectWebsocket();
     });
@@ -280,18 +277,19 @@ ServiceWorker::provideTray()
         serviceLog()->info("Tray process connected");
         bool const kill = !m_trayService->start();
         if (kill) {
-            serviceLog()->info ("A tray process is already running. Responding "
-                                "with the kill command");
+            serviceLog()->info ("A tray process is already is already connected. "
+                                "Responding with the kill command.");
         }
         return kill;
     });
 
     m_rpc->server()->provide ("synergy.tray.goodbye", [this]() {
+        serviceLog()->info ("Tray process disconnected");
         m_trayService->stop();
     });
 
     m_rpc->server()->provide ("synergy.tray.ping", [this]() {
-        serviceLog()->debug ("Received ping from tray");
+        serviceLog()->debug ("Received ping from tray process");
         m_trayService->ping();
     });
 }
@@ -299,16 +297,14 @@ ServiceWorker::provideTray()
 void
 ServiceWorker::provideLogging()
 {
-    m_rpc->server()->provide(
-        "synergy.log.config", [this](std::string logLine) {
+    m_rpc->server()->provide("synergy.log.config", [this](std::string logLine) {
         configLog()->debug(logLine);
     });
 }
 
 void ServiceWorker::provideServerClaim()
 {
-    m_rpc->server()->provide(
-        "synergy.server.claim", [this](int serverId) {
+    m_rpc->server()->provide("synergy.server.claim", [this](int serverId) {
         m_coreManager->switchServer(serverId);
         m_coreManager->notifyServerClaim(serverId);
     });

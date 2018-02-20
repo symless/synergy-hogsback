@@ -12,13 +12,18 @@ WampClient::WampClient (boost::asio::io_service& ioService,
     m_defaultCallOptions.set_timeout (std::chrono::seconds (3));
 
     connected.connect ([this](){
+        assert (this->m_connected);
         this->keepAlive();
     });
 
-    disconnected.connect ([this]() {
+    disconnected.connect ([this](bool) {
         this->m_connected = false;
-        this->m_keepAliveTimer.cancel();
-        this->log()->error ("RPC connection failed");
+
+        boost::system::error_code ec;
+        this->m_keepAliveTimer.cancel(ec);
+        this->ioService().poll();
+
+        this->log()->info ("RPC disconnected");
     });
 }
 
@@ -27,14 +32,14 @@ WampClient::isConnected() const {
     return m_connected;
 }
 
-// TODO: make this return a future?
 void
 WampClient::disconnect () {
-    m_connected = false;
-    boost::system::error_code ec;
-    m_keepAliveTimer.cancel(ec);
+    if (!this->m_connected) {
+        return;
+    }
 
-    disconnected();
+    this->m_connected = false;
+    disconnected(true);
 
     if (!m_session) {
         return;
@@ -57,6 +62,8 @@ WampClient::disconnect () {
                 disconnected.get();
                 this->m_transport->detach();
                 this->m_transport.reset();
+                // TODO: why can't we do this?
+                // this->m_session.reset();
             });
         });
     });
@@ -64,6 +71,10 @@ WampClient::disconnect () {
 
 void
 WampClient::connect (std::string const& ip, int const port) {
+    if (this->m_connected) {
+        return;
+    }
+
     auto endpoint = boost::asio::ip::tcp::endpoint
                     (boost::asio::ip::address::from_string(ip), port);
     m_transport = std::make_shared<autobahn::wamp_tcp_transport>
@@ -86,7 +97,7 @@ WampClient::connect() {
             connected.get();
         } catch (const std::exception& e) {
             log()->error ("RPC connect() failed: {}", e.what());
-            disconnected();
+            disconnected(false);
             return;
         }
         m_session->start().then(m_executor, [&](boost::future<void> started) {
@@ -94,7 +105,7 @@ WampClient::connect() {
                 started.get();
             } catch (const std::exception& e) {
                 log()->error ("RPC start() failed: {}", e.what());
-                disconnected();
+                disconnected(false);
                 return;
             }
             m_session->join("default").then(m_executor, [&](boost::future<uint64_t> joined) {
@@ -102,10 +113,10 @@ WampClient::connect() {
                     joined.get();
                 } catch (const std::exception& e) {
                     log()->error ("RPC join() failed: {}", e.what());
-                    disconnected();
+                    disconnected(false);
                     return;
                 }
-                m_connected = true;
+                this->m_connected = true;
                 this->connected();
             });
         });

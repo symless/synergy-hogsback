@@ -51,9 +51,9 @@ TrayControlsImpl::initlogFileSink() noexcept {
 
         return std::make_shared<spdlog::sinks::rotating_file_sink_mt>
                     (logPath.string(), 1024 * 1024, 1);
-    }
-    catch (std::exception const&) {
+    } catch (std::exception const&) {
         /* Opening the log file will fail if a tray is already open */
+    } catch (...) {
     }
 
     return std::make_shared<spdlog::sinks::null_sink_mt>();
@@ -95,12 +95,11 @@ TrayControlsImpl::TrayControlsImpl (TrayControls* const interface):
     });
 
     /* When the RPC goes down, switch to the file logger and stop pinging */
-    m_rpcClient.disconnected.connect ([&](){
+    m_rpcClient.disconnected.connect ([&](bool){
         this->m_logger = fileLogger();
 
         boost::system::error_code ec;
         this->m_pingTimer.cancel(ec);
-
         this->m_ioService.poll();
     });
 }
@@ -111,9 +110,14 @@ TrayControlsImpl::~TrayControlsImpl() {
 
 void
 TrayControlsImpl::start() {
-    m_rpcThread = std::thread([this](){
+    m_rpcThread = std::thread([this]() {
         m_rpcClient.connect ("127.0.0.1", 24888);
-        m_ioService.run();
+        try {
+            m_ioService.run();
+        } catch (std::exception const& ex) {
+            this->m_logger = fileLogger();
+            log()->critical ("Exception: {}", ex.what());
+        }
     });
 }
 
