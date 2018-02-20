@@ -14,7 +14,7 @@ public:
 
     void connect();
     void pauseService();
-    void restartService();
+    void resumeService();
     std::shared_ptr<spdlog::logger> log() const;
 
 private:
