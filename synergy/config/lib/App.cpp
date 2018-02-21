@@ -137,6 +137,10 @@ App::installAndStartService()
             sleep (3);
         }
         startService();
+
+        // HACK THE PLANET!
+        sleep(5);
+
         QProcess::startDetached("/Applications/Synergy.app/Contents/MacOS/synergy-config");
         exit (EXIT_SUCCESS);
     }
