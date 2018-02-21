@@ -138,8 +138,8 @@ App::installAndStartService()
         }
         startService();
 
-        // HACK THE PLANET!
-        sleep(5);
+        // give the service a few seconds grace to restart before we try and relaunch the config app and connect to it
+        sleep(3);
 
         QProcess::startDetached("/Applications/Synergy.app/Contents/MacOS/synergy-config");
         exit (EXIT_SUCCESS);
