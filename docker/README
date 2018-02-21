@@ -1,0 +1,7 @@
+# Docker image building
+
+```
+cd Docker
+docker build -f centos.Dockerfile -t symless/centos_build  .
+docker run -it --rm -v $PWD/synergy:/synergy  symless/centos_build
+```
