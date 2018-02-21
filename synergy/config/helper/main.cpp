@@ -128,7 +128,7 @@ main (int argc, const char* argv[], const char* env[]) {
 
             auto const kUserFilesDirectory = userHome + "/Library/Synergy";
             auto const kUserPreferencesDirectory = userHome + "/Library/Preferences/Symless";
-
+            auto const kUserPreferencesConfigPlistFile = userHome + "/Library/Preferences/com.https-symless-com.Synergy.plist";
 
             boost::filesystem::remove_all (kUserFilesDirectory, ec);
             log() << fmt::format ("[{}] removing {} {}\n",
@@ -140,6 +140,12 @@ main (int argc, const char* argv[], const char* env[]) {
             log() << fmt::format ("[{}] removing {} {}\n",
                                   timestamp(),
                                   kUserPreferencesDirectory,
+                                  ec ? "Failed" : "OK");
+
+            boost::filesystem::remove (kUserPreferencesConfigPlistFile, ec);
+            log() << fmt::format ("[{}] removing {} {}\n",
+                                  timestamp(),
+                                  kUserPreferencesConfigPlistFile,
                                   ec ? "Failed" : "OK");
 
             return EXIT_SUCCESS;
