@@ -41,6 +41,7 @@ private:
     WampClient m_rpcClient;
 
     boost::asio::steady_timer m_pingTimer;
+    bool m_active = false;
 };
 
 spdlog::sink_ptr
@@ -86,6 +87,8 @@ TrayControlsImpl::TrayControlsImpl (TrayControls* const interface):
                 return;
             }
 
+            m_active = true;
+
             boost::asio::spawn (m_rpcClient.ioService(), [this](auto ctx) {
                 this->pingLoop(ctx);
             });
@@ -127,9 +130,15 @@ TrayControlsImpl::shutdown() {
         boost::system::error_code ec;
         m_pingTimer.cancel(ec);
 
+        if (!this->m_active) {
+            m_rpcClient.disconnect();
+            return;
+        }
+
         m_rpcClient.call<void>("synergy.tray.goodbye").then
             (m_rpcClient.executor(), [this](boost::future<void> result) {
                 result.get();
+                this->m_active = false;
                 m_rpcClient.disconnect();
             }
         );
@@ -147,6 +156,7 @@ TrayControlsImpl::pingLoop (boost::asio::yield_context ctx) {
         if (ec == boost::asio::error::operation_aborted) {
             return;
         } else if (ec) {
+            this->shutdown();
             throw boost::system::system_error (ec);
         }
 
