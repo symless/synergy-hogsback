@@ -59,5 +59,4 @@ private:
     Router& m_router;
     ServerProxy m_serverProxy;
     ClientProxy m_clientProxy;
-    std::map<std::string, ScreenStatus> m_lastSeenStatus;
 };
