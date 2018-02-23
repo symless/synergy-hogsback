@@ -114,10 +114,16 @@ CoreManager::CoreManager (boost::asio::io_service& io,
 
     m_process->statusMonitor().screenStatusChanged.connect(
         [server, this](std::string const& screenName, ScreenStatus status) {
-            server->publish ("synergy.screen.status", screenName, int(status));
-
             Screen& screen = m_localProfileConfig->getScreen(screenName);
             if (screen.status() != status) {
+
+                // HACK: force disconnected can only happen from connected
+                // reason: that is the only case becoming disconnected makes sense
+                if (status == ScreenStatus::kDisconnected &&
+                    screen.status() != ScreenStatus::kConnected) {
+                    return;
+                }
+
                 screen.status(status);
                 screen.touch();
                 m_cloudClient->updateScreenStatus(screen);
