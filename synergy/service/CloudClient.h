@@ -23,6 +23,7 @@ public:
 
     void claimServer(int64_t serverId);
     void updateScreen(Screen& screen);
+    void updateScreenStatus(Screen& screen);
     void updateScreenError(Screen& screen);
     void reconnectWebsocket();
     void shutdownWebsocket();
