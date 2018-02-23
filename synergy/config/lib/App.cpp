@@ -320,6 +320,8 @@ App::run(int argc, char* argv[])
     engine.rootContext()->setContextProperty
         ("qmlLogManager", static_cast<QObject*>(logManager));
 
+    QProcess::startDetached("synergy-tray");
+
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     auto qtAppRet = app.exec();
 
