@@ -166,7 +166,8 @@ CloudClient::reconnectWebsocket()
     m_websocket.reconnect(true);
 }
 
-void CloudClient::shutdownWebsocket()
+void
+CloudClient::shutdownWebsocket()
 {
     m_websocket.shutdown();
 }
@@ -177,21 +178,8 @@ CloudClient::isWebsocketConnected() const
     return m_websocket.isConnected();
 }
 
-void CloudClient::fakeScreenStatusUpdate(Screen& screen)
-{
-    static const std::string kUrlTarget = "/dummy/screen/status/update";
-    HttpSession* httpSession = newHttpSession();
-
-    tao::json::value root;
-    root["id"] = screen.id();
-    root["name"] = screen.name();
-    root["status"] = static_cast<int>(screen.status());
-    root["version"] = screen.version();
-
-    httpSession->post(kUrlTarget, tao::json::to_string(root));
-}
-
-HttpSession* CloudClient::newHttpSession()
+HttpSession*
+CloudClient::newHttpSession()
 {
     // TODO: add lifetime management or make http session reusable
     HttpSession* httpSession = new HttpSession(m_ioService, cloudServerHostname(), kCloudServerPort);

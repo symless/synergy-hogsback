@@ -28,7 +28,6 @@ public:
     void reconnectWebsocket();
     void shutdownWebsocket();
     bool isWebsocketConnected() const;
-    void fakeScreenStatusUpdate(Screen &screen);
 
 private:
     void load(const UserConfig &userConfig);
