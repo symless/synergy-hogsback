@@ -80,8 +80,6 @@ void ScreenManager::setServiceProxy(ServiceProxy* serviceProxy)
 
     connect(m_serviceProxy, SIGNAL(receivedScreens(QByteArray)),
             this, SLOT(updateScreens(QByteArray)));
-    connect(m_serviceProxy, &ServiceProxy::screenStatusChanged,
-            this, &ScreenManager::onScreenStatusChanged);
     connect(m_serviceProxy, &ServiceProxy::screenError,
             this, &ScreenManager::onScreenError, Qt::QueuedConnection);
 
@@ -304,36 +302,6 @@ void ScreenManager::onUpdateProfileConfig()
 
     m_cloudClient->updateProfileConfig(doc);
     ++m_configVersion;
-}
-
-void ScreenManager::onScreenStatusChanged(QPair<QString, ScreenStatus> r)
-{
-    int index = m_screenListModel->findScreen(r.first);
-    if (index != -1) {
-        const UIScreen& s = m_screenListModel->getScreen(index);
-
-        if (s.status() == r.second) {
-            return;
-        }
-
-        // HACK: force disconnected can only happen from connected
-        // reason: that is the only case becoming disconnected makes sense
-
-        if (r.second == ScreenStatus::kDisconnected &&
-            s.status() != ScreenStatus::kConnected) {
-            return;
-        }
-
-        QString screenName = s.name();
-        QString orignialStatus = QString::fromStdString(screenStatusToString(s.status()));
-        QString newStatus = QString::fromStdString(screenStatusToString(r.second));
-        LogManager::debug(QString("update screen %1 status: %2 -> %3").arg(screenName).arg(orignialStatus).arg(newStatus));
-
-        m_screenListModel->setScreenStatus(index, r.second);
-
-        m_screenListModel->touchScreen(index);
-        m_cloudClient->updateScreen(s);
-    }
 }
 
 void ScreenManager::onScreenError(QString screenName, int errorCode)

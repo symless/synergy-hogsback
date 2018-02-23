@@ -32,8 +32,6 @@ public:
     void serverClaim(int screenId);
 
 signals:
-    void screenStatusChanged(QPair<QString, ScreenStatus>);
-    void rpcScreenStatusChanged(QString, int);
     void screenError(QString, int);
     void logCoreOutput(QString);
     void logServiceOutput(QString);
@@ -51,7 +49,6 @@ public slots:
     // signals it needs to first catch it in main thread then
     // emit another signal from main thread
     void onRpcReceivedScreens(QString);
-    void onRpcScreenStatusChanged(QString, int);
     void onLogServiceOutput(QString text);
     void onLogCoreOutput(QString text);
     void onRpcCloudOffline();

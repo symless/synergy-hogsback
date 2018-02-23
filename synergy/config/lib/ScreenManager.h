@@ -58,7 +58,6 @@ signals:
 private slots:
     void updateScreens(QByteArray reply);
     void onUpdateProfileConfig();
-    void onScreenStatusChanged(QPair<QString, ScreenStatus> r);
     void onScreenError(QString screenName, int errorCode);
 
 private:

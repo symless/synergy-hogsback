@@ -22,9 +22,6 @@ ServiceProxy::ServiceProxy() :
     connect (this, &ServiceProxy::rpcReceivedScreens, this,
              &ServiceProxy::onRpcReceivedScreens, Qt::QueuedConnection);
 
-    connect (this, &ServiceProxy::rpcScreenStatusChanged, this,
-             &ServiceProxy::onRpcScreenStatusChanged, Qt::QueuedConnection);
-
     connect (this, &ServiceProxy::logCoreOutput, this,
              &ServiceProxy::onLogCoreOutput, Qt::QueuedConnection);
 
@@ -74,11 +71,6 @@ ServiceProxy::ServiceProxy() :
 
         m_wampClient.subscribe ("synergy.service.log", [this](std::string line) {
             emit logServiceOutput(QString::fromStdString(line));
-        });
-
-        m_wampClient.subscribe ("synergy.screen.status",
-                              [this](std::string screenName, int status) {
-            emit rpcScreenStatusChanged(QString::fromStdString(screenName), status);
         });
 
         m_wampClient.subscribe ("synergy.screen.error",
@@ -131,15 +123,6 @@ ServiceProxy::onRpcReceivedScreens(QString json)
 {
     QByteArray byteArray(json.toUtf8());
     emit receivedScreens(byteArray);
-}
-
-void
-ServiceProxy::onRpcScreenStatusChanged(QString name, int status)
-{
-    QPair<QString, ScreenStatus> r;
-    r.first = name;
-    r.second = (ScreenStatus)status;
-    emit screenStatusChanged(r);
 }
 
 void
