@@ -82,7 +82,7 @@ TrayControlsImpl::TrayControlsImpl (TrayControls* const interface):
 
             // A tray process is already running, shut everything down
             if (kill.get()) {
-                log()->info ("Received kill command.");
+                log()->info ("Received kill command from service.");
                 this->shutdown();
                 return;
             }

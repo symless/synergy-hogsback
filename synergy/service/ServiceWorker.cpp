@@ -278,7 +278,7 @@ ServiceWorker::provideTray()
         bool const kill = !m_trayService->start();
         if (kill) {
             serviceLog()->info ("A tray process is already is already connected. "
-                                "Responding with the kill command.");
+                                "Sending kill command.");
         }
         return kill;
     });
@@ -289,7 +289,7 @@ ServiceWorker::provideTray()
     });
 
     m_rpc->server()->provide ("synergy.tray.ping", [this]() {
-        serviceLog()->debug ("Received ping from tray process");
+        // serviceLog()->debug ("Received ping from tray process");
         m_trayService->ping();
     });
 }
