@@ -124,6 +124,11 @@ CoreManager::CoreManager (boost::asio::io_service& io,
                     return;
                 }
 
+                auto screenName = screen.name();
+                auto orignialStatus = screenStatusToString(screen.status());
+                auto newStatus = screenStatusToString(status);
+                serviceLog()->debug("send screen status update {}: {} -> {}", screenName, orignialStatus, newStatus);
+
                 screen.status(status);
                 screen.touch();
                 m_cloudClient->updateScreenStatus(screen);
