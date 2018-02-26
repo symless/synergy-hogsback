@@ -232,6 +232,20 @@ CoreManager::~CoreManager () noexcept {
 }
 
 void
+CoreManager::pause()
+{
+    m_process->setDisabled(true);
+    shutdown();
+}
+
+void
+CoreManager::resume()
+{
+    m_process->setDisabled(false);
+    restart();
+}
+
+void
 CoreManager::shutdown() {
     m_process->shutdown();
 }

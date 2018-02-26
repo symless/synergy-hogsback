@@ -36,6 +36,9 @@ public:
 
     friend class ClaimMessageHandler;
 
+    void pause();
+    void resume();
+
     void shutdown();
     bool restart();
     bool setRunAsUid(std::string runAsUid);

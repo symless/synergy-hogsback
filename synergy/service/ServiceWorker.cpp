@@ -195,11 +195,13 @@ void
 ServiceWorker::provideControls()
 {
     m_rpc->server()->provide ("synergy.pause", [this](){
-        serviceLog()->info ("Pausing Synergy");
+        serviceLog()->info ("pausing core");
+        m_coreManager->pause();
     });
 
     m_rpc->server()->provide ("synergy.resume", [this](){
-        serviceLog()->info ("Resuming Synergy");
+        serviceLog()->info ("resuming core");
+        m_coreManager->resume();
     });
 }
 
