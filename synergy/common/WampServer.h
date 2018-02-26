@@ -65,6 +65,7 @@ WampCallee<Fun>::operator()(autobahn::wamp_invocation invocation) {
      */
     using return_type = boost::callable_traits::return_type_t<Fun>;
     WampCalleeInvoker<return_type> invoker;
+    invocation->get_arguments (args);
     invoker.invoke (invocation, m_fun, args);
 }
 
