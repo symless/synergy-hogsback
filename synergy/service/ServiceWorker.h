@@ -27,6 +27,7 @@ public:
 
 private:
     void provideRpcEndpoints();
+    void provideControls();
     void provideCore();
     void provideAuth();
     void provideSnapshot();

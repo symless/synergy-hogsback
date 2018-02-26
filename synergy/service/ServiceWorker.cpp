@@ -178,6 +178,7 @@ ServiceWorker::provideRpcEndpoints()
 {
     serviceLog()->debug("creating rpc endpoints");
 
+    provideControls();
     provideCore();
     provideAuth();
     provideSnapshot();
@@ -191,11 +192,21 @@ ServiceWorker::provideRpcEndpoints()
 }
 
 void
+ServiceWorker::provideControls()
+{
+    m_rpc->server()->provide ("synergy.pause", [this](){
+        serviceLog()->info ("Pausing Synergy");
+    });
+
+    m_rpc->server()->provide ("synergy.resume", [this](){
+        serviceLog()->info ("Resuming Synergy");
+    });
+}
+
+void
 ServiceWorker::provideCore()
 {
-    auto server = m_rpc->server();
-
-    server->provide ("synergy.core.set_uid",
+    m_rpc->server()->provide ("synergy.core.set_uid",
         [this](std::string uid) {
         serviceLog()->debug("setting core uid from rpc: {}", uid);
         m_userConfig->setSystemUid(uid);
@@ -289,7 +300,6 @@ ServiceWorker::provideTray()
     });
 
     m_rpc->server()->provide ("synergy.tray.ping", [this]() {
-        // serviceLog()->debug ("Received ping from tray process");
         m_trayService->ping();
     });
 }

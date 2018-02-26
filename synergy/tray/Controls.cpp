@@ -23,6 +23,9 @@ public:
     void shutdown();
     std::shared_ptr<spdlog::logger> log() const;
 
+    void pause();
+    void resume();
+
 private:
     void pingLoop (boost::asio::yield_context ctx);
     std::shared_ptr<spdlog::logger> consoleLogger();
@@ -169,6 +172,29 @@ TrayControlsImpl::log() const {
     return this->m_logger;
 }
 
+void
+TrayControlsImpl::pause()
+{
+    m_ioService.dispatch ([this]() {
+        m_rpcClient.call<void>("synergy.pause").then
+            (m_rpcClient.executor(), [this](boost::future<void> result) {
+                result.get();
+            }
+        );
+    });
+}
+
+void TrayControlsImpl::resume()
+{
+    m_ioService.dispatch ([this]() {
+        m_rpcClient.call<void>("synergy.resume").then
+            (m_rpcClient.executor(), [this](boost::future<void> result) {
+                result.get();
+            }
+        );
+    });
+}
+
 std::shared_ptr<spdlog::logger>
 TrayControlsImpl::fileLogger() {
     std::vector<spdlog::sink_ptr> sinks = { logFileSink() };
@@ -208,6 +234,18 @@ void
 TrayControls::connect()
 {
     m_impl->start();
+}
+
+void
+TrayControls::pause()
+{
+    m_impl->pause();
+}
+
+void
+TrayControls::resume()
+{
+    m_impl->resume();
 }
 
 std::shared_ptr<spdlog::logger>

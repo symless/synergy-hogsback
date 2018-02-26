@@ -13,8 +13,9 @@ public:
     ~TrayControls() noexcept;
 
     void connect();
-    void pauseService();
-    void resumeService();
+    void pause();
+    void resume();
+
     std::shared_ptr<spdlog::logger> log() const;
 
 private:
