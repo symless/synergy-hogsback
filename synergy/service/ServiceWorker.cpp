@@ -197,11 +197,14 @@ ServiceWorker::provideControls()
     m_rpc->server()->provide ("synergy.pause", [this](){
         serviceLog()->info ("pausing core");
         m_coreManager->pause();
+        m_rpc->server()->publish ("synergy.config.close");
+        m_cloudClient->shutdownWebsocket();
     });
 
     m_rpc->server()->provide ("synergy.resume", [this](){
         serviceLog()->info ("resuming core");
         m_coreManager->resume();
+        m_cloudClient->reconnectWebsocket();
     });
 }
 

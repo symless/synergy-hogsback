@@ -11,6 +11,7 @@
 #include <boost/asio/deadline_timer.hpp>
 #include <QtNetwork>
 #include <QtGlobal>
+#include <QApplication>
 #include <iostream>
 #ifndef Q_OS_WIN
 #include <unistd.h>
@@ -39,6 +40,9 @@ ServiceProxy::ServiceProxy() :
 
     connect (this, &ServiceProxy::rpcVersionCheck, this,
              &ServiceProxy::onRpcVersionCheck, Qt::QueuedConnection);
+
+    connect (this, &ServiceProxy::rpcConfigClose, this,
+             &ServiceProxy::onRpcConfigClose, Qt::QueuedConnection);
 
     m_wampClient.disconnected.connect([&](bool) {
         m_errorView->setMode(ErrorViewMode::kServiceError);
@@ -92,6 +96,10 @@ ServiceProxy::ServiceProxy() :
 
         m_wampClient.subscribe ("synergy.version.check", [this]() {
             emit rpcVersionCheck();
+        });
+
+        m_wampClient.subscribe ("synergy.config.close", [this]() {
+            emit rpcConfigClose();
         });
 
         LogManager::debug("saying hello to background service");
@@ -157,6 +165,12 @@ void ServiceProxy::onRpcVersionCheck()
     CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
     cloudClient->enableVersionCheck();
     cloudClient->checkUpdate();
+}
+
+void
+ServiceProxy::onRpcConfigClose()
+{
+    QApplication::exit();
 }
 
 std::shared_ptr<ErrorView>

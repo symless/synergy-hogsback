@@ -41,6 +41,7 @@ signals:
     void rpcCloudOnline();
     void rpcAuthLogout();
     void rpcVersionCheck();
+    void rpcConfigClose();
     void authLogout();
 
 public slots:
@@ -55,6 +56,7 @@ public slots:
     void onRpcCloudOnline();
     void onRpcAuthLogout();
     void onRpcVersionCheck();
+    void onRpcConfigClose();
 
 private:
     boost::asio::io_service m_io;
