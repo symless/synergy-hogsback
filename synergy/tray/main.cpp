@@ -47,11 +47,11 @@ main (int argc, char* argv[]) {
 Tray::Tray():
     m_svg (":/synergy/tray/icon.svg")
 {
-    m_pauseAction = m_menu.addAction ("Pause", [this](){
+    m_pauseAction = m_menu.addAction ("Enable", [this](){
         this->m_controls.pause();
     });
 
-    m_resumeAction = m_menu.addAction ("Resume", [this](){
+    m_resumeAction = m_menu.addAction ("Disable", [this](){
         this->m_controls.resume();
     });
 
