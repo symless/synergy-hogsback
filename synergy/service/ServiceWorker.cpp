@@ -293,7 +293,7 @@ ServiceWorker::provideTray()
         serviceLog()->info("Tray process connected");
         bool const kill = !m_trayService->start();
         if (kill) {
-            serviceLog()->info ("A tray process is already is already connected. "
+            serviceLog()->info ("A tray process is already connected. "
                                 "Sending kill command.");
         }
         return kill;
