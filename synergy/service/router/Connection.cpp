@@ -106,7 +106,7 @@ Connection::send (MessageHeader const& header, Message const& message) {
         asio::spawn (socket_.get_io_service(),
                      [this, self = this->shared_from_this ()] (auto ctx) {
             while (!message_queue_.empty()) {
-                auto msg_pair = message_queue_.front();
+                auto const& msg_pair = message_queue_.front();
                 writer_.write (msg_pair.first, msg_pair.second, ctx);
                 message_queue_.pop_front();
             }
