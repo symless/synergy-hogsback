@@ -23,6 +23,7 @@ private:
 
 public:
     boost::signals2::signal<void()> ready;
+    boost::signals2::signal<void(bool)> statusChanged;
 };
 
 #endif // SYNERGY_TRAY_CONTROLS_H
