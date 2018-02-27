@@ -83,6 +83,19 @@ public:
         return m_executor.underlying_executor().get_io_service();
     }
 
+private:
+    auto
+    log() const {
+        if (!m_logger) {
+            std::array<spdlog::sink_ptr, 1> sinks {std::make_shared<spdlog::sinks::null_sink_mt>()};
+            auto logger = std::make_shared<spdlog::logger>("null", begin(sinks), end(sinks));
+            return logger;
+        }
+        return m_logger;
+    }
+
+public:
+
     template <typename Result, typename... Args>
     boost::future<Result>
     call (char const* const fun, Args&&... args) {
@@ -132,16 +145,6 @@ public:
     boost::signals2::signal<void(bool)> disconnected;
 
 private:
-    auto
-    log() const {
-        if (!m_logger) {
-            std::array<spdlog::sink_ptr, 1> sinks {std::make_shared<spdlog::sinks::null_sink_mt>()};
-            auto logger = std::make_shared<spdlog::logger>("null", begin(sinks), end(sinks));
-            return logger;
-        }
-        return m_logger;
-    }
-
     void connect();
     void keepAlive();
 
