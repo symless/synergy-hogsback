@@ -8,3 +8,7 @@ table ProxyClientConnect {
 table ProxyClientDisconnect {
     connection: uint;
 }
+
+table ProxyServerReset {
+    connection: uint;
+}
