@@ -107,6 +107,11 @@ TrayControlsImpl::TrayControlsImpl (TrayControls* const interface):
         boost::system::error_code ec;
         this->m_pingTimer.cancel(ec);
         this->m_ioService.poll();
+
+        // HACK: If the service restarts, the trays RPC client fails silently.
+        // The service, having then forgotten the tray is running, will then
+        // allow a second tray to run, resulting in multiple tray icons.
+        std::exit (EXIT_FAILURE);
     });
 }
 
