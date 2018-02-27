@@ -56,7 +56,6 @@ private:
     void upload(QString filename);
 
 private:
-	static QFile s_file;
     static QStringList s_logLines;
     static QObject* s_instance;
     static QQmlContext* s_qmlContext;

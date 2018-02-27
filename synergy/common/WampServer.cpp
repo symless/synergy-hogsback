@@ -35,7 +35,6 @@ WampServer::start (std::string const& ip, int const port) {
             m_session->join("default").then(executor(),
                                         [&](boost::future<uint64_t> joined) {
                 joined.get();
-                this->provide ("synergy.network.noop", [](){});
                 this->provide ("synergy.keepalive", [](){});
                 ready();
             });
