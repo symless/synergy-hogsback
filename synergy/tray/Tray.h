@@ -24,6 +24,8 @@ signals:
     void coreDisabled(bool);
 
 public slots:
+    void enableCore();
+    void disableCore();
     void onCoreDisabled(bool disabled);
 
 private:

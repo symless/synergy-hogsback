@@ -3,16 +3,11 @@
 Tray::Tray():
     m_svg (":/synergy/tray/icon.svg")
 {
-    m_enableAction = m_menu.addAction ("Enable", [this](){
-        this->m_controls.resume();
-    });
-
-    m_disableAction = m_menu.addAction ("Disable", [this](){
-        this->m_controls.pause();
-    });
+    m_enableAction = m_menu.addAction ("Enable", this, SLOT(enableCore()));
+    m_disableAction = m_menu.addAction ("Disable", this, SLOT(disableCore()));
 
     m_menu.addSeparator ();
-    m_menu.addAction ("Quit", QApplication::instance(), &QApplication::quit);
+    m_menu.addAction ("Quit", QApplication::instance(), SLOT(quit()));
 
     m_icon.setIcon(m_svg);
     m_icon.setContextMenu (&m_menu);
@@ -39,7 +34,18 @@ Tray::show() {
     m_icon.show();
 }
 
-void Tray::onCoreDisabled(bool disabled)
+void
+Tray::enableCore() {
+    this->m_controls.resume();
+}
+
+void
+Tray::disableCore() {
+    this->m_controls.pause();
+}
+
+void
+Tray::onCoreDisabled(bool disabled)
 {
     if (disabled) {
         m_disableAction->setEnabled(false);
