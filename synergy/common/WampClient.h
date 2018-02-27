@@ -15,6 +15,7 @@
 #include <boost/fusion/functional/invocation/invoke.hpp>
 #include <boost/signals2.hpp>
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/null_sink.h>
 
 namespace {
 
@@ -71,11 +72,6 @@ public:
 
     void
     disconnect();
-
-    auto
-    log() const {
-        return m_logger;
-    }
 
     auto&
     executor() noexcept {
@@ -136,6 +132,16 @@ public:
     boost::signals2::signal<void(bool)> disconnected;
 
 private:
+    auto
+    log() const {
+        if (!m_logger) {
+            std::array<spdlog::sink_ptr, 1> sinks {std::make_shared<spdlog::sinks::null_sink_mt>()};
+            auto logger = std::make_shared<spdlog::logger>("null", begin(sinks), end(sinks));
+            return logger;
+        }
+        return m_logger;
+    }
+
     void connect();
     void keepAlive();
 
