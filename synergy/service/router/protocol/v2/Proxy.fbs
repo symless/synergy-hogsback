@@ -2,4 +2,5 @@ namespace synergy.protocol.v2.fb;
 
 table ProxyClientConnect {
     screen: string;
+    connection: uint;
 }

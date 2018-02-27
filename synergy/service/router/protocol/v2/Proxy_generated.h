@@ -17,22 +17,29 @@ struct ProxyClientConnectT;
 struct ProxyClientConnectT : public flatbuffers::NativeTable {
   typedef ProxyClientConnect TableType;
   std::string screen;
-  ProxyClientConnectT() {
+  uint32_t connection;
+  ProxyClientConnectT()
+      : connection(0) {
   }
 };
 
 struct ProxyClientConnect FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef ProxyClientConnectT NativeTableType;
   enum {
-    VT_SCREEN = 4
+    VT_SCREEN = 4,
+    VT_CONNECTION = 6
   };
   const flatbuffers::String *screen() const {
     return GetPointer<const flatbuffers::String *>(VT_SCREEN);
+  }
+  uint32_t connection() const {
+    return GetField<uint32_t>(VT_CONNECTION, 0);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyOffset(verifier, VT_SCREEN) &&
            verifier.Verify(screen()) &&
+           VerifyField<uint32_t>(verifier, VT_CONNECTION) &&
            verifier.EndTable();
   }
   ProxyClientConnectT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
@@ -45,6 +52,9 @@ struct ProxyClientConnectBuilder {
   flatbuffers::uoffset_t start_;
   void add_screen(flatbuffers::Offset<flatbuffers::String> screen) {
     fbb_.AddOffset(ProxyClientConnect::VT_SCREEN, screen);
+  }
+  void add_connection(uint32_t connection) {
+    fbb_.AddElement<uint32_t>(ProxyClientConnect::VT_CONNECTION, connection, 0);
   }
   explicit ProxyClientConnectBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -60,18 +70,22 @@ struct ProxyClientConnectBuilder {
 
 inline flatbuffers::Offset<ProxyClientConnect> CreateProxyClientConnect(
     flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<flatbuffers::String> screen = 0) {
+    flatbuffers::Offset<flatbuffers::String> screen = 0,
+    uint32_t connection = 0) {
   ProxyClientConnectBuilder builder_(_fbb);
+  builder_.add_connection(connection);
   builder_.add_screen(screen);
   return builder_.Finish();
 }
 
 inline flatbuffers::Offset<ProxyClientConnect> CreateProxyClientConnectDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
-    const char *screen = nullptr) {
+    const char *screen = nullptr,
+    uint32_t connection = 0) {
   return synergy::protocol::v2::fb::CreateProxyClientConnect(
       _fbb,
-      screen ? _fbb.CreateString(screen) : 0);
+      screen ? _fbb.CreateString(screen) : 0,
+      connection);
 }
 
 flatbuffers::Offset<ProxyClientConnect> CreateProxyClientConnect(flatbuffers::FlatBufferBuilder &_fbb, const ProxyClientConnectT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
@@ -86,6 +100,7 @@ inline void ProxyClientConnect::UnPackTo(ProxyClientConnectT *_o, const flatbuff
   (void)_o;
   (void)_resolver;
   { auto _e = screen(); if (_e) _o->screen = _e->str(); };
+  { auto _e = connection(); _o->connection = _e; };
 }
 
 inline flatbuffers::Offset<ProxyClientConnect> ProxyClientConnect::Pack(flatbuffers::FlatBufferBuilder &_fbb, const ProxyClientConnectT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
@@ -97,9 +112,11 @@ inline flatbuffers::Offset<ProxyClientConnect> CreateProxyClientConnect(flatbuff
   (void)_o;
   struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const ProxyClientConnectT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
   auto _screen = _o->screen.empty() ? 0 : _fbb.CreateString(_o->screen);
+  auto _connection = _o->connection;
   return synergy::protocol::v2::fb::CreateProxyClientConnect(
       _fbb,
-      _screen);
+      _screen,
+      _connection);
 }
 
 }  // namespace fb
