@@ -16,8 +16,11 @@ namespace v2 {
 using HelloMessage       = fb::HelloT;
 using Route              = fb::RouteT;
 using RouteAdvertisement = fb::RouteAdvertisementT;
+
 using ProxyClientConnect = fb::ProxyClientConnectT;
 using ProxyClientDisconnect = fb::ProxyClientDisconnectT;
+using ProxyServerReset   = fb::ProxyServerResetT;
+
 using ServerClaim        = fb::ServerClaimT;
 using CoreMessage        = fb::CoreMessageT;
 

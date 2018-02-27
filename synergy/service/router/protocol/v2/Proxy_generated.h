@@ -17,6 +17,9 @@ struct ProxyClientConnectT;
 struct ProxyClientDisconnect;
 struct ProxyClientDisconnectT;
 
+struct ProxyServerReset;
+struct ProxyServerResetT;
+
 struct ProxyClientConnectT : public flatbuffers::NativeTable {
   typedef ProxyClientConnect TableType;
   std::string screen;
@@ -147,6 +150,60 @@ inline flatbuffers::Offset<ProxyClientDisconnect> CreateProxyClientDisconnect(
 
 flatbuffers::Offset<ProxyClientDisconnect> CreateProxyClientDisconnect(flatbuffers::FlatBufferBuilder &_fbb, const ProxyClientDisconnectT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
+struct ProxyServerResetT : public flatbuffers::NativeTable {
+  typedef ProxyServerReset TableType;
+  uint32_t connection;
+  ProxyServerResetT()
+      : connection(0) {
+  }
+};
+
+struct ProxyServerReset FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef ProxyServerResetT NativeTableType;
+  enum {
+    VT_CONNECTION = 4
+  };
+  uint32_t connection() const {
+    return GetField<uint32_t>(VT_CONNECTION, 0);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint32_t>(verifier, VT_CONNECTION) &&
+           verifier.EndTable();
+  }
+  ProxyServerResetT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(ProxyServerResetT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<ProxyServerReset> Pack(flatbuffers::FlatBufferBuilder &_fbb, const ProxyServerResetT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+};
+
+struct ProxyServerResetBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_connection(uint32_t connection) {
+    fbb_.AddElement<uint32_t>(ProxyServerReset::VT_CONNECTION, connection, 0);
+  }
+  explicit ProxyServerResetBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ProxyServerResetBuilder &operator=(const ProxyServerResetBuilder &);
+  flatbuffers::Offset<ProxyServerReset> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<ProxyServerReset>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<ProxyServerReset> CreateProxyServerReset(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    uint32_t connection = 0) {
+  ProxyServerResetBuilder builder_(_fbb);
+  builder_.add_connection(connection);
+  return builder_.Finish();
+}
+
+flatbuffers::Offset<ProxyServerReset> CreateProxyServerReset(flatbuffers::FlatBufferBuilder &_fbb, const ProxyServerResetT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+
 inline ProxyClientConnectT *ProxyClientConnect::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
   auto _o = new ProxyClientConnectT();
   UnPackTo(_o, _resolver);
@@ -198,6 +255,32 @@ inline flatbuffers::Offset<ProxyClientDisconnect> CreateProxyClientDisconnect(fl
   struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const ProxyClientDisconnectT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
   auto _connection = _o->connection;
   return synergy::protocol::v2::fb::CreateProxyClientDisconnect(
+      _fbb,
+      _connection);
+}
+
+inline ProxyServerResetT *ProxyServerReset::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new ProxyServerResetT();
+  UnPackTo(_o, _resolver);
+  return _o;
+}
+
+inline void ProxyServerReset::UnPackTo(ProxyServerResetT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+  (void)_o;
+  (void)_resolver;
+  { auto _e = connection(); _o->connection = _e; };
+}
+
+inline flatbuffers::Offset<ProxyServerReset> ProxyServerReset::Pack(flatbuffers::FlatBufferBuilder &_fbb, const ProxyServerResetT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreateProxyServerReset(_fbb, _o, _rehasher);
+}
+
+inline flatbuffers::Offset<ProxyServerReset> CreateProxyServerReset(flatbuffers::FlatBufferBuilder &_fbb, const ProxyServerResetT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+  (void)_rehasher;
+  (void)_o;
+  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const ProxyServerResetT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
+  auto _connection = _o->connection;
+  return synergy::protocol::v2::fb::CreateProxyServerReset(
       _fbb,
       _connection);
 }
