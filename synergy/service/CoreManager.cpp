@@ -245,6 +245,12 @@ CoreManager::resume()
     restart();
 }
 
+bool
+CoreManager::isCoreDisabled()
+{
+    return m_process->disabled();
+}
+
 void
 CoreManager::shutdown() {
     m_process->shutdown();

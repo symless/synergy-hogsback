@@ -199,12 +199,14 @@ ServiceWorker::provideControls()
         m_coreManager->pause();
         m_rpc->server()->publish ("synergy.config.close");
         m_cloudClient->shutdownWebsocket();
+        m_rpc->server()->publish ("synergy.core.disabled", true);
     });
 
     m_rpc->server()->provide ("synergy.resume", [this](){
         serviceLog()->info ("resuming core");
         m_coreManager->resume();
         m_cloudClient->reconnectWebsocket();
+        m_rpc->server()->publish ("synergy.core.disabled", false);
     });
 }
 
@@ -296,7 +298,8 @@ ServiceWorker::provideTray()
             serviceLog()->info ("A tray process is already connected. "
                                 "Sending kill command.");
         }
-        return kill;
+
+        return std::make_tuple (kill,m_coreManager->isCoreDisabled());
     });
 
     m_rpc->server()->provide ("synergy.tray.goodbye", [this]() {

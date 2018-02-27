@@ -33,6 +33,7 @@ public:
     void startClient(int serverId);
     CoreStatusMonitor& statusMonitor() const;
     void setDisabled(bool disabled);
+    bool disabled() const;
 
 public:
     template <typename... Args>
@@ -43,7 +44,6 @@ public:
     signal<void()> localInputDetected;
     signal<void()> serverReady;
     signal<void(std::string line)> output;
-
 
 private:
     void writeConfigurationFile();

@@ -38,6 +38,7 @@ public:
 
     void pause();
     void resume();
+    bool isCoreDisabled();
 
     void shutdown();
     bool restart();

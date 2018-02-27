@@ -173,6 +173,11 @@ CoreProcess::writeConfigurationFile()
     createConfigFile(configPath.string(), m_localProfileConfig->screens());
 }
 
+bool CoreProcess::disabled() const
+{
+    return m_disabled;
+}
+
 CoreStatusMonitor&
 CoreProcess::statusMonitor() const
 {

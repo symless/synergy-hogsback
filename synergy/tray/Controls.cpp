@@ -8,6 +8,7 @@
 #include <spdlog/sinks/sink.h>
 #include <spdlog/sinks/null_sink.h>
 #include <thread>
+#include <QObject>
 
 static auto const kTrayLogPattern = "[ Tray    ] [%Y-%m-%dT%T] %l: %v";
 static auto const kTrayLogLevel = spdlog::level::debug;
@@ -44,7 +45,7 @@ private:
     WampClient m_rpcClient;
 
     boost::asio::steady_timer m_pingTimer;
-    bool m_active = false;
+    bool m_ready = false;
 };
 
 spdlog::sink_ptr
@@ -80,23 +81,31 @@ TrayControlsImpl::TrayControlsImpl (TrayControls* const interface):
     m_rpcClient.connected.connect ([&](){
         this->m_logger = rpcLogger();
 
-        m_rpcClient.call<bool>("synergy.tray.hello")
-            .then (m_rpcClient.executor(), [this](boost::future<bool> kill) {
-
+        m_rpcClient.call<std::tuple<bool, bool>>("synergy.tray.hello")
+            .then (m_rpcClient.executor(), [this](auto result) {
+            auto resultTuple = result.get();
+            auto kill = std::get<0>(resultTuple);
+            auto disabled = std::get<1>(resultTuple);
             // A tray process is already running, shut everything down
-            if (kill.get()) {
+            if (kill) {
                 log()->info ("Received kill command from service.");
                 this->shutdown();
                 return;
             }
 
-            m_active = true;
+            m_ready = true;
+
+            m_rpcClient.subscribe ("synergy.core.disabled",
+                                   [this](bool disabled) {
+                this->m_interface->statusChanged (disabled);
+            });
 
             boost::asio::spawn (m_rpcClient.ioService(), [this](auto ctx) {
                 this->pingLoop(ctx);
             });
 
             m_interface->ready();
+            m_interface->statusChanged(disabled);
         });
     });
 
@@ -138,7 +147,7 @@ TrayControlsImpl::shutdown() {
         boost::system::error_code ec;
         m_pingTimer.cancel(ec);
 
-        if (!this->m_active) {
+        if (!this->m_ready) {
             m_rpcClient.disconnect();
             return;
         }
@@ -146,7 +155,7 @@ TrayControlsImpl::shutdown() {
         m_rpcClient.call<void>("synergy.tray.goodbye").then
             (m_rpcClient.executor(), [this](boost::future<void> result) {
                 result.get();
-                this->m_active = false;
+                this->m_ready = false;
                 m_rpcClient.disconnect();
             }
         );
