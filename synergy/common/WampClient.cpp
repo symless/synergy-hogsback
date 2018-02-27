@@ -13,7 +13,6 @@ WampClient::WampClient (boost::asio::io_service& ioService,
 
     connected.connect ([this](){
         assert (this->m_connected);
-        this->keepAlive();
     });
 
     disconnected.connect ([this](bool) {
@@ -92,6 +91,7 @@ WampClient::connect (std::string const& ip, int const port) {
 void
 WampClient::connect() {
     connecting();
+
     m_transport->connect().then(m_executor, [&](boost::future<void> connected) {
         try {
             connected.get();
@@ -121,6 +121,11 @@ WampClient::connect() {
             });
         });
     });
+
+    // HACK
+    // reason: We rely on this keep alive to detect initial connection failure
+    // There should be a timer to do this
+    keepAlive();
 }
 
 void
