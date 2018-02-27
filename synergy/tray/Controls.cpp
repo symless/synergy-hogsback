@@ -88,7 +88,7 @@ TrayControlsImpl::TrayControlsImpl (TrayControls* const interface):
             auto disabled = std::get<1>(resultTuple);
             // A tray process is already running, shut everything down
             if (kill) {
-                log()->info ("Received kill command from service.");
+                this->log()->info ("Received kill command from service.");
                 this->shutdown();
                 return;
             }
@@ -136,7 +136,7 @@ TrayControlsImpl::start() {
             m_ioService.run();
         } catch (std::exception const& ex) {
             this->m_logger = fileLogger();
-            log()->critical ("Exception: {}", ex.what());
+            this->log()->critical ("Exception: {}", ex.what());
         }
     });
 }
@@ -148,7 +148,7 @@ TrayControlsImpl::shutdown() {
         m_pingTimer.cancel(ec);
 
         if (!this->m_ready) {
-            m_rpcClient.disconnect();
+            this->m_rpcClient.disconnect();
             return;
         }
 
@@ -156,7 +156,7 @@ TrayControlsImpl::shutdown() {
             (m_rpcClient.executor(), [this](boost::future<void> result) {
                 result.get();
                 this->m_ready = false;
-                m_rpcClient.disconnect();
+                this->m_rpcClient.disconnect();
             }
         );
     });
