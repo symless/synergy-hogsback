@@ -17,22 +17,29 @@ struct CoreMessageT;
 struct CoreMessageT : public flatbuffers::NativeTable {
   typedef CoreMessage TableType;
   std::vector<uint8_t> data;
-  CoreMessageT() {
+  uint32_t connection;
+  CoreMessageT()
+      : connection(0) {
   }
 };
 
 struct CoreMessage FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef CoreMessageT NativeTableType;
   enum {
-    VT_DATA = 4
+    VT_DATA = 4,
+    VT_CONNECTION = 6
   };
   const flatbuffers::Vector<uint8_t> *data() const {
     return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_DATA);
+  }
+  uint32_t connection() const {
+    return GetField<uint32_t>(VT_CONNECTION, 0);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyOffset(verifier, VT_DATA) &&
            verifier.Verify(data()) &&
+           VerifyField<uint32_t>(verifier, VT_CONNECTION) &&
            verifier.EndTable();
   }
   CoreMessageT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
@@ -45,6 +52,9 @@ struct CoreMessageBuilder {
   flatbuffers::uoffset_t start_;
   void add_data(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> data) {
     fbb_.AddOffset(CoreMessage::VT_DATA, data);
+  }
+  void add_connection(uint32_t connection) {
+    fbb_.AddElement<uint32_t>(CoreMessage::VT_CONNECTION, connection, 0);
   }
   explicit CoreMessageBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -60,18 +70,22 @@ struct CoreMessageBuilder {
 
 inline flatbuffers::Offset<CoreMessage> CreateCoreMessage(
     flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> data = 0) {
+    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> data = 0,
+    uint32_t connection = 0) {
   CoreMessageBuilder builder_(_fbb);
+  builder_.add_connection(connection);
   builder_.add_data(data);
   return builder_.Finish();
 }
 
 inline flatbuffers::Offset<CoreMessage> CreateCoreMessageDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
-    const std::vector<uint8_t> *data = nullptr) {
+    const std::vector<uint8_t> *data = nullptr,
+    uint32_t connection = 0) {
   return synergy::protocol::v2::fb::CreateCoreMessage(
       _fbb,
-      data ? _fbb.CreateVector<uint8_t>(*data) : 0);
+      data ? _fbb.CreateVector<uint8_t>(*data) : 0,
+      connection);
 }
 
 flatbuffers::Offset<CoreMessage> CreateCoreMessage(flatbuffers::FlatBufferBuilder &_fbb, const CoreMessageT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
@@ -86,6 +100,7 @@ inline void CoreMessage::UnPackTo(CoreMessageT *_o, const flatbuffers::resolver_
   (void)_o;
   (void)_resolver;
   { auto _e = data(); if (_e) { _o->data.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->data[_i] = _e->Get(_i); } } };
+  { auto _e = connection(); _o->connection = _e; };
 }
 
 inline flatbuffers::Offset<CoreMessage> CoreMessage::Pack(flatbuffers::FlatBufferBuilder &_fbb, const CoreMessageT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
@@ -97,9 +112,11 @@ inline flatbuffers::Offset<CoreMessage> CreateCoreMessage(flatbuffers::FlatBuffe
   (void)_o;
   struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const CoreMessageT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
   auto _data = _o->data.size() ? _fbb.CreateVector(_o->data) : 0;
+  auto _connection = _o->connection;
   return synergy::protocol::v2::fb::CreateCoreMessage(
       _fbb,
-      _data);
+      _data,
+      _connection);
 }
 
 }  // namespace fb
