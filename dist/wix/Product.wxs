@@ -124,6 +124,12 @@
                     <File Source="$(var.BinPath)/synergy-config.pdb"/>
                 <?endif ?>
             </Component>
+            <Component Guid="6CFD5595-DC3D-4C74-9840-C57405CC8DAD" Id="Tray">
+                <File Id="TrayProgram" KeyPath="yes" Source="$(var.BinPath)/synergy-tray.exe"/>
+                <?if $(var.Configuration) = "Debug" ?>
+                    <File Source="$(var.BinPath)/synergy-tray.pdb"/>
+                <?endif ?>
+            </Component>
         </ComponentGroup>
     </Fragment>
 </Wix>
