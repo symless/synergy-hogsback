@@ -20,3 +20,11 @@ target_link_libraries (${PROJECT_NAME}
     Qt5::Widgets
     ${CMAKE_THREAD_LIBS_INIT}
 )
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    install (TARGETS ${PROJECT_NAME} DESTINATION ${SYNERGY_BUNDLE_BINARY_DIR})
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    install (TARGETS ${PROJECT_NAME} DESTINATION bin)
+    install (FILES ${CMAKE_SOURCE_DIR}/debian/synergy.service
+             DESTINATION lib/systemd/system)
+endif()
