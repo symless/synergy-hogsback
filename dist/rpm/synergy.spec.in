@@ -28,6 +28,7 @@ systemctl start synergy.service
 %{_bindir}/synergy-config
 %{_bindir}/synergy-core
 %{_bindir}/synergy-service
+%{_bindir}/synergy-tray
 %attr(644,-,-) %{_datarootdir}/applications/synergy.desktop
 %attr(644,-,-) %{_datarootdir}/icons/synergy.svg
 %attr(644,-,-) %{_unitdir}/synergy.service
