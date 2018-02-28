@@ -262,6 +262,11 @@ ServiceWorker::provideHello()
 
         serviceLog()->debug("saying hello to config ui");
 
+        if (m_coreManager->isCoreDisabled()) {
+            m_coreManager->resume();
+            m_rpc->server()->publish ("synergy.core.disabled", false);
+        }
+
         if (!m_cloudClient->isWebsocketConnected() &&
              m_userConfig->profileId() != -1) {
             m_rpc->server()->publish("synergy.cloud.offline");
