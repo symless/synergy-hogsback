@@ -267,6 +267,7 @@ void WebsocketSession::shutdown() noexcept
         m_reconnectTimer.cancel();
         m_websocket->lowest_layer().cancel();
         m_ioService.poll();
+        serviceLog()->debug("closed websocket lowest layer");
         m_websocket->close(websocket::close_code::normal, ec);
         m_connecting = false;
         m_connected = false;
