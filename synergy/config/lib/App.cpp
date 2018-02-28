@@ -320,7 +320,11 @@ App::run(int argc, char* argv[])
     engine.rootContext()->setContextProperty
         ("qmlLogManager", static_cast<QObject*>(logManager));
 
+#ifdef Q_OS_OSX
+    QProcess::startDetached("/Applications/Synergy.app/Contents/MacOS/synergy-config");
+#else
     QProcess::startDetached("synergy-tray");
+#endif
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     auto qtAppRet = app.exec();
