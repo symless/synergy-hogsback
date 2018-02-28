@@ -1,8 +1,16 @@
 #include <QApplication>
 #include <synergy/tray/Tray.h>
+#include <synergy/common/DirectoryManager.h>
+#include <synergy/common/CrashHandler.h>
 
 int
 main (int argc, char* argv[]) {
+    try {
+        DirectoryManager::instance()->init(argv[0]);
+        startCrashHandler();
+    } catch (...) {
+    }
+
     QApplication app (argc, argv);
     Tray tray;
 
