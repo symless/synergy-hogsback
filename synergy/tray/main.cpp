@@ -11,6 +11,9 @@ main (int argc, char* argv[]) {
     } catch (...) {
     }
 
+    // stop icon shown up in dock
+    qputenv("QT_MAC_DISABLE_FOREGROUND_APPLICATION_TRANSFORM", "1");
+
     QApplication app (argc, argv);
     Tray tray;
 
