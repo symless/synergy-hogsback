@@ -321,7 +321,7 @@ App::run(int argc, char* argv[])
         ("qmlLogManager", static_cast<QObject*>(logManager));
 
 #ifdef Q_OS_OSX
-    QProcess::startDetached("/Applications/Synergy.app/Contents/Resources/synergy-tray");
+    QProcess::startDetached("/Applications/Synergy.app/Contents/MacOS/synergy-tray");
 #else
     QProcess::startDetached("synergy-tray");
 #endif
