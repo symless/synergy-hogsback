@@ -15,12 +15,12 @@ main (int argc, char* argv[]) {
     } catch (...) {
     }
 
+    QApplication app (argc, argv);
+    Tray tray;
+
 #ifdef Q_OS_OSX
     hideDockIcon();
 #endif
-
-    QApplication app (argc, argv);
-    Tray tray;
 
     if (!tray.waitUntilReadyFor (std::chrono::seconds (5))) {
         return EXIT_FAILURE;
