@@ -3,6 +3,10 @@
 #include <synergy/common/DirectoryManager.h>
 #include <synergy/common/CrashHandler.h>
 
+#ifdef Q_OS_OSX
+extern "C++" void hideDockIcon();
+#endif
+
 int
 main (int argc, char* argv[]) {
     try {
@@ -11,8 +15,9 @@ main (int argc, char* argv[]) {
     } catch (...) {
     }
 
-    // stop icon shown up in dock
-    qputenv("QT_MAC_DISABLE_FOREGROUND_APPLICATION_TRANSFORM", "1");
+#ifdef Q_OS_OSX
+    hideDockIcon();
+#endif
 
     QApplication app (argc, argv);
     Tray tray;

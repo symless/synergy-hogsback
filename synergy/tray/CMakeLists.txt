@@ -7,10 +7,18 @@ set (CMAKE_AUTORCC ON)
 
 find_package (Qt5 COMPONENTS Core Widgets)
 
+if (APPLE)
+    set (SYNERGY_OSX_HELPER_SOURCES
+        helper.mm
+    )
+    find_library (AppKit_LIBRARY AppKit)
+endif()
+
 add_executable (${PROJECT_NAME}
     main.cpp
     Controls.cpp
     Tray.cpp
+    ${SYNERGY_OSX_HELPER_SOURCES}
     tray.qrc
 )
 
@@ -19,6 +27,7 @@ target_link_libraries (${PROJECT_NAME}
     Qt5::Core
     Qt5::Widgets
     ${CMAKE_THREAD_LIBS_INIT}
+    ${AppKit_LIBRARY}
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
