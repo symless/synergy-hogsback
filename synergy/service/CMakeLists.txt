@@ -3,7 +3,10 @@ cmake_minimum_required (VERSION 3.4)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set (SYSTEMD_LIBRARIES "systemd")
-    set (SERVICE_SM_SOURCES "linux/SessionMonitor.cpp")
+    set (SERVICE_SM_SOURCES
+        "linux/SessionMonitor.cpp"
+        "linux/ActiveXDisplay.cpp"
+    )
 else()
     set (SERVICE_SM_SOURCES "common/SessionMonitor.cpp")
 endif()

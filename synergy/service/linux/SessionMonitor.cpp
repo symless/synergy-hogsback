@@ -14,6 +14,9 @@
 #include <boost/optional.hpp>
 #include <boost/optional/optional_io.hpp>
 
+bool
+getActiveTTYXDisplay (boost::optional<std::string>& display) noexcept;
+
 struct SessionMonitor::Impl {
     sd_login_monitor* monitor = nullptr;
     boost::asio::posix::stream_descriptor fd;
@@ -144,7 +147,7 @@ SessionMonitor::poll () {
             }
             if (strcmp (type, "x11") != 0) {
                 serviceLog()->warn ("Active login session \"{}\" is not running "
-                                    "an X server. Ignoring.", session);
+                                    "an X server", session);
                 return;
             }
 
@@ -155,13 +158,13 @@ SessionMonitor::poll () {
             BOOST_SCOPE_EXIT_END
 
             if (sd_session_get_class (session.c_str (), &sclass) < 0) {
-                serviceLog()->critical ("Couldn't determine the 'class' of active "
-                                        "X session \"{}\". Ignoring", session);
+                serviceLog()->error ("Couldn't determine the 'class' of active "
+                                        "X session \"{}\"", session);
                 return;
             }
 
             if (strcmp (sclass, "user") != 0) {
-                serviceLog()->warn ("Active X \"{}\" session \"{}\" ignored",
+                serviceLog()->info ("Active X \"{}\" session \"{}\" ignored",
                                     sclass, session);
                 return;
             }
@@ -174,15 +177,25 @@ SessionMonitor::poll () {
             BOOST_SCOPE_EXIT_END
 
             if (sd_session_get_uid (session.c_str (), &user) < 0) {
-                serviceLog()->critical ("Couldn't determine user of the newly activated X "
-                                        "session \"{}\". Ignoring switch", session);
+                serviceLog()->error ("Couldn't determine the user of active X session \"{}\"", 
+                                     session);
                 return;
             }
 
             if (sd_session_get_display (session.c_str (), &display) < 0) {
-                serviceLog()->critical ("Couldn't determine X display for newly activated X "
-                                        "session \"{}\". Ignoring switch", session);
-                return;
+                serviceLog()->warn  ("systemd didn't provide the X display for active X "
+                                     "session \"{}\", apply workaround...", session);
+
+                boost::optional<std::string> ttyDisplay;
+
+                if (getActiveTTYXDisplay (ttyDisplay)) {
+                    display = ::strdup (ttyDisplay->c_str());
+                    serviceLog()->info ("Found X display \"{}\" on active TTY", display);
+                } else {
+                    serviceLog()->error ("Couldn't find the X display on the active TTY. "
+                                         "Defaulting to :0");
+                    return;
+                }
             }
           
             if (!impl_->activeXSession || (session != *impl_->activeXSession)) {
@@ -195,14 +208,14 @@ SessionMonitor::poll () {
              * and active user change.
              */
             if (!impl_->activeUser || (*impl_->activeUser != user)) {
-                serviceLog()->info ("Active X user changed from \"{}\" to \"{}\"",
+                serviceLog()->info ("Active X session user changed from \"{}\" to \"{}\"",
                                     impl_->activeUser, user);
                 impl_->activeUser = user;
                 activeUserChanged (std::to_string (user));
             }
 
             if (!impl_->activeXDisplay || (*impl_->activeXDisplay != display)) {
-                serviceLog()->info ("Active X display changed from \"{}\" to \"{}\"",
+                serviceLog()->info ("Active X session display changed from \"{}\" to \"{}\"",
                                     impl_->activeXDisplay, display);
                 impl_->activeXDisplay = display;
                 activeDisplayChanged (display);
