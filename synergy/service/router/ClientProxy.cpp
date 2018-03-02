@@ -102,6 +102,10 @@ ClientProxy::connect (int32_t client_id, const std::string& screen_name, uint32_
                         auto it = std::find (
                             begin (connections_), end (connections_), connection);
                         if (it != end (connections_)) {
+                            ProxyServerReset psr;
+                            psr.connection = connection->connection_id_;
+                            this->router().send (std::move (psr), connection->client_id_);
+
                             connections_.erase (it);
                         }
                     });
