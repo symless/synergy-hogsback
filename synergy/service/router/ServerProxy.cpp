@@ -37,18 +37,18 @@ class ServerProxyConnection:
 public:
     explicit ServerProxyConnection (asio::io_service& io, uint32_t id):
         socket_ (io),
-        id_ (id) {
+        connection_id_ (id) {
     }
 
     tcp::socket& socket () &;
     void start (ServerProxy& proxy, std::uint32_t server_id);
     void write (std::vector<uint8_t> data);
     void close ();
-    uint32_t id () { return id_; }
+    uint32_t id () { return connection_id_; }
 
 private:
     tcp::socket socket_;
-    uint32_t id_;
+    uint32_t connection_id_;
 
 public:
     template <typename... Args>
@@ -184,7 +184,7 @@ ServerProxyConnection::start (ServerProxy& proxy,
             std::vector<unsigned char> buffer;
             buffer.reserve (64 * 1024);
 
-            synergy::protocol::v1::Handler handler (proxy.router (), server_id);
+            synergy::protocol::v1::Handler handler (proxy.router (), server_id, connection_id_);
             handler.on_hello_back.connect (
                 [this](std::string screen) {
                     return on_hello_back (std::move (screen));
