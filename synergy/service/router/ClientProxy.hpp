@@ -16,7 +16,7 @@ public:
     ~ClientProxy ();
 
     void start ();
-    void connect (int32_t client_id, const std::string& screen_name);
+    void connect (int32_t client_id, const std::string& screen_name, uint32_t connection_id);
 
     Router& router () const noexcept;
 

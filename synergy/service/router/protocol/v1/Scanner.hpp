@@ -29,8 +29,11 @@ struct all_true final {
 
 class Handler final {
 public:
-    Handler (Router& router, std::uint32_t const server)
-        : router_ (router), server_id_ (server) {
+    Handler (Router& router, std::uint32_t const server,
+             std::uint32_t const connection_id) :
+        router_ (router),
+        server_id_ (server),
+        connection_id_(connection_id) {
     }
 
     template <typename T>
@@ -44,6 +47,7 @@ public:
 
         CoreMessage coreMessage;
         coreMessage.data = std::move (buffer);
+        coreMessage.connection = connection_id_;
         return router_.send (std::move(coreMessage), server_id_);
     }
 
@@ -60,6 +64,7 @@ public:
 private:
     Router& router_;
     std::uint32_t server_id_;
+    std::uint32_t connection_id_;
 
 public:
     template <typename... Args>
