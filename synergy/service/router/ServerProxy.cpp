@@ -35,17 +35,20 @@ private:
 class ServerProxyConnection:
     public std::enable_shared_from_this<ServerProxyConnection> {
 public:
-    explicit ServerProxyConnection (asio::io_service& io):
-        socket_ (io) {
+    explicit ServerProxyConnection (asio::io_service& io, uint32_t id):
+        socket_ (io),
+        id_ (id) {
     }
 
     tcp::socket& socket () &;
     void start (ServerProxy& proxy, std::uint32_t server_id);
     void write (std::vector<uint8_t> data);
     void close ();
+    uint32_t id () { return id_; }
 
 private:
     tcp::socket socket_;
+    uint32_t id_;
 
 public:
     template <typename... Args>
@@ -104,7 +107,7 @@ ServerProxy::start (std::int64_t const server_id) {
     asio::spawn (acceptor_.get_io_service (), [this](auto ctx) {
         while (true) {
             auto connection = std::make_shared<ServerProxyConnection> (
-                acceptor_.get_io_service ());
+                acceptor_.get_io_service (), secondsSinceEpoch());
 
             boost::system::error_code ec;
             acceptor_.async_accept (connection->socket (), ctx[ec]);
@@ -117,16 +120,22 @@ ServerProxy::start (std::int64_t const server_id) {
 
             connection->socket ().set_option (tcp::no_delay (true), ec);
 
+            auto connection_id = connection->id ();
             connection->on_hello_back.connect (
-                [this](std::string screen_name) {
+                [this, connection_id](std::string screen_name) {
                     ProxyClientConnect pcc;
                     pcc.screen = std::move (screen_name);
-                    pcc.connection = secondsSinceEpoch();
+                    pcc.connection = connection_id;
                     return this->router().send (std::move (pcc), this->server_id_);
                 });
 
             connection->on_disconnect.connect (
-                [this](std::shared_ptr<ServerProxyConnection> const& connection) {
+                [this, connection_id](std::shared_ptr<ServerProxyConnection> const& connection) {
+                    ProxyClientDisconnect pcd;
+                    pcd.connection = connection_id;
+
+                    this->router().send (std::move (pcd), this->server_id_);
+
                     auto it = std::find (begin (connections_), end (connections_),
                                          connection);
                     if (it != end (connections_)) {
