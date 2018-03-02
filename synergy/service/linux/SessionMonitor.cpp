@@ -92,8 +92,8 @@ SessionMonitor::start () {
                                      "error: {}", ec.message());
                 break;
             }
-            sd_login_monitor_flush (this->impl_->monitor);
             this->poll ();
+            sd_login_monitor_flush (this->impl_->monitor);
         }
 
         serviceLog()->info ("Session monitor stopped");
