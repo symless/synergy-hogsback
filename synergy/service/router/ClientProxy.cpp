@@ -267,13 +267,13 @@ ClientProxyMessageHandler::handle (CoreMessage const& msg,
                                    int32_t const source) const {
     auto& connections = proxy ().connections_;
     auto it           = std::find_if (
-        begin (connections), end (connections), [source](auto& connection) {
-            return connection->client_id_ == source;
+        begin (connections), end (connections), [source, connection_id = msg.connection](auto& connection) {
+            return (connection->client_id_ == source) && (connection->connection_id_ == connection_id);
         });
 
     if (it == end (connections)) {
         routerLog ()->trace(
-            "ClientProxy: Received core message for client '{}' "
+            "ClientProxy: Received core message from client '{}' "
             "before a connected was established",
             source);
         return;
