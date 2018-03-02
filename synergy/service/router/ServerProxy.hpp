@@ -21,6 +21,9 @@ public:
     auto& connections() const& noexcept { return connections_; }
 
 private:
+    uint32_t secondsSinceEpoch();
+
+private:
     boost::asio::ip::tcp::acceptor acceptor_;
     Router& router_;
     std::unique_ptr<ServerProxyMessageHandler> message_handler_;

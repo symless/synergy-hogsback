@@ -15,6 +15,8 @@
 #include <synergy/service/ServiceLogs.h>
 #include <synergy/service/router/Router.hpp>
 
+#include <ctime>
+
 class ServerProxyMessageHandler final {
 public:
     explicit ServerProxyMessageHandler (ServerProxy& proxy);
@@ -119,6 +121,7 @@ ServerProxy::start (std::int64_t const server_id) {
                 [this](std::string screen_name) {
                     ProxyClientConnect pcc;
                     pcc.screen = std::move (screen_name);
+                    pcc.connection = secondsSinceEpoch();
                     return this->router().send (std::move (pcc), this->server_id_);
                 });
 
@@ -146,6 +149,14 @@ ServerProxy::stop () {
     }
     acceptor_.get_io_service().poll();
     connections_.clear ();
+}
+
+uint32_t
+ServerProxy::secondsSinceEpoch()
+{
+    // 32 bit int support until 2038
+    std::time_t result = std::time(nullptr);
+    return static_cast<uint32_t>(result);
 }
 
 void
