@@ -44,9 +44,7 @@ public:
     void start (ServerProxy& proxy, std::uint32_t server_id);
     void write (std::vector<uint8_t> data);
     void close ();
-    uint32_t id () { return connection_id_; }
 
-private:
     tcp::socket socket_;
     uint32_t connection_id_;
 
@@ -120,7 +118,7 @@ ServerProxy::start (std::int64_t const server_id) {
 
             connection->socket ().set_option (tcp::no_delay (true), ec);
 
-            auto connection_id = connection->id ();
+            auto connection_id = connection->connection_id_;
             connection->on_hello_back.connect (
                 [this, connection_id](std::string screen_name) {
                     ProxyClientConnect pcc;
@@ -298,11 +296,25 @@ ServerProxyMessageHandler::operator() (Message const& message,
 
 void
 ServerProxyMessageHandler::handle (CoreMessage const& msg,
-                                   std::uint32_t) const {
-    if (!proxy().connections().empty ()) {
-        auto& connection = proxy().connections().back ();
-        connection->write (msg.data);
+                                   std::uint32_t source) const {
+    assert (proxy().server_id_ == source);
+
+    auto& connections = proxy ().connections_;
+    auto it = std::find_if (
+        begin (connections), end (connections), [connection_id = msg.connection](auto& connection) {
+            return connection->connection_id_ == connection_id;
+        });
+
+    if (it == end (connections)) {
+        routerLog ()->trace(
+            "ServerProxy: Received core message for client '{}' "
+            "before a connected was established",
+            source);
+        return;
     }
+
+    auto& connection = *it;
+    connection->write (msg.data);
 }
 
 template <typename T> inline

@@ -10,6 +10,7 @@ class ServerProxyConnection;
 class ServerProxyMessageHandler;
 
 class ServerProxy final {
+    friend class ServerProxyMessageHandler;
 public:
     ServerProxy (boost::asio::io_service&, Router& router, uint16_t port);
     ~ServerProxy () noexcept;
