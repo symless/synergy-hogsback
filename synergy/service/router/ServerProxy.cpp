@@ -338,6 +338,7 @@ ServerProxyMessageHandler::handle(const ProxyServerReset& psr, int32_t source) c
 
     if (it != end (connections)) {
         (*it)->stop ();
+        routerLog()->debug("stopped connection {}", connection_id);
     }
 }
 
