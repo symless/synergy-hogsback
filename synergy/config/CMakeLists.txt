@@ -77,7 +77,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     add_subdirectory (helper)
     install (TARGETS ${PROJECT_NAME} DESTINATION ${SYNERGY_BUNDLE_BINARY_DIR})
     install (PROGRAMS "${CMAKE_SOURCE_DIR}/third_party/precompiled/crashpad/macos/crashpad_handler"
-             DESTINATION ${SYNERGY_BUNDLE_BINARY_DIR})
+             DESTINATION ${SYNERGY_BUNDLE_RESOURSES_DIR})
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     install (TARGETS ${PROJECT_NAME} DESTINATION bin)
 endif()
