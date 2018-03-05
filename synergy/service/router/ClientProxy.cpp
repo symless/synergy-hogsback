@@ -25,6 +25,7 @@ public:
     void operator() (Message const&, int32_t source) const;
     void handle (CoreMessage const&, int32_t source) const;
     void handle (ProxyClientConnect const&, int32_t source) const;
+    void handle (ProxyClientDisconnect const&, int32_t source) const;
 
     template <typename T> inline
     void handle (T const&, int32_t source) const;
@@ -237,7 +238,29 @@ ClientProxyMessageHandler::
 operator() (Message const& message, int32_t const source) const {
     boost::apply_visitor (
         [this, source](auto& body) { this->handle (body, source); },
-        message.body ());
+    message.body ());
+}
+
+void
+ClientProxyMessageHandler::handle(const ProxyClientDisconnect& pcd, int32_t source) const
+{
+    auto connection_id = pcd.connection;
+
+    routerLog()->debug(
+        "ClientProxy: Received client disconnect from screen {} for connection {}",
+        source,
+        connection_id);
+
+    auto& connections = proxy ().connections_;
+
+    auto it = std::find_if (
+        begin (connections), end (connections), [source, connection_id](auto& connection) {
+            return (connection->client_id_ == source) && (connection->connection_id_ == connection_id);
+        });
+
+    if (it != end (connections)) {
+        (*it)->stop();
+    }
 }
 
 void
