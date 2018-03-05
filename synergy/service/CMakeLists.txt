@@ -90,6 +90,20 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
              DESTINATION lib/systemd/system)
 endif()
 
+if (WIN32)
+    set (LSIF_SOURCES lsif_windows.cpp)
+else()
+    set (LSIF_SOURCES lsif_unix.cpp)
+endif()
+
+add_executable (lsif ${LSIF_SOURCES})
+target_compile_definitions (lsif PUBLIC LSIF_APP)
+target_include_directories (lsif SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
+target_link_libraries (lsif ${Boost_LIBRARIES})
+
+if (WIN32)
+    target_link_libraries (lsif iphlpapi)
+endif()
 
 add_subdirectory (router)
 
