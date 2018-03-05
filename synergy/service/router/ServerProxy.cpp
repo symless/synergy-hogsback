@@ -24,6 +24,7 @@ public:
 
     void operator() (Message const&, std::uint32_t source) const;
     void handle (CoreMessage const&, std::uint32_t source) const;
+    void handle (ProxyServerReset const&, int32_t source) const;
 
     template <typename T>
     void handle (T const&,  std::uint32_t) const;
@@ -43,7 +44,7 @@ public:
     tcp::socket& socket () &;
     void start (ServerProxy& proxy, std::uint32_t server_id);
     void write (std::vector<uint8_t> data);
-    void close ();
+    void stop ();
 
     tcp::socket socket_;
     uint32_t connection_id_;
@@ -152,7 +153,7 @@ ServerProxy::stop () {
     acceptor_.cancel ();
     acceptor_.get_io_service().poll();
     for (auto& connection : connections_) {
-        connection->close ();
+        connection->stop ();
     }
     acceptor_.get_io_service().poll();
     connections_.clear ();
@@ -254,9 +255,10 @@ ServerProxyConnection::socket() & {
 }
 
 void
-ServerProxyConnection::close () {
+ServerProxyConnection::stop () {
     boost::system::error_code ec;
-    socket().close (ec);
+    socket_.cancel(ec);
+    socket_.get_io_service().poll();
 }
 
 void
@@ -315,6 +317,28 @@ ServerProxyMessageHandler::handle (CoreMessage const& msg,
 
     auto& connection = *it;
     connection->write (msg.data);
+}
+
+void
+ServerProxyMessageHandler::handle(const ProxyServerReset& psr, int32_t source) const
+{
+    auto connection_id = psr.connection;
+
+    routerLog()->debug(
+        "ServerProxy: Received server reset from screen {} for connection {}",
+        source,
+        connection_id);
+
+    auto& connections = proxy ().connections_;
+
+    auto it = std::find_if (
+        begin (connections), end (connections), [this, source, connection_id](auto& connection) {
+            return (this->proxy ().server_id_ == source) && (connection->connection_id_ == connection_id);
+        });
+
+    if (it != end (connections)) {
+        (*it)->stop ();
+    }
 }
 
 template <typename T> inline
