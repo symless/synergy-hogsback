@@ -272,15 +272,17 @@ ClientProxyMessageHandler::handle (ProxyClientConnect const& pcc,
         pcc.screen,
         source);
 
+    // refactor duplicate code
     auto& connections = proxy ().connections_;
 
     auto it = std::find_if (
         begin (connections), end (connections), [source](auto& connection) {
-            return connection->client_id_ == source;
+            return (connection->client_id_ == source) && (connection->connection_id_ == connection_id);
         });
 
     if (it != end (connections)) {
         (*it)->stop();
+        routerLog()->debug("stopped connection {} for client {}", connection_id, pcc.screen);
     }
 
     proxy ().connect (source, pcc.screen, pcc.connection);
