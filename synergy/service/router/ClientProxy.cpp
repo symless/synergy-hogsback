@@ -260,6 +260,7 @@ ClientProxyMessageHandler::handle(const ProxyClientDisconnect& pcd, int32_t sour
 
     if (it != end (connections)) {
         (*it)->stop();
+        routerLog()->debug("stopped connection {}", connection_id);
     }
 }
 
