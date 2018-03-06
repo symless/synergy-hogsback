@@ -267,6 +267,7 @@ ClientProxyMessageHandler::handle(const ProxyClientDisconnect& pcd, int32_t sour
 void
 ClientProxyMessageHandler::handle (ProxyClientConnect const& pcc,
                                    int32_t const source) const {
+    auto connection_id = pcc.connection;
     routerLog()->debug(
         "ClientProxy: Received client connection for {} from screen {}",
         pcc.screen,
@@ -276,7 +277,7 @@ ClientProxyMessageHandler::handle (ProxyClientConnect const& pcc,
     auto& connections = proxy ().connections_;
 
     auto it = std::find_if (
-        begin (connections), end (connections), [source](auto& connection) {
+        begin (connections), end (connections), [source, connection_id](auto& connection) {
             return (connection->client_id_ == source) && (connection->connection_id_ == connection_id);
         });
 
