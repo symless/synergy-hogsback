@@ -106,7 +106,7 @@ ServerProxy::start (std::int64_t const server_id) {
     asio::spawn (acceptor_.get_io_service (), [this](auto ctx) {
         while (true) {
             auto connection = std::make_shared<ServerProxyConnection> (
-                acceptor_.get_io_service (), secondsSinceEpoch());
+                acceptor_.get_io_service (), this->secondsSinceEpoch());
 
             boost::system::error_code ec;
             acceptor_.async_accept (connection->socket (), ctx[ec]);
