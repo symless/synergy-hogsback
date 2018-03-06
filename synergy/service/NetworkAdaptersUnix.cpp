@@ -1,4 +1,4 @@
-#include "lsif.hpp"
+#include <synergy/service/NetworkAdapters.h>
 #include <boost/endian/conversion.hpp>
 #include <boost/scope_exit.hpp>
 #include <boost/system/error_code.hpp>
@@ -7,9 +7,9 @@
 #include <netinet/in.h>
 #include <sys/types.h>
 
-std::map<std::string, boost::asio::ip::address>
-get_all_netdevices () {
-    std::map<std::string, boost::asio::ip::address> map;
+std::multimap<std::string, boost::asio::ip::address>
+getAdapterIPAddresses () {
+    std::multimap<std::string, boost::asio::ip::address> map;
 
     struct ::ifaddrs* ifa = nullptr;
     if (::getifaddrs (&ifa)) {
@@ -42,7 +42,7 @@ get_all_netdevices () {
 
 int
 main (int, char**) {
-    auto map = get_all_netdevices ();
+    auto map = getAdapterIPAddresses ();
     for (auto& e : map) {
         std::cout << e.first << " -> " << e.second << std::endl;
     }

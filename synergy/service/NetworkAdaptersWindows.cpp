@@ -1,13 +1,13 @@
-#include "lsif.hpp"
+#include <synergy/service/NetworkAdapters.h>
 #include <vector>
 #include <cstring>
 #include <cassert>
 #include <codecvt>
 #include <Iphlpapi.h>
 
-std::map<std::string, boost::asio::ip::address>
-get_all_netdevices () {
-    std::map<std::string, boost::asio::ip::address> map;
+std::multimap<std::string, boost::asio::ip::address>
+getAdapterIPAddresses () {
+    std::multimap<std::string, boost::asio::ip::address> map;
 
     ULONG size = 16 * 1024; // 16 KB recommended preallocation
     std::vector<IP_ADAPTER_ADDRESSES> adapters;
@@ -65,7 +65,7 @@ get_all_netdevices () {
 
 int
 main (int, char**) {
-    auto map = get_all_netdevices();
+    auto map = getAdapterIPAddresses();
     for (auto& e : map) {
         std::cout << e.first << " -> " << e.second << std::endl;
     }

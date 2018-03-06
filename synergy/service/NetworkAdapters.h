@@ -5,6 +5,6 @@
 #include <map>
 #include <string>
 
-std::map<std::string, boost::asio::ip::address> get_all_netdevices ();
+std::multimap<std::string, boost::asio::ip::address> getAdapterIPAddresses();
 
 #endif // LSIF_HPP

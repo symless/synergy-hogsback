@@ -11,6 +11,12 @@ else()
     set (SERVICE_SM_SOURCES "common/SessionMonitor.cpp")
 endif()
 
+if (WIN32)
+    set (LSIF_SOURCES NetworkAdaptersWindows.cpp)
+else()
+    set (LSIF_SOURCES NetworkAdaptersUnix.cpp)
+endif()
+
 set (SERVICE_SOURCES
     main.cpp
     App.cpp
@@ -30,6 +36,8 @@ set (SERVICE_SOURCES
     RouterErrorMonitor.cpp
     ErrorNotifier.cpp
     TrayService.cpp
+    IPMonitor.cpp
+    ${LSIF_SOURCES}
     ${SERVICE_SM_SOURCES}
 )
 
@@ -82,18 +90,22 @@ target_link_libraries (${PROJECT_NAME}
     ${CMAKE_THREAD_LIBS_INIT}
 )
 
+if (WIN32)
+    target_link_libraries (${PROJECT_NAME} iphlpapi)
+endif()
+
+add_subdirectory (router)
+
+if (WIN32)
+    add_subdirectory (windows)
+endif()
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     install (TARGETS ${PROJECT_NAME} DESTINATION ${SYNERGY_BUNDLE_BINARY_DIR})
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     install (TARGETS ${PROJECT_NAME} DESTINATION bin)
     install (FILES ${CMAKE_SOURCE_DIR}/debian/synergy.service
              DESTINATION lib/systemd/system)
-endif()
-
-if (WIN32)
-    set (LSIF_SOURCES lsif_windows.cpp)
-else()
-    set (LSIF_SOURCES lsif_unix.cpp)
 endif()
 
 add_executable (lsif ${LSIF_SOURCES})
@@ -103,10 +115,4 @@ target_link_libraries (lsif ${Boost_LIBRARIES})
 
 if (WIN32)
     target_link_libraries (lsif iphlpapi)
-endif()
-
-add_subdirectory (router)
-
-if (WIN32)
-add_subdirectory (windows)
 endif()
