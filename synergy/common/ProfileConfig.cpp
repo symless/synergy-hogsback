@@ -74,27 +74,27 @@ bool ProfileConfig::compare(ProfileConfig const& target)
         bool found = false;
 
         for (auto& screen : m_screens) {
-            if (screen.m_id == targetScreen.m_id) {
+            if (screen.id() == targetScreen.id()) {
                 found = true;
 
-                if (screen.m_version > targetScreen.m_version) {
+                if (screen.version() > targetScreen.version()) {
                     serviceLog()->debug("screen version is older ({} < {}), skip screen {}",
-                        targetScreen.m_version, screen.m_version, screen.m_id);
+                        targetScreen.version(), screen.version(), screen.id());
                     continue;
                 }
 
-                if (screen.m_name != targetScreen.m_name) {
+                if (screen.name() != targetScreen.name()) {
                     serviceLog()->debug("profile screen name changed, screenId={} {}->{}",
-                        screen.m_id, screen.m_name, targetScreen.m_name);
-                    screenNameChanged(targetScreen.m_id);
+                        screen.id(), screen.name(), targetScreen.name());
+                    screenNameChanged(targetScreen.id());
                     different = true;
                 }
 
-                if (screen.m_active != targetScreen.m_active) {
+                if (screen.active() != targetScreen.active()) {
                     serviceLog()->debug("profile screen active changed, screenId={} {}->{}",
-                        screen.m_id, screen.m_active, targetScreen.m_active);
+                        screen.id(), screen.active(), targetScreen.active());
 
-                    if (targetScreen.m_active) {
+                    if (targetScreen.active()) {
                         screenOnline(targetScreen);
                     }
                     else {
@@ -104,18 +104,19 @@ bool ProfileConfig::compare(ProfileConfig const& target)
                     different = true;
                 }
 
-                if (screen.m_x != targetScreen.m_x || screen.m_y != targetScreen.m_y) {
+                if (screen.x() != targetScreen.x() ||
+                        screen.y() != targetScreen.y()) {
                     serviceLog()->debug("profile screen position changed, screenId={} {},{}->{},{}",
-                        screen.m_id, screen.m_x, screen.m_y, targetScreen.m_x, targetScreen.m_y);
-                    screenPositionChanged(targetScreen.m_id);
+                        screen.id(), screen.x(), screen.y(), targetScreen.x(), targetScreen.y());
+                    screenPositionChanged(targetScreen.id());
                     different = true;
                 }
 
-                if (screen.m_status != targetScreen.m_status) {
+                if (screen.status() != targetScreen.status()) {
                     serviceLog()->debug("profile screen status changed, screenId={} {}->{}",
-                        screen.m_id, screenStatusToString(screen.m_status),
-                        screenStatusToString(targetScreen.m_status));
-                    screenStatusChanged(targetScreen.m_id);
+                        screen.id(), screenStatusToString(screen.status()),
+                        screenStatusToString(targetScreen.status()));
+                    screenStatusChanged(targetScreen.id());
                     different = true;
                 }
             }
@@ -131,7 +132,7 @@ bool ProfileConfig::compare(ProfileConfig const& target)
         bool found = false;
 
         for (auto& srcScreen : target.m_screens) {
-            if (screen.m_id == srcScreen.m_id) {
+            if (screen.id() == srcScreen.id()) {
                 found = true;
             }
         }
