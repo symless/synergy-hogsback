@@ -5,6 +5,8 @@
 #include <synergy/common/ScreenError.h>
 #include <cstdint>
 #include <string>
+#include <vector>
+#include <boost/asio/ip/address.hpp>
 #include <boost/signals2.hpp>
 
 using ScreenID = int64_t;
@@ -41,6 +43,7 @@ public:
     ScreenStatus status() const noexcept;
 
     std::string ipList() const;
+    void ipList (std::vector<boost::asio::ip::address> const&);
 
     bool active() const;
 

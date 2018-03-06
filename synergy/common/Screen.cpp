@@ -1,6 +1,7 @@
 #include <synergy/common/Screen.h>
-
 #include <synergy/common/ScreenSnapshot.h>
+#include <algorithm>
+#include <boost/algorithm/string/join.hpp>
 
 const int kScreenWidth = 86;
 const int kScreenHeight = 58;
@@ -78,12 +79,26 @@ Screen::status() const noexcept {
     return m_status;
 }
 
-std::string Screen::ipList() const
+std::string
+Screen::ipList() const
 {
     return m_ipList;
 }
 
-bool Screen::active() const
+void
+Screen::ipList (std::vector<boost::asio::ip::address> const& ipList) {
+    std::vector<std::string> ipStringList;
+    ipStringList.reserve (ipList.size());
+
+    std::transform (begin(ipList), end(ipList),
+                    std::back_inserter(ipStringList),
+                    [](auto const& ip) { return ip.to_string(); });
+
+    m_ipList = boost::algorithm::join (ipStringList, ",");
+}
+
+bool
+Screen::active() const
 {
     return m_active;
 }
