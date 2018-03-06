@@ -47,9 +47,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
 
     m_cloudClient->websocketMessageReceived.connect([this](std::string json){
         try {
-            // parse json message and copy into remote profile config
-            ProfileConfig profileConfig = ProfileConfig::fromJsonSnapshot(json);
-            m_remoteProfileConfig->clone(profileConfig);
+            *m_remoteProfileConfig = ProfileConfig::fromJsonSnapshot(json);
         }
         catch (const std::exception& ex) {
             serviceLog()->error("failed to create profile from json: {}", ex.what());

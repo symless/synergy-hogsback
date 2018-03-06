@@ -9,14 +9,17 @@
 class ProfileConfig final
 {
 public:
+    template <typename... Args>
+    using signal = boost::signals2::signal<Args...>;
+
     static ProfileConfig fromJsonSnapshot (std::string const&json);
+
+    ProfileConfig () = default;
+    ProfileConfig (ProfileConfig const& src);
+    ProfileConfig& operator= (ProfileConfig const& src);
 
     void apply (ProfileConfig const& src);
     bool compare (ProfileConfig const& target);
-    void clone (ProfileConfig const& src);
-
-    template <typename... Args>
-    using signal = boost::signals2::signal<Args...>;
 
     signal<void ()> modified;
 

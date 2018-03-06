@@ -5,7 +5,8 @@
 
 #include <synergy/service/json.hpp>
 
-ProfileConfig ProfileConfig::fromJsonSnapshot(const std::string& json)
+ProfileConfig
+ProfileConfig::fromJsonSnapshot(const std::string& json)
 {
     ProfileConfigSnapshot snapshot;
     from_json (snapshot, json);
@@ -30,7 +31,7 @@ void ProfileConfig::apply (ProfileConfig const& src)
 {
     if (compare(src)) {
         serviceLog()->debug("profile changed, storing local copy");
-        clone(src);
+        *this = src;
     }
     else {
         serviceLog()->debug("profile has not changed, no action needed");
@@ -159,14 +160,15 @@ bool ProfileConfig::compare(ProfileConfig const& target)
     return different;
 }
 
-void ProfileConfig::clone (ProfileConfig const& src)
-{
-    m_profile.m_id = src.m_profile.m_id;
-    m_profile.m_version = src.m_profile.m_version;
-    m_profile.m_server = src.m_profile.m_server;
-    m_profile.m_name = src.m_profile.m_name;
+ProfileConfig::ProfileConfig (ProfileConfig const& src):
+    m_profile (src.m_profile), m_screens (src.m_screens) {
+}
 
+ProfileConfig&
+ProfileConfig::operator= (ProfileConfig const& src) {
+    m_profile = src.m_profile;
     m_screens = src.m_screens;
+    return *this;
 }
 
 const std::vector<Screen> & ProfileConfig::screens() const
