@@ -1,6 +1,6 @@
 #include <synergy/common/WampClient.h>
 
-static bool const kDebugWampClient = true;
+static bool const kDebugWampClient = false;
 static boost::posix_time::seconds const kRPCKeepAliveInterval (3);
 
 WampClient::WampClient (boost::asio::io_service& ioService,
