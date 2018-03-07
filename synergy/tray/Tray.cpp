@@ -9,6 +9,10 @@ Tray::Tray():
     m_menu.addSeparator ();
     m_menu.addAction ("Quit Synergy Helper", QApplication::instance(), SLOT(quit()));
 
+#ifdef Q_OS_OSX
+    m_svg.setIsMask(true);
+#endif
+
     m_icon.setIcon(m_svg);
     m_icon.setContextMenu (&m_menu);
 
