@@ -3,11 +3,11 @@
 Tray::Tray():
     m_svg (":/synergy/tray/icon.svg")
 {
-    m_enableAction = m_menu.addAction ("Enable", this, SLOT(enableCore()));
-    m_disableAction = m_menu.addAction ("Disable", this, SLOT(disableCore()));
+    m_enableAction = m_menu.addAction ("Enable Synergy Service", this, SLOT(enableCore()));
+    m_disableAction = m_menu.addAction ("Disable Synergy Service", this, SLOT(disableCore()));
 
     m_menu.addSeparator ();
-    m_menu.addAction ("Quit", QApplication::instance(), SLOT(quit()));
+    m_menu.addAction ("Quit Synergy Helper", QApplication::instance(), SLOT(quit()));
 
     m_icon.setIcon(m_svg);
     m_icon.setContextMenu (&m_menu);
