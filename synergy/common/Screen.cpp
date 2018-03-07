@@ -85,8 +85,8 @@ Screen::ipList() const
     return m_ipList;
 }
 
-void
-Screen::ipList (std::vector<boost::asio::ip::address> const& ipList) {
+bool
+Screen::ipList (std::set<boost::asio::ip::address> const& ipList) {
     std::vector<std::string> ipStringList;
     ipStringList.reserve (ipList.size());
 
@@ -94,7 +94,12 @@ Screen::ipList (std::vector<boost::asio::ip::address> const& ipList) {
                     std::back_inserter(ipStringList),
                     [](auto const& ip) { return ip.to_string(); });
 
-    m_ipList = boost::algorithm::join (ipStringList, ",");
+    auto list = boost::algorithm::join (ipStringList, ",");
+    auto const changed = (m_ipList != list);
+    if (changed) {
+        m_ipList = std::move (list);
+    }
+    return changed;
 }
 
 bool

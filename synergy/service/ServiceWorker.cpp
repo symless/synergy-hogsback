@@ -9,7 +9,7 @@
 #include <synergy/service/SessionMonitor.h>
 #include <synergy/service/WebsocketError.h>
 #include <synergy/service/TrayService.h>
-#include <synergy/service/router/protocol/v2/MessageTypes.hpp>
+#include <synergy/service/IPMonitor.h>
 #include <synergy/common/UserConfig.h>
 #include <synergy/common/RpcManager.h>
 #include <synergy/common/WampServer.h>
@@ -21,7 +21,11 @@
 
 #include <boost/asio.hpp>
 #include <boost/algorithm/string.hpp>
+#include <fmt/ostream.h>
 #include <iostream>
+#include <algorithm>
+#include <sstream>
+#include <iterator>
 
 ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
                              std::shared_ptr<UserConfig> userConfig) :
@@ -37,8 +41,8 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
     m_sessionMonitor (std::make_unique<SessionMonitor>(ioService)),
     m_work (std::make_shared<boost::asio::io_service::work>(ioService)),
     m_errorNotifier(std::make_unique<ErrorNotifier>(*m_cloudClient, *m_localProfileConfig, *m_userConfig)),
-    m_trayService(std::make_unique<TrayService>(m_ioService))
-
+    m_trayService(std::make_unique<TrayService>(m_ioService)),
+    m_ipMonitor(std::make_unique<IPMonitor>(ioService))
 {
     m_localProfileConfig->modified.connect([this](){
         serviceLog()->debug("local profile modified, id={}", m_localProfileConfig->profileId());
@@ -63,6 +67,8 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         // forward the message via rpc server to config UI
         auto rpcServer = m_rpc->server();
         rpcServer->publish("synergy.profile.snapshot", std::move(json));
+
+        this->m_ipMonitor->start();
     });
 
     m_cloudClient->websocketConnected.connect([this](){
@@ -82,6 +88,8 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             serviceLog()->debug("sending logout message to config ui");
             m_rpc->server()->publish("synergy.auth.logout");
         }
+
+        this->m_ipMonitor->stop();
     });
 
     m_rpc->ready.connect([this]() {
@@ -134,6 +142,20 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
                                    (ip::address::from_string (ipStr), kNodePort));
             }
         });
+    });
+
+    m_ipMonitor->ipSetChanged.connect ([this](auto const& ipSet) {
+        try {
+            auto& localScreen = this->m_localProfileConfig->getScreen
+                                    (this->m_userConfig->screenId());
+            if (localScreen.ipList (ipSet)) {
+                serviceLog()->info ("System IP addresses changed: {}",
+                                    localScreen.ipList());
+                localScreen.touch();
+                m_cloudClient->updateScreen (localScreen);
+            }
+        } catch (...) {
+        }
     });
 
     m_errorNotifier->install(m_coreManager->errorMonitor());
