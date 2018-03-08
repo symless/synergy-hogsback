@@ -28,6 +28,7 @@ public:
     signal<void (int64_t)> profileServerChanged;
 
     signal<void (int64_t)> screenNameChanged;
+    signal<void (Screen const&)> screenIPSetChanged;
     signal<void (int64_t)> screenPositionChanged;
     signal<void (int64_t)> screenStatusChanged;
 

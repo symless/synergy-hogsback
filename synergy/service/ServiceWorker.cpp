@@ -144,6 +144,23 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         });
     });
 
+    m_localProfileConfig->screenIPSetChanged.connect (
+        [this](Screen const& screen) {
+            if (m_userConfig->screenId() == screen.id()) {
+                return;
+            }
+
+            std::vector<std::string> ipList;
+            std::string ipListStr = screen.ipList();
+
+            boost::split (ipList, ipListStr, boost::is_any_of(","));
+            for (auto const& ipStr : ipList) {
+                m_router.add_peer (tcp::endpoint
+                    (ip::address::from_string (ipStr), kNodePort));
+            }
+        }
+    );
+
     m_ipMonitor->ipSetChanged.connect ([this](auto const& ipSet) {
         try {
             auto& localScreen = this->m_localProfileConfig->getScreen

@@ -105,6 +105,13 @@ bool ProfileConfig::compare(ProfileConfig const& target)
                     different = true;
                 }
 
+                if (screen.ipList() != targetScreen.ipList()) {
+                    serviceLog()->debug("profile screen IP set changed, screenId={}, {}->{}",
+                        screen.id(), screen.ipList(), targetScreen.ipList());
+                    screenIPSetChanged(targetScreen);
+                    different = true;
+                }
+
                 if (screen.x() != targetScreen.x() ||
                         screen.y() != targetScreen.y()) {
                     serviceLog()->debug("profile screen position changed, screenId={} {},{}->{},{}",
