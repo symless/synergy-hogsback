@@ -163,7 +163,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
 
     m_ipMonitor->ipSetChanged.connect ([this](auto const& ipSet) {
         try {
-            auto& localScreen = this->m_localProfileConfig->getScreen
+            auto localScreen = this->m_localProfileConfig->getScreen
                                     (this->m_userConfig->screenId());
             if (localScreen.ipList (ipSet)) {
                 serviceLog()->info ("System IP addresses changed: {}",
