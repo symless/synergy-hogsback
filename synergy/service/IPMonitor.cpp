@@ -2,7 +2,7 @@
 #include <synergy/service/NetworkAdapters.h>
 #include <boost/asio/spawn.hpp>
 
-static auto kIPMonitorInterval = std::chrono::seconds(10);
+static auto kIPMonitorInterval = std::chrono::seconds(3);
 
 IPMonitor::IPMonitor
 (boost::asio::io_service& ioService): m_pollTimer(ioService) {
