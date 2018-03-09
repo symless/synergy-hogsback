@@ -123,6 +123,7 @@ void CloudClient::updateScreen(Screen& screen)
 
     tao::json::value root;
     root["id"] = screen.id();
+    root["name"] = screen.name();
     root["ipList"] = screen.ipList();
     root["version"] = screen.version();
 
@@ -150,6 +151,7 @@ void CloudClient::updateScreenError(Screen &screen)
 
     tao::json::value root;
     root["id"] = screen.id();
+    root["name"] = screen.name();
     root["error_code"] = static_cast<uint32_t>(screen.errorCode());
     root["error_message"] = screen.errorMessage();
 
