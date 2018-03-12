@@ -14,6 +14,7 @@ class SessionMonitor;
 class ErrorNotifier;
 class RouterErrorMonitor;
 class TrayService;
+class IPMonitor;
 
 class ServiceWorker final
 {
@@ -54,6 +55,7 @@ private:
     std::string                     m_lastProfileSnapshot;
     std::unique_ptr<ErrorNotifier>  m_errorNotifier;
     std::unique_ptr<TrayService>    m_trayService;
+    std::unique_ptr<IPMonitor>      m_ipMonitor;
 };
 
 #endif // SERVICEWORKER_H
