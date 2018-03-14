@@ -29,17 +29,26 @@ Rectangle {
     Connections {
         target: applicationWindow
         onKeyReceived: {
-            //screenManager.onKeyPressed(keyEvent)
+            if (keyEvent.modifiers == Qt.NoModifier) {
 
-            if (keyEvent.key == Qt.Key_QuoteLeft) {
-                if (logConsole.height === 0) {
-                    logConsole.height = dp(70)
+                screenManager.onKeyPressed(keyEvent.key)
+
+                if (keyEvent.key == Qt.Key_QuoteLeft) {
+                    if (logConsole.height === 0) {
+                        logConsole.height = dp(70)
+                    }
+                    else {
+                        logConsole.height = 0
+                    }
                 }
-                else {
-                    logConsole.height = 0
+            } else {
+
+                // claw for restart services
+                if (keyEvent.modifiers == (Qt.ShiftModifier | Qt.AltModifier | Qt.ControlModifier)
+                    && (keyEvent.key == Qt.Key_AsciiTilde)) {
+                        screenManager.restartServices()
                 }
             }
-            console.log(keyEvent.text)
         }
     }
 

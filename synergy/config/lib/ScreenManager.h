@@ -31,11 +31,12 @@ public:
     Q_INVOKABLE int getModelIndex(int x, int y);
     Q_INVOKABLE void moveModel(int index, int offsetX, int offsetY);
     Q_INVOKABLE bool removeScreen(QString name, bool notify = false);
-    Q_INVOKABLE void onKeyPressed(QKeyEvent keyEvent);
+    Q_INVOKABLE void onKeyPressed(int const key);
     Q_INVOKABLE bool addScreen(QString name);
     Q_INVOKABLE void lockScreen(int index);
     Q_INVOKABLE void unlockScreen(int index);
     Q_INVOKABLE void serverClaim(int index);
+    Q_INVOKABLE void restartServices();
 
     // TODO: remove these debug functions
     Q_INVOKABLE void printBoundingBoxInfo();

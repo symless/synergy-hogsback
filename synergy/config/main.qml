@@ -54,8 +54,6 @@ ApplicationWindow {
 
         Keys.onPressed: {
             keyReceived(event)
-
-            console.log(event)
         }
 
         function nextPage() {

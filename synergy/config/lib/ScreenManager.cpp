@@ -107,9 +107,9 @@ void ScreenManager::saveSnapshot()
     m_screenListSnapshotManager->saveSnapshot(m_screenListModel);
 }
 
-void ScreenManager::onKeyPressed (QKeyEvent keyEvent)
+void ScreenManager::onKeyPressed (int const key)
 {
-    switch (keyEvent.key()) {
+    switch (key) {
         case Qt::Key_F12:
             LogManager::warning(QString("F12 no longer claims server, right click a screen instead"));
             break;
@@ -318,4 +318,9 @@ void ScreenManager::setConfigHint(const QString& text)
 {
     m_configHint = text;
     configHintChanged();
+}
+
+void ScreenManager::restartServices()
+{
+    LogManager::debug("Resart services request");
 }
