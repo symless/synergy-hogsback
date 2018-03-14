@@ -31,7 +31,7 @@ public:
     Q_INVOKABLE int getModelIndex(int x, int y);
     Q_INVOKABLE void moveModel(int index, int offsetX, int offsetY);
     Q_INVOKABLE bool removeScreen(QString name, bool notify = false);
-    Q_INVOKABLE void onKeyPressed(const int key);
+    Q_INVOKABLE void onKeyPressed(QKeyEvent keyEvent);
     Q_INVOKABLE bool addScreen(QString name);
     Q_INVOKABLE void lockScreen(int index);
     Q_INVOKABLE void unlockScreen(int index);

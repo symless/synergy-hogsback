@@ -29,9 +29,9 @@ Rectangle {
     Connections {
         target: applicationWindow
         onKeyReceived: {
-            screenManager.onKeyPressed(key)
+            //screenManager.onKeyPressed(keyEvent)
 
-            if (key == Qt.Key_QuoteLeft) {
+            if (keyEvent.key == Qt.Key_QuoteLeft) {
                 if (logConsole.height === 0) {
                     logConsole.height = dp(70)
                 }
@@ -39,6 +39,7 @@ Rectangle {
                     logConsole.height = 0
                 }
             }
+            console.log(keyEvent.text)
         }
     }
 

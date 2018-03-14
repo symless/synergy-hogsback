@@ -98,7 +98,7 @@ Rectangle {
                 Connections {
                     target: applicationWindow
                     onKeyReceived: {
-                        if (key == Qt.Key_Return) {
+                        if (keyEvent.key == Qt.Key_Return) {
                             signInButton.clicked();
                         }
                     }

@@ -11,7 +11,7 @@ ApplicationWindow {
     minimumWidth: dp(600)
     minimumHeight: dp(450)
     title: qsTr("Synergy")
-    signal keyReceived(int key)
+    signal keyReceived(var keyEvent)
     property ServiceProxy serviceProxy: qmlServiceProxy
     property LogManager logManager: qmlLogManager
 
@@ -53,7 +53,9 @@ ApplicationWindow {
         focus: true
 
         Keys.onPressed: {
-            keyReceived(event.key)
+            keyReceived(event)
+
+            console.log(event)
         }
 
         function nextPage() {
