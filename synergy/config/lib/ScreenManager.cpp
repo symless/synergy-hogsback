@@ -323,4 +323,5 @@ void ScreenManager::setConfigHint(const QString& text)
 void ScreenManager::restartServices()
 {
     LogManager::debug("Resart services request");
+    m_serviceProxy->restartService();
 }

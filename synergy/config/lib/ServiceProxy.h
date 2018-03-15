@@ -30,6 +30,7 @@ public:
     void setErrorView(const std::shared_ptr<ErrorView>& errorView);
     void requestProfileSnapshot();
     void serverClaim(int screenId);
+    void restartService();
 
 signals:
     void screenError(QString, int);
