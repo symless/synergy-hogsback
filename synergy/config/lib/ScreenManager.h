@@ -36,6 +36,7 @@ public:
     Q_INVOKABLE void lockScreen(int index);
     Q_INVOKABLE void unlockScreen(int index);
     Q_INVOKABLE void serverClaim(int index);
+    Q_INVOKABLE void restartServices();
 
     // TODO: remove these debug functions
     Q_INVOKABLE void printBoundingBoxInfo();
