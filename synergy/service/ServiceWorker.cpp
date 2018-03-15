@@ -224,6 +224,7 @@ ServiceWorker::provideRpcEndpoints()
     provideLogging();
     provideServerClaim();
     provideTray();
+    provideRestart();
 
     serviceLog()->debug("rpc endpoints created");
 }
@@ -367,5 +368,13 @@ void ServiceWorker::provideServerClaim()
     m_rpc->server()->provide("synergy.server.claim", [this](int serverId) {
         m_coreManager->switchServer(serverId);
         m_coreManager->notifyServerClaim(serverId);
+    });
+}
+
+void ServiceWorker::provideRestart()
+{
+    m_rpc->server()->provide("synergy.service.restart", [this]() {
+        serviceLog()->info("Restart service received");
+        this->shutdown();
     });
 }

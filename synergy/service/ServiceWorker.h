@@ -37,6 +37,7 @@ private:
     void provideTray();
     void provideLogging();
     void provideServerClaim();
+    void provideRestart();
 
 private:
     boost::asio::io_service&        m_ioService;
