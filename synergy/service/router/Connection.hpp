@@ -21,14 +21,15 @@ public:
 
     uint32_t id () const noexcept;
     stream_type& stream() noexcept;
-    tcp::endpoint remote_acceptor_endpoint () const;
 
     void start ();
     void stop ();
 
     bool send (Message const&);
     bool send (MessageHeader const&, Message const&);
-    tcp::endpoint endpoint() const;
+
+    tcp::endpoint remote_endpoint() const;
+    tcp::endpoint remote_acceptor_endpoint () const;
 
 private:
     static uint32_t next_connection_id_;

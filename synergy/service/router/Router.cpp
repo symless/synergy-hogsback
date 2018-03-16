@@ -12,7 +12,7 @@
 #include <tuple>
 
 static auto const kHelloInterval        = std::chrono::seconds (3);
-static auto const kConnectTimeout       = std::chrono::seconds (5);
+static auto const kConnectTimeout       = std::chrono::seconds (3);
 static auto const kConnectRetryInterval = std::chrono::seconds (1);
 static int const kConnectRetryLimit     = 10;
 static int const kDestRouteLimit        = 3;
@@ -36,6 +36,7 @@ void
 Router::add_peer (tcp::endpoint endpoint, bool const immediate) {
     auto it = std::find (begin (known_peers_), end (known_peers_), endpoint);
     if (it != end (known_peers_)) {
+        routerLog()->debug("Already connected to {}", endpoint);
         return;
     }
 
@@ -102,12 +103,12 @@ Router::add_peer (tcp::endpoint endpoint, bool const immediate) {
             timer.cancel ();
 
             if (ec == asio::error::operation_aborted) {
-                routerLog()->info("Connection to {} timed out.", endpoint);
+                routerLog()->info("Timed out while connecting to {}", endpoint);
                 continue;
             }
 
             if (ec) {
-                routerLog()->error("Connection to {} failed: {} (code {})",
+                routerLog()->error("Outbound connection to {} failed: {} (ec = {})",
                                    endpoint, ec.message(), ec.value());
                 socket.shutdown (boost::asio::ip::tcp::socket::shutdown_both, ec);
                 socket.close (ec);
@@ -124,9 +125,9 @@ Router::add_peer (tcp::endpoint endpoint, bool const immediate) {
                 (Connection::stream_type::client, ctx[ec]);
 
             if (ec) {
-                routerLog ()->error ("Connection {} failed to complete SSL "
-                                     "handshake: {}",  connection->id (),
-                                     ec.message());
+                routerLog ()->error ("Outbound connection {} to {} failed. Unable to complete TLS "
+                                     "handshake: {} (ec = {})", connection->id(), 
+                                     endpoint,  ec.message(), ec);
                 continue;
             }
 
@@ -214,7 +215,7 @@ Router::start (uint32_t const id, std::string name) {
                 throw boost::system::system_error (ec);
             }
 
-            routerLog()->debug("Accepted connection from router {}",
+            routerLog()->debug("Accepted connection from peer at {}",
                                 socket.remote_endpoint ());
 
             auto connection = std::make_shared<Connection> (std::move(socket),
@@ -222,9 +223,10 @@ Router::start (uint32_t const id, std::string name) {
             connection->stream().async_handshake (Connection::stream_type::server,
                                                   ctx[ec]);
             if (ec) {
-                routerLog ()->error ("Connection {} failed to complete SSL "
-                                     "handshake: {}",  connection->id (),
-                                     ec.message());
+                routerLog ()->error ("Incoming connection {} from {} failed. Unable to complete TLS "
+                                     "handshake: {} (ec = {})",  connection->id (),
+                                     connection->remote_endpoint(),
+                                     ec.message(), ec);
                 continue;
             }
 
@@ -517,7 +519,7 @@ Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
                             comma_separate (route->path));
 
         if (route->dest == id_) {
-            routerLog()->debug("   Route {}: ignored because it's to me",
+            routerLog()->debug("   Route {}: ignored because it leads back to this machine",
                                 route_n);
             continue;
         }
@@ -579,8 +581,8 @@ Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
 
     /* What remains is now a set of now unreachable nodes. Log it. */
     for (auto dest: dests_effected) {
-        routerLog()->debug ("Node {} is now unreachable (announced by"
-                            " node {})", dest, rr.sender);
+        routerLog()->debug ("Screen {} is now unreachable (announced via "
+                            "screen {})", dest, rr.sender);
         on_node_unreachable (dest);
     }
 }
@@ -588,8 +590,8 @@ Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
 void
 Router::integrate (RouteAdvertisement& ra, std::shared_ptr<Connection> source) {
     if (ra.sender == id_) {
-        routerLog()->debug("Received own route advertisement. "
-                           "This indicates a routing loop. Ignoring");
+        routerLog()->debug ("Received own route advertisement. "
+                            "This indicates a routing loop. Ignoring");
         return;
     }
 
@@ -611,7 +613,7 @@ Router::integrate (RouteAdvertisement& ra, std::shared_ptr<Connection> source) {
 
         if (route->dest == id_) {
             routerLog()->debug("   Route {}: ignored because it leads back to "
-                               "to me", route_n);
+                               "to this machine", route_n);
             continue;
         }
 
@@ -718,7 +720,7 @@ Router::remove (std::shared_ptr<Connection> connection) {
 
     /* What remains is now a set of now unreachable nodes. Log it. */
     for (auto dest: dests_effected) {
-        routerLog()->debug ("Node {} is now unreachable", dest);
+        routerLog()->debug ("Screen {} is now unreachable", dest);
         on_node_unreachable (dest);
     }
 }
@@ -728,7 +730,7 @@ Router::send (Message message, std::uint32_t const dest) {
     MessageHeader header = message.header ();
     header.source        = this->id_;
     header.dest          = dest;
-    return forward (header, message);
+    return forward (header, std::move (message));
 }
 
 bool
@@ -737,7 +739,7 @@ Router::forward (MessageHeader const& header, Message message) {
     auto route    = by_dest.find (header.dest);
 
     if ((route == end (by_dest)) || !route->connection) {
-        routerLog()->error ("Couldn't send message to node {}: no route to node\n",
+        routerLog()->error ("Couldn't send message: no route to screen {}\n",
                             header.dest);
         dump_table();
         return false;
@@ -748,19 +750,31 @@ Router::forward (MessageHeader const& header, Message message) {
     return true;
 }
 
-void Router::notifyOtherNodes(Message message)
+void
+Router::broadcast (Message const& message) {
+    auto connections = connections_;
+    for (auto& connection : connections) {
+        if (!running_) {
+            break;
+        }
+        connection->send (message);
+    }
+}
+
+void
+Router::notifyOtherNodes (Message const& message)
 {
-    uint32_t lastDestId = -1;
+    auto last_dest = ~uint32_t(0);
     for (auto& route : route_table_) {
-        if (lastDestId != route.dest) {
-            lastDestId = route.dest;
-            send(message, lastDestId);
+        if (last_dest != route.dest) {
+            last_dest = route.dest;
+            send(message, last_dest);
         }
     }
 }
 
 void
-Router::flood (Message message, std::uint32_t const source) {
+Router::flood (Message const& message, std::uint32_t const source) {
     auto connections = connections_;
     for (auto& connection : connections) {
         if (!running_) {
@@ -769,17 +783,6 @@ Router::flood (Message message, std::uint32_t const source) {
         if (connection->id () != source) {
             connection->send (message);
         }
-    }
-}
-
-void
-Router::broadcast (Message message) {
-    auto connections = connections_;
-    for (auto& connection : connections) {
-        if (!running_) {
-            break;
-        }
-        connection->send (message);
     }
 }
 
