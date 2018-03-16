@@ -67,11 +67,11 @@ public:
     void remove (std::shared_ptr<Connection>);
 
     bool send (Message message, std::uint32_t dest);
-
-    void flood (Message message, std::uint32_t source);
-    void broadcast (Message message);
     bool forward (MessageHeader const& header, Message message);
-    void notifyOtherNodes (Message message);
+
+    void broadcast (Message const& message);
+    void notifyOtherNodes (Message const& message);
+    void flood (Message const& message, std::uint32_t source);
 
 public:
     template <typename... Args>

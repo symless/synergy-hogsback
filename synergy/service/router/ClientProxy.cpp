@@ -209,7 +209,11 @@ ClientProxyConnection::stop () {
 }
 
 void
-ClientProxyConnection::write (const std::vector<uint8_t>& data) {
+ClientProxyConnection::write 
+(std::vector<uint8_t> const& data) {
+    /* This is super inefficient, we should probably have a write loop
+     * here that dispatches messages from a per-connection queue
+     */
     asio::spawn (socket_.get_io_service (), [this, data](auto ctx) {
         uint32_t size = data.size ();
         boost::endian::native_to_big_inplace (size);
@@ -275,7 +279,6 @@ ClientProxyMessageHandler::handle (ProxyClientConnect const& pcc,
 
     // refactor duplicate code
     auto& connections = proxy ().connections_;
-
     auto it = std::find_if (
         begin (connections), end (connections), [source, connection_id](auto& connection) {
             return (connection->client_id_ == source) && (connection->connection_id_ == connection_id);
@@ -290,8 +293,8 @@ ClientProxyMessageHandler::handle (ProxyClientConnect const& pcc,
 }
 
 void
-ClientProxyMessageHandler::handle (CoreMessage const& msg,
-                                   int32_t const source) const {
+ClientProxyMessageHandler::handle 
+(CoreMessage const& msg, int32_t const source) const {
     auto& connections = proxy ().connections_;
     auto it           = std::find_if (
         begin (connections), end (connections), [source, connection_id = msg.connection](auto& connection) {

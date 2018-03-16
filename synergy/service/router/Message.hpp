@@ -41,8 +41,9 @@ public:
     Message (T&&,
              std::enable_if_t<!std::is_same<std::decay_t<T>, Message>::value,
                               void*> = 0);
-
-    MessageHeader header () const &;
+    
+    MessageHeader 
+    header () const &;
 
     Body&
     body () & {
@@ -54,11 +55,13 @@ public:
         return body_;
     }
 
-    auto type () const noexcept {
+    auto 
+    type () const noexcept {
         return type_;
     }
 
-    auto ttl () const noexcept {
+    auto 
+    ttl () const noexcept {
         return ttl_;
     }
 

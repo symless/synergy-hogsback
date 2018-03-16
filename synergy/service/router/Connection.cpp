@@ -51,32 +51,37 @@ Connection::start () {
             while (true) {
                 MessageHeader header;
                 Message message;
+                bool complete = false;
 
                 if (reader_.read_header (header, ctx)) {
                     if (reader_.read_body (header, message, ctx)) {
+                        complete = true;
                         on_message (header, message, self);
                     }
                 }
 
                 auto ec = reader_.error ();
-                if (!enabled_) {
-                    routerLog()->debug("Stopped processing messages on "
-                                       "connection {}", this->id ());
+                if ((ec == asio::error::operation_aborted) && !complete) {
+                    routerLog()->error ("Message processing on connection {}, connected to {}, "
+                                        "interrupted. Terminating", this->id (),
+                                       this->remote_endpoint());
+                    on_disconnect (self);
                     break;
-                } else if (ec == asio::error::operation_aborted) {
-                    routerLog()->warn("Message processing on connection {} "
-                                       "cancelled.", this->id ());
+                } else if (!enabled_) {
+                    routerLog()->debug ("Connection {}, connected to {}, disabled"
+                                        this->id (), this->remote_endpoint());
                     break;
-                } else if (ec) {
-                    routerLog()->error("Read error on connection {}: {} "
-                                       "(code {})", this->id (), ec.message (),
-                                       ec.value());
+                } else  if (ec) {
+                    routerLog()->error ("Message processing on connection {}, connected "
+                                        "to {}, failed: {} (ec = {})", this->id (), 
+                                        this->remote_endpoint(), ec.message (), ec.value());
                     on_disconnect (self);
                     break;
                 }
             }
-            routerLog()->debug("Connection {} terminated receive loop",
-                                this->id ());
+            
+            routerLog()->debug("Connection {}, connected to {},  terminated receive loop", 
+                                this->id (), this->remote_endpoint());
     });
 
     on_connected (this->shared_from_this ());
@@ -106,8 +111,8 @@ Connection::send (MessageHeader const& header, Message const& message) {
         asio::spawn (socket_.get_io_service(),
                      [this, self = this->shared_from_this ()] (auto ctx) {
             while (!message_queue_.empty()) {
-                auto const& msg_pair = message_queue_.front();
-                writer_.write (msg_pair.first, msg_pair.second, ctx);
+                auto& envelope = message_queue_.front();
+                writer_.write (envelope.first, envelope.second, ctx);
                 message_queue_.pop_front();
             }
         });
@@ -116,7 +121,8 @@ Connection::send (MessageHeader const& header, Message const& message) {
     return true;
 }
 
-tcp::endpoint Connection::endpoint() const
+tcp::endpoint 
+Connection::remote_endpoint() const
 {
     return remote_endpoint_;
 }
