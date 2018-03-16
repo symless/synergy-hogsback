@@ -29,7 +29,9 @@ private:
         v2::RouteRevocation,
         v2::ProxyClientConnect,
         v2::ServerClaim,
-        v2::CoreMessage
+        v2::CoreMessage,
+        v2::ProxyClientDisconnect,
+        v2::ProxyServerReset
     >;
 
 public:

@@ -10,6 +10,7 @@ class ServerProxyConnection;
 class ServerProxyMessageHandler;
 
 class ServerProxy final {
+    friend class ServerProxyMessageHandler;
 public:
     ServerProxy (boost::asio::io_service&, Router& router, uint16_t port);
     ~ServerProxy () noexcept;
@@ -19,6 +20,9 @@ public:
 
     auto& router () const& noexcept { return router_; }
     auto& connections() const& noexcept { return connections_; }
+
+private:
+    uint32_t secondsSinceEpoch();
 
 private:
     boost::asio::ip::tcp::acceptor acceptor_;

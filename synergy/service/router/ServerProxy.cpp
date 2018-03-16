@@ -15,6 +15,8 @@
 #include <synergy/service/ServiceLogs.h>
 #include <synergy/service/router/Router.hpp>
 
+#include <ctime>
+
 class ServerProxyMessageHandler final {
 public:
     explicit ServerProxyMessageHandler (ServerProxy& proxy);
@@ -22,6 +24,7 @@ public:
 
     void operator() (Message const&, std::uint32_t source) const;
     void handle (CoreMessage const&, std::uint32_t source) const;
+    void handle (ProxyServerReset const&, int32_t source) const;
 
     template <typename T>
     void handle (T const&,  std::uint32_t) const;
@@ -33,17 +36,18 @@ private:
 class ServerProxyConnection:
     public std::enable_shared_from_this<ServerProxyConnection> {
 public:
-    explicit ServerProxyConnection (asio::io_service& io):
-        socket_ (io) {
+    explicit ServerProxyConnection (asio::io_service& io, uint32_t id):
+        socket_ (io),
+        connection_id_ (id) {
     }
 
     tcp::socket& socket () &;
     void start (ServerProxy& proxy, std::uint32_t server_id);
     void write (std::vector<uint8_t> data);
-    void close ();
+    void stop ();
 
-private:
     tcp::socket socket_;
+    uint32_t connection_id_;
 
 public:
     template <typename... Args>
@@ -102,7 +106,7 @@ ServerProxy::start (std::int64_t const server_id) {
     asio::spawn (acceptor_.get_io_service (), [this](auto ctx) {
         while (true) {
             auto connection = std::make_shared<ServerProxyConnection> (
-                acceptor_.get_io_service ());
+                acceptor_.get_io_service (), this->secondsSinceEpoch());
 
             boost::system::error_code ec;
             acceptor_.async_accept (connection->socket (), ctx[ec]);
@@ -115,15 +119,22 @@ ServerProxy::start (std::int64_t const server_id) {
 
             connection->socket ().set_option (tcp::no_delay (true), ec);
 
+            auto connection_id = connection->connection_id_;
             connection->on_hello_back.connect (
-                [this](std::string screen_name) {
+                [this, connection_id](std::string screen_name) {
                     ProxyClientConnect pcc;
                     pcc.screen = std::move (screen_name);
+                    pcc.connection = connection_id;
                     return this->router().send (std::move (pcc), this->server_id_);
                 });
 
             connection->on_disconnect.connect (
-                [this](std::shared_ptr<ServerProxyConnection> const& connection) {
+                [this, connection_id](std::shared_ptr<ServerProxyConnection> const& connection) {
+                    ProxyClientDisconnect pcd;
+                    pcd.connection = connection_id;
+
+                    this->router().send (std::move (pcd), this->server_id_);
+
                     auto it = std::find (begin (connections_), end (connections_),
                                          connection);
                     if (it != end (connections_)) {
@@ -142,10 +153,18 @@ ServerProxy::stop () {
     acceptor_.cancel ();
     acceptor_.get_io_service().poll();
     for (auto& connection : connections_) {
-        connection->close ();
+        connection->stop ();
     }
     acceptor_.get_io_service().poll();
     connections_.clear ();
+}
+
+uint32_t
+ServerProxy::secondsSinceEpoch()
+{
+    // 32 bit int support until 2038
+    std::time_t result = std::time(nullptr);
+    return static_cast<uint32_t>(result);
 }
 
 void
@@ -164,7 +183,7 @@ ServerProxyConnection::start (ServerProxy& proxy,
             std::vector<unsigned char> buffer;
             buffer.reserve (64 * 1024);
 
-            synergy::protocol::v1::Handler handler (proxy.router (), server_id);
+            synergy::protocol::v1::Handler handler (proxy.router (), server_id, connection_id_);
             handler.on_hello_back.connect (
                 [this](std::string screen) {
                     return on_hello_back (std::move (screen));
@@ -236,9 +255,10 @@ ServerProxyConnection::socket() & {
 }
 
 void
-ServerProxyConnection::close () {
+ServerProxyConnection::stop () {
     boost::system::error_code ec;
-    socket().close (ec);
+    socket_.cancel(ec);
+    socket_.get_io_service().poll();
 }
 
 void
@@ -278,10 +298,47 @@ ServerProxyMessageHandler::operator() (Message const& message,
 
 void
 ServerProxyMessageHandler::handle (CoreMessage const& msg,
-                                   std::uint32_t) const {
-    if (!proxy().connections().empty ()) {
-        auto& connection = proxy().connections().back ();
-        connection->write (msg.data);
+                                   std::uint32_t source) const {
+    assert (proxy().server_id_ == source);
+
+    auto& connections = proxy ().connections_;
+    auto it = std::find_if (
+        begin (connections), end (connections), [connection_id = msg.connection](auto& connection) {
+            return connection->connection_id_ == connection_id;
+        });
+
+    if (it == end (connections)) {
+        routerLog ()->trace(
+            "ServerProxy: Received core message for client '{}' "
+            "before a connected was established",
+            source);
+        return;
+    }
+
+    auto& connection = *it;
+    connection->write (msg.data);
+}
+
+void
+ServerProxyMessageHandler::handle(const ProxyServerReset& psr, int32_t source) const
+{
+    auto connection_id = psr.connection;
+
+    routerLog()->debug(
+        "ServerProxy: Received server reset from screen {} for connection {}",
+        source,
+        connection_id);
+
+    auto& connections = proxy ().connections_;
+
+    auto it = std::find_if (
+        begin (connections), end (connections), [this, source, connection_id](auto& connection) {
+            return (this->proxy ().server_id_ == source) && (connection->connection_id_ == connection_id);
+        });
+
+    if (it != end (connections)) {
+        (*it)->stop ();
+        routerLog()->debug("stopped connection {}", connection_id);
     }
 }
 

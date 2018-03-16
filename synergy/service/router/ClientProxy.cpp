@@ -25,6 +25,7 @@ public:
     void operator() (Message const&, int32_t source) const;
     void handle (CoreMessage const&, int32_t source) const;
     void handle (ProxyClientConnect const&, int32_t source) const;
+    void handle (ProxyClientDisconnect const&, int32_t source) const;
 
     template <typename T> inline
     void handle (T const&, int32_t source) const;
@@ -40,10 +41,12 @@ public:
     using signal = boost::signals2::signal<Args...>;
 
     explicit ClientProxyConnection (tcp::socket socket, int32_t client_id,
-                                    std::string screen_name)
+                                    std::string screen_name,
+                                    uint32_t connection_id)
         : client_id_ (client_id),
           socket_ (std::move (socket)),
-          screen_name_ (std::move (screen_name)) {
+          screen_name_ (std::move (screen_name)),
+          connection_id_(connection_id) {
     }
 
     void start (ClientProxy& proxy);
@@ -51,6 +54,7 @@ public:
     void write (std::vector<uint8_t> const& data);
 
     int32_t client_id_;
+    uint32_t connection_id_;
     tcp::socket socket_;
     std::string screen_name_;
     signal<void(std::shared_ptr<ClientProxyConnection> const&)> on_disconnect;
@@ -71,8 +75,8 @@ ClientProxy::start () {
 }
 
 void
-ClientProxy::connect (int32_t client_id, const std::string& screen_name) {
-    asio::spawn (io_, [this, client_id, screen_name](auto ctx) {
+ClientProxy::connect (int32_t client_id, const std::string& screen_name, uint32_t connection_id) {
+    asio::spawn (io_, [this, client_id, screen_name, connection_id](auto ctx) {
         tcp::socket socket (io_);
         boost::system::error_code ec;
         socket.open (tcp::v4 ());
@@ -90,7 +94,7 @@ ClientProxy::connect (int32_t client_id, const std::string& screen_name) {
                 socket.set_option (tcp::no_delay (true), ec);
 
                 connections_.emplace_back (std::make_shared<ClientProxyConnection> (
-                    std::move (socket), client_id, std::move (screen_name)));
+                    std::move (socket), client_id, std::move (screen_name), connection_id));
 
                 auto connection = connections_.back ();
                 connection->on_disconnect.connect (
@@ -99,6 +103,10 @@ ClientProxy::connect (int32_t client_id, const std::string& screen_name) {
                         auto it = std::find (
                             begin (connections_), end (connections_), connection);
                         if (it != end (connections_)) {
+                            ProxyServerReset psr;
+                            psr.connection = connection->connection_id_;
+                            this->router().send (std::move (psr), connection->client_id_);
+
                             connections_.erase (it);
                         }
                     });
@@ -131,7 +139,7 @@ ClientProxyConnection::start (ClientProxy& proxy) {
         std::vector<unsigned char> buffer;
         int32_t size = 0;
         boost::system::error_code ec;
-        synergy::protocol::v1::Handler handler (proxy.router (), client_id_);
+        synergy::protocol::v1::Handler handler (proxy.router (), client_id_, connection_id_);
 
         handler.on_hello.connect ([this]() {
             synergy::protocol::v1::HelloBackMessage hb;
@@ -234,28 +242,54 @@ ClientProxyMessageHandler::
 operator() (Message const& message, int32_t const source) const {
     boost::apply_visitor (
         [this, source](auto& body) { this->handle (body, source); },
-        message.body ());
+    message.body ());
+}
+
+void
+ClientProxyMessageHandler::handle(const ProxyClientDisconnect& pcd, int32_t source) const
+{
+    auto connection_id = pcd.connection;
+
+    routerLog()->debug(
+        "ClientProxy: Received client disconnect from screen {} for connection {}",
+        source,
+        connection_id);
+
+    auto& connections = proxy ().connections_;
+
+    auto it = std::find_if (
+        begin (connections), end (connections), [source, connection_id](auto& connection) {
+            return (connection->client_id_ == source) && (connection->connection_id_ == connection_id);
+        });
+
+    if (it != end (connections)) {
+        (*it)->stop();
+        routerLog()->debug("stopped connection {}", connection_id);
+    }
 }
 
 void
 ClientProxyMessageHandler::handle (ProxyClientConnect const& pcc,
                                    int32_t const source) const {
+    auto connection_id = pcc.connection;
     routerLog()->debug(
         "ClientProxy: Received client connection for {} from screen {}",
         pcc.screen,
         source);
 
+    // refactor duplicate code
     auto& connections = proxy ().connections_;
     auto it = std::find_if (
-        begin (connections), end (connections), [source](auto& connection) {
-            return connection->client_id_ == source;
+        begin (connections), end (connections), [source, connection_id](auto& connection) {
+            return (connection->client_id_ == source) && (connection->connection_id_ == connection_id);
         });
 
     if (it != end (connections)) {
         (*it)->stop();
+        routerLog()->debug("stopped connection {} for client {}", connection_id, pcc.screen);
     }
 
-    proxy ().connect (source, pcc.screen);
+    proxy ().connect (source, pcc.screen, pcc.connection);
 }
 
 void
@@ -263,13 +297,13 @@ ClientProxyMessageHandler::handle
 (CoreMessage const& msg, int32_t const source) const {
     auto& connections = proxy ().connections_;
     auto it           = std::find_if (
-        begin (connections), end (connections), [source](auto& connection) {
-            return connection->client_id_ == source;
+        begin (connections), end (connections), [source, connection_id = msg.connection](auto& connection) {
+            return (connection->client_id_ == source) && (connection->connection_id_ == connection_id);
         });
 
     if (it == end (connections)) {
         routerLog ()->trace(
-            "ClientProxy: Received core message for client '{}' "
+            "ClientProxy: Received core message from client '{}' "
             "before a connected was established",
             source);
         return;
