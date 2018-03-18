@@ -6,17 +6,18 @@
 #include <iostream>
 #include <synergy/common/SocketOptions.hpp>
 #include <synergy/service/ServiceLogs.h>
+#include <fmt/ostream.h>
 
 uint32_t Connection::next_connection_id_ = 0;
 
 Connection::Connection (tcp::socket&& socket,
                         boost::asio::ssl::context& context):
-        id_ (++next_connection_id_),
-        socket_ (std::move (socket)),
-        remote_endpoint_ (socket_.remote_endpoint ()),
-        stream_ (socket_, context),
-        reader_ (stream_),
-        writer_ (stream_)
+    id_ (++next_connection_id_),
+    socket_ (std::move (socket)),
+    remote_endpoint_ (socket_.remote_endpoint ()),
+    stream_ (socket_, context),
+    reader_ (stream_),
+    writer_ (stream_)
 {
     routerLog ()->debug ("Connection {} created", id ());
 
@@ -51,36 +52,32 @@ Connection::start () {
             while (true) {
                 MessageHeader header;
                 Message message;
-                bool complete = false;
 
-                if (reader_.read_header (header, ctx)) {
-                    if (reader_.read_body (header, message, ctx)) {
-                        complete = true;
-                        on_message (header, message, self);
-                    }
+                if (reader_.read (header, message, ctx)) {
+                    on_message (header, message, self);
                 }
 
                 auto ec = reader_.error ();
-                if ((ec == asio::error::operation_aborted) && !complete) {
+                if (ec == asio::error::operation_aborted) {
                     routerLog()->error ("Message processing on connection {}, connected to {}, "
                                         "interrupted. Terminating", this->id (),
                                        this->remote_endpoint());
                     on_disconnect (self);
                     break;
                 } else if (!enabled_) {
-                    routerLog()->debug ("Connection {}, connected to {}, disabled"
+                    routerLog()->debug ("Connection {}, connected to {}, disabled",
                                         this->id (), this->remote_endpoint());
                     break;
                 } else  if (ec) {
                     routerLog()->error ("Message processing on connection {}, connected "
-                                        "to {}, failed: {} (ec = {})", this->id (), 
+                                        "to {}, failed: {} (ec = {})", this->id (),
                                         this->remote_endpoint(), ec.message (), ec.value());
                     on_disconnect (self);
                     break;
                 }
             }
-            
-            routerLog()->debug("Connection {}, connected to {},  terminated receive loop", 
+
+            routerLog()->debug("Connection {}, connected to {},  terminated receive loop",
                                 this->id (), this->remote_endpoint());
     });
 
@@ -121,7 +118,7 @@ Connection::send (MessageHeader const& header, Message const& message) {
     return true;
 }
 
-tcp::endpoint 
+tcp::endpoint
 Connection::remote_endpoint() const
 {
     return remote_endpoint_;

@@ -28,6 +28,20 @@ public:
         return ec_;
     }
 
+    bool
+    read (MessageHeader& header, Message& message,
+          asio::yield_context ctx) {
+        bool success = false;
+        if (read_header (header, ctx)) {
+            if (read_body (header, message, ctx)) {
+                success = true;
+            }
+        }
+        return success;
+    }
+
+private:
+
     void
     reset () {
         buffer_.clear ();
