@@ -209,12 +209,16 @@ ServiceProxy::wampClient()
     return m_wampClient;
 }
 
-void
-ServiceProxy::onLogServiceOutput(QString text)
+void ServiceProxy::onLogServiceOutput(QString text)
 {
     foreach(QString line, text.split(QRegExp("\r|\n|\r\n"))) {
         if (!line.isEmpty()) {
             LogManager::raw(line);
         }
     }
+}
+
+void ServiceProxy::restartService()
+{
+    m_wampClient.call<void>("synergy.service.restart");
 }

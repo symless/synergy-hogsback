@@ -5,6 +5,8 @@
 #include <synergy/common/ScreenError.h>
 #include <cstdint>
 #include <string>
+#include <set>
+#include <boost/asio/ip/address.hpp>
 #include <boost/signals2.hpp>
 
 using ScreenID = int64_t;
@@ -12,8 +14,6 @@ using ScreenID = int64_t;
 class ScreenSnapshot;
 
 class Screen final {
-    friend class ProfileConfig;
-
 public:
     Screen() = default;
     explicit Screen(ScreenID id) noexcept;
@@ -41,6 +41,7 @@ public:
     ScreenStatus status() const noexcept;
 
     std::string ipList() const;
+    bool ipList (const std::set<boost::asio::ip::address> &);
 
     bool active() const;
 
