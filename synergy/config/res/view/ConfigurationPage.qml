@@ -44,7 +44,7 @@ Rectangle {
             } else {
 
                 // claw for restart services
-                if ((keyEvent.modifiers === Qt.AltModifier) && (keyEvent.key === Qt.Key_F5)) {
+                if ((keyEvent.modifiers === Qt.ShiftModifier) && (keyEvent.key === Qt.Key_F5)) {
                     screenManager.restartServices()
                 }
 
