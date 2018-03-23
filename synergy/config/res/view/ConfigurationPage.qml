@@ -44,10 +44,10 @@ Rectangle {
             } else {
 
                 // claw for restart services
-                if (keyEvent.modifiers == (Qt.AltModifier | Qt.ControlModifier)
-                    && (keyEvent.key == Qt.Key_Backspace)) {
-                        screenManager.restartServices()
+                if ((keyEvent.modifiers === Qt.ShiftModifier) && (keyEvent.key === Qt.Key_F5)) {
+                    screenManager.restartServices()
                 }
+
             }
         }
     }
