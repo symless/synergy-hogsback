@@ -22,17 +22,6 @@ IPMonitor::start() {
                 return;
             }
 
-            std::set<boost::asio::ip::address> ipAddresses;
-            auto adapterIPAddresses = getAdapterIPAddresses();
-            for (auto& adapter: adapterIPAddresses) {
-                ipAddresses.insert (std::move (adapter.second));
-            }
-
-            if (ipAddresses != m_knownIPAddresses) {
-                m_knownIPAddresses = std::move (ipAddresses);
-                this->ipSetChanged (m_knownIPAddresses);
-            }
-
             boost::system::error_code ec;
             this->m_pollTimer.expires_from_now (kIPMonitorInterval);
             this->m_pollTimer.async_wait (ctx[ec]);
@@ -42,7 +31,18 @@ IPMonitor::start() {
                 if (ec == boost::asio::error::operation_aborted) {
                     return;
                 }
-                throw boost::system::system_error (ec, "");
+                throw boost::system::system_error (ec, ec.message());
+            }
+
+            std::set<boost::asio::ip::address> ipAddresses;
+            auto adapterIPAddresses = getAdapterIPAddresses();
+            for (auto& adapter: adapterIPAddresses) {
+                ipAddresses.insert (std::move (adapter.second));
+            }
+
+            if (ipAddresses != m_knownIPAddresses) {
+                m_knownIPAddresses = std::move (ipAddresses);
+                this->ipSetChanged (m_knownIPAddresses);
             }
         }
     });
