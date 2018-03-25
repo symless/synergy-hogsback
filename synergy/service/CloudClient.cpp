@@ -10,7 +10,7 @@
 #include <tao/json.hpp>
 
 static const char* kLiveCloudServerHostname = "v1.api.cloud.symless.com";
-static const char* kLivePubSubServerHostname = "pubsub1.cloud.symless.com";
+static const char* kLivePubSubServerHostname = "pubsub.cloud.symless.com";
 static const char* kTestCloudServerHostname = "test-api.cloud.symless.com";
 static const char* kTestPubSubServerHostname = "test-pubsub.cloud.symless.com";
 static const char* kCloudServerPort = "443";
