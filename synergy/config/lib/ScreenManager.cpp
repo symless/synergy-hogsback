@@ -266,9 +266,11 @@ void ScreenManager::updateScreens(QByteArray reply)
         }
     }
 
+    // remove screen with ID -1, this screen was added
+    // before receiving any screen info or first snapshot
+    removeScreenById(-1);
+
     if (updateLocalHost) {
-        // replace incomplete local screen
-        removeScreenByName(Hostname::local());
         UIScreen screen(Hostname::local());
         screen.setId(m_appConfig->screenId());
         m_arrangementStrategy->addScreen(m_screenListModel, screen);
