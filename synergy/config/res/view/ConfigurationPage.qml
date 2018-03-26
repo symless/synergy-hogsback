@@ -12,10 +12,6 @@ Rectangle {
         name: "Source Code Pro"
     }
 
-    Hostname {
-        id: localHostname
-    }
-
     ScreenListModel {
         id: screenListModel
     }
@@ -96,7 +92,7 @@ Rectangle {
             LogoText {
                 id: hostname
                 z: 2
-                text: localHostname.hostname()
+                text: Hostname.local()
                 color: "#4D4D4D"
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
