@@ -38,12 +38,10 @@ Rectangle {
                     }
                 }
             } else {
-
                 // claw for restart services
                 if ((keyEvent.modifiers === Qt.ShiftModifier) && (keyEvent.key === Qt.Key_F5)) {
                     screenManager.restartServices()
                 }
-
             }
         }
     }
@@ -98,9 +96,7 @@ Rectangle {
                 horizontalAlignment: Text.AlignHCenter
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter
-                //fillMode: Image.PreserveAspectFit
                 smooth: true
-                //source: "qrc:/res/image/synergy-icon.png"
             }
         }
 
