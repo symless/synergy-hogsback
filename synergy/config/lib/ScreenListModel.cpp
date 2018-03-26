@@ -67,7 +67,7 @@ const UIScreen& ScreenListModel::getScreen(int index) const
 void ScreenListModel::update(const QList<UIScreen>& screens)
 {
     for (int i = 0; i < screens.count(); i++) {
-        int r = findScreen(screens[i].name());
+        int r = findScreen(screens[i].id());
         if (r != -1) {
             m_screens[r] = screens[i];
             dataChanged(getIndex(r), getIndex(r));
