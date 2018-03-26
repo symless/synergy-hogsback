@@ -175,9 +175,9 @@ bool ScreenManager::removeScreenByIndex(int index, bool notify)
             m_cloudClient->unsubProfile(s.id(), m_configVersion);
             m_configVersion++;
         }
-
-        result = m_arrangementStrategy->removeScreen(m_screenListModel, s.id());
     }
+
+    result = m_arrangementStrategy->removeScreen(m_screenListModel, s.id());
 
     return result;
 }
