@@ -150,9 +150,13 @@ void ScreenManager::serverClaim(int index)
     }
 }
 
-bool ScreenManager::removeScreenById(int Id, bool notify)
+bool ScreenManager::removeScreenById(int id, bool notify)
 {
-    int index = m_screenListModel->findScreen(Id);
+    int index = m_screenListModel->findScreen(id);
+
+    if (index == -1 && id == -1) {
+        return false;
+    }
 
     return removeScreenByIndex(index, notify);
 }
