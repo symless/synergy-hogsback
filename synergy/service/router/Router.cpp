@@ -34,30 +34,19 @@ comma_separate (std::vector<uint32_t> const& path) {
 
 void
 Router::add_peer (tcp::endpoint endpoint, bool const immediate) {
-    auto it = std::find (begin (known_peers_), end (known_peers_), endpoint);
-    if (it != end (known_peers_)) {
+    auto existing = connections_.equal_range
+                    (boost::make_tuple (endpoint.address()));
+    if (existing.first != existing.second) {
         return;
     }
 
     routerLog()->debug("Adding peer at {}", endpoint);
-    known_peers_.push_back (endpoint);
 
     /* Connect thread */
     asio::spawn (acceptor_.get_io_service (), [this, endpoint, immediate](auto ctx) {
-        bool connected = false;
-        BOOST_SCOPE_EXIT_ALL(&connected, &endpoint, this) {
-            if (!connected) {
-                auto it = std::find (begin (known_peers_), end (known_peers_),
-                                     endpoint);
-                if (it != end (known_peers_)) {
-                    known_peers_.erase (it);
-                }
-            }
-        };
-
-        /* TODO: cleanup this code duplication */
         if (!running_) {
-            routerLog()->debug("Aborting connection to {}", endpoint);
+            routerLog()->debug("Aborting connection to {} (router shutdown)",
+                               endpoint);
             return;
         }
 
@@ -76,7 +65,8 @@ Router::add_peer (tcp::endpoint endpoint, bool const immediate) {
 
         for (; attempt <= kConnectRetryLimit; ++attempt) {
             if (!running_) {
-                routerLog()->debug("Aborting connection to {}", endpoint);
+                routerLog()->debug("Aborting connection to {} (router shutdown)",
+                                   endpoint);
                 break;
             }
 
@@ -116,6 +106,20 @@ Router::add_peer (tcp::endpoint endpoint, bool const immediate) {
                 continue;
             }
 
+            auto existing = connections_.equal_range
+                (boost::make_tuple (socket.remote_endpoint().address(),
+                                    socket.local_endpoint().address()));
+
+            if (existing.first != existing.second) {
+                routerLog()->debug ("Connected and dropped connection to {} "
+                                    "(duplicate edge)",
+                                    socket.remote_endpoint ().address());
+                socket.shutdown (boost::asio::ip::tcp::socket::shutdown_both,
+                                 ec);
+                socket.close ();
+                break;
+            }
+
             routerLog ()->debug ("Connected to {}", socket.remote_endpoint());
 
             auto connection = std::make_shared<Connection> (std::move (socket),
@@ -131,7 +135,6 @@ Router::add_peer (tcp::endpoint endpoint, bool const immediate) {
             }
 
             this->add (std::move(connection));
-            connected = true;
             break;
         }
 
@@ -214,6 +217,19 @@ Router::start (uint32_t const id, std::string name) {
                 throw boost::system::system_error (ec);
             }
 
+            auto existing = connections_.equal_range
+                (boost::make_tuple (socket.remote_endpoint().address(),
+                                    socket.local_endpoint().address()));
+
+            if (existing.first != existing.second) {
+                routerLog()->debug ("Accepted and dropped connection from "
+                                    "{} (duplicate edge)",
+                                    socket.remote_endpoint ().address());
+                socket.shutdown (boost::asio::ip::tcp::socket::shutdown_both, ec);
+                socket.close();
+                continue;
+            }
+
             routerLog()->debug("Accepted connection from router {}",
                                 socket.remote_endpoint ());
 
@@ -230,6 +246,8 @@ Router::start (uint32_t const id, std::string name) {
 
             add (std::move (connection));
         }
+
+        routerLog()->debug("Accept loop terminated");
     });
 
     /* Hello thread - Heartbeats neighbours so they know we're still here */
@@ -239,7 +257,7 @@ Router::start (uint32_t const id, std::string name) {
         hello.name = name_;
 
         while (true) {
-            auto connections = connections_;
+            auto connections = connections_; // FIXME
             for (auto& connection : connections) {
                 if (!running_) {
                     return;
@@ -361,10 +379,10 @@ operator() (RouteRevocation& rr, std::shared_ptr<Connection> source) const {
 void
 Router::add
 (std::shared_ptr<Connection> connection) {
+    connections_.insert (connection);
+
     connection->on_connected.connect (
         [this](std::shared_ptr<Connection> connection) {
-            connections_.push_back (connection);
-
             RouteAdvertisement advert;
             advert.sender = id_;
 
@@ -517,7 +535,7 @@ Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
                             comma_separate (route->path));
 
         if (route->dest == id_) {
-            routerLog()->debug("   Route {}: ignored because it's to me",
+            routerLog()->debug("   Route {}: not installed (route loop)",
                                 route_n);
             continue;
         }
@@ -686,16 +704,11 @@ Router::remove (std::shared_ptr<Connection> connection) {
                                                  dead_routes.second);
     dump_table ();
 
-    auto remote = connection->remote_acceptor_endpoint ();
-    connections_.erase (
-        std::remove (begin (connections_), end (connections_), connection),
-        end (connections_)
-    );
-
-    auto it = std::find (begin (known_peers_), end (known_peers_), remote);
-    if (it != end (known_peers_)) {
-        known_peers_.erase (it);
+    auto it = std::find (begin(connections_), end(connections_), connection);
+    if (it != end(connections_)) {
+        connections_.erase (it);
     }
+    connection.reset();
 
     if (!revocation.routes.empty ()) {
         broadcast (std::move (revocation));
@@ -761,7 +774,7 @@ void Router::notifyOtherNodes(Message message)
 
 void
 Router::flood (Message message, std::uint32_t const source) {
-    auto connections = connections_;
+    auto connections = connections_; // FIXME
     for (auto& connection : connections) {
         if (!running_) {
             break;
@@ -774,7 +787,7 @@ Router::flood (Message message, std::uint32_t const source) {
 
 void
 Router::broadcast (Message message) {
-    auto connections = connections_;
+    auto connections = connections_; // FIXME
     for (auto& connection : connections) {
         if (!running_) {
             break;
@@ -784,11 +797,10 @@ Router::broadcast (Message message) {
 }
 
 uint32_t
-connection_id_extractor::
-operator() (RouteTableEntry const& rte) const noexcept {
+connection_id_extractor::operator()
+(RouteTableEntry const& rte) const noexcept {
     return rte.connection->id ();
 }
-
 
 void
 Router::loadRawCertificate()
@@ -888,4 +900,16 @@ Router::sslDH()
         "oEEZdnZWANkkpR/m/pfgdmGPU66S2sXMHgsliViQWpDCYeehrvFRHEdR9NV+XJfC\n"
         "QMUk26jPTIVTLfXmmwU0u8vUkpR7LQKkwwIBAg==\n"
         "-----END DH PARAMETERS-----\n";
+}
+
+connection_remote_ip_extractor::result_type
+connection_remote_ip_extractor::operator()
+(std::shared_ptr<Connection> const& connection) const {
+    return connection->remote_ip();
+}
+
+connection_local_ip_extractor::result_type
+connection_local_ip_extractor::operator()
+(std::shared_ptr<Connection> const& connection) const {
+    return connection->local_ip();
 }
