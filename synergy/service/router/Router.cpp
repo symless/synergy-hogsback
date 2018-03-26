@@ -37,10 +37,12 @@ Router::add_peer (tcp::endpoint endpoint, bool const immediate) {
     auto existing = connections_.equal_range
                     (boost::make_tuple (endpoint.address()));
     if (existing.first != existing.second) {
+        routerLog()->warn("Ignoring request to connect to {} (already connected)",
+                          endpoint.address());
         return;
     }
 
-    routerLog()->debug("Adding peer at {}", endpoint);
+    routerLog()->debug("Connecting to new peer at {}", endpoint);
 
     /* Connect thread */
     asio::spawn (acceptor_.get_io_service (), [this, endpoint, immediate](auto ctx) {
@@ -111,8 +113,8 @@ Router::add_peer (tcp::endpoint endpoint, bool const immediate) {
                                     socket.local_endpoint().address()));
 
             if (existing.first != existing.second) {
-                routerLog()->debug ("Connected and dropped connection to {} "
-                                    "(duplicate edge)",
+                routerLog()->warn ("Connected and dropped duplicate connection"
+                                    " to {}",
                                     socket.remote_endpoint ().address());
                 socket.shutdown (boost::asio::ip::tcp::socket::shutdown_both,
                                  ec);
@@ -222,8 +224,8 @@ Router::start (uint32_t const id, std::string name) {
                                     socket.local_endpoint().address()));
 
             if (existing.first != existing.second) {
-                routerLog()->debug ("Accepted and dropped connection from "
-                                    "{} (duplicate edge)",
+                routerLog()->warn ("Accepted and dropped duplicate connection "
+                                    "from {}",
                                     socket.remote_endpoint ().address());
                 socket.shutdown (boost::asio::ip::tcp::socket::shutdown_both, ec);
                 socket.close();
