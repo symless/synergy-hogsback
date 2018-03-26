@@ -37,9 +37,9 @@ bool ScreenBBArrangement::addScreen(ScreenListModel* screenListModel,
 }
 
 bool ScreenBBArrangement::removeScreen(ScreenListModel* screenListModel,
-								UIScreen& screen)
+                                int screenId)
 {
-	screenListModel->removeScreen(screen.name());
+    screenListModel->removeScreen(screenId);
 	update(screenListModel);
 
 	return true;

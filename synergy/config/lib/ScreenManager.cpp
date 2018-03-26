@@ -151,29 +151,34 @@ void ScreenManager::serverClaim(int index)
     }
 }
 
-bool ScreenManager::removeScreen(QString name, bool notify)
+bool ScreenManager::removeScreenById(int Id, bool notify)
 {
-    int index = m_screenListModel->findScreen(name);
+    int index = m_screenListModel->findScreen(Id);
+
+    return removeScreenByIndex(index, notify);
+}
+
+bool ScreenManager::removeScreenByIndex(int index, bool notify)
+{
     if (index == -1) {
         LogManager::debug(QString("screen doesn't exist: %1")
-                    .arg(name));
+                    .arg(index));
         return false;
     }
 
-    if (notify) {
-        // get screen id
-        const UIScreen& s = m_screenListModel->getScreen(index);
 
-        // notify cloud
-        if (s.id() != -1) {
+    const UIScreen& s = m_screenListModel->getScreen(index);
+    bool result = false;
+
+    if (s.id() != -1) {
+        if (notify) {
+            // notify cloud
             m_cloudClient->unsubProfile(s.id(), m_configVersion);
             m_configVersion++;
         }
-    }
 
-    UIScreen screen(name);
-    bool result = m_arrangementStrategy->removeScreen(m_screenListModel,
-                                            screen);
+        result = m_arrangementStrategy->removeScreen(m_screenListModel, s.id());
+    }
 
     return result;
 }
@@ -200,16 +205,17 @@ void ScreenManager::updateScreens(QByteArray reply)
 
             QJsonArray screens = obj["screens"].toArray();
             QList<UIScreen> latestScreenList;
-            QSet<QString> latestScreenNameSet;
+            QSet<int> latestScreenIdSet;
+            int localScreenId = m_appConfig->screenId();
             foreach (QJsonValue const& v, screens) {
                 QJsonObject obj = v.toObject();
                 int screenId = obj["id"].toInt();
+                latestScreenIdSet.insert(screenId);
 
                 QString screenName = obj["name"].toString();
                 int screenVersion = obj["version"].toInt();
 
-                latestScreenNameSet.insert(screenName);
-                int index = m_screenListModel->findScreen(screenName);
+                int index = m_screenListModel->findScreen(screenId);
                 if (index != -1) {
                     const UIScreen& s = m_screenListModel->getScreen(index);
 
@@ -238,31 +244,31 @@ void ScreenManager::updateScreens(QByteArray reply)
                 latestScreenList.push_back(screen);
             }
 
-            if (!m_screenNameSet.contains(m_localHostname) &&
-                !latestScreenNameSet.contains(m_localHostname) &&
+            if (!m_screenIdSet.contains(localScreenId) &&
+                !latestScreenIdSet.contains(localScreenId) &&
                 m_appConfig->profileId() != -1) {
-                latestScreenNameSet.insert(m_localHostname);
+                latestScreenIdSet.insert(localScreenId);
                 updateLocalHost = true;
             }
 
             // remove unsub screen
-            m_screenNameSet.subtract(latestScreenNameSet);
-            for (const QString& name : m_screenNameSet) {
-                removeScreen(name);
+            m_screenIdSet.subtract(latestScreenIdSet);
+            for (const int id : m_screenIdSet) {
+                removeScreenById(id);
 
-                if (name == m_localHostname) {
+                if (id == localScreenId) {
                     emit localhostUnsubscribed();
                 }
             }
 
-            m_screenNameSet = latestScreenNameSet;
+            m_screenIdSet = latestScreenIdSet;
 
             m_screenListModel->update(latestScreenList);
         }
     }
 
     if (updateLocalHost) {
-        removeScreen(m_localHostname);
+        removeScreenById(m_appConfig->screenId());
         UIScreen screen(m_localHostname);
         screen.setId(m_appConfig->screenId());
         m_arrangementStrategy->addScreen(m_screenListModel, screen);
@@ -326,4 +332,9 @@ void ScreenManager::restartServices()
 {
     LogManager::debug("Resart services request");
     m_serviceProxy->restartService();
+}
+
+bool ScreenManager::isLocalMachine(int index)
+{
+    return index == m_screenListModel->findScreen(Hostname::local());
 }

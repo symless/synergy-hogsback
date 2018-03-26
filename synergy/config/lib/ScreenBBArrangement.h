@@ -14,7 +14,7 @@ public:
 	ScreenBBArrangement();
 
 	bool addScreen(ScreenListModel* screenListModel, UIScreen& screen);
-	bool removeScreen(ScreenListModel* screenListModel, UIScreen& screen);
+    bool removeScreen(ScreenListModel* screenListModel, int screenId);
 	void setViewW(int w);
 	void setViewH(int h);
 	void adjustModel(ScreenListModel* screenListModel, int index);

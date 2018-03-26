@@ -418,7 +418,7 @@ Rectangle {
                                 MenuItem {
                                     id: removeServerItem
                                     onTriggered: {
-                                        screenManager.removeScreen(name, true)
+                                        screenManager.removeScreenByIndex(index, true)
                                     }
                                 }
 
@@ -436,7 +436,7 @@ Rectangle {
                                 else {
                                     claimServerItem.text = "Share from " + name
                                     removeServerItem.text = "Remove " + name
-                                    if (name == localHostname.hostname() )
+                                    if (screenManager.isLocalMachine(index))
                                     {
                                         removeServerItem.enabled = false
                                     }

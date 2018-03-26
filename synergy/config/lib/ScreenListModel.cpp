@@ -203,9 +203,9 @@ void ScreenListModel::addScreen(const UIScreen& screen)
     endInsertRows();
 }
 
-void ScreenListModel::removeScreen(QString name)
+void ScreenListModel::removeScreen(int id)
 {
-    int index = findScreen(name);
+    int index = findScreen(id);
     beginRemoveRows(QModelIndex(), index, index);
     m_screens.removeAt(index);
     endRemoveRows();
