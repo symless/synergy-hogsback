@@ -17,7 +17,6 @@ ScreenManager::ScreenManager() :
     m_screenListSnapshotManager(NULL)
 {
     m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
-    m_localHostname = Hostname::local();
 
     m_arrangementStrategy = new ScreenBBArrangement();
     m_screenListSnapshotManager= new ScreenListSnapshotManager();
@@ -65,8 +64,8 @@ void ScreenManager::setScreenModel(ScreenListModel* screenListModel)
     if (m_screenListModel != screenListModel) {
         m_screenListModel = screenListModel;
 
-        // this looks like a hack
-        addScreen(m_localHostname);
+        // this is for always showing local machine even without receiving snapshot
+        addScreen(Hostname::local());
     }
 }
 
@@ -269,7 +268,7 @@ void ScreenManager::updateScreens(QByteArray reply)
 
     if (updateLocalHost) {
         removeScreenById(m_appConfig->screenId());
-        UIScreen screen(m_localHostname);
+        UIScreen screen(Hostname::local());
         screen.setId(m_appConfig->screenId());
         m_arrangementStrategy->addScreen(m_screenListModel, screen);
 

@@ -74,7 +74,6 @@ private:
     AppConfig* m_appConfig;
     CloudClient* m_cloudClient;
     QSet<int> m_screenIdSet;
-    QString m_localHostname;
     int m_configVersion = -1;
     int m_serverId = -1;
     QString m_configHint = "";
