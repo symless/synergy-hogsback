@@ -92,7 +92,7 @@ Rectangle {
             LogoText {
                 id: hostname
                 z: 2
-                text: Hostname.local()
+                text: Hostname.QmlLocal()
                 color: "#4D4D4D"
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter

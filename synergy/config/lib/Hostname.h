@@ -17,7 +17,9 @@ public:
 
     Hostname() = default;
 
-    Q_INVOKABLE QString local();
+    static QString local();
+
+    Q_INVOKABLE QString QmlLocal();
 };
 
 #endif // HOSTNAME_H

@@ -5,6 +5,7 @@
 #include "VersionManager.h"
 #include "AppConfig.h"
 #include "App.h"
+#include <synergy/config/lib/Hostname.h>
 
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
@@ -273,7 +274,7 @@ void CloudClient::switchProfile(QString profileName)
 
         QJsonObject screenObject;
 
-        screenObject.insert("name", QHostInfo::localHostName());
+        screenObject.insert("name", Hostname::local());
         screenObject.insert("ipList", ipList.join(","));
         screenObject.insert("status", "Disconnected");
 
@@ -431,7 +432,7 @@ CloudClient::uploadLogFile(QString source, QString target)
         "\r\n").arg(appConfig->userId())
                .arg(QSysInfo::productType() + " " + QSysInfo::productVersion())
                .arg(SYNERGY_VERSION_STRING)
-               .arg(QHostInfo::localHostName());
+               .arg(Hostname::local());
 
     // NOTE: The log can grow while we're reading the file here, which is why
     //       we cannot use setBodyDevice() instead of reading the file in to

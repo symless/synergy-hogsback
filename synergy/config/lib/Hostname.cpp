@@ -19,3 +19,9 @@ Hostname::local()
 {
     return QString::fromStdString(localHostname());
 }
+
+QString
+Hostname::QmlLocal()
+{
+    return QString::fromStdString(localHostname());
+}

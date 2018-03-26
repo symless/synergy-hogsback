@@ -3,6 +3,7 @@
 #include "UIScreen.h"
 #include "ScreenListModel.h"
 #include "LogManager.h"
+#include <synergy/config/lib/Hostname.h>
 #include "Common.h"
 
 #include <QtNetwork>
@@ -129,7 +130,7 @@ void ScreenBBArrangement::calculateNewPos(ScreenListModel* screenListModel,
 	int newPosY = m_scaledViewH / 2 - kScreenIconHeight / 2;
 
 	if (screen.posX() == -1 && screen.posY() == -1) {
-		screenListModel->getScreenPos(QHostInfo::localHostName(), newPosX, newPosY);
+        screenListModel->getScreenPos(Hostname::local(), newPosX, newPosY);
 	}
 	else {
 		newPosX = screen.posX();

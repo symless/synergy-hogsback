@@ -7,6 +7,7 @@
 #include "ScreenListSnapshotManager.h"
 #include "AppConfig.h"
 #include "ProcessMode.h"
+#include <synergy/config/lib/Hostname.h>
 
 #include <QtNetwork>
 #include <iostream>
@@ -16,7 +17,7 @@ ScreenManager::ScreenManager() :
     m_screenListSnapshotManager(NULL)
 {
     m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
-    m_localHostname = QHostInfo::localHostName();
+    m_localHostname = Hostname::local();
 
     m_arrangementStrategy = new ScreenBBArrangement();
     m_screenListSnapshotManager= new ScreenListSnapshotManager();
@@ -64,7 +65,8 @@ void ScreenManager::setScreenModel(ScreenListModel* screenListModel)
     if (m_screenListModel != screenListModel) {
         m_screenListModel = screenListModel;
 
-        addScreen(QHostInfo::localHostName());
+        // this looks like a hack
+        addScreen(m_localHostname);
     }
 }
 
