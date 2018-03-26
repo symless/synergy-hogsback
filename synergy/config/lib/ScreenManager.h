@@ -65,6 +65,7 @@ private slots:
 
 private:
     void setConfigHint(const QString &value);
+    bool removeScreenByName(QString name, bool notify = false);
 
 private:
     ScreenListModel* m_screenListModel;

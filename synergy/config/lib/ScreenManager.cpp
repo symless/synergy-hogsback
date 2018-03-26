@@ -267,7 +267,8 @@ void ScreenManager::updateScreens(QByteArray reply)
     }
 
     if (updateLocalHost) {
-        removeScreenById(m_appConfig->screenId());
+        // replace incomplete local screen
+        removeScreenByName(Hostname::local());
         UIScreen screen(Hostname::local());
         screen.setId(m_appConfig->screenId());
         m_arrangementStrategy->addScreen(m_screenListModel, screen);
@@ -325,6 +326,13 @@ void ScreenManager::setConfigHint(const QString& text)
 {
     m_configHint = text;
     configHintChanged();
+}
+
+bool ScreenManager::removeScreenByName(QString name, bool notify)
+{
+    int index = m_screenListModel->findScreen(name);
+
+    return removeScreenByIndex(index, notify);
 }
 
 void ScreenManager::restartServices()
