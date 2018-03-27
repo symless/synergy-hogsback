@@ -160,7 +160,7 @@ CoreProcess::start (std::vector<std::string> command)
     m_impl = std::make_unique<CoreProcessImpl>(*this, m_ioService,
                                                std::move (command));
 
-     m_statusMonitor->update(localHostname(), ScreenStatus::kConnecting);
+     m_statusMonitor->update(m_userConfig->screenId(), ScreenStatus::kConnecting);
      m_statusMonitor->monitor(*this);
 
     m_impl->start();

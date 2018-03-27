@@ -111,8 +111,8 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     );
 
     m_process->statusMonitor().screenStatusChanged.connect(
-        [server, this](std::string const& screenName, ScreenStatus status) {
-            Screen& screen = m_localProfileConfig->getScreen(screenName);
+        [server, this](const int screenId, ScreenStatus status) {
+            Screen& screen = m_localProfileConfig->getScreen(screenId);
             if (screen.status() != status) {
 
                 // HACK: force disconnected can only happen from connected

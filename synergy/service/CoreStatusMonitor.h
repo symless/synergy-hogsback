@@ -17,7 +17,7 @@ public:
 
     void monitor(CoreProcess& process);
 
-    void update(const std::string& screenName, ScreenStatus status);
+    void update(const int screenId, ScreenStatus status);
 
 private:
     void reset();
@@ -26,11 +26,11 @@ public:
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
 
-    signal<void(std::string const& screenName, ScreenStatus status)> screenStatusChanged;
+    signal<void(const int screenId, ScreenStatus status)> screenStatusChanged;
 
 private:
     std::vector<boost::signals2::connection> m_signals;
-    std::map<std::string, ScreenStatus> m_screenStates;
+    std::map<int, ScreenStatus> m_screenStates;
     std::shared_ptr<UserConfig> m_userConfig;
     std::shared_ptr<ProfileConfig> m_localProfileConfig;
 };

@@ -18,49 +18,49 @@ void CoreStatusMonitor::monitor(CoreProcess& process)
     reset();
 
     using boost::algorithm::contains;
-    std::string localScreenName = localHostname();
+    int localScreenId = m_userConfig->screenId();
 
     if (process.processMode() == ProcessMode::kClient) {
         m_signals.emplace_back (
-            process.output.connect ([this, localScreenName](std::string const& line) {
+            process.output.connect ([this, localScreenId](std::string const& line) {
                 if (!contains (line, "connected to server")) {
                     return;
                 }
 
-                update(localScreenName, ScreenStatus::kConnected);
+                update(localScreenId, ScreenStatus::kConnected);
             }, boost::signals2::at_front)
         );
 
         m_signals.emplace_back (
-            process.output.connect ([this, localScreenName](std::string const& line) {
+            process.output.connect ([this, localScreenId](std::string const& line) {
                 if (!contains (line, "connecting to")) {
                     return;
                 }
 
-                update(localScreenName, ScreenStatus::kConnecting);
+                update(localScreenId, ScreenStatus::kConnecting);
             }, boost::signals2::at_front)
         );
     }
     else if (process.processMode() == ProcessMode::kServer) {
         m_signals.emplace_back (
-            process.output.connect ( [this, localScreenName] (std::string const& line) {
+            process.output.connect ( [this, localScreenId] (std::string const& line) {
                 if (!contains (line, "started server, waiting for clients")) {
                     return;
                 }
 
-                update(localScreenName, ScreenStatus::kConnected);
+                update(localScreenId, ScreenStatus::kConnected);
             }, boost::signals2::at_front)
         );
     }
 }
 
-void CoreStatusMonitor::update(const std::string &screenName, ScreenStatus status)
+void CoreStatusMonitor::update(const int screenId, ScreenStatus status)
 {
-    auto originalStatus = m_screenStates[screenName];
-    m_screenStates[screenName] = status;
+    auto originalStatus = m_screenStates[screenId];
+    m_screenStates[screenId] = status;
 
     if (status != originalStatus) {
-        screenStatusChanged(screenName, status);
+        screenStatusChanged(screenId, status);
     }
 }
 
