@@ -78,8 +78,6 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     m_cloudClient (CloudClient),
     m_processCommand (std::make_shared<ProcessCommand>()),
     m_process (std::make_unique<CoreProcess>(m_ioService, m_userConfig, m_localProfileConfig, m_processCommand)),
-    // TODO: unify hostname between UI and service
-    m_errorMonitor(std::make_unique<CoreErrorMonitor>(localHostname())),
     m_rpc (rpc),
     m_router (router),
     m_serverProxy (io, m_router, kServerProxyPort),
@@ -223,8 +221,6 @@ CoreManager::CoreManager (boost::asio::io_service& io,
             }
         });
     }
-
-    m_errorMonitor->monitor(*m_process);
 }
 
 CoreManager::~CoreManager () noexcept {
@@ -339,12 +335,6 @@ CoreManager::notifyServerClaim(int64_t serverId)
     Message message(serverClaimMessage);
 
     m_router.notifyOtherNodes(message);
-}
-
-CoreErrorMonitor&
-CoreManager::errorMonitor() const
-{
-    return *m_errorMonitor;
 }
 
 CoreStatusMonitor&
