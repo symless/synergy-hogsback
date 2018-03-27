@@ -349,5 +349,14 @@ void ScreenManager::restartServices()
 
 bool ScreenManager::isLocalMachine(int index)
 {
-    return index == m_screenListModel->findScreen(Hostname::local());
+    int findIndex = -1;
+
+    if (m_appConfig->screenId() == -1)  {
+        findIndex = m_screenListModel->findScreen(Hostname::local());
+    }
+    else {
+        findIndex = m_screenListModel->findScreen(m_appConfig->screenId());
+    }
+
+    return index == findIndex;
 }
