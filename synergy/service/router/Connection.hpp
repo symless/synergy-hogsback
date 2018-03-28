@@ -22,23 +22,27 @@ public:
     uint32_t id () const noexcept;
     stream_type& stream() noexcept;
 
+    boost::asio::ip::address local_ip() const;
+    boost::asio::ip::address remote_ip() const;
+    tcp::endpoint remote_acceptor_endpoint () const;
+
     void start ();
     void stop ();
 
     bool send (Message const&);
     bool send (MessageHeader const&, Message const&);
 
-    tcp::endpoint remote_endpoint() const;
-    tcp::endpoint remote_acceptor_endpoint () const;
-
 private:
     static uint32_t next_connection_id_;
     uint32_t id_;
     tcp::socket socket_;
 
-    /* We need this because once the socket has been disconnected you can no
-     * longer call the remote_endpoint() function on it. */
-    tcp::endpoint remote_endpoint_;
+    /* We need to store the remote because once the socket has been
+     * disconnected you can no longer call the remote_endpoint() function on it.
+     * Do the same for the local endpoint for good measure
+     */
+    boost::asio::ip::address remote_address_;
+    boost::asio::ip::address local_address_;
 
     stream_type stream_;
     MessageReader<stream_type> reader_;
