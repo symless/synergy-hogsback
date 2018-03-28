@@ -131,11 +131,11 @@ Router::add_peer (tcp::endpoint endpoint, bool const immediate) {
 
             if (ec) {
                 routerLog ()->error ("Connection {} failed to complete SSL "
-                                     "handshake: {}",  connection->id (),
-                                     ec.message());
+                                     "handshake, aborting: {}",
+                                     connection->id (), ec.message());
                 timer.expires_from_now (kConnectRetryInterval);
                 timer.async_wait (ctx[ec]);
-                continue;
+                break;
             }
 
             this->add (std::move(connection));
