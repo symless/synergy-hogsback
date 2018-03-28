@@ -133,8 +133,6 @@ Router::add_peer (tcp::endpoint endpoint, bool const immediate) {
                 routerLog ()->error ("Connection {} failed to complete SSL "
                                      "handshake, aborting: {}",
                                      connection->id (), ec.message());
-                timer.expires_from_now (kConnectRetryInterval);
-                timer.async_wait (ctx[ec]);
                 break;
             }
 
