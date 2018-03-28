@@ -47,7 +47,10 @@ TEST_CASE("Websocket subscriber recieves published message", "[WebsocketSession]
         boost::signals2::at_front
     );
 
-    testFinished.connect([&ioService]() {
+    testFinished.connect([&ioService, &pubWebsocket, &subWebsocket]() {
+        pubWebsocket.shutdown();
+        subWebsocket.shutdown();
+
         ioService.poll();
         ioService.stop();
     });
