@@ -39,7 +39,6 @@ public:
 
     const std::vector<Screen>& screens() const;
     Screen& getScreen(const int screenId);
-    Screen& getScreen(const std::string& screenName);
     int profileId() const { return m_profile.id(); }
     int64_t profileVersion() const { return m_profile.version(); }
     void claimServer(int64_t serverId);
