@@ -83,8 +83,6 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     m_serverProxy (io, m_router, kServerProxyPort),
     m_clientProxy (io, m_router, kServerPort)
 {
-    m_processCommand->setLocalHostname(localHostname());
-
     m_messageHandler = std::make_unique<ClaimMessageHandler> (*this);
     m_router.on_receive.connect (*m_messageHandler);
 
@@ -261,7 +259,8 @@ CoreManager::restart()
     }
 
     m_process->start (m_processCommand->generate
-                      (m_process->processMode() == ProcessMode::kServer));
+                      (m_process->processMode() == ProcessMode::kServer,
+                       m_process->localScreenName()));
     return true;
 }
 

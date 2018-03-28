@@ -13,7 +13,7 @@ const std::string kCoreProgram = "synergy-core";
 #endif
 
 std::vector<std::string>
-ProcessCommand::generate(bool const serverMode) const
+ProcessCommand::generate(bool const serverMode, const std::string& localHostname) const
 {
     auto profileDir = DirectoryManager::instance()->profileDir();
     auto installDir = DirectoryManager::instance()->installDir();
@@ -59,12 +59,12 @@ ProcessCommand::generate(bool const serverMode) const
     args.push_back("--debug");
     args.push_back(kCoreDebugLevel);
 
-    if (m_localHostname.empty()) {
+    if (localHostname.empty()) {
         throw std::runtime_error("Can't generate args, local hostname missing.");
     }
 
     args.push_back("--name");
-    args.push_back(m_localHostname);
+    args.push_back(localHostname);
 
     // TODO: change features depending on edition
     args.push_back("--enable-drag-drop");
@@ -90,12 +90,6 @@ ProcessCommand::generate(bool const serverMode) const
     }
 
     return args;
-}
-
-void
-ProcessCommand::setLocalHostname(const std::string& localHostname)
-{
-    m_localHostname = localHostname;
 }
 
 bool

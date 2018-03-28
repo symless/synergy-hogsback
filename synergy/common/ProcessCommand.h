@@ -13,14 +13,12 @@ class ProcessCommand
 public:
     virtual ~ProcessCommand() = default;
 
-    virtual std::vector<std::string> generate(bool serverMode) const;
-    void setLocalHostname(const std::string& localHostname);
+    virtual std::vector<std::string> generate(bool serverMode, const std::string& localHostname) const;
     bool setRunAsUid(std::string runAsUid);
     bool setDisplay(std::string display);
 
 private:
     std::string m_serverAddress;
-    std::string m_localHostname;
     std::string m_runAsUid;
     std::string m_display;
 };

@@ -109,7 +109,7 @@ CoreProcess::startServer()
     writeConfigurationFile();
 
     try {
-        start(m_processCommand->generate(true));
+        start(m_processCommand->generate(true, localScreenName()));
     } catch (const std::exception& ex) {
         serviceLog()->error ("failed to start server core process: {}", ex.what());
         m_impl.reset();
@@ -126,7 +126,7 @@ CoreProcess::startClient(int const serverId)
     m_currentServerId = serverId;
 
     try {
-        start (m_processCommand->generate(false));
+        start (m_processCommand->generate(false, localScreenName()));
     } catch (const std::exception& ex) {
         serviceLog()->error("failed to start client core process: {}", ex.what());
         m_impl.reset();
@@ -176,6 +176,14 @@ CoreProcess::writeConfigurationFile()
 bool CoreProcess::disabled() const
 {
     return m_disabled;
+}
+
+std::string
+CoreProcess::localScreenName()
+{
+    auto& s = m_localProfileConfig->getScreen(
+                                        m_userConfig->screenId());
+    return s.name();
 }
 
 CoreStatusMonitor&

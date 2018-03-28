@@ -6,7 +6,6 @@
 TEST_CASE("Process command and args generated correctly", "[ProcessCommand]")
 {
     ProcessCommand pc;
-    pc.setLocalHostname("mock local hostname");
 
     // TODO: stub out profile directory
     auto profileDir = DirectoryManager::instance()->profileDir();
@@ -22,7 +21,7 @@ TEST_CASE("Process command and args generated correctly", "[ProcessCommand]")
 
     SECTION("Server command line")
     {
-        auto command = pc.generate(true);
+        auto command = pc.generate(true, "mock local hostname");
 
         // TODO: test each element instead of using string join
         REQUIRE(boost::algorithm::join(command, " ") ==
@@ -37,7 +36,7 @@ TEST_CASE("Process command and args generated correctly", "[ProcessCommand]")
 
     SECTION("Client command line")
     {
-        auto command = pc.generate(false);
+        auto command = pc.generate(false, "mock local hostname");
 
         // TODO: test each element instead of using string join
         REQUIRE(boost::algorithm::join(command, " ") ==
