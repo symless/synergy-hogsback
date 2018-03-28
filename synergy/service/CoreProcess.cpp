@@ -114,6 +114,7 @@ CoreProcess::startServer()
         serviceLog()->error ("failed to start server core process: {}", ex.what());
         m_impl.reset();
         assert (!m_impl);
+        throw;
     }
 }
 
@@ -131,6 +132,7 @@ CoreProcess::startClient(int const serverId)
         serviceLog()->error("failed to start client core process: {}", ex.what());
         m_impl.reset();
         assert (!m_impl);
+        throw;
     }
 }
 
