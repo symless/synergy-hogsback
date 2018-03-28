@@ -383,7 +383,10 @@ operator() (RouteRevocation& rr, std::shared_ptr<Connection> source) const {
 void
 Router::add
 (std::shared_ptr<Connection> connection) {
-    connections_.insert (connection);
+    auto inserted = connections_.insert (connection);
+    if (!inserted.second) {
+        return;
+    }
 
     connection->on_connected.connect (
         [this](std::shared_ptr<Connection> connection) {
