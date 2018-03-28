@@ -207,13 +207,13 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     });
 
     if (m_userConfig->screenId() != -1) {
-        m_router.start (m_userConfig->screenId(), localHostname());
+        m_router.start (m_userConfig->screenId(), m_process->localScreenName());
         m_clientProxy.start ();
     }
     else {
         m_userConfig->updated.connect_extended ([this](const auto& connection) {
             if (m_userConfig->screenId() != -1) {
-                m_router.start (m_userConfig->screenId(), localHostname());
+                m_router.start (m_userConfig->screenId(), m_process->localScreenName());
                 m_clientProxy.start ();
                 connection.disconnect();
             }
