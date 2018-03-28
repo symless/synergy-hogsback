@@ -18,11 +18,11 @@ ErrorNotifier::ErrorNotifier(CloudClient& cloudClient, ProfileConfig& profileCon
 void ErrorNotifier::install(CoreErrorMonitor& monitor)
 {
     monitor.error.connect([this](std::string const& screenName, ScreenError code, std::string const& message){
-        Screen screen = m_profileConfig.getScreen(screenName);
-        screen.setErrorCode(code);
-        screen.setErrorMessage(message);
+        //Screen screen = m_profileConfig.getScreen(screenName);
+//        screen.setErrorCode(code);
+//        screen.setErrorMessage(message);
 
-        m_cloudClient.updateScreenError(screen);
+//        m_cloudClient.updateScreenError(screen);
     });
 }
 
