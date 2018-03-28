@@ -1,3 +1,4 @@
+// THIS IS BROKEN ON WINDOWS
 #include "catch.hpp"
 
 #include "synergy/service/WebsocketSession.h"
