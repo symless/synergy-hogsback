@@ -5,7 +5,9 @@
 #include <boost/container/small_vector.hpp>
 #include <boost/multi_index/composite_key.hpp>
 #include <boost/multi_index/hashed_index.hpp>
+#include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/member.hpp>
+#include <boost/multi_index/mem_fun.hpp>
 #include <boost/multi_index/ranked_index.hpp>
 #include <boost/multi_index_container.hpp>
 #include <boost/asio/ssl/stream.hpp>
@@ -40,12 +42,45 @@ using RouteTable = bmi::multi_index_container<
         bmi::ranked_unique<
             bmi::tag<by_destination>,
             bmi::composite_key<
-                Route, bmi::member<Route, uint32_t, &RouteTableEntry::dest>,
+                Route,
+                bmi::member<Route, uint32_t, &RouteTableEntry::dest>,
                 bmi::member<Route, uint32_t, &RouteTableEntry::cost>,
                 bmi::member<Route, std::vector<uint32_t>,
-                            &RouteTableEntry::path>>>,
-        bmi::hashed_non_unique<bmi::tag<by_connection_id>,
-                               connection_id_extractor>>>;
+                            &RouteTableEntry::path>
+            >
+        >,
+        bmi::hashed_non_unique<
+            bmi::tag<by_connection_id>,
+            connection_id_extractor
+        >
+    >
+>;
+
+struct by_ip_address;
+
+struct connection_remote_ip_extractor {
+    using result_type = boost::asio::ip::address;
+    result_type operator() (std::shared_ptr<Connection> const&) const;
+};
+
+struct connection_local_ip_extractor {
+    using result_type = boost::asio::ip::address;
+    result_type operator() (std::shared_ptr<Connection> const&) const;
+};
+
+using ConnectionTable = bmi::multi_index_container<
+    std::shared_ptr<Connection>,
+    bmi::indexed_by<
+        bmi::ordered_unique<
+            bmi::tag<by_ip_address>,
+            bmi::composite_key<
+                std::shared_ptr<Connection>,
+                connection_remote_ip_extractor,
+                connection_local_ip_extractor
+            >
+        >
+    >
+>;
 
 class Router final {
 public:
@@ -60,7 +95,7 @@ public:
     asio::io_service& getIoService();
 
     bool started () const noexcept;
-    void start (const uint32_t id, std::string name);
+    void start (uint32_t id, std::string name);
     void shutdown ();
 
     void add_peer (boost::asio::ip::tcp::endpoint, bool immediate = false);
@@ -78,7 +113,6 @@ public:
     using signal = boost::signals2::signal<Args...>;
 
     signal<void(Message const&, int32_t)> on_receive;
-
     signal<void(int64_t screen_id)> on_node_reachable;
     signal<void(int64_t screen_id)> on_node_unreachable;
 
@@ -100,9 +134,8 @@ private:
 private:
     tcp::acceptor acceptor_;
     asio::steady_timer hello_timer_;
-    std::vector<std::shared_ptr<Connection>> connections_;
-    std::vector<tcp::endpoint> known_peers_;
     RouteTable route_table_;
+    ConnectionTable connections_;
     boost::asio::ssl::context ssl_context_;
     std::string name_;
     uint32_t id_ = 0;
