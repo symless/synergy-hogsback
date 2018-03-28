@@ -564,11 +564,11 @@ Router::integrate (RouteRevocation& rr, std::shared_ptr<Connection> source) {
             boost::tie (new_route->dest, new_route->cost, new_route->path));
 
         if (entry == end (route_table_)) {
-            routerLog()->debug("    Route {}: not found", route_n);
+            routerLog()->debug("   Route {}: not found", route_n);
         } else {
             dests_effected.push_back (entry->dest);
             route_table_.get<by_destination> ().erase (entry);
-            routerLog()->debug ("    Route {}: removed", route_n);
+            routerLog()->debug ("   Route {}: removed", route_n);
             routes_updated = true;
         }
 
