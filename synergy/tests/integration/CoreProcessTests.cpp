@@ -60,14 +60,20 @@ TEST_CASE("Start and stop core process in different modes", "[CoreProcess]" ) {
     fakeit::Mock<ProcessCommand> processCommandMock;
     fakeit::Fake(Dtor(processCommandMock));
 
-    fakeit::When(Method(processCommandMock, generate).Using(true, "mocklocalhostname")).AlwaysDo([](...){
+    fakeit::When(Method(processCommandMock, serverCmd)).AlwaysDo([](auto name){
         ProcessCommand tempProcessCommand;
-        std::vector<std::string> cmds = tempProcessCommand.generate(true, "mocklocalhostname");
+        std::vector<std::string> cmds = tempProcessCommand.serverCmd("mocklocalhostname");
+ #ifdef __APPLE__
+        cmds[0] = "synergy-core";
+#endif
         return cmds;
     });
-    fakeit::When(Method(processCommandMock, generate).Using(false, "mocklocalhostname")).AlwaysDo([](...){
+    fakeit::When(Method(processCommandMock, clientCmd)).AlwaysDo([](auto name){
         ProcessCommand tempProcessCommand;
-        std::vector<std::string> cmds = tempProcessCommand.generate(false, "mocklocalhostname");
+        std::vector<std::string> cmds = tempProcessCommand.clientCmd("mocklocalhostname");
+#ifdef __APPLE__
+       cmds[0] = "synergy-core";
+#endif
         return cmds;
     });
 

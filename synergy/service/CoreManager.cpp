@@ -258,9 +258,13 @@ CoreManager::restart()
         return false;
     }
 
-    m_process->start (m_processCommand->generate
-                      (m_process->processMode() == ProcessMode::kServer,
-                       m_process->localScreenName()));
+    if (m_process->processMode() == ProcessMode::kServer) {
+        m_process->startServer();
+    }
+    else {
+        m_process->startClient(m_process->currentServerId());
+    }
+
     return true;
 }
 

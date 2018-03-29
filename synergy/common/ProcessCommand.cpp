@@ -13,7 +13,7 @@ const std::string kCoreProgram = "synergy-core";
 #endif
 
 std::vector<std::string>
-ProcessCommand::generate(bool const serverMode, const std::string& localHostname) const
+ProcessCommand::generate(bool const serverMode, const std::string localHostname) const
 {
     auto profileDir = DirectoryManager::instance()->profileDir();
     auto installDir = DirectoryManager::instance()->installDir();
@@ -90,6 +90,18 @@ ProcessCommand::generate(bool const serverMode, const std::string& localHostname
     }
 
     return args;
+}
+
+std::vector<std::string>
+ProcessCommand::serverCmd(const std::string localHostname) const
+{
+    return generate(true, localHostname);
+}
+
+std::vector<std::string>
+ProcessCommand::clientCmd(const std::string localHostname) const
+{
+    return generate(false, localHostname);
 }
 
 bool
