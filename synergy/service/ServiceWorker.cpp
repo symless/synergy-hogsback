@@ -61,11 +61,6 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         // store profile config (causes signals to be invoked)
         m_localProfileConfig->apply(*m_remoteProfileConfig);
 
-        if (m_lastProfileSnapshot.empty()) {
-            auto& s = m_localProfileConfig->getScreen(m_userConfig->screenId());
-            m_router.start (m_userConfig->screenId(), s.name());
-        }
-
         // save for future requests from config UI
         m_lastProfileSnapshot = json;
 
@@ -133,6 +128,8 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
 
     m_localProfileConfig->screenOnline.connect([this](Screen screen){
         if (m_userConfig->screenId() == screen.id()) {
+            m_router.start (m_userConfig->screenId(), screen.name());
+
             return;
         }
 
