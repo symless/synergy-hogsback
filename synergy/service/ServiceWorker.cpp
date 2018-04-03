@@ -58,15 +58,42 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             return;
         }
 
-        // store profile config (causes signals to be invoked)
-        m_localProfileConfig->apply(*m_remoteProfileConfig);
-
         // save for future requests from config UI
         m_lastProfileSnapshot = json;
 
         // forward the message via rpc server to config UI
         auto rpcServer = m_rpc->server();
         rpcServer->publish("synergy.profile.snapshot", std::move(json));
+
+        auto localScreenId = m_userConfig->screenId();
+
+        // HACK
+        // reason: we want to delay starting core until we find local
+        // screen in the snapshot, otherwise various components would
+        // be broken
+        // details: when local snapshot contains local screen and
+        // remote doesn't this means local screen has been removed
+        // when neither local nor remote snapshot contains local screen
+        // this means there is no point to apply remote snapshot
+        bool screenInLocalSnapshot = false;
+        try {
+            m_localProfileConfig->getScreen(localScreenId);
+            screenInLocalSnapshot= true;
+        }
+        catch (...) {}
+
+        try {
+            m_remoteProfileConfig->getScreen(localScreenId);
+        }
+        catch (...) {
+            if (!screenInLocalSnapshot) {
+                serviceLog()->warn("ignoring a snapshot that doesn't contain local screen");
+                return;
+            }
+        }
+
+        // store profile config (causes signals to be invoked)
+        m_localProfileConfig->apply(*m_remoteProfileConfig);
 
         this->m_ipMonitor->start();
     });
