@@ -20,6 +20,7 @@ public:
 
     void apply (ProfileConfig const& src);
     bool compare (ProfileConfig const& target);
+    void clear ();
 
     signal<void ()> modified;
 

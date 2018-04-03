@@ -114,6 +114,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             // Authentication failed either by using an invalid session or an out of date version
             serviceLog()->debug("sending logout message to config ui");
             m_rpc->server()->publish("synergy.auth.logout");
+            m_localProfileConfig->clear();
         }
 
         this->m_ipMonitor->stop();

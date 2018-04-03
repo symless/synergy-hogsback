@@ -167,6 +167,12 @@ bool ProfileConfig::compare(ProfileConfig const& target)
     return different;
 }
 
+void ProfileConfig::clear()
+{
+    m_profile = Profile();
+    m_screens.clear();
+}
+
 ProfileConfig::ProfileConfig (ProfileConfig const& src):
     m_profile (src.m_profile), m_screens (src.m_screens) {
 }

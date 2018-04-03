@@ -172,6 +172,7 @@ CoreManager::CoreManager (boost::asio::io_service& io,
             m_userConfig->save();
             m_cloudClient->shutdownWebsocket();
             m_rpc.server()->publish ("synergy.auth.logout");
+            m_localProfileConfig->clear();
             m_process->setDisabled(true);
             m_process->shutdown();
             return;
