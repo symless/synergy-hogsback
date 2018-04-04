@@ -202,6 +202,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             serviceLog()->debug ("Local screen removed from profile");
             m_coreManager->pause();
             m_cloudClient->shutdownWebsocket();
+            m_router.shutdown();
             m_userConfig->reset();
             m_userConfig->save();
             m_localProfileConfig->clear();
