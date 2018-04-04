@@ -191,6 +191,25 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         }
     );
 
+    m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen> const& added,
+                                                          std::vector<Screen> const& removed) {
+
+        auto removedLocal = std::find_if (begin(removed), end(removed), [this](auto const& screen) {
+            return (screen.id() == m_userConfig->screenId());
+        });
+
+        if (removedLocal != end(removed)) {
+            serviceLog()->debug ("Local screen removed from profile");
+            m_coreManager->pause();
+            m_cloudClient->shutdownWebsocket();
+            m_userConfig->reset();
+            m_userConfig->save();
+            m_localProfileConfig->clear();
+            m_rpc->server()->publish ("synergy.auth.logout");
+            return;
+        }
+    });
+
     m_ipMonitor->ipSetChanged.connect ([this](auto const& ipSet) {
         try {
             auto localScreen = this->m_localProfileConfig->getScreen
