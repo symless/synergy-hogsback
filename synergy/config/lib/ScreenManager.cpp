@@ -232,6 +232,10 @@ void ScreenManager::updateScreens(QByteArray reply)
                     }
                 }
 
+                if (screenId == localScreenId) {
+                    emit localHostNameChanged(screenName);
+                }
+
                 UIScreen screen(screenName);
                 screen.setId(screenId);
                 screen.setPosX(obj["x_pos"].toInt());

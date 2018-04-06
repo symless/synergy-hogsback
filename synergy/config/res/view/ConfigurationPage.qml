@@ -20,6 +20,10 @@ Rectangle {
         id: screenManager
         screenListModel: screenListModel
         serviceProxy: applicationWindow.serviceProxy
+
+        onLocalHostNameChanged: {
+            hostname.text = name
+        }
     }
 
     Connections {

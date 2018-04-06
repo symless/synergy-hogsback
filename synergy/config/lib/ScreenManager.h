@@ -57,6 +57,7 @@ signals:
     void localhostUnsubscribed();
     void configHintChanged();
     void serverIdChanged();
+    void localHostNameChanged(QString name);
 
 private slots:
     void updateScreens(QByteArray reply);
