@@ -274,6 +274,10 @@ void CloudClient::switchProfile(QString profileName)
 
         QJsonObject screenObject;
 
+        auto localScreenId = m_appConfig->screenId();
+        if (localScreenId != -1) {
+            screenObject.insert("id", localScreenId);
+        }
         screenObject.insert("name", Hostname::local());
         screenObject.insert("ipList", ipList.join(","));
         screenObject.insert("status", "Disconnected");
