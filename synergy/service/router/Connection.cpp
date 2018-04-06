@@ -13,7 +13,8 @@ Connection::Connection (tcp::socket&& socket,
                         boost::asio::ssl::context& context):
         id_ (++next_connection_id_),
         socket_ (std::move (socket)),
-        remote_endpoint_ (socket_.remote_endpoint ()),
+        remote_address_ (socket_.remote_endpoint ().address()),
+        local_address_ (socket_.local_endpoint().address()),
         stream_ (socket_, context),
         reader_ (stream_),
         writer_ (stream_)
@@ -116,12 +117,17 @@ Connection::send (MessageHeader const& header, Message const& message) {
     return true;
 }
 
-tcp::endpoint Connection::endpoint() const
-{
-    return remote_endpoint_;
+boost::asio::ip::address
+Connection::local_ip() const {
+    return local_address_;
+}
+
+boost::asio::ip::address
+Connection::remote_ip() const {
+    return remote_address_;
 }
 
 tcp::endpoint
 Connection::remote_acceptor_endpoint () const {
-    return tcp::endpoint (remote_endpoint_.address (), 24802);
+    return tcp::endpoint (remote_ip(), 24802);
 }

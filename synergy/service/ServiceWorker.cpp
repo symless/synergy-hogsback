@@ -169,7 +169,8 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
 
             for(const auto& ipStr : ipList) {
                 m_router.add_peer (tcp::endpoint
-                                   (ip::address::from_string (ipStr), kNodePort));
+                                   (ip::address::from_string (ipStr), kNodePort),
+                                   true);
             }
         });
     });
@@ -186,7 +187,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             boost::split (ipList, ipListStr, boost::is_any_of(","));
             for (auto const& ipStr : ipList) {
                 m_router.add_peer (tcp::endpoint
-                    (ip::address::from_string (ipStr), kNodePort));
+                    (ip::address::from_string (ipStr), kNodePort), true);
             }
         }
     );
