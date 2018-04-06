@@ -200,7 +200,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         });
 
         if (removedLocal != end(removed)) {
-            serviceLog()->debug ("Local screen removed from profile");
+            serviceLog()->debug ("local screen removed from profile");
             m_coreManager->pause();
             m_cloudClient->shutdownWebsocket();
             m_router.shutdown();
