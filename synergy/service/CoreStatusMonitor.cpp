@@ -40,6 +40,16 @@ void CoreStatusMonitor::monitor(CoreProcess& process)
                 update(localScreenId, ScreenStatus::kConnecting);
             }, boost::signals2::at_front)
         );
+
+        m_signals.emplace_back (
+            process.output.connect ([this, localScreenId](std::string const& line) {
+                if (!contains (line, "disconnected from server")) {
+                    return;
+                }
+
+                update(localScreenId, ScreenStatus::kDisconnected);
+            }, boost::signals2::at_front)
+        );
     }
     else if (process.processMode() == ProcessMode::kServer) {
         m_signals.emplace_back (
