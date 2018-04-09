@@ -102,6 +102,11 @@ CoreProcess::shutdown() {
 void
 CoreProcess::startServer()
 {
+    if (m_disabled) {
+        serviceLog()->debug("core process is disabled");
+        return;
+    }
+
     serviceLog()->debug("starting core server process");
 
     m_processMode = ProcessMode::kServer;
@@ -121,6 +126,11 @@ CoreProcess::startServer()
 void
 CoreProcess::startClient(int const serverId)
 {
+    if (m_disabled) {
+        serviceLog()->debug("core process is disabled");
+        return;
+    }
+
     serviceLog()->debug("starting core client process");
 
     m_processMode = ProcessMode::kClient;
@@ -139,6 +149,7 @@ CoreProcess::startClient(int const serverId)
 void
 CoreProcess::start (std::vector<std::string> command)
 {
+    // TODO: remove duplicate code
     if (m_disabled) {
         serviceLog()->debug("core process is disabled");
         return;
