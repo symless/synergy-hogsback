@@ -18,7 +18,7 @@ public:
     using signal = boost::signals2::signal<Args...>;
 
     signal<void(SecuredTcpClient*)> connected;
-    signal<void(SecuredTcpClient*)> connectFailed;
+    signal<void(errorCode)> connectFailed;
 
     std::string address() const;
     std::string port() const;
