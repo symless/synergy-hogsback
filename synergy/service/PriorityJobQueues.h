@@ -10,18 +10,21 @@ public:
         m_queues(numberOfQueue) {
     }
 
+    size_t size() { return m_size; }
+
     void appendQueue() {
         std::queue<T> q;
         m_queues.emplace_back(std::move(q));
     }
 
     bool appendJob(typename std::queue<T>::size_type index, T job) {
-        bool result = false;
         if (index >= m_queues.size()) {
-            return result;
+            return false;
         }
 
         m_queues[index].emplace(std::move(job));
+        ++m_size;
+        return true;
     }
 
     bool hasJob() noexcept {
@@ -47,11 +50,14 @@ public:
     void popJob() {
         for (auto& q : m_queues) {
             if (!q.empty()) {
-                return q.pop();
+                q.pop();
+                --m_size;
+                return;
             }
         }
     }
 
 private:
     std::vector<std::queue<T>> m_queues;
+    size_t m_size = 0;
 };
