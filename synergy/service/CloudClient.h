@@ -6,6 +6,7 @@
 #include <synergy/service/PriorityJobQueues.h>
 #include <synergy/common/Screen.h>
 
+#include <boost/beast/http.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/signals2.hpp>
 #include <memory.h>
@@ -15,12 +16,20 @@ class HttpSession;
 class ProfileConfig;
 class Screen;
 
+namespace http = boost::beast::http;
+
 class CloudClient
 {
 public:
     CloudClient (boost::asio::io_service& ioService,
                  std::shared_ptr<UserConfig> userConfig,
                  std::shared_ptr<ProfileConfig> remoteProfileConfig);
+
+    ~CloudClient();
+    CloudClient(const CloudClient&) = default;
+    CloudClient& operator=(const CloudClient&) = default;
+    CloudClient(CloudClient&&) = default;
+    CloudClient& operator=(CloudClient&&) = default;
 
     void claimServer(int64_t serverId);
     void updateScreen(Screen& screen);
@@ -31,16 +40,11 @@ public:
     bool isWebsocketConnected() const;
 
 private:
-    void load(const UserConfig &userConfig);
-    HttpSession* newHttpSession();
-    static std::string pubSubServerHostname();
-    static std::string cloudServerHostname();
-
-private:
     struct HttpJob {
         std::string target;
-        std::string method;
+        http::verb method;
         std::string context;
+        unsigned int retryTimes = 0;
     };
 
     enum JobCategories {
@@ -51,6 +55,14 @@ private:
     };
 
     using HTTPPriorityJobQueues = PriorityJobQueues <HttpJob>;
+
+private:
+    void load(const UserConfig &userConfig);
+    void addHttpJob(JobCategories cat, HttpJob& job);
+    void sendNextHttp();
+
+    static std::string pubSubServerHostname();
+    static std::string cloudServerHostname();
 
 public:
     template <typename... Args>
@@ -68,7 +80,8 @@ private:
     std::shared_ptr<ProfileConfig> m_remoteProfileConfig;
     int m_lastProfileId = -1;
     std::string m_lastUserToken = "";
-    HTTPPriorityJobQueues m_HTTPJobQueues;
+    HTTPPriorityJobQueues m_httpJobQueues;
+    std::unique_ptr<HttpSession> m_httpSession;
 };
 
 #endif // CLOUDCLIENT_H

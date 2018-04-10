@@ -24,7 +24,8 @@ CloudClient::CloudClient(boost::asio::io_service& ioService,
     m_userConfig (std::move(userConfig)),
     m_websocket(ioService, pubSubServerHostname(), kPubSubServerPort),
     m_remoteProfileConfig(remoteProfileConfig),
-    m_HTTPJobQueues(JobCategories::MaximumSize)
+    m_httpJobQueues(JobCategories::MaximumSize),
+    m_httpSession(std::make_unique<HttpSession>(m_ioService, cloudServerHostname(), kCloudServerPort))
 {
     m_userConfig->updated.connect ([this]() { this->load (*m_userConfig); });
     load (*m_userConfig);
@@ -50,6 +51,27 @@ CloudClient::CloudClient(boost::asio::io_service& ioService,
     m_websocket.connectionError.connect([this](WebsocketError error) {
         websocketError(error);
     });
+
+    m_httpSession->requestReturned.connect([this](http::status result, std::string response) {
+        if (result != http::status::ok) {
+            auto& lastJob = m_httpJobQueues.nextJob();
+            serviceLog()->debug("invalid http request to {}: {}", lastJob.target, response);
+
+            if (lastJob.retryTimes-- > 0) {
+                m_httpJobQueues.popJob();
+            }
+
+            sendNextHttp();
+        }
+    });
+
+    m_httpSession->requestFailed.connect([this](errorCode ec) {
+        // without popping the top job, this means retry
+        sendNextHttp();
+    });
+}
+
+CloudClient::~CloudClient() {
 }
 
 void
@@ -86,6 +108,27 @@ CloudClient::load(UserConfig const& userConfig)
 
     m_lastProfileId = profileId;
     m_lastUserToken = userToken;
+
+    m_httpSession->addHeader("X-Auth-Token", m_userConfig->userToken());
+}
+
+void CloudClient::addHttpJob(CloudClient::JobCategories cat, CloudClient::HttpJob &job)
+{
+    m_httpJobQueues.appendJob(cat, job);
+
+    if (m_httpJobQueues.size() == 1) {
+        sendNextHttp();
+    }
+}
+
+void CloudClient::sendNextHttp()
+{
+    if (m_httpJobQueues.hasJob()) {
+        auto& nextJob = m_httpJobQueues.nextJob();
+
+        m_httpSession->setupRequest(nextJob.method, nextJob.target, nextJob.context);
+        m_httpSession->connect();
+    }
 }
 
 void CloudClient::claimServer(int64_t serverId)
@@ -100,10 +143,10 @@ void CloudClient::claimServer(int64_t serverId)
     root["profile_version"] = profileVersion;
 
     job.target = "/profile/server/claim";
-    job.method = "post";
+    job.method = http::verb::post;
     job.context = std::move(tao::json::to_string(root));
 
-    m_HTTPJobQueues.appendJob(JobCategories::ProfileUpdate, job);
+    m_httpJobQueues.appendJob(JobCategories::ProfileUpdate, job);
 }
 
 void CloudClient::updateScreen(Screen& screen)
@@ -117,10 +160,10 @@ void CloudClient::updateScreen(Screen& screen)
     root["version"] = screen.version();
 
     job.target = "/screen/update";
-    job.method = "post";
+    job.method = http::verb::post;
     job.context = std::move(tao::json::to_string(root));
 
-    m_HTTPJobQueues.appendJob(JobCategories::ScreenUpdate, job);
+    m_httpJobQueues.appendJob(JobCategories::ScreenUpdate, job);
 }
 
 void CloudClient::updateScreenStatus(Screen &screen)
@@ -134,10 +177,10 @@ void CloudClient::updateScreenStatus(Screen &screen)
     root["version"] = screen.version();
 
     job.target = "/screen/status/update";
-    job.method = "post";
+    job.method = http::verb::post;
     job.context = std::move(tao::json::to_string(root));
 
-    m_HTTPJobQueues.appendJob(JobCategories::ScreenUpdate, job);
+    m_httpJobQueues.appendJob(JobCategories::ScreenUpdate, job);
 }
 
 void CloudClient::updateScreenError(Screen &screen)
@@ -161,27 +204,6 @@ bool
 CloudClient::isWebsocketConnected() const
 {
     return m_websocket.isConnected();
-}
-
-HttpSession*
-CloudClient::newHttpSession()
-{
-    // TODO: add lifetime management or make http session reusable
-    HttpSession* httpSession = new HttpSession(m_ioService, cloudServerHostname(), kCloudServerPort);
-
-    httpSession->addHeader("X-Auth-Token", m_userConfig->userToken());
-
-    httpSession->requestSuccess.connect(
-        [](HttpSession* session, std::string){
-        delete session;
-
-    });
-    httpSession->requestFailed.connect(
-        [](HttpSession* session, std::string){
-        delete session;
-    });
-
-    return httpSession;
 }
 
 std::string
