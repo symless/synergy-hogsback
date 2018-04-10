@@ -10,6 +10,18 @@ HttpSession::HttpSession(boost::asio::io_service& ioService, std::string hostnam
     m_readBuffer(2048)
 {
     addHeader("X-Synergy-Version", SYNERGY_VERSION_STRING);
+
+    m_tcpClient.connected.connect(
+        [this](SecuredTcpClient*) {
+            onTcpClientConnected();
+        },
+        boost::signals2::at_front
+    );
+
+    m_tcpClient.connectFailed.connect(
+        [this](errorCode ec){
+        requestFailed(ec);
+    });
 }
 
 void HttpSession::addHeader(std::string headerName, std::string headerContent)
@@ -33,28 +45,27 @@ void HttpSession::post(const std::string &target, const std::string &body)
 
 void HttpSession::connect()
 {
-    m_tcpClient.connected.connect(
-        [this](SecuredTcpClient*) {
-            onTcpClientConnected();
-        },
-        boost::signals2::at_front
-    );
-
-    m_tcpClient.connectFailed.connect(
-        [this](SecuredTcpClient*){
-        requestFailed(this, "TCP connection failed");
-    });
-
-    m_tcpClient.connect();
+    if (!m_connected) {
+        m_tcpClient.connect();
+    }
+    else {
+        sendRequest();
+    }
 }
 
-void HttpSession::onTcpClientConnected()
+void HttpSession::sendRequest()
 {
     http::async_write(m_tcpClient.stream(), m_request,
         std::bind(
             &HttpSession::onWriteFinished,
             this,
             std::placeholders::_1));
+}
+
+void HttpSession::onTcpClientConnected()
+{
+    m_connected = true;
+    sendRequest();
 }
 
 void HttpSession::setupRequest(http::verb method, const std::string &target, const std::string &body)
@@ -81,7 +92,8 @@ void HttpSession::onWriteFinished(errorCode ec)
 {
     if (ec) {
         serviceLog()->debug("http session write error: {}", ec.message());
-        requestFailed(this, ec.message());
+        m_connected = false;
+        requestFailed(ec);
         return;
     }
 
@@ -99,15 +111,10 @@ void HttpSession::onReadFinished(errorCode ec)
 {
     if (ec) {
         serviceLog()->debug("http session read error: {}", ec.message());
-        requestFailed(this, ec.message());
+        m_connected = false;
+        requestFailed(ec);
         return;
     }
 
-    if (m_response.result() != http::status::ok) {
-        serviceLog()->debug("invalid http request: {}", m_response.body());
-        requestFailed(this, m_response.body());
-        return;
-    }
-
-    requestSuccess(this, m_response.body());
+    requestReturned(m_response.result(), m_response.body());
 }
