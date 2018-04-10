@@ -44,7 +44,7 @@ private:
         std::string target;
         http::verb method;
         std::string context;
-        unsigned int retryTimes = 0;
+        int retryTimes = 0;
     };
 
     enum JobCategories {

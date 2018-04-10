@@ -52,12 +52,12 @@ CloudClient::CloudClient(boost::asio::io_service& ioService,
         websocketError(error);
     });
 
-    m_httpSession->requestReturned.connect([this](http::status result, std::string response) {
+    m_httpSession->responseReceived.connect([this](http::status result, std::string response) {
         if (result != http::status::ok) {
             auto& lastJob = m_httpJobQueues.nextJob();
             serviceLog()->debug("invalid http request to {}: {}", lastJob.target, response);
 
-            if (lastJob.retryTimes-- > 0) {
+            if (lastJob.retryTimes-- <= 0) {
                 m_httpJobQueues.popJob();
             }
 
@@ -127,7 +127,7 @@ void CloudClient::sendNextHttp()
         auto& nextJob = m_httpJobQueues.nextJob();
 
         m_httpSession->setupRequest(nextJob.method, nextJob.target, nextJob.context);
-        m_httpSession->connect();
+        m_httpSession->send();
     }
 }
 
@@ -144,9 +144,9 @@ void CloudClient::claimServer(int64_t serverId)
 
     job.target = "/profile/server/claim";
     job.method = http::verb::post;
-    job.context = std::move(tao::json::to_string(root));
+    job.context = tao::json::to_string(root);
 
-    m_httpJobQueues.appendJob(JobCategories::ProfileUpdate, job);
+    addHttpJob(JobCategories::ProfileUpdate, job);
 }
 
 void CloudClient::updateScreen(Screen& screen)
@@ -161,9 +161,9 @@ void CloudClient::updateScreen(Screen& screen)
 
     job.target = "/screen/update";
     job.method = http::verb::post;
-    job.context = std::move(tao::json::to_string(root));
+    job.context = tao::json::to_string(root);
 
-    m_httpJobQueues.appendJob(JobCategories::ScreenUpdate, job);
+    addHttpJob(JobCategories::ScreenUpdate, job);
 }
 
 void CloudClient::updateScreenStatus(Screen &screen)
@@ -178,9 +178,9 @@ void CloudClient::updateScreenStatus(Screen &screen)
 
     job.target = "/screen/status/update";
     job.method = http::verb::post;
-    job.context = std::move(tao::json::to_string(root));
+    job.context = tao::json::to_string(root);
 
-    m_httpJobQueues.appendJob(JobCategories::ScreenUpdate, job);
+    addHttpJob(JobCategories::ScreenUpdate, job);
 }
 
 void CloudClient::updateScreenError(Screen &screen)
