@@ -13,8 +13,7 @@ public:
     size_t size() { return m_size; }
 
     void appendQueue() {
-        std::queue<T> q;
-        m_queues.emplace_back(std::move(q));
+        m_queues.emplace_back();
     }
 
     bool appendJob(typename std::queue<T>::size_type index, T job) {
@@ -27,14 +26,8 @@ public:
         return true;
     }
 
-    bool hasJob() noexcept {
-        for (auto& q : m_queues) {
-            if (!q.empty()) {
-                return true;
-            }
-        }
-
-        return false;
+    bool hasJob() const noexcept {
+        return m_size;
     }
 
     T& nextJob() {
