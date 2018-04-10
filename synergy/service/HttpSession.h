@@ -23,11 +23,11 @@ public:
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
 
-    signal<void(http::status result, std::string response)> requestReturned;
+    signal<void(http::status result, std::string response)> responseReceived;
     signal<void(errorCode ec)> requestFailed;
 
 private:
-    void connect();
+    void send();
     void sendRequest();
     void onTcpClientConnected();
     void setupRequest(http::verb method, const std::string &target, const std::string &body = "");

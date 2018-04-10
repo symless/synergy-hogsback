@@ -33,17 +33,17 @@ void HttpSession::get(const std::string &target)
 {
     setupRequest(http::verb::get, target);
 
-    connect();
+    send();
 }
 
 void HttpSession::post(const std::string &target, const std::string &body)
 {
     setupRequest(http::verb::post, target, body);
 
-    connect();
+    send();
 }
 
-void HttpSession::connect()
+void HttpSession::send()
 {
     if (!m_connected) {
         m_tcpClient.connect();
@@ -116,5 +116,5 @@ void HttpSession::onReadFinished(errorCode ec)
         return;
     }
 
-    requestReturned(m_response.result(), m_response.body());
+    responseReceived(m_response.result(), m_response.body());
 }
