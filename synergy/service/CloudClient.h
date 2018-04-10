@@ -1,9 +1,10 @@
 #ifndef CLOUDCLIENT_H
 #define CLOUDCLIENT_H
 
-#include "synergy/service/WebsocketSession.h"
-#include "synergy/service/WebsocketError.h"
-#include "synergy/common/Screen.h"
+#include <synergy/service/WebsocketSession.h>
+#include <synergy/service/WebsocketError.h>
+#include <synergy/service/PriorityJobQueues.h>
+#include <synergy/common/Screen.h>
 
 #include <boost/asio/io_service.hpp>
 #include <boost/signals2.hpp>
@@ -35,6 +36,22 @@ private:
     static std::string pubSubServerHostname();
     static std::string cloudServerHostname();
 
+private:
+    struct HttpJob {
+        std::string target;
+        std::string method;
+        std::string context;
+    };
+
+    enum JobCategories {
+        ProfileUpdate,
+        ScreenUpdate,
+        ScreenStatusUpdate,
+        MaximumSize
+    };
+
+    using HTTPPriorityJobQueues = PriorityJobQueues <HttpJob>;
+
 public:
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
@@ -51,6 +68,7 @@ private:
     std::shared_ptr<ProfileConfig> m_remoteProfileConfig;
     int m_lastProfileId = -1;
     std::string m_lastUserToken = "";
+    HTTPPriorityJobQueues m_HTTPJobQueues;
 };
 
 #endif // CLOUDCLIENT_H

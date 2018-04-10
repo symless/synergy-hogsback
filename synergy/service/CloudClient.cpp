@@ -23,7 +23,8 @@ CloudClient::CloudClient(boost::asio::io_service& ioService,
     m_ioService(ioService),
     m_userConfig (std::move(userConfig)),
     m_websocket(ioService, pubSubServerHostname(), kPubSubServerPort),
-    m_remoteProfileConfig(remoteProfileConfig)
+    m_remoteProfileConfig(remoteProfileConfig),
+    m_HTTPJobQueues(JobCategories::MaximumSize)
 {
     m_userConfig->updated.connect ([this]() { this->load (*m_userConfig); });
     load (*m_userConfig);
@@ -89,37 +90,25 @@ CloudClient::load(UserConfig const& userConfig)
 
 void CloudClient::claimServer(int64_t serverId)
 {
-    boost::posix_time::ptime current = boost::posix_time::second_clock::local_time();
-    static auto allowNextTime = current;
-    static const auto kMinRequestInterval = boost::posix_time::seconds(1);
-    if (current >= allowNextTime) {
-        allowNextTime = current + kMinRequestInterval;
-    }
-    else {
-        serviceLog()->warn("ignored sending claim server request, operation too frequent");
-        return;
-    }
+    HttpJob job;
 
     auto profileId = m_userConfig->profileId();
-    serviceLog()->debug("sending claim server message, serverId={} profileId={}", serverId, profileId);
-
-    static const std::string kUrlTarget = "/profile/server/claim";
-    HttpSession* httpSession = newHttpSession();
-
     int64_t profileVersion = m_remoteProfileConfig->profileVersion();
-
     tao::json::value root;
     root["screen_id"] = serverId;
     root["profile_id"] = profileId;
     root["profile_version"] = profileVersion;
 
-    httpSession->post(kUrlTarget, tao::json::to_string(root));
+    job.target = "/profile/server/claim";
+    job.method = "post";
+    job.context = std::move(tao::json::to_string(root));
+
+    m_HTTPJobQueues.appendJob(JobCategories::ProfileUpdate, job);
 }
 
 void CloudClient::updateScreen(Screen& screen)
 {
-    static const std::string kUrlTarget = "/screen/update";
-    HttpSession* httpSession = newHttpSession();
+    HttpJob job;
 
     tao::json::value root;
     root["id"] = screen.id();
@@ -127,13 +116,16 @@ void CloudClient::updateScreen(Screen& screen)
     root["ipList"] = screen.ipList();
     root["version"] = screen.version();
 
-    httpSession->post(kUrlTarget, tao::json::to_string(root));
+    job.target = "/screen/update";
+    job.method = "post";
+    job.context = std::move(tao::json::to_string(root));
+
+    m_HTTPJobQueues.appendJob(JobCategories::ScreenUpdate, job);
 }
 
 void CloudClient::updateScreenStatus(Screen &screen)
 {
-    static const std::string kUrlTarget = "/screen/status/update";
-    HttpSession* httpSession = newHttpSession();
+    HttpJob job;
 
     tao::json::value root;
     root["id"] = screen.id();
@@ -141,21 +133,16 @@ void CloudClient::updateScreenStatus(Screen &screen)
     root["status"] = screenStatusToString(screen.status());
     root["version"] = screen.version();
 
-    httpSession->post(kUrlTarget, tao::json::to_string(root));
+    job.target = "/screen/status/update";
+    job.method = "post";
+    job.context = std::move(tao::json::to_string(root));
+
+    m_HTTPJobQueues.appendJob(JobCategories::ScreenUpdate, job);
 }
 
 void CloudClient::updateScreenError(Screen &screen)
 {
-    static const std::string kUrlTarget = "/screen/error/update";
-    HttpSession* httpSession = newHttpSession();
-
-    tao::json::value root;
-    root["id"] = screen.id();
-    root["name"] = screen.name();
-    root["error_code"] = static_cast<uint32_t>(screen.errorCode());
-    root["error_message"] = screen.errorMessage();
-
-    httpSession->post(kUrlTarget, tao::json::to_string(root));
+    // TODO: implement this
 }
 
 void
