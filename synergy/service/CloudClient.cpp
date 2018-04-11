@@ -60,9 +60,13 @@ CloudClient::CloudClient(boost::asio::io_service& ioService,
             if (lastJob.retryTimes-- <= 0) {
                 m_httpJobQueues.popJob();
             }
-
-            sendNextHttp();
         }
+        else {
+            m_httpJobQueues.popJob();
+
+        }
+
+        sendNextHttp();
     });
 
     m_httpSession->requestFailed.connect([this](errorCode ec) {
