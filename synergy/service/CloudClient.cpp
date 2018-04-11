@@ -54,7 +54,7 @@ CloudClient::CloudClient(boost::asio::io_service& ioService,
 
     m_httpSession->responseReceived.connect([this](http::status result, std::string response) {
         if (result != http::status::ok) {
-            auto& lastJob = m_httpJobQueues.nextJob();
+            auto& lastJob = m_httpJobQueues.currentJob();
             serviceLog()->debug("invalid http request to {}: {}", lastJob.target, response);
 
             if (lastJob.retryTimes-- <= 0) {

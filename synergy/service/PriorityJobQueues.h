@@ -30,27 +30,42 @@ public:
         return m_size;
     }
 
+    T& currentJob() {
+        if (m_currentJobQueueIndex <= -1 ||
+            m_currentJobQueueIndex >= m_queues.size()) {
+            throw;
+        }
+
+        return m_queues[m_currentJobQueueIndex].front();
+    }
+
     T& nextJob() {
+        int index = 0;
         for (auto& q : m_queues) {
             if (!q.empty()) {
+                m_currentJobQueueIndex = index;
                 return q.front();
             }
+
+            index += 1;
         }
 
         throw;
     }
 
     void popJob() {
-        for (auto& q : m_queues) {
-            if (!q.empty()) {
-                q.pop();
-                --m_size;
-                return;
-            }
+        if (m_currentJobQueueIndex <= -1 ||
+            m_currentJobQueueIndex >= m_queues.size()) {
+            throw;
         }
+
+        m_queues[m_currentJobQueueIndex].pop();
+
+        m_size -= 1;
     }
 
 private:
     std::vector<std::queue<T>> m_queues;
     size_t m_size = 0;
+    int m_currentJobQueueIndex = -1;
 };
