@@ -63,7 +63,6 @@ CloudClient::CloudClient(boost::asio::io_service& ioService,
         }
         else {
             m_httpJobQueues.popJob();
-
         }
 
         sendNextHttp();
@@ -71,6 +70,7 @@ CloudClient::CloudClient(boost::asio::io_service& ioService,
 
     m_httpSession->requestFailed.connect([this](errorCode ec) {
         // without popping the top job, this means retry
+        serviceLog()->debug("http request failed: {}", ec.message());
         sendNextHttp();
     });
 }
