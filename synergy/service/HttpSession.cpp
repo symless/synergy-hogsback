@@ -75,6 +75,7 @@ void HttpSession::setupRequest(http::verb method, const std::string &target, con
     m_request.target(std::move(target));
     m_request.set(http::field::host, m_tcpClient.address().c_str());
     m_request.set(http::field::connection, "keep-alive");
+    m_response = http::response<http::string_body>();
 
     if (!body.empty()) {
         m_request.set(http::field::content_type, "application/json");
