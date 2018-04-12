@@ -43,7 +43,7 @@ void CoreStatusMonitor::monitor(CoreProcess& process)
 
         m_signals.emplace_back (
             process.output.connect ([this, localScreenId](std::string const& line) {
-                if (!contains (line, "disconnected from server")) {
+                if (!contains (line, "suspend")) {
                     return;
                 }
 
