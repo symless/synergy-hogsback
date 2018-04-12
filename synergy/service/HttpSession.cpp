@@ -6,22 +6,12 @@
 static const int kHttpVersion = 11;
 
 HttpSession::HttpSession(boost::asio::io_service& ioService, std::string hostname, std::string port) :
-    m_tcpClient(ioService, hostname, port),
-    m_readBuffer(2048)
+    m_readBuffer(2048),
+    m_ioService(ioService),
+    m_hostname(hostname),
+    m_port(port)
 {
     addHeader("X-Synergy-Version", SYNERGY_VERSION_STRING);
-
-    m_tcpClient.connected.connect(
-        [this](SecuredTcpClient*) {
-            onTcpClientConnected();
-        },
-        boost::signals2::at_front
-    );
-
-    m_tcpClient.connectFailed.connect(
-        [this](errorCode ec){
-        requestFailed(ec);
-    });
 }
 
 void HttpSession::addHeader(std::string headerName, std::string headerContent)
@@ -45,8 +35,22 @@ void HttpSession::post(const std::string &target, const std::string &body)
 
 void HttpSession::send()
 {
-    if (!m_connected) {
-        m_tcpClient.connect();
+    if (!m_tcpClient) {
+        m_tcpClient = std::make_unique<SecuredTcpClient>(m_ioService, m_hostname, m_port);
+
+        m_tcpClient->connected.connect(
+            [this](SecuredTcpClient*) {
+                onTcpClientConnected();
+            },
+            boost::signals2::at_front
+        );
+
+        m_tcpClient->connectFailed.connect(
+            [this](errorCode ec){
+            requestFailed(ec);
+        });
+
+        m_tcpClient->connect();
     }
     else {
         sendRequest();
@@ -55,7 +59,7 @@ void HttpSession::send()
 
 void HttpSession::sendRequest()
 {
-    http::async_write(m_tcpClient.stream(), m_request,
+    http::async_write(m_tcpClient->stream(), m_request,
         std::bind(
             &HttpSession::onWriteFinished,
             this,
@@ -64,7 +68,6 @@ void HttpSession::sendRequest()
 
 void HttpSession::onTcpClientConnected()
 {
-    m_connected = true;
     sendRequest();
 }
 
@@ -73,7 +76,7 @@ void HttpSession::setupRequest(http::verb method, const std::string &target, con
     m_request.version(kHttpVersion);
     m_request.method(method);
     m_request.target(std::move(target));
-    m_request.set(http::field::host, m_tcpClient.address().c_str());
+    m_request.set(http::field::host, m_hostname.c_str());
     m_request.set(http::field::connection, "keep-alive");
     m_response = http::response<http::string_body>();
 
@@ -93,13 +96,13 @@ void HttpSession::onWriteFinished(errorCode ec)
 {
     if (ec) {
         serviceLog()->debug("http session write error: {}", ec.message());
-        m_connected = false;
+        m_tcpClient.reset();
         requestFailed(ec);
         return;
     }
 
     http::async_read(
-        m_tcpClient.stream(),
+        m_tcpClient->stream(),
         m_readBuffer,
         m_response,
         std::bind(
@@ -112,7 +115,7 @@ void HttpSession::onReadFinished(errorCode ec)
 {
     if (ec) {
         serviceLog()->debug("http session read error: {}", ec.message());
-        m_connected = false;
+        m_tcpClient.reset();
         requestFailed(ec);
         return;
     }

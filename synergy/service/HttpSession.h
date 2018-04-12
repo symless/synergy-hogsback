@@ -35,12 +35,14 @@ private:
     void onReadFinished(errorCode ec);
 
 private:
-    SecuredTcpClient m_tcpClient;
+    std::unique_ptr<SecuredTcpClient> m_tcpClient;
     std::map<std::string, std::string> m_headers;
     http::request<http::string_body> m_request;
     http::response<http::string_body> m_response;
     boost::beast::flat_buffer  m_readBuffer;
-    bool m_connected = false;
+    boost::asio::io_service& m_ioService;
+    std::string m_hostname;
+    std::string m_port;
 };
 
 #endif // HTTPSESSION_H
