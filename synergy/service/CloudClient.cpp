@@ -161,7 +161,6 @@ void CloudClient::updateScreen(Screen& screen)
     root["id"] = screen.id();
     root["name"] = screen.name();
     root["ipList"] = screen.ipList();
-    root["version"] = screen.version();
 
     job.target = "/screen/update";
     job.method = http::verb::post;
@@ -178,7 +177,6 @@ void CloudClient::updateScreenStatus(Screen &screen)
     root["id"] = screen.id();
     root["name"] = screen.name();
     root["status"] = screenStatusToString(screen.status());
-    root["version"] = screen.version();
 
     job.target = "/screen/status/update";
     job.method = http::verb::post;

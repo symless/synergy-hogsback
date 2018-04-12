@@ -126,7 +126,6 @@ CoreManager::CoreManager (boost::asio::io_service& io,
                 serviceLog()->debug("send screen status update {}: {} -> {}", screenName, orignialStatus, newStatus);
 
                 screen.status(status);
-                screen.touch();
                 m_cloudClient->updateScreenStatus(screen);
             }
         }

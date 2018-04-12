@@ -219,7 +219,6 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             if (localScreen.ipList (ipSet)) {
                 serviceLog()->info ("System IP addresses changed: {}",
                                     localScreen.ipList());
-                localScreen.touch();
                 m_cloudClient->updateScreen (localScreen);
             }
         } catch (...) {
