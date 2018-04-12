@@ -268,6 +268,19 @@ App::run(int argc, char* argv[])
         }
     });
 
+    auto proxies = QNetworkProxyFactory::systemProxyForQuery(
+                QNetworkProxyQuery("https://pubsub.cloud.symless.com/",
+                                   QNetworkProxyQuery::QueryType::UrlRequest));
+
+    QString httpProxy;
+    for (auto& proxy: proxies) {
+        if (proxy.type() == QNetworkProxy::ProxyType::HttpProxy) {
+            httpProxy = QString("%1:%2").arg(proxy.hostName()).arg(proxy.port());
+            LogManager::info(QString("HTTP proxy detected %1").arg(httpProxy));
+            break;
+        }
+    }
+
     CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
     cloudClient->checkUpdate();
 
@@ -280,12 +293,14 @@ App::run(int argc, char* argv[])
         cloudClient->invalidAuth();
     });
 
-    WampClient& wampClient = serviceProxy.wampClient();
+    auto& wampClient = serviceProxy.wampClient();
 
-    QObject::connect(cloudClient, &CloudClient::profileUpdated, [&wampClient](){
-        // TODO: review this, this is essentially from a http call, probably should be in service
+    QObject::connect(cloudClient, &CloudClient::profileUpdated,
+                     [&wampClient, httpProxy](){
+        // TODO: review this, this is essentially from a http call, probably
+        // should be in service
         auto authUpdateFunc = [&wampClient]() {
-            AppConfig* appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
+            auto appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
             wampClient.call<void> ("synergy.auth.update",
                                    appConfig->userId(),
                                    appConfig->screenId(),
@@ -293,15 +308,25 @@ App::run(int argc, char* argv[])
                                    appConfig->userToken().toStdString());
         };
 
+        auto httpProxyUpdateFunc = [&wampClient, httpProxy]() {
+            if (!httpProxy.isEmpty()) {
+                wampClient.call<void> ("synergy.network.http-proxy.update",
+                                       "http", httpProxy.toStdString());
+            }
+        };
+
         if (wampClient.isConnected()) {
+            httpProxyUpdateFunc();
             authUpdateFunc();
         }
         else {
+            wampClient.connected.connect(httpProxyUpdateFunc);
             wampClient.connected.connect(authUpdateFunc);
         }
     });
 
-    QObject::connect(logManager, &LogManager::logLine, [&](const QString& logLine) {
+    QObject::connect(logManager, &LogManager::logLine,
+                     [&wampClient](const QString& logLine) {
         if (wampClient.isConnected()) {
             wampClient.call<void>("synergy.log.config", logLine.toStdString());
         }

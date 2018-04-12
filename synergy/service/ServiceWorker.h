@@ -38,6 +38,7 @@ private:
     void provideLogging();
     void provideServerClaim();
     void provideRestart();
+    void provideNetworkConfig();
 
 private:
     boost::asio::io_service&        m_ioService;
@@ -57,6 +58,8 @@ private:
     std::unique_ptr<ErrorNotifier>  m_errorNotifier;
     std::unique_ptr<TrayService>    m_trayService;
     std::unique_ptr<IPMonitor>      m_ipMonitor;
+
+    std::string                     m_httpProxy;
 };
 
 #endif // SERVICEWORKER_H

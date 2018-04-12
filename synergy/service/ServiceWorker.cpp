@@ -226,6 +226,7 @@ ServiceWorker::provideRpcEndpoints()
     provideServerClaim();
     provideTray();
     provideRestart();
+    provideNetworkConfig();
 
     serviceLog()->debug("rpc endpoints created");
 }
@@ -377,5 +378,21 @@ void ServiceWorker::provideRestart()
     m_rpc->server()->provide("synergy.service.restart", [this]() {
         serviceLog()->info("Restart service received");
         this->shutdown();
+    });
+}
+
+void
+ServiceWorker::provideNetworkConfig()
+{
+    m_rpc->server()->provide("synergy.network.http-proxy.update",
+            [this](std::string const& protocol, std::string proxyString) {
+        if (protocol != "http") {
+            return;
+        }
+        m_httpProxy = std::move(proxyString);
+        if (m_httpProxy.empty()) {
+            return;
+        }
+        serviceLog()->info("Using HTTP proxy: {}", m_httpProxy.c_str());
     });
 }
