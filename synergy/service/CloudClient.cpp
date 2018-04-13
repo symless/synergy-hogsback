@@ -188,7 +188,7 @@ CloudClient::setProxy
     }
 
     std::vector<std::string> parts;
-    boost::split (config, parts, ":");
+    boost::algorithm::split (parts, config, [](char c) { return c == ':'; });
 
     if (parts.size() > 2) {
         return false;
