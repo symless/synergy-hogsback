@@ -53,7 +53,7 @@ private:
     int m_lastProfileId = -1;
     std::string m_lastUserToken = "";
     std::string m_httpProxy;
-    int m_httpProxyPort = 0;
+    int m_httpProxyPort = 80;
 };
 
 #endif // CLOUDCLIENT_H
