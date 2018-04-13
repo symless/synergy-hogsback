@@ -174,10 +174,9 @@ void CloudClient::updateScreenStatus(Screen &screen)
 
     tao::json::value root;
     root["id"] = screen.id();
-    root["name"] = screen.name();
     root["status"] = screenStatusToString(screen.status());
 
-    job.target = "/screen/status/update";
+    job.target = "screen/update";
     job.method = http::verb::post;
     job.context = tao::json::to_string(root);
 
