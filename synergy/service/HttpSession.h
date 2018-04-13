@@ -2,7 +2,7 @@
 #define HTTPSESSION_H
 
 #include "synergy/service/SecuredTcpClient.h"
-
+#include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/signals2.hpp>
@@ -12,6 +12,8 @@ namespace http = boost::beast::http;
 class HttpSession final
 {
 public:
+    using ErrorCode = SecuredTcpClient::ErrorCode;
+
     HttpSession(boost::asio::io_service& ioService, std::string hostname, std::string port);
 
     void addHeader(std::string headerName, std::string headerContent);
@@ -28,8 +30,8 @@ private:
     void connect();
     void onTcpClientConnected();
     void setupRequest(http::verb method, const std::string &target, const std::string &body = "");
-    void onWriteFinished(errorCode ec);
-    void onReadFinished(errorCode ec);
+    void onWriteFinished(ErrorCode ec);
+    void onReadFinished(ErrorCode ec);
 
 private:
     SecuredTcpClient m_tcpClient;

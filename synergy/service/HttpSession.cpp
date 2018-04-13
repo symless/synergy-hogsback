@@ -77,7 +77,7 @@ void HttpSession::setupRequest(http::verb method, const std::string &target, con
     }
 }
 
-void HttpSession::onWriteFinished(errorCode ec)
+void HttpSession::onWriteFinished(HttpSession::ErrorCode ec)
 {
     if (ec) {
         serviceLog()->debug("http session write error: {}", ec.message());
@@ -95,7 +95,7 @@ void HttpSession::onWriteFinished(errorCode ec)
             std::placeholders::_1));
 }
 
-void HttpSession::onReadFinished(errorCode ec)
+void HttpSession::onReadFinished(HttpSession::ErrorCode ec)
 {
     if (ec) {
         serviceLog()->debug("http session read error: {}", ec.message());

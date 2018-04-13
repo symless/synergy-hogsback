@@ -18,6 +18,10 @@
 #include <errno.h>
 #endif
 
+namespace websocket = boost::beast::websocket;
+namespace ssl = boost::asio::ssl;
+using tcp = boost::asio::ip::tcp;
+
 // randomly reconnect between this min and max.
 static const long kMinReconnectDelaySec = 5;
 static const long kMaxReconnectDelaySec = 30;
@@ -189,7 +193,7 @@ WebsocketSession::onTcpClientConnectFailed()
 }
 
 void
-WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
+WebsocketSession::onWebsocketHandshakeFinished(WebsocketSession::ErrorCode ec)
 {
     if (ec) {
         std::string res_failed_reason = m_res["X-SCS-Reason"].to_string();
@@ -222,7 +226,7 @@ WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
 }
 
 void
-WebsocketSession::onReadFinished(errorCode ec)
+WebsocketSession::onReadFinished(WebsocketSession::ErrorCode ec)
 {
     if (ec) {
         if (ec != boost::asio::error::operation_aborted) {
@@ -252,7 +256,7 @@ WebsocketSession::onReadFinished(errorCode ec)
 }
 
 void
-WebsocketSession::onWriteFinished(errorCode ec)
+WebsocketSession::onWriteFinished(WebsocketSession::ErrorCode ec)
 {
     if (ec) {
         serviceLog()->error("websocket write error {}: {}", ec.value(), ec.message());
@@ -263,7 +267,7 @@ void WebsocketSession::shutdown() noexcept
 {
     if (m_connected) {
         serviceLog()->debug("closing existing websocket connection");
-        errorCode ec;
+        ErrorCode ec;
         m_reconnectTimer.cancel();
         m_websocket->lowest_layer().cancel();
         m_ioService.poll();

@@ -3,10 +3,13 @@
 #include <boost/asio/connect.hpp>
 #include <synergy/service/ServiceLogs.h>
 
+namespace ssl = boost::asio::ssl;
+using tcp = boost::asio::ip::tcp;
+
 SecuredTcpClient::SecuredTcpClient(boost::asio::io_service &ioService, std::string hostname, std::string port) :
     m_ioService(ioService),
     m_sslContext(ssl::context::tls_client),
-    m_session(ioService, m_sslContext),
+    m_stream(ioService, m_sslContext),
     m_resolver(ioService),
     m_address(hostname),
     m_port(port),
@@ -23,17 +26,18 @@ void SecuredTcpClient::connect()
 
     // resolve syncronously due to a bug in boost where
     // m_resolver.cancel doesn't trigger abort.
-    errorCode ec;
+    ErrorCode ec;
     auto result = m_resolver.resolve({m_address, m_port}, ec);
     onResolveFinished(ec, result);
 }
 
-ssl::stream<tcp::socket> &SecuredTcpClient::stream()
+SecuredTcpClient::Stream&
+SecuredTcpClient::stream()
 {
-    return m_session.stream();
+    return m_stream;
 }
 
-void SecuredTcpClient::onResolveFinished(errorCode ec, tcp::resolver::iterator result)
+void SecuredTcpClient::onResolveFinished(ErrorCode ec, tcp::resolver::iterator result)
 {
     if (ec) {
         if (ec == boost::asio::error::operation_aborted) {
@@ -47,7 +51,7 @@ void SecuredTcpClient::onResolveFinished(errorCode ec, tcp::resolver::iterator r
     }
 
     boost::asio::async_connect(
-        m_session.stream().next_layer(),
+        this->stream().next_layer(),
         result,
         std::bind(
             &SecuredTcpClient::onConnectFinished,
@@ -55,7 +59,7 @@ void SecuredTcpClient::onResolveFinished(errorCode ec, tcp::resolver::iterator r
             std::placeholders::_1));
 }
 
-void SecuredTcpClient::onConnectFinished(errorCode ec)
+void SecuredTcpClient::onConnectFinished(ErrorCode ec)
 {
     if (ec) {
         if (ec == boost::asio::error::operation_aborted) {
@@ -68,7 +72,7 @@ void SecuredTcpClient::onConnectFinished(errorCode ec)
         return;
     }
 
-    m_session.stream().async_handshake(
+    this->stream().async_handshake(
         ssl::stream_base::client,
         std::bind(
             &SecuredTcpClient::onSslHandshakeFinished,
@@ -76,7 +80,7 @@ void SecuredTcpClient::onConnectFinished(errorCode ec)
                     std::placeholders::_1));
 }
 
-void SecuredTcpClient::onSslHandshakeFinished(errorCode ec)
+void SecuredTcpClient::onSslHandshakeFinished(ErrorCode ec)
 {
     if (ec) {
         if (ec == boost::asio::error::operation_aborted) {

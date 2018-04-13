@@ -25,7 +25,6 @@ set (SERVICE_SOURCES
     CoreManager.cpp
     ServiceWorker.cpp
     CloudClient.cpp
-    SecuredTcpSession.cpp
     SecuredTcpClient.cpp
     HttpSession.cpp
     WebsocketSession.cpp
