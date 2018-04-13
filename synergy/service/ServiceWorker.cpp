@@ -169,8 +169,9 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             if (localScreen.ipList (ipSet)) {
                 serviceLog()->info ("System IP addresses changed: {}",
                                     localScreen.ipList());
+                m_userConfig->setHttpProxy("");
+                m_userConfig->save();
                 localScreen.touch();
-                m_cloudClient->setProxy("http", "");
                 m_cloudClient->updateScreen (localScreen);
             }
         } catch (...) {
@@ -388,6 +389,9 @@ ServiceWorker::provideNetworkConfig()
     m_rpc->server()->provide("synergy.network.proxy.update",
             [this](std::string const& protocol,
                    std::string const& proxyString) {
-        m_cloudClient->setProxy (protocol, proxyString);
+        if (m_cloudClient->setProxy (protocol, proxyString)) {
+            m_userConfig->setHttpProxy (proxyString);
+            m_userConfig->save();
+        }
     });
 }

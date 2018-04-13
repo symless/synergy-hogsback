@@ -201,13 +201,20 @@ CloudClient::setProxy
         return false;
     }
 
-    m_httpProxy = std::move (parts[0]);
-    m_httpProxyPort = port;
+    bool const changed = (std::tie (m_httpProxy, m_httpProxyPort)
+                            != std::tie (parts[0], port));
+    if (changed) {
+        m_httpProxy = std::move (parts[0]);
+        m_httpProxyPort = port;
+        if (m_httpProxy.empty()) {
+            serviceLog()->info("Using unproxied cloud connectons");
+        } else {
+            serviceLog()->info("Using HTTP proxy: {}:{}",
+                               m_httpProxy.c_str(), m_httpProxyPort);
+        }
+    }
 
-    serviceLog()->info("Using HTTP proxy: {}:{}",
-                       m_httpProxy.c_str(), m_httpProxyPort);
-    m_userConfig->setHttpProxy (config);
-    return true;
+    return changed;
 }
 
 HttpSession*

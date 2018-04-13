@@ -53,7 +53,7 @@ public:
     void setVersionCheck(bool versionCheck);
 
     std::string httpProxy() const;
-    bool setHttpProxy(std::string);
+    void setHttpProxy(std::string);
 
 private:
     void makeTable(std::shared_ptr<cpptoml::table>& root);

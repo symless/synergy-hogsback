@@ -227,11 +227,10 @@ UserConfig::httpProxy() const
     return m_httpProxy;
 }
 
-bool
+void
 UserConfig::setHttpProxy(std::string str)
 {
     m_httpProxy = std::move(str);
-    return true;
 }
 
 std::string UserConfig::systemUid() const
