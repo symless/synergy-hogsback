@@ -58,8 +58,6 @@ private:
     std::unique_ptr<ErrorNotifier>  m_errorNotifier;
     std::unique_ptr<TrayService>    m_trayService;
     std::unique_ptr<IPMonitor>      m_ipMonitor;
-
-    std::string                     m_httpProxy;
 };
 
 #endif // SERVICEWORKER_H

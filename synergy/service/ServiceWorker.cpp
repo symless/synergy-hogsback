@@ -384,15 +384,9 @@ void ServiceWorker::provideRestart()
 void
 ServiceWorker::provideNetworkConfig()
 {
-    m_rpc->server()->provide("synergy.network.http-proxy.update",
-            [this](std::string const& protocol, std::string proxyString) {
-        if (protocol != "http") {
-            return;
-        }
-        m_httpProxy = std::move(proxyString);
-        if (m_httpProxy.empty()) {
-            return;
-        }
-        serviceLog()->info("Using HTTP proxy: {}", m_httpProxy.c_str());
+    m_rpc->server()->provide("synergy.network.proxy.update",
+            [this](std::string const& protocol,
+                   std::string const& proxyString) {
+        m_cloudClient->setProxy (protocol, proxyString);
     });
 }

@@ -6,6 +6,7 @@
 #include <synergy/common/UserConfig.h>
 #include <synergy/common/Screen.h>
 #include <synergy/service/App.h>
+#include <boost/algorithm/string/split.hpp>
 
 #include <tao/json.hpp>
 
@@ -82,6 +83,8 @@ CloudClient::load(UserConfig const& userConfig)
             m_websocket.reconnect();
         }
     }
+
+    this->setProxy ("http", userConfig.httpProxy());
 
     m_lastProfileId = profileId;
     m_lastUserToken = userToken;
@@ -174,6 +177,37 @@ bool
 CloudClient::isWebsocketConnected() const
 {
     return m_websocket.isConnected();
+}
+
+bool
+CloudClient::setProxy
+(std::string const& protocol, std::string const& config)
+{
+    if (protocol != "http") {
+        return false;
+    }
+
+    std::vector<std::string> parts;
+    boost::split (config, parts, ":");
+
+    if (parts.size() > 2) {
+        return false;
+    }
+
+    auto port = (parts.size() > 1)
+                    ? boost::lexical_cast<uint16_t>(parts[1])
+                    : 80;
+    if (!port) {
+        return false;
+    }
+
+    m_httpProxy = std::move (parts[0]);
+    m_httpProxyPort = port;
+
+    serviceLog()->info("Using HTTP proxy: {}:{}",
+                       m_httpProxy.c_str(), m_httpProxyPort);
+    m_userConfig->setHttpProxy (config);
+    return true;
 }
 
 HttpSession*

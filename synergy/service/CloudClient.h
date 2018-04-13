@@ -28,6 +28,7 @@ public:
     void reconnectWebsocket();
     void shutdownWebsocket();
     bool isWebsocketConnected() const;
+    bool setProxy (std::string const& protocol, std::string const& config);
 
 private:
     void load(const UserConfig &userConfig);
@@ -51,6 +52,8 @@ private:
     std::shared_ptr<ProfileConfig> m_remoteProfileConfig;
     int m_lastProfileId = -1;
     std::string m_lastUserToken = "";
+    std::string m_httpProxy;
+    int m_httpProxyPort = 0;
 };
 
 #endif // CLOUDCLIENT_H
