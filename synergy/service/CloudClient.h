@@ -32,7 +32,7 @@ public:
     CloudClient& operator=(CloudClient&&) = default;
 
     void claimServer(int64_t serverId);
-    void updateScreen(Screen& screen);
+    void updateScreenIpList(Screen& screen);
     void updateScreenStatus(Screen& screen);
     void updateScreenError(Screen& screen);
     void reconnectWebsocket();

@@ -153,13 +153,12 @@ void CloudClient::claimServer(int64_t serverId)
     addHttpJob(JobCategories::ProfileUpdate, job);
 }
 
-void CloudClient::updateScreen(Screen& screen)
+void CloudClient::updateScreenIpList(Screen& screen)
 {
     HttpJob job;
 
     tao::json::value root;
     root["id"] = screen.id();
-    root["name"] = screen.name();
     root["ipList"] = screen.ipList();
 
     job.target = "/screen/update";
