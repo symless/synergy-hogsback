@@ -240,13 +240,13 @@ App::run(int argc, char* argv[])
     FontManager::loadAll();
 
     qmlRegisterType<ErrorView>("com.synergy.gui", 1, 0, "ErrorView");
-    qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");
     qmlRegisterType<ScreenListModel>("com.synergy.gui", 1, 0, "ScreenListModel");
     qmlRegisterType<ScreenManager>("com.synergy.gui", 1, 0, "ScreenManager");
     qmlRegisterType<ServiceProxy>("com.synergy.gui", 1, 0, "ServiceProxy");
     qmlRegisterType<AccessibilityManager>("com.synergy.gui", 1, 0, "AccessibilityManager");
     qmlRegisterType<ProfileListModel>("com.synergy.gui", 1, 0, "ProfileListModel");
     qmlRegisterType<LogManager>("com.synergy.gui", 1, 0, "LogManager");
+    qmlRegisterSingletonType<Hostname>("com.synergy.gui", 1, 0, "Hostname", Hostname::instance);
     qmlRegisterSingletonType<CloudClient>("com.synergy.gui", 1, 0, "CloudClient", CloudClient::instance);
     qmlRegisterSingletonType<ProfileManager>("com.synergy.gui", 1, 0, "ProfileManager", ProfileManager::instance);
     qmlRegisterSingletonType<AppConfig>("com.synergy.gui", 1, 0, "AppConfig", AppConfig::instance);

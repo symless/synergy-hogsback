@@ -11,6 +11,8 @@ namespace http = boost::beast::http;
 
 class HttpSession final
 {
+    friend class CloudClient;
+
 public:
     using ErrorCode = SecuredTcpClient::ErrorCode;
 
@@ -23,22 +25,26 @@ public:
     template <typename... Args>
     using signal = boost::signals2::signal<Args...>;
 
-    signal<void(HttpSession* session, std::string response)> requestSuccess;
-    signal<void(HttpSession* session, std::string error)> requestFailed;
+    signal<void(http::status result, std::string response)> responseReceived;
+    signal<void(ErrorCode ec)> requestFailed;
 
 private:
-    void connect();
+    void send();
+    void sendRequest();
     void onTcpClientConnected();
     void setupRequest(http::verb method, const std::string &target, const std::string &body = "");
     void onWriteFinished(ErrorCode ec);
     void onReadFinished(ErrorCode ec);
 
 private:
-    SecuredTcpClient m_tcpClient;
+    std::unique_ptr<SecuredTcpClient> m_tcpClient;
     std::map<std::string, std::string> m_headers;
     http::request<http::string_body> m_request;
     http::response<http::string_body> m_response;
     boost::beast::flat_buffer  m_readBuffer;
+    boost::asio::io_service& m_ioService;
+    std::string m_hostname;
+    std::string m_port;
 };
 
 #endif // HTTPSESSION_H

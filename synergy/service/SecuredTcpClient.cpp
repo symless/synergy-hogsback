@@ -46,7 +46,7 @@ void SecuredTcpClient::onResolveFinished(ErrorCode ec, tcp::resolver::iterator r
 
         serviceLog()->debug("tcp client resolve error: {}", ec.message());
 
-        connectFailed(this);
+        connectFailed(ec);
         return;
     }
 
@@ -64,7 +64,7 @@ void SecuredTcpClient::onConnectFinished(ErrorCode ec)
 
         serviceLog()->debug("tcp client connect error: {}", ec.message());
 
-        connectFailed(this);
+        connectFailed(ec);
         return;
     }
 
@@ -85,7 +85,7 @@ void SecuredTcpClient::onSslHandshakeFinished(ErrorCode ec)
 
         serviceLog()->debug("tcp session ssl handshake error: {}", ec.message());
 
-        connectFailed(this);
+        connectFailed(ec);
         return;
     }
 

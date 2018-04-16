@@ -30,13 +30,15 @@ public:
 
     Q_INVOKABLE int getModelIndex(int x, int y);
     Q_INVOKABLE void moveModel(int index, int offsetX, int offsetY);
-    Q_INVOKABLE bool removeScreen(QString name, bool notify = false);
+    Q_INVOKABLE bool removeScreenByIndex(int index, bool notify = false);
+    Q_INVOKABLE bool removeScreenById(int id, bool notify = false);
     Q_INVOKABLE void onKeyPressed(const int key);
     Q_INVOKABLE bool addScreen(QString name);
     Q_INVOKABLE void lockScreen(int index);
     Q_INVOKABLE void unlockScreen(int index);
     Q_INVOKABLE void serverClaim(int index);
     Q_INVOKABLE void restartServices();
+    Q_INVOKABLE bool isLocalMachine(int index);
 
     // TODO: remove these debug functions
     Q_INVOKABLE void printBoundingBoxInfo();
@@ -55,6 +57,7 @@ signals:
     void localhostUnsubscribed();
     void configHintChanged();
     void serverIdChanged();
+    void localHostNameChanged(QString name);
 
 private slots:
     void updateScreens(QByteArray reply);
@@ -63,6 +66,7 @@ private slots:
 
 private:
     void setConfigHint(const QString &value);
+    bool removeScreenByName(QString name, bool notify = false);
 
 private:
     ScreenListModel* m_screenListModel;
@@ -71,8 +75,7 @@ private:
     ScreenListSnapshotManager* m_screenListSnapshotManager;
     AppConfig* m_appConfig;
     CloudClient* m_cloudClient;
-    QSet<QString> m_screenNameSet;
-    QString m_localHostname;
+    QSet<int> m_screenIdSet;
     int m_configVersion = -1;
     int m_serverId = -1;
     QString m_configHint = "";

@@ -78,15 +78,11 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     m_cloudClient (CloudClient),
     m_processCommand (std::make_shared<ProcessCommand>()),
     m_process (std::make_unique<CoreProcess>(m_ioService, m_userConfig, m_localProfileConfig, m_processCommand)),
-    // TODO: unify hostname between UI and service
-    m_errorMonitor(std::make_unique<CoreErrorMonitor>(localHostname())),
     m_rpc (rpc),
     m_router (router),
     m_serverProxy (io, m_router, kServerProxyPort),
     m_clientProxy (io, m_router, kServerPort)
 {
-    m_processCommand->setLocalHostname(localHostname());
-
     m_messageHandler = std::make_unique<ClaimMessageHandler> (*this);
     m_router.on_receive.connect (*m_messageHandler);
 
@@ -113,26 +109,38 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     );
 
     m_process->statusMonitor().screenStatusChanged.connect(
-        [server, this](std::string const& screenName, ScreenStatus status) {
-            Screen& screen = m_localProfileConfig->getScreen(screenName);
-            if (screen.status() != status) {
+        [server, this](const int screenId, ScreenStatus status) {
+            Screen& screen = m_localProfileConfig->getScreen(screenId);
 
-                // HACK: force disconnected can only happen from connected
-                // reason: that is the only case becoming disconnected makes sense
-                if (status == ScreenStatus::kDisconnected &&
-                    screen.status() != ScreenStatus::kConnected) {
-                    return;
-                }
-
-                auto screenName = screen.name();
-                auto orignialStatus = screenStatusToString(screen.status());
-                auto newStatus = screenStatusToString(status);
-                serviceLog()->debug("send screen status update {}: {} -> {}", screenName, orignialStatus, newStatus);
-
-                screen.status(status);
-                screen.touch();
-                m_cloudClient->updateScreenStatus(screen);
+            // HACK: stop duplicate status update for connecting
+            // reason: when a client is trying to connect a disconnected/unreachable server
+            // it will generate infinite connecting status
+            // we can't always compare status in local snapshot with the new status
+            // as there might be a delay in receiving latest status
+            // for example when c-ed -> s-ing -> s-ed happens
+            // if we received c-ed but not s-ing before we try to send s-ed
+            // we are going to skip an update which cause inconsistent result
+            // solution: CoreManager needs to be smarter to know when to start a client necessarily
+            // challenge: we currently rely on core running to detect local input
+            if (screen.status() == status && status == ScreenStatus::kConnecting) {
+                serviceLog()->debug("skip duplicate connecting status update for {}", screen.name());
+                return;
             }
+
+            // HACK: force disconnected can only happen from connected
+            // reason: that is the only case becoming disconnected makes sense
+            if (status == ScreenStatus::kDisconnected &&
+                screen.status() != ScreenStatus::kConnected) {
+                return;
+            }
+
+            auto screenName = screen.name();
+            auto orignialStatus = screenStatusToString(screen.status());
+            auto newStatus = screenStatusToString(status);
+            serviceLog()->debug("send screen status update {}: {} -> {}", screenName, orignialStatus, newStatus);
+
+            screen.status(status);
+            m_cloudClient->updateScreenStatus(screen);
         }
     );
 
@@ -165,22 +173,6 @@ CoreManager::CoreManager (boost::asio::io_service& io,
 
     m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen> const& added,
                                                           std::vector<Screen> const& removed) {
-
-        auto removedLocal = std::find_if (begin(removed), end(removed), [this](auto const& screen) {
-            return (screen.id() == m_userConfig->screenId());
-        });
-
-        if (removedLocal != end(removed)) {
-            serviceLog()->debug ("Local screen removed from profile");
-            m_userConfig->reset();
-            m_userConfig->save();
-            m_cloudClient->shutdownWebsocket();
-            m_rpc.server()->publish ("synergy.auth.logout");
-            m_process->setDisabled(true);
-            m_process->shutdown();
-            return;
-        }
-
         m_ioService.post([this, added]() {
             auto addedLocal = std::find_if (begin(added), end(added), [this](auto const& screen) {
                 return (screen.id() == m_userConfig->screenId());
@@ -211,20 +203,16 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     });
 
     if (m_userConfig->screenId() != -1) {
-        m_router.start (m_userConfig->screenId(), localHostname());
         m_clientProxy.start ();
     }
     else {
         m_userConfig->updated.connect_extended ([this](const auto& connection) {
             if (m_userConfig->screenId() != -1) {
-                m_router.start (m_userConfig->screenId(), localHostname());
                 m_clientProxy.start ();
                 connection.disconnect();
             }
         });
     }
-
-    m_errorMonitor->monitor(*m_process);
 }
 
 CoreManager::~CoreManager () noexcept {
@@ -264,8 +252,13 @@ CoreManager::restart()
         return false;
     }
 
-    m_process->start (m_processCommand->generate
-                      (m_process->processMode() == ProcessMode::kServer));
+    if (m_process->processMode() == ProcessMode::kServer) {
+        m_process->startServer();
+    }
+    else {
+        m_process->startClient(m_process->currentServerId());
+    }
+
     return true;
 }
 
@@ -339,12 +332,6 @@ CoreManager::notifyServerClaim(int64_t serverId)
     Message message(serverClaimMessage);
 
     m_router.notifyOtherNodes(message);
-}
-
-CoreErrorMonitor&
-CoreManager::errorMonitor() const
-{
-    return *m_errorMonitor;
 }
 
 CoreStatusMonitor&

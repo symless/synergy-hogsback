@@ -15,7 +15,7 @@ public:
 	virtual ~IScreenArrangement() { }
 
 	virtual bool addScreen(ScreenListModel* screenModel, UIScreen& screen) = 0;
-	virtual bool removeScreen(ScreenListModel* screenModel, UIScreen& screen) = 0;
+        virtual bool removeScreen(ScreenListModel* screenModel, int screenId) = 0;
 	virtual void setViewW(int w) = 0;
 	virtual void setViewH(int h) = 0;
 	virtual void adjustModel(ScreenListModel* screenModel, int index) = 0;

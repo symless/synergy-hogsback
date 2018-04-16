@@ -38,7 +38,7 @@ public:
     int findScreen(QString name);
     int findScreen(int screenId);
     void addScreen(const UIScreen& screen);
-    void removeScreen(QString name);
+    void removeScreen(int id);
     void getScreenPos(QString name, int& newPosX,int& newPosY);
     virtual void adjustAll(int disX, int disY);
     int getModelIndex(int x, int y);

@@ -24,7 +24,7 @@ public:
     Stream& stream();
 
     signal<void(SecuredTcpClient*)> connected;
-    signal<void(SecuredTcpClient*)> connectFailed;
+    signal<void(ErrorCode)> connectFailed;
 
     std::string address() const;
     std::string port() const;

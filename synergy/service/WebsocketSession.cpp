@@ -82,7 +82,7 @@ WebsocketSession::connect(const std::string target)
     );
 
     m_tcpClient->connectFailed.connect(
-        [this](SecuredTcpClient*) {
+        [this](ErrorCode) {
             onTcpClientConnectFailed();
         },
         boost::signals2::at_front

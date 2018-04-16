@@ -102,6 +102,11 @@ CoreProcess::shutdown() {
 void
 CoreProcess::startServer()
 {
+    if (m_disabled) {
+        serviceLog()->debug("core process is disabled");
+        return;
+    }
+
     serviceLog()->debug("starting core server process");
 
     m_processMode = ProcessMode::kServer;
@@ -109,34 +114,42 @@ CoreProcess::startServer()
     writeConfigurationFile();
 
     try {
-        start(m_processCommand->generate(true));
+        start(m_processCommand->serverCmd(localScreenName()));
     } catch (const std::exception& ex) {
         serviceLog()->error ("failed to start server core process: {}", ex.what());
         m_impl.reset();
         assert (!m_impl);
+        throw;
     }
 }
 
 void
 CoreProcess::startClient(int const serverId)
 {
+    if (m_disabled) {
+        serviceLog()->debug("core process is disabled");
+        return;
+    }
+
     serviceLog()->debug("starting core client process");
 
     m_processMode = ProcessMode::kClient;
     m_currentServerId = serverId;
 
     try {
-        start (m_processCommand->generate(false));
+        start (m_processCommand->clientCmd(localScreenName()));
     } catch (const std::exception& ex) {
         serviceLog()->error("failed to start client core process: {}", ex.what());
         m_impl.reset();
         assert (!m_impl);
+        throw;
     }
 }
 
 void
 CoreProcess::start (std::vector<std::string> command)
 {
+    // TODO: remove duplicate code
     if (m_disabled) {
         serviceLog()->debug("core process is disabled");
         return;
@@ -160,7 +173,7 @@ CoreProcess::start (std::vector<std::string> command)
     m_impl = std::make_unique<CoreProcessImpl>(*this, m_ioService,
                                                std::move (command));
 
-     m_statusMonitor->update(localHostname(), ScreenStatus::kConnecting);
+     m_statusMonitor->update(m_userConfig->screenId(), ScreenStatus::kConnecting);
      m_statusMonitor->monitor(*this);
 
     m_impl->start();
@@ -176,6 +189,14 @@ CoreProcess::writeConfigurationFile()
 bool CoreProcess::disabled() const
 {
     return m_disabled;
+}
+
+std::string
+CoreProcess::localScreenName()
+{
+    auto& s = m_localProfileConfig->getScreen(
+                                        m_userConfig->screenId());
+    return s.name();
 }
 
 CoreStatusMonitor&

@@ -67,7 +67,7 @@ const UIScreen& ScreenListModel::getScreen(int index) const
 void ScreenListModel::update(const QList<UIScreen>& screens)
 {
     for (int i = 0; i < screens.count(); i++) {
-        int r = findScreen(screens[i].name());
+        int r = findScreen(screens[i].id());
         if (r != -1) {
             m_screens[r] = screens[i];
             dataChanged(getIndex(r), getIndex(r));
@@ -203,9 +203,9 @@ void ScreenListModel::addScreen(const UIScreen& screen)
     endInsertRows();
 }
 
-void ScreenListModel::removeScreen(QString name)
+void ScreenListModel::removeScreen(int id)
 {
-    int index = findScreen(name);
+    int index = findScreen(id);
     beginRemoveRows(QModelIndex(), index, index);
     m_screens.removeAt(index);
     endRemoveRows();

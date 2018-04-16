@@ -1,7 +1,7 @@
+#include <synergy/service/router/Router.hpp>
 #include <synergy/service/CoreProcess.h>
 #include <synergy/common/UserConfig.h>
 #include <synergy/common/ProfileConfig.h>
-#include <synergy/service/router/Router.hpp>
 #include <synergy/common/ProcessCommand.h>
 #include <synergy/common/Hostname.h>
 
@@ -52,24 +52,28 @@ TEST_CASE("Start and stop core process in different modes", "[CoreProcess]" ) {
     fakeit::Fake(Dtor(userConfigMock));
     Method(userConfigMock,screenId) = kTestScreenId;
 
-    auto profileConfig = std::make_shared<ProfileConfig>();
+    std::string jsonMock1 = R"JSON({"profile":{"id":1,"name":"mock1","server":1,"configVersion":1},"screens":[{"id":1,"name":"mocklocalhostname","x_pos":100,"y_pos":200,"version":1,"active":true,"status":"Connecting","ipList":"192.168.3.1,127.0.0.1","error_code":0,"error_message":""}]})JSON";
+    auto profileConfig = std::make_shared<ProfileConfig>(ProfileConfig::fromJsonSnapshot(jsonMock1));
+
 
     Router router(ioService, kTestNodePort);
     fakeit::Mock<ProcessCommand> processCommandMock;
     fakeit::Fake(Dtor(processCommandMock));
 
-    fakeit::When(Method(processCommandMock, generate).Using(true)).AlwaysDo([](...){
+    fakeit::When(Method(processCommandMock, serverCmd)).AlwaysDo([](auto name){
         ProcessCommand tempProcessCommand;
-        tempProcessCommand.setLocalHostname(localHostname());
-        std::vector<std::string> cmds = tempProcessCommand.generate(true);
+        std::vector<std::string> cmds = tempProcessCommand.serverCmd("mocklocalhostname");
+ #ifdef __APPLE__
         cmds[0] = "synergy-core";
+#endif
         return cmds;
     });
-    fakeit::When(Method(processCommandMock, generate).Using(false)).AlwaysDo([](...){
+    fakeit::When(Method(processCommandMock, clientCmd)).AlwaysDo([](auto name){
         ProcessCommand tempProcessCommand;
-        tempProcessCommand.setLocalHostname(localHostname());
-        std::vector<std::string> cmds = tempProcessCommand.generate(false);
-        cmds[0] = "synergy-core";
+        std::vector<std::string> cmds = tempProcessCommand.clientCmd("mocklocalhostname");
+#ifdef __APPLE__
+       cmds[0] = "synergy-core";
+#endif
         return cmds;
     });
 
