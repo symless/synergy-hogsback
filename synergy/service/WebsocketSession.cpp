@@ -58,8 +58,8 @@ WebsocketSession::~WebsocketSession()
 void
 WebsocketSession::initSockets()
 {
-    m_tcpClient.reset(new SecuredTcpClient(m_ioService, m_hostname, m_port));
-    m_websocket.reset(new websocket::stream<ssl::stream<tcp::socket>&>(m_tcpClient->stream()));
+    m_tcpClient.reset(new SecuredTcpClient (m_ioService, m_hostname, m_port));
+    m_websocket.reset(new Stream (m_tcpClient->stream()));
 }
 
 void
@@ -281,7 +281,7 @@ void WebsocketSession::shutdown() noexcept
 
 void WebsocketSession::setTcpKeepAliveTimeout()
 {
-    auto& socket = m_tcpClient->stream().next_layer();
+    auto& socket = m_tcpClient->stream().lowest_layer();
 
 #ifdef _WIN32
     struct tcp_keepalive options;

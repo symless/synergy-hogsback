@@ -50,13 +50,9 @@ void SecuredTcpClient::onResolveFinished(ErrorCode ec, tcp::resolver::iterator r
         return;
     }
 
-    boost::asio::async_connect(
-        this->stream().next_layer(),
-        result,
-        std::bind(
-            &SecuredTcpClient::onConnectFinished,
-            this,
-            std::placeholders::_1));
+    this->stream().next_layer().async_connect (result, [this](auto ec) {
+        this->onConnectFinished(ec);
+    });
 }
 
 void SecuredTcpClient::onConnectFinished(ErrorCode ec)

@@ -36,6 +36,7 @@ set (SERVICE_SOURCES
     ErrorNotifier.cpp
     TrayService.cpp
     IPMonitor.cpp
+    ProxyClient.cpp
     ${LSIF_SOURCES}
     ${SERVICE_SM_SOURCES}
 )

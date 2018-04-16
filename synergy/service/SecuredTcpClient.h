@@ -5,6 +5,7 @@
 #include <boost/asio/ssl/stream.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/signals2.hpp>
+#include <synergy/service/ProxyClient.h>
 
 class SecuredTcpClient
 {
@@ -13,7 +14,8 @@ public:
     using signal = boost::signals2::signal<Args...>;
 
     using ErrorCode = boost::system::error_code;
-    using Stream = boost::asio::ssl::stream<boost::asio::ip::tcp::socket>;
+    using Stream = boost::asio::ssl::stream
+                    <ProxyClient<boost::asio::ip::tcp::socket>>;
 
     SecuredTcpClient(boost::asio::io_service& ioService,
                      std::string hostname, std::string port);

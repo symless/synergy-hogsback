@@ -15,6 +15,7 @@ class WebsocketSession final
 {
 public:
     using ErrorCode = SecuredTcpClient::ErrorCode;
+    using Stream    = boost::beast::websocket::stream<SecuredTcpClient::Stream&>;
 
     WebsocketSession(boost::asio::io_service& ioService,
                      const std::string& hostname, const std::string& port);
@@ -50,7 +51,7 @@ private:
     boost::beast::multi_buffer m_readBuffer;
     boost::asio::deadline_timer m_reconnectTimer;
     std::unique_ptr<SecuredTcpClient> m_tcpClient;
-    std::unique_ptr<boost::beast::websocket::stream<SecuredTcpClient::Stream&>> m_websocket;
+    std::unique_ptr<Stream> m_websocket;
     boost::beast::websocket::response_type m_res;
     std::string m_target;
     std::map<std::string, std::string> m_headers;
