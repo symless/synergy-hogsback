@@ -169,8 +169,6 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             if (localScreen.ipList (ipSet)) {
                 serviceLog()->info ("System IP addresses changed: {}",
                                     localScreen.ipList());
-                m_userConfig->setHttpProxy("");
-                m_userConfig->save();
                 localScreen.touch();
                 m_cloudClient->updateScreen (localScreen);
             }
