@@ -111,23 +111,36 @@ CoreManager::CoreManager (boost::asio::io_service& io,
     m_process->statusMonitor().screenStatusChanged.connect(
         [server, this](const int screenId, ScreenStatus status) {
             Screen& screen = m_localProfileConfig->getScreen(screenId);
-            if (screen.status() != status) {
 
-                // HACK: force disconnected can only happen from connected
-                // reason: that is the only case becoming disconnected makes sense
-                if (status == ScreenStatus::kDisconnected &&
-                    screen.status() != ScreenStatus::kConnected) {
-                    return;
-                }
-
-                auto screenName = screen.name();
-                auto orignialStatus = screenStatusToString(screen.status());
-                auto newStatus = screenStatusToString(status);
-                serviceLog()->debug("send screen status update {}: {} -> {}", screenName, orignialStatus, newStatus);
-
-                screen.status(status);
-                m_cloudClient->updateScreenStatus(screen);
+            // HACK: stop duplicate status update for connecting
+            // reason: when a client is trying to connect a disconnected/unreachable server
+            // it will generate infinite connecting status
+            // we can't always compare status in local snapshot with the new status
+            // as there might be a delay in receiving latest status
+            // for example when c-ed -> s-ing -> s-ed happens
+            // if we received c-ed but not s-ing before we try to send s-ed
+            // we are going to skip an update which cause inconsistent result
+            // solution: CoreManager needs to be smarter to know when to start a client necessarily
+            // challenge: we currently rely on core running to detect local input
+            if (screen.status() == status && status == ScreenStatus::kConnecting) {
+                serviceLog()->debug("skip duplicate connecting status update for {}", screen.name());
+                return;
             }
+
+            // HACK: force disconnected can only happen from connected
+            // reason: that is the only case becoming disconnected makes sense
+            if (status == ScreenStatus::kDisconnected &&
+                screen.status() != ScreenStatus::kConnected) {
+                return;
+            }
+
+            auto screenName = screen.name();
+            auto orignialStatus = screenStatusToString(screen.status());
+            auto newStatus = screenStatusToString(status);
+            serviceLog()->debug("send screen status update {}: {} -> {}", screenName, orignialStatus, newStatus);
+
+            screen.status(status);
+            m_cloudClient->updateScreenStatus(screen);
         }
     );
 
