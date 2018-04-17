@@ -218,21 +218,24 @@ CloudClient::setProxy
     }
 
     std::vector<std::string> parts;
-    boost::algorithm::split (parts, config, [](char c) { return c == ':'; });
-
+    boost::algorithm::split (parts, config,
+                             [](char c) { return c == ':'; });
     if (parts.size() > 2) {
         return false;
+    } else if (parts.empty()) {
+        parts.emplace_back();
     }
 
     auto port = (parts.size() > 1)
                     ? boost::lexical_cast<uint16_t>(parts[1])
                     : 80;
     if (!port) {
-        return false;
+        port = 80;
     }
 
     bool const changed = (std::tie (m_httpProxy, m_httpProxyPort)
                             != std::tie (parts[0], port));
+
     if (changed) {
         m_httpProxy = std::move (parts[0]);
         m_httpProxyPort = port;
@@ -242,6 +245,8 @@ CloudClient::setProxy
             serviceLog()->info("Using HTTP proxy: {}:{}",
                                m_httpProxy.c_str(), m_httpProxyPort);
         }
+        this->m_httpSession->setProxy (m_httpProxy, m_httpProxyPort);
+        this->m_websocket.setProxy (m_httpProxy, m_httpProxyPort);
     }
 
     return changed;

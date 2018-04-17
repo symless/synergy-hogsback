@@ -309,10 +309,8 @@ App::run(int argc, char* argv[])
         };
 
         auto httpProxyUpdateFunc = [&wampClient, httpProxy]() {
-            if (!httpProxy.isEmpty()) {
-                wampClient.call<void> ("synergy.network.proxy.update",
-                                       "http", httpProxy.toStdString());
-            }
+            wampClient.call<void> ("synergy.network.proxy.update",
+                                   "http", httpProxy.toStdString());
         };
 
         if (wampClient.isConnected()) {
