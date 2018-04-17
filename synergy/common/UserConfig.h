@@ -52,6 +52,9 @@ public:
     bool versionCheck() const;
     void setVersionCheck(bool versionCheck);
 
+    std::string httpProxy() const;
+    void setHttpProxy(std::string);
+
 private:
     void makeTable(std::shared_ptr<cpptoml::table>& root);
     void update(ConfigParser& configParser);
@@ -59,16 +62,19 @@ private:
 private:
     /* Cloud config */
     std::string m_userToken;
-    int64_t m_userId;
-    int64_t m_profileId;
-    int64_t m_screenId;
+    std::string m_httpProxy;
+
+    int64_t m_userId = -1;
+    int64_t m_profileId = -1;
+    int64_t m_screenId = -1;
     std::string m_systemUid = "";
+
     bool m_hasDeveloperConfig = false;
     bool m_versionCheck = true;
 
     /* Process options */
     DebugLevel m_debugLevel = kInfo;
-    bool m_dragAndDrop;
+    bool m_dragAndDrop = true;
 
 public:
     signal<void()> updated;

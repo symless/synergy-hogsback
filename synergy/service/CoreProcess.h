@@ -34,6 +34,7 @@ public:
     CoreStatusMonitor& statusMonitor() const;
     void setDisabled(bool disabled);
     bool disabled() const;
+    std::string localScreenName();
 
 public:
     template <typename... Args>

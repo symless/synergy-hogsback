@@ -12,10 +12,6 @@ Rectangle {
         name: "Source Code Pro"
     }
 
-    Hostname {
-        id: localHostname
-    }
-
     ScreenListModel {
         id: screenListModel
     }
@@ -24,6 +20,10 @@ Rectangle {
         id: screenManager
         screenListModel: screenListModel
         serviceProxy: applicationWindow.serviceProxy
+
+        onLocalHostNameChanged: {
+            hostname.text = name
+        }
     }
 
     Connections {
@@ -42,12 +42,10 @@ Rectangle {
                     }
                 }
             } else {
-
                 // claw for restart services
                 if ((keyEvent.modifiers === Qt.ShiftModifier) && (keyEvent.key === Qt.Key_F5)) {
                     screenManager.restartServices()
                 }
-
             }
         }
     }
@@ -96,15 +94,13 @@ Rectangle {
             LogoText {
                 id: hostname
                 z: 2
-                text: localHostname.hostname()
+                text: Hostname.QmlLocal()
                 color: "#4D4D4D"
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter
-                //fillMode: Image.PreserveAspectFit
                 smooth: true
-                //source: "qrc:/res/image/synergy-icon.png"
             }
         }
 
@@ -426,7 +422,7 @@ Rectangle {
                                 MenuItem {
                                     id: removeServerItem
                                     onTriggered: {
-                                        screenManager.removeScreen(name, true)
+                                        screenManager.removeScreenByIndex(index, true)
                                     }
                                 }
 
@@ -444,7 +440,7 @@ Rectangle {
                                 else {
                                     claimServerItem.text = "Share from " + name
                                     removeServerItem.text = "Remove " + name
-                                    if (name == localHostname.hostname() )
+                                    if (screenManager.isLocalMachine(index))
                                     {
                                         removeServerItem.enabled = false
                                     }

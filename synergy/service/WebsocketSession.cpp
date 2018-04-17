@@ -18,6 +18,10 @@
 #include <errno.h>
 #endif
 
+namespace websocket = boost::beast::websocket;
+namespace ssl = boost::asio::ssl;
+using tcp = boost::asio::ip::tcp;
+
 // randomly reconnect between this min and max.
 static const long kMinReconnectDelaySec = 5;
 static const long kMaxReconnectDelaySec = 30;
@@ -54,8 +58,9 @@ WebsocketSession::~WebsocketSession()
 void
 WebsocketSession::initSockets()
 {
-    m_tcpClient.reset(new SecuredTcpClient(m_ioService, m_hostname, m_port));
-    m_websocket.reset(new websocket::stream<ssl::stream<tcp::socket>&>(m_tcpClient->stream()));
+    m_tcpClient.reset(new SecuredTcpClient (m_ioService, m_hostname, m_port));
+    m_tcpClient->setProxy (m_proxyHost, m_proxyPort);
+    m_websocket.reset(new Stream (m_tcpClient->stream()));
 }
 
 void
@@ -78,7 +83,7 @@ WebsocketSession::connect(const std::string target)
     );
 
     m_tcpClient->connectFailed.connect(
-        [this](SecuredTcpClient*) {
+        [this](ErrorCode) {
             onTcpClientConnectFailed();
         },
         boost::signals2::at_front
@@ -189,7 +194,7 @@ WebsocketSession::onTcpClientConnectFailed()
 }
 
 void
-WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
+WebsocketSession::onWebsocketHandshakeFinished(WebsocketSession::ErrorCode ec)
 {
     if (ec) {
         std::string res_failed_reason = m_res["X-SCS-Reason"].to_string();
@@ -222,7 +227,7 @@ WebsocketSession::onWebsocketHandshakeFinished(errorCode ec)
 }
 
 void
-WebsocketSession::onReadFinished(errorCode ec)
+WebsocketSession::onReadFinished(WebsocketSession::ErrorCode ec)
 {
     if (ec) {
         if (ec != boost::asio::error::operation_aborted) {
@@ -252,7 +257,7 @@ WebsocketSession::onReadFinished(errorCode ec)
 }
 
 void
-WebsocketSession::onWriteFinished(errorCode ec)
+WebsocketSession::onWriteFinished(WebsocketSession::ErrorCode ec)
 {
     if (ec) {
         serviceLog()->error("websocket write error {}: {}", ec.value(), ec.message());
@@ -263,9 +268,9 @@ void WebsocketSession::shutdown() noexcept
 {
     if (m_connected) {
         serviceLog()->debug("closing existing websocket connection");
-        errorCode ec;
+        ErrorCode ec;
         m_reconnectTimer.cancel();
-        m_websocket->lowest_layer().cancel();
+        m_websocket->lowest_layer().cancel(ec);
         m_ioService.poll();
         serviceLog()->debug("cancelled websocket lowest layer");
         m_websocket->close(websocket::close_code::normal, ec);
@@ -275,9 +280,20 @@ void WebsocketSession::shutdown() noexcept
     }
 }
 
+bool
+WebsocketSession::setProxy (std::string host, int port)
+{
+    m_proxyHost = host;
+    m_proxyPort = port;
+    if (m_tcpClient) {
+        return m_tcpClient->setProxy (host, port);
+    }
+    return false;
+}
+
 void WebsocketSession::setTcpKeepAliveTimeout()
 {
-    auto& socket = m_tcpClient->stream().next_layer();
+    auto& socket = m_tcpClient->stream().lowest_layer();
 
 #ifdef _WIN32
     struct tcp_keepalive options;

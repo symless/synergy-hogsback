@@ -2,14 +2,26 @@
 
 #include <synergy/common/Hostname.h>
 
-#include <QHostInfo>
-
-Hostname::Hostname()
+QObject*
+Hostname::instance(QQmlEngine *engine, QJSEngine *scriptEngine)
 {
-    m_hostname = QString::fromStdString(localHostname());
+    Q_UNUSED(engine)
+    Q_UNUSED(scriptEngine)
+
+    static Hostname s_instance;
+    QQmlEngine::setObjectOwnership(&s_instance, QQmlEngine::CppOwnership);
+
+    return &s_instance;
 }
 
-QString Hostname::hostname()
+QString
+Hostname::local()
 {
-	return m_hostname;
+    return QString::fromStdString(localHostname());
+}
+
+QString
+Hostname::QmlLocal()
+{
+    return QString::fromStdString(localHostname());
 }

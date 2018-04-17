@@ -11,13 +11,14 @@
 #include <map>
 #include <memory>
 
-namespace websocket = boost::beast::websocket;
-namespace ssl = boost::asio::ssl;
-
 class WebsocketSession final
 {
 public:
-    WebsocketSession(boost::asio::io_service& ioService, const std::string& hostname, const std::string& port);
+    using ErrorCode = SecuredTcpClient::ErrorCode;
+    using Stream    = boost::beast::websocket::stream<SecuredTcpClient::Stream&>;
+
+    WebsocketSession(boost::asio::io_service& ioService,
+                     const std::string& hostname, const std::string& port);
     ~WebsocketSession();
 
     void connect(const std::string target);
@@ -36,12 +37,14 @@ public:
     signal<void(WebsocketError error)> connectionError;
     signal<void(std::string)> messageReceived;
 
+    bool setProxy (std::string host, int port);
+
 private:
     void onTcpClientConnected();
     void onTcpClientConnectFailed();
-    void onWebsocketHandshakeFinished(errorCode ec);
-    void onReadFinished(errorCode ec);
-    void onWriteFinished(errorCode ec);
+    void onWebsocketHandshakeFinished(ErrorCode ec);
+    void onReadFinished(ErrorCode ec);
+    void onWriteFinished(ErrorCode ec);
     void setTcpKeepAliveTimeout();
     void handleConnectError(bool reconnect, WebsocketError error = WebsocketError::kUnknown);
     void initSockets();
@@ -50,14 +53,16 @@ private:
     boost::beast::multi_buffer m_readBuffer;
     boost::asio::deadline_timer m_reconnectTimer;
     std::unique_ptr<SecuredTcpClient> m_tcpClient;
-    std::unique_ptr<websocket::stream<ssl::stream<tcp::socket>&>> m_websocket;
-    websocket::response_type m_res;
+    std::unique_ptr<Stream> m_websocket;
+    boost::beast::websocket::response_type m_res;
     std::string m_target;
     std::map<std::string, std::string> m_headers;
     bool m_connected;
     boost::asio::io_service& m_ioService;
     std::string m_hostname;
     std::string m_port;
+    std::string m_proxyHost;
+    int m_proxyPort = 0;
     bool m_connecting = false;
 };
 
