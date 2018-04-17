@@ -63,6 +63,27 @@ ProxyClient<NextLayer>::lowest_layer() noexcept {
     return m_nextLayer.lowest_layer();
 }
 
+template<typename NextLayer>
+bool
+ProxyClient<NextLayer>::setProxy(std::string host, int port) {
+    if ((port < 0) || (port > 65535)) {
+        return false;
+    } else if (!port) {
+        port = 80;
+    }
+    bool const changed = (std::tie (host, port) != std::tie (m_host, m_port));
+    if (changed) {
+        m_host = std::move (host);
+        m_port = port;
+        m_connected = false;
+        if (m_nextLayer.is_open()) {
+            boost::system::error_code ec;
+            m_nextLayer.close(ec);
+        }
+    }
+    return changed;
+}
+
 template <typename NextLayer>
 template <typename NextLayerInit> inline
 ProxyClient<NextLayer>::ProxyClient (NextLayerInit&& nextLayer,
@@ -82,8 +103,8 @@ ProxyClient<NextLayer>::async_connect
     boost::asio::async_result<std::decay_t<Handler>> result (handler);
 
     if (m_connected) {
-        throw std::runtime_error ("connect() called on an already connected "
-                                  "proxy client");
+        throw std::runtime_error ("connect() called on a proxy client that's "
+                                  "lready connected");
     }
 
     if (dnsIt == boost::asio::ip::tcp::resolver::iterator()) {
@@ -95,7 +116,8 @@ ProxyClient<NextLayer>::async_connect
                         boost::asio::ip::address_v4::from_string(m_host),
                         m_port
                       );
-        auto target = fmt::format ("{}:443", dnsIt->host_name());
+        auto target = fmt::format ("{}:{}", dnsIt->host_name(),
+                                   dnsIt->service_name());
 
         m_nextLayer.async_connect (proxy, [this, target, handler](auto ec) {
             using boost::asio::asio_handler_invoke;

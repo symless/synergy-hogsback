@@ -37,6 +37,8 @@ public:
     signal<void(WebsocketError error)> connectionError;
     signal<void(std::string)> messageReceived;
 
+    bool setProxy (std::string host, int port);
+
 private:
     void onTcpClientConnected();
     void onTcpClientConnectFailed();
@@ -59,6 +61,8 @@ private:
     boost::asio::io_service& m_ioService;
     std::string m_hostname;
     std::string m_port;
+    std::string m_proxyHost;
+    int m_proxyPort = 0;
     bool m_connecting = false;
 };
 

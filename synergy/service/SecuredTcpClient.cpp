@@ -6,7 +6,8 @@
 namespace ssl = boost::asio::ssl;
 using tcp = boost::asio::ip::tcp;
 
-SecuredTcpClient::SecuredTcpClient(boost::asio::io_service &ioService, std::string hostname, std::string port) :
+SecuredTcpClient::SecuredTcpClient(boost::asio::io_service &ioService,
+                                   std::string hostname, std::string port) :
     m_ioService(ioService),
     m_sslContext(ssl::context::tls_client),
     m_stream(ioService, m_sslContext),
@@ -101,4 +102,10 @@ std::string SecuredTcpClient::address() const
 std::string SecuredTcpClient::port() const
 {
     return m_port;
+}
+
+bool
+SecuredTcpClient::setProxy (std::string host, int port)
+{
+    return this->stream().next_layer().setProxy (host, port);
 }

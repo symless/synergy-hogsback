@@ -59,6 +59,7 @@ void
 WebsocketSession::initSockets()
 {
     m_tcpClient.reset(new SecuredTcpClient (m_ioService, m_hostname, m_port));
+    m_tcpClient->setProxy (m_proxyHost, m_proxyPort);
     m_websocket.reset(new Stream (m_tcpClient->stream()));
 }
 
@@ -269,7 +270,7 @@ void WebsocketSession::shutdown() noexcept
         serviceLog()->debug("closing existing websocket connection");
         ErrorCode ec;
         m_reconnectTimer.cancel();
-        m_websocket->lowest_layer().cancel();
+        m_websocket->lowest_layer().cancel(ec);
         m_ioService.poll();
         serviceLog()->debug("cancelled websocket lowest layer");
         m_websocket->close(websocket::close_code::normal, ec);
@@ -277,6 +278,17 @@ void WebsocketSession::shutdown() noexcept
         m_connecting = false;
         m_connected = false;
     }
+}
+
+bool
+WebsocketSession::setProxy (std::string host, int port)
+{
+    m_proxyHost = host;
+    m_proxyPort = port;
+    if (m_tcpClient) {
+        return m_tcpClient->setProxy (host, port);
+    }
+    return false;
 }
 
 void WebsocketSession::setTcpKeepAliveTimeout()

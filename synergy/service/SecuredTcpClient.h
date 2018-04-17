@@ -29,6 +29,8 @@ public:
     std::string address() const;
     std::string port() const;
 
+    bool setProxy(std::string host, int port);
+
 private:
     void onResolveFinished(ErrorCode ec,
                            boost::asio::ip::tcp::resolver::iterator result);

@@ -85,6 +85,9 @@ CloudClient::load(UserConfig const& userConfig)
     auto const profileId = userConfig.profileId();
     auto const userToken = userConfig.userToken();
 
+
+    this->setProxy ("http", userConfig.httpProxy());
+
     if ((profileId != -1) && ((profileId != m_lastProfileId) || (userToken != m_lastUserToken))) {
 
         auto versionCheck = userConfig.versionCheck();
@@ -111,7 +114,6 @@ CloudClient::load(UserConfig const& userConfig)
         }
     }
 
-    this->setProxy ("http", userConfig.httpProxy());
 
     m_lastProfileId = profileId;
     m_lastUserToken = userToken;

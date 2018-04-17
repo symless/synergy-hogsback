@@ -33,10 +33,24 @@ void HttpSession::post(const std::string &target, const std::string &body)
     send();
 }
 
+bool
+HttpSession::setProxy (std::string host, int port)
+{
+    m_proxyHost = std::move(host);
+    m_proxyPort = port;
+    if (m_tcpClient) {
+        // this is essentially a shutdown
+        return m_tcpClient->setProxy (m_proxyHost, m_proxyPort);
+    }
+    return false;
+}
+
 void HttpSession::send()
 {
     if (!m_tcpClient) {
-        m_tcpClient = std::make_unique<SecuredTcpClient>(m_ioService, m_hostname, m_port);
+        m_tcpClient = std::make_unique<SecuredTcpClient>(m_ioService,
+                                                         m_hostname, m_port);
+        m_tcpClient->setProxy (m_proxyHost, m_proxyPort);
 
         m_tcpClient->connected.connect(
             [this](SecuredTcpClient*) {

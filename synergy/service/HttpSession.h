@@ -28,6 +28,8 @@ public:
     signal<void(http::status result, std::string response)> responseReceived;
     signal<void(ErrorCode ec)> requestFailed;
 
+    bool setProxy(std::string host, int port);
+
 private:
     void send();
     void sendRequest();
@@ -41,10 +43,12 @@ private:
     std::map<std::string, std::string> m_headers;
     http::request<http::string_body> m_request;
     http::response<http::string_body> m_response;
-    boost::beast::flat_buffer  m_readBuffer;
+    boost::beast::flat_buffer m_readBuffer;
     boost::asio::io_service& m_ioService;
     std::string m_hostname;
     std::string m_port;
+    std::string m_proxyHost;
+    int m_proxyPort = 0;
 };
 
 #endif // HTTPSESSION_H
