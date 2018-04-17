@@ -55,8 +55,8 @@ void VersionManager::checkUpdate(QJsonDocument& updateReplyDoc)
         else if (updateReplyResult == kRequiredUpdate) {
             m_updateRequired = true;
             QMessageBox msgBox;
-            msgBox.setText("This version of Synergy is not supported anymore. "
-                           "Please <a href='https://symless.com/synergy/downloads'>download</a> the latest version.");
+            msgBox.setText(QString("This version of Synergy is not supported anymore. "
+                           "Please <a href='https://symless.com/synergy/downloads?source=s2-app&version=%1'>download</a> the latest version.").arg(buildVersion()));
             msgBox.exec();
             QApplication::exit(1);
         }
