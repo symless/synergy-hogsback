@@ -44,6 +44,8 @@ public:
     template <typename Buffer, typename Handler>
     void async_write_some (Buffer const&, Handler&&);
 
+    bool setProxy (std::string host, int port = 80);
+
 private:
     next_layer_type m_nextLayer;
     std::string m_host;
@@ -136,7 +138,7 @@ ProxyClient<NextLayer>::async_connect
 
                     boost::beast::multi_buffer mb;
                     boost::beast::http::response_parser<boost::beast::http::empty_body> resp;
-                    resp.skip(true);
+                    resp.skip (true);
                     boost::beast::http::read (m_nextLayer, mb, resp, ec);
                     if (!ec) {
                         m_connected = true;
@@ -163,11 +165,6 @@ template <typename Buffer> inline
 std::size_t
 ProxyClient<NextLayer>::read_some (Buffer&& buffer,
                                    boost::system::error_code& ec) {
-    if (!m_connected) {
-        throw std::runtime_error ("Proxy client must be connected before "
-                                  "invoking a read operation");
-    }
-
     return m_nextLayer.read_some (buffer, ec);
 }
 
@@ -175,10 +172,6 @@ template <typename NextLayer>
 template <typename Buffer, typename Handler> inline
 void
 ProxyClient<NextLayer>::async_read_some (Buffer&& buffer, Handler&& handler) {
-    if (!m_connected) {
-        throw std::runtime_error ("Proxy client must be connected before "
-                                  "invoking a read operation");
-    }
     return m_nextLayer.async_read_some (std::forward<Buffer>(buffer),
                                         std::forward<Handler>(handler));
 }
@@ -188,11 +181,6 @@ template <typename Buffer, typename Handler> inline
 void
 ProxyClient<NextLayer>::async_write_some (Buffer const& buffer,
                                           Handler&& handler) {
-    if (!m_connected) {
-        throw std::runtime_error ("Proxy client must be connected before "
-                                  "invoking a write operation");
-    }
-
     return m_nextLayer.async_write_some (buffer,
                                          std::forward<Handler>(handler));
 }
@@ -202,11 +190,6 @@ template <typename Buffer> inline
 std::size_t
 ProxyClient<NextLayer>::write_some (Buffer const& buffer,
                                     boost::system::error_code& ec) {
-    if (!m_connected) {
-        throw std::runtime_error ("Proxy client must be connected before "
-                                  "invoking a write operation");
-    }
-
     return m_nextLayer.write_some (buffer, ec);
 }
 
