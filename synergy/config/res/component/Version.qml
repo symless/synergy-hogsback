@@ -29,7 +29,7 @@ Rectangle {
         anchors.bottom: versionNumber.top
         color: textColor
         text: VersionManager.latestVersion().length === 0 ?
-                "" : VersionManager.latestVersion() + " is available! Please <a href='https://symless.com/synergy/downloads'>download</a>."
+                "" : VersionManager.latestVersion() + " is available! Please <a href='https://symless.com/synergy/downloads?source=s2-app&version="+VersionManager.buildVersion()+"'>download</a>."
         onLinkActivated: Qt.openUrlExternally(link)
 
         MouseArea {
@@ -42,7 +42,7 @@ Rectangle {
     Connections {
         target: VersionManager
         onNewVersionDetected: {
-            versionWarning.text = newVersion + " is available! Please <a href='https://symless.com/synergy/downloads'>download</a>"
+            versionWarning.text = newVersion + " is available! Please <a href='https://symless.com/synergy/downloads?source=s2-app&version="+VersionManager.buildVersion()+"'>download</a>"
         }
     }
 }
