@@ -3,18 +3,23 @@
 
 #include "LibMacro.h"
 
+#include <QQmlEngine>
 #include <QQuickItem>
 
 class LIB_SPEC Hostname : public QQuickItem
 {
 	Q_OBJECT
+    Q_DISABLE_COPY(Hostname)
+
 public:
-	Hostname();
 
-	Q_INVOKABLE QString hostname();
+    static QObject* instance(QQmlEngine* engine = NULL, QJSEngine* scriptEngine = NULL);
 
-private:
-	QString m_hostname;
+    Hostname() = default;
+
+    static QString local();
+
+    Q_INVOKABLE QString QmlLocal();
 };
 
 #endif // HOSTNAME_H

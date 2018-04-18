@@ -18,7 +18,6 @@ class CoreProcess;
 class CloudClient;
 class ProcessCommand;
 class ClaimMessageHandler;
-class CoreErrorMonitor;
 class CoreStatusMonitor;
 
 class CoreManager final {
@@ -47,7 +46,6 @@ public:
     void switchServer(int64_t serverId);
     void notifyServerClaim(int64_t serverId);
 
-    CoreErrorMonitor& errorMonitor() const;
     CoreStatusMonitor& statusMonitor() const;
 
 private:
@@ -58,7 +56,6 @@ private:
     std::shared_ptr<CloudClient> m_cloudClient;
     std::shared_ptr<ProcessCommand> m_processCommand;
     std::unique_ptr<CoreProcess> m_process;
-    std::unique_ptr<CoreErrorMonitor> m_errorMonitor;
     RpcManager& m_rpc;
     Router& m_router;
     ServerProxy m_serverProxy;

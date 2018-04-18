@@ -53,10 +53,6 @@ public:
     std::string errorMessage() const;
     void setErrorMessage(const std::string &errorMessage);
 
-    void touch();
-
-    uint64_t version() const;
-
 private:
     ScreenID        m_id      = 0;
     std::string     m_name;
@@ -65,7 +61,6 @@ private:
     int64_t         m_y       = 0;
     int64_t         m_width   = 0;
     int64_t         m_height  = 0;
-    uint64_t        m_version = 0;
     ScreenStatus    m_status  = ScreenStatus::kDisconnected;
     std::string     m_ipList;
     ScreenError     m_errorCode;

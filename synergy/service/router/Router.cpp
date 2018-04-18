@@ -290,6 +290,11 @@ Router::shutdown () {
     hello_timer_.cancel ();
     acceptor_.cancel ();
     acceptor_.get_io_service().poll();
+
+    auto connections = this->connections_;
+    for (auto& connection : connections) {
+        this->remove (std::move (connection));
+    }
 }
 
 

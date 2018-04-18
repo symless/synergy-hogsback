@@ -8,7 +8,6 @@ add_definitions (-DTEST_ENV)
 # TODO: use lib instead of including sources
 set(SERVICE_SOURCES
     ../service/WebsocketSession.cpp
-    ../service/SecuredTcpSession.cpp
     ../service/SecuredTcpClient.cpp
     ../service/ServiceLogs.cpp
     ../service/CoreProcess.cpp
