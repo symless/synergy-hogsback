@@ -82,6 +82,11 @@ UserConfig::update(ConfigParser& parser)
         m_versionCheck = developerConfig.get_value<bool>("version-check");
     }
 
+    auto networkConfig = parser.get_section("network");
+    if (networkConfig.isValid()) {
+        setHttpProxy(networkConfig.get_value_or<std::string>("httpProxy", ""));
+    }
+
     updated();
 }
 
@@ -103,6 +108,12 @@ UserConfig::makeTable(std::shared_ptr<cpptoml::table>& root)
     auto systemTable = cpptoml::make_table();
     systemTable->insert("uid", m_systemUid);
     root->insert("system", systemTable);
+
+    if (!m_httpProxy.empty()) {
+        auto networkTable = cpptoml::make_table();
+        networkTable->insert ("httpProxy", m_httpProxy);
+        root->insert ("network", networkTable);
+    }
 
     // only save developer section if there was one when we read
     // the config, which hides developer options from end-users
@@ -208,6 +219,18 @@ bool UserConfig::versionCheck() const
 void UserConfig::setVersionCheck(bool versionCheck)
 {
     m_versionCheck = versionCheck;
+}
+
+std::string
+UserConfig::httpProxy() const
+{
+    return m_httpProxy;
+}
+
+void
+UserConfig::setHttpProxy(std::string str)
+{
+    m_httpProxy = std::move(str);
 }
 
 std::string UserConfig::systemUid() const

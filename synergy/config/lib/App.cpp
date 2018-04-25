@@ -240,13 +240,13 @@ App::run(int argc, char* argv[])
     FontManager::loadAll();
 
     qmlRegisterType<ErrorView>("com.synergy.gui", 1, 0, "ErrorView");
-    qmlRegisterType<Hostname>("com.synergy.gui", 1, 0, "Hostname");
     qmlRegisterType<ScreenListModel>("com.synergy.gui", 1, 0, "ScreenListModel");
     qmlRegisterType<ScreenManager>("com.synergy.gui", 1, 0, "ScreenManager");
     qmlRegisterType<ServiceProxy>("com.synergy.gui", 1, 0, "ServiceProxy");
     qmlRegisterType<AccessibilityManager>("com.synergy.gui", 1, 0, "AccessibilityManager");
     qmlRegisterType<ProfileListModel>("com.synergy.gui", 1, 0, "ProfileListModel");
     qmlRegisterType<LogManager>("com.synergy.gui", 1, 0, "LogManager");
+    qmlRegisterSingletonType<Hostname>("com.synergy.gui", 1, 0, "Hostname", Hostname::instance);
     qmlRegisterSingletonType<CloudClient>("com.synergy.gui", 1, 0, "CloudClient", CloudClient::instance);
     qmlRegisterSingletonType<ProfileManager>("com.synergy.gui", 1, 0, "ProfileManager", ProfileManager::instance);
     qmlRegisterSingletonType<AppConfig>("com.synergy.gui", 1, 0, "AppConfig", AppConfig::instance);
@@ -268,6 +268,19 @@ App::run(int argc, char* argv[])
         }
     });
 
+    auto proxies = QNetworkProxyFactory::systemProxyForQuery(
+                QNetworkProxyQuery("https://pubsub.cloud.symless.com/",
+                                   QNetworkProxyQuery::QueryType::UrlRequest));
+
+    QString httpProxy;
+    for (auto& proxy: proxies) {
+        if (proxy.type() == QNetworkProxy::ProxyType::HttpProxy) {
+            httpProxy = QString("%1:%2").arg(proxy.hostName()).arg(proxy.port());
+            LogManager::info(QString("HTTP proxy detected %1").arg(httpProxy));
+            break;
+        }
+    }
+
     CloudClient* cloudClient = qobject_cast<CloudClient*>(CloudClient::instance());
     cloudClient->checkUpdate();
 
@@ -280,12 +293,14 @@ App::run(int argc, char* argv[])
         cloudClient->invalidAuth();
     });
 
-    WampClient& wampClient = serviceProxy.wampClient();
+    auto& wampClient = serviceProxy.wampClient();
 
-    QObject::connect(cloudClient, &CloudClient::profileUpdated, [&wampClient](){
-        // TODO: review this, this is essentially from a http call, probably should be in service
+    QObject::connect(cloudClient, &CloudClient::profileUpdated,
+                     [&wampClient, httpProxy](){
+        // TODO: review this, this is essentially from a http call, probably
+        // should be in service
         auto authUpdateFunc = [&wampClient]() {
-            AppConfig* appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
+            auto appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
             wampClient.call<void> ("synergy.auth.update",
                                    appConfig->userId(),
                                    appConfig->screenId(),
@@ -293,15 +308,23 @@ App::run(int argc, char* argv[])
                                    appConfig->userToken().toStdString());
         };
 
+        auto httpProxyUpdateFunc = [&wampClient, httpProxy]() {
+            wampClient.call<void> ("synergy.network.proxy.update",
+                                   "http", httpProxy.toStdString());
+        };
+
         if (wampClient.isConnected()) {
+            httpProxyUpdateFunc();
             authUpdateFunc();
         }
         else {
+            wampClient.connected.connect(httpProxyUpdateFunc);
             wampClient.connected.connect(authUpdateFunc);
         }
     });
 
-    QObject::connect(logManager, &LogManager::logLine, [&](const QString& logLine) {
+    QObject::connect(logManager, &LogManager::logLine,
+                     [&wampClient](const QString& logLine) {
         if (wampClient.isConnected()) {
             wampClient.call<void>("synergy.log.config", logLine.toStdString());
         }

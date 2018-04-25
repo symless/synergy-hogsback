@@ -78,12 +78,6 @@ bool ProfileConfig::compare(ProfileConfig const& target)
             if (screen.id() == targetScreen.id()) {
                 found = true;
 
-                if (screen.version() > targetScreen.version()) {
-                    serviceLog()->debug("screen version is older ({} < {}), skip screen {}",
-                        targetScreen.version(), screen.version(), screen.id());
-                    continue;
-                }
-
                 if (screen.name() != targetScreen.name()) {
                     serviceLog()->debug("profile screen name changed, screenId={} {}->{}",
                         screen.id(), screen.name(), targetScreen.name());
@@ -167,6 +161,12 @@ bool ProfileConfig::compare(ProfileConfig const& target)
     return different;
 }
 
+void ProfileConfig::clear()
+{
+    m_profile = Profile();
+    m_screens.clear();
+}
+
 ProfileConfig::ProfileConfig (ProfileConfig const& src):
     m_profile (src.m_profile), m_screens (src.m_screens) {
 }
@@ -192,17 +192,6 @@ Screen& ProfileConfig::getScreen(const int screenId)
     }
 
     throw std::runtime_error("Can't find screen with ID: " + std::to_string(screenId));
-}
-
-Screen& ProfileConfig::getScreen(const std::string& screenName)
-{
-    for (auto& screen : m_screens) {
-        if (screen.name() == screenName) {
-            return screen;
-        }
-    }
-
-    throw std::runtime_error("Can't find screen: " + screenName);
 }
 
 void ProfileConfig::claimServer(int64_t serverId)

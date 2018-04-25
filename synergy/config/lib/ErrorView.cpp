@@ -1,6 +1,6 @@
 #include <synergy/config/lib/ErrorView.h>
-
 #include <synergy/config/lib/LogManager.h>
+#include <synergy/config/lib/VersionManager.h>
 
 ErrorView::ErrorView(QObject *parent) :
     QObject(parent)
@@ -63,11 +63,13 @@ ErrorView::message() const
 QString
 ErrorView::help() const
 {
+    VersionManager* versionManager = qobject_cast<VersionManager*>(VersionManager::instance());
+
     switch (m_mode) {
         case ErrorViewMode::kCloudError:
-            return "<a href='https://symless.com/synergy/help/connection/auto-config-service'>Help</a>";
+            return QString("<a href='https://symless.com/synergy/help/connection/auto-config-service?source=s2-app&version=%1'>Help</a>").arg(versionManager->buildVersion());
         case ErrorViewMode::kServiceError:
-            return "<a href='https://symless.com/synergy/help/connection/background-service'>Help</a>";
+            return QString("<a href='https://symless.com/synergy/help/connection/background-service?source=s2-app&version=%1'>Help</a>").arg(versionManager->buildVersion());
         default:
             return "";
     }

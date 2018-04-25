@@ -5,6 +5,7 @@
 #include "VersionManager.h"
 #include "AppConfig.h"
 #include "App.h"
+#include <synergy/config/lib/Hostname.h>
 
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
@@ -273,7 +274,11 @@ void CloudClient::switchProfile(QString profileName)
 
         QJsonObject screenObject;
 
-        screenObject.insert("name", QHostInfo::localHostName());
+        auto localScreenId = m_appConfig->screenId();
+        if (localScreenId != -1) {
+            screenObject.insert("id", localScreenId);
+        }
+        screenObject.insert("name", Hostname::local());
         screenObject.insert("ipList", ipList.join(","));
         screenObject.insert("status", "Disconnected");
 
@@ -425,13 +430,15 @@ CloudClient::uploadLogFile(QString source, QString target)
 
     QString header = QString::fromUtf8(
         "Symless User ID: %1\r\n"
-        "Operating System: %2\r\n"
-        "Synergy Version: %3\r\n"
-        "System Name: %4\r\n"
+        "Screen ID: %2\r\n"
+        "Operating System: %3\r\n"
+        "Synergy Version: %4\r\n"
+        "System Name: %5\r\n"
         "\r\n").arg(appConfig->userId())
-               .arg(QSysInfo::productType() + " " + QSysInfo::productVersion())
+               .arg(appConfig->screenId())
+               .arg(QSysInfo::prettyProductName())
                .arg(SYNERGY_VERSION_STRING)
-               .arg(QHostInfo::localHostName());
+               .arg(Hostname::local());
 
     // NOTE: The log can grow while we're reading the file here, which is why
     //       we cannot use setBodyDevice() instead of reading the file in to

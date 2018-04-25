@@ -58,15 +58,42 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             return;
         }
 
-        // store profile config (causes signals to be invoked)
-        m_localProfileConfig->apply(*m_remoteProfileConfig);
-
         // save for future requests from config UI
         m_lastProfileSnapshot = json;
 
         // forward the message via rpc server to config UI
         auto rpcServer = m_rpc->server();
         rpcServer->publish("synergy.profile.snapshot", std::move(json));
+
+        auto localScreenId = m_userConfig->screenId();
+
+        // HACK
+        // reason: we want to delay starting core until we find local
+        // screen in the snapshot, otherwise various components would
+        // be broken
+        // details: when local snapshot contains local screen and
+        // remote doesn't this means local screen has been removed
+        // when neither local nor remote snapshot contains local screen
+        // this means there is no point to apply remote snapshot
+        bool screenInLocalSnapshot = false;
+        try {
+            m_localProfileConfig->getScreen(localScreenId);
+            screenInLocalSnapshot= true;
+        }
+        catch (...) {}
+
+        try {
+            m_remoteProfileConfig->getScreen(localScreenId);
+        }
+        catch (...) {
+            if (!screenInLocalSnapshot) {
+                serviceLog()->warn("ignoring a snapshot that doesn't contain local screen");
+                return;
+            }
+        }
+
+        // store profile config (causes signals to be invoked)
+        m_localProfileConfig->apply(*m_remoteProfileConfig);
 
         this->m_ipMonitor->start();
     });
@@ -87,6 +114,7 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             // Authentication failed either by using an invalid session or an out of date version
             serviceLog()->debug("sending logout message to config ui");
             m_rpc->server()->publish("synergy.auth.logout");
+            m_localProfileConfig->clear();
         }
 
         this->m_ipMonitor->stop();
@@ -128,6 +156,8 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
 
     m_localProfileConfig->screenOnline.connect([this](Screen screen){
         if (m_userConfig->screenId() == screen.id()) {
+            m_router.start (m_userConfig->screenId(), screen.name());
+
             return;
         }
 
@@ -162,6 +192,26 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
         }
     );
 
+    m_localProfileConfig->screenSetChanged.connect([this](std::vector<Screen> const& added,
+                                                          std::vector<Screen> const& removed) {
+
+        auto removedLocal = std::find_if (begin(removed), end(removed), [this](auto const& screen) {
+            return (screen.id() == m_userConfig->screenId());
+        });
+
+        if (removedLocal != end(removed)) {
+            serviceLog()->debug ("local screen removed from profile");
+            m_coreManager->pause();
+            m_cloudClient->shutdownWebsocket();
+            m_router.shutdown();
+            m_userConfig->reset();
+            m_userConfig->save();
+            m_localProfileConfig->clear();
+            m_rpc->server()->publish ("synergy.auth.logout");
+            return;
+        }
+    });
+
     m_ipMonitor->ipSetChanged.connect ([this](auto const& ipSet) {
         try {
             auto localScreen = this->m_localProfileConfig->getScreen
@@ -169,14 +219,12 @@ ServiceWorker::ServiceWorker(boost::asio::io_service& ioService,
             if (localScreen.ipList (ipSet)) {
                 serviceLog()->info ("System IP addresses changed: {}",
                                     localScreen.ipList());
-                localScreen.touch();
-                m_cloudClient->updateScreen (localScreen);
+                m_cloudClient->updateScreenIpList (localScreen);
             }
         } catch (...) {
         }
     });
 
-    m_errorNotifier->install(m_coreManager->errorMonitor());
     m_errorNotifier->install(m_coreManager->statusMonitor());
     m_errorNotifier->install(*m_routerMonitor);
 
@@ -226,6 +274,7 @@ ServiceWorker::provideRpcEndpoints()
     provideServerClaim();
     provideTray();
     provideRestart();
+    provideNetworkConfig();
 
     serviceLog()->debug("rpc endpoints created");
 }
@@ -377,5 +426,18 @@ void ServiceWorker::provideRestart()
     m_rpc->server()->provide("synergy.service.restart", [this]() {
         serviceLog()->info("Restart service received");
         this->shutdown();
+    });
+}
+
+void
+ServiceWorker::provideNetworkConfig()
+{
+    m_rpc->server()->provide("synergy.network.proxy.update",
+            [this](std::string const& protocol,
+                   std::string const& proxyString) {
+        if (m_cloudClient->setProxy (protocol, proxyString)) {
+            m_userConfig->setHttpProxy (proxyString);
+            m_userConfig->save();
+        }
     });
 }

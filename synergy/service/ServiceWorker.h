@@ -38,6 +38,7 @@ private:
     void provideLogging();
     void provideServerClaim();
     void provideRestart();
+    void provideNetworkConfig();
 
 private:
     boost::asio::io_service&        m_ioService;

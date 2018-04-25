@@ -6,7 +6,6 @@
 TEST_CASE("Process command and args generated correctly", "[ProcessCommand]")
 {
     ProcessCommand pc;
-    pc.setLocalHostname("mock local hostname");
 
     // TODO: stub out profile directory
     auto profileDir = DirectoryManager::instance()->profileDir();
@@ -22,13 +21,13 @@ TEST_CASE("Process command and args generated correctly", "[ProcessCommand]")
 
     SECTION("Server command line")
     {
-        auto command = pc.generate(true);
+        auto command = pc.serverCmd("mocklocalhostname");
 
         // TODO: test each element instead of using string join
         REQUIRE(boost::algorithm::join(command, " ") ==
             corePath.string() + " --server -f "
             "--debug " + kCoreDebugLevel + " "
-            "--name mock local hostname --enable-drag-drop "
+            "--name mocklocalhostname --enable-drag-drop "
             "--profile-dir " + profileDir.string() + " "
             "--log " + logPath.string() + " "
             "-c " + configPath.string() + " "
@@ -37,13 +36,13 @@ TEST_CASE("Process command and args generated correctly", "[ProcessCommand]")
 
     SECTION("Client command line")
     {
-        auto command = pc.generate(false);
+        auto command = pc.clientCmd("mocklocalhostname");
 
         // TODO: test each element instead of using string join
         REQUIRE(boost::algorithm::join(command, " ") ==
             corePath.string() + " --client -f "
             "--debug " + kCoreDebugLevel + " "
-            "--name mock local hostname --enable-drag-drop "
+            "--name mocklocalhostname --enable-drag-drop "
             "--profile-dir " + profileDir.string() + " "
             "--log " + logPath.string() + " 127.0.0.1:24801");
     }

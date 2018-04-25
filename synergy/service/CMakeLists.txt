@@ -25,7 +25,6 @@ set (SERVICE_SOURCES
     CoreManager.cpp
     ServiceWorker.cpp
     CloudClient.cpp
-    SecuredTcpSession.cpp
     SecuredTcpClient.cpp
     HttpSession.cpp
     WebsocketSession.cpp
@@ -37,6 +36,7 @@ set (SERVICE_SOURCES
     ErrorNotifier.cpp
     TrayService.cpp
     IPMonitor.cpp
+    ProxyClient.cpp
     ${LSIF_SOURCES}
     ${SERVICE_SM_SOURCES}
 )

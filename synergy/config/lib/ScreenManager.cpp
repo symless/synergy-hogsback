@@ -7,6 +7,7 @@
 #include "ScreenListSnapshotManager.h"
 #include "AppConfig.h"
 #include "ProcessMode.h"
+#include <synergy/config/lib/Hostname.h>
 
 #include <QtNetwork>
 #include <iostream>
@@ -16,7 +17,6 @@ ScreenManager::ScreenManager() :
     m_screenListSnapshotManager(NULL)
 {
     m_appConfig = qobject_cast<AppConfig*>(AppConfig::instance());
-    m_localHostname = QHostInfo::localHostName();
 
     m_arrangementStrategy = new ScreenBBArrangement();
     m_screenListSnapshotManager= new ScreenListSnapshotManager();
@@ -64,7 +64,8 @@ void ScreenManager::setScreenModel(ScreenListModel* screenListModel)
     if (m_screenListModel != screenListModel) {
         m_screenListModel = screenListModel;
 
-        addScreen(QHostInfo::localHostName());
+        // this is for always showing local machine even without receiving snapshot
+        addScreen(Hostname::local());
     }
 }
 
@@ -149,29 +150,38 @@ void ScreenManager::serverClaim(int index)
     }
 }
 
-bool ScreenManager::removeScreen(QString name, bool notify)
+bool ScreenManager::removeScreenById(int id, bool notify)
 {
-    int index = m_screenListModel->findScreen(name);
-    if (index == -1) {
-        LogManager::debug(QString("screen doesn't exist: %1")
-                    .arg(name));
+    int index = m_screenListModel->findScreen(id);
+
+    if (index == -1 && id == -1) {
         return false;
     }
 
-    if (notify) {
-        // get screen id
-        const UIScreen& s = m_screenListModel->getScreen(index);
+    return removeScreenByIndex(index, notify);
+}
 
-        // notify cloud
-        if (s.id() != -1) {
+bool ScreenManager::removeScreenByIndex(int index, bool notify)
+{
+    if (index == -1) {
+        LogManager::debug(QString("screen doesn't exist: %1")
+                    .arg(index));
+        return false;
+    }
+
+
+    const UIScreen& s = m_screenListModel->getScreen(index);
+    bool result = false;
+
+    if (s.id() != -1) {
+        if (notify) {
+            // notify cloud
             m_cloudClient->unsubProfile(s.id(), m_configVersion);
             m_configVersion++;
         }
     }
 
-    UIScreen screen(name);
-    bool result = m_arrangementStrategy->removeScreen(m_screenListModel,
-                                            screen);
+    result = m_arrangementStrategy->removeScreen(m_screenListModel, s.id());
 
     return result;
 }
@@ -198,16 +208,17 @@ void ScreenManager::updateScreens(QByteArray reply)
 
             QJsonArray screens = obj["screens"].toArray();
             QList<UIScreen> latestScreenList;
-            QSet<QString> latestScreenNameSet;
+            QSet<int> latestScreenIdSet;
+            int localScreenId = m_appConfig->screenId();
             foreach (QJsonValue const& v, screens) {
                 QJsonObject obj = v.toObject();
                 int screenId = obj["id"].toInt();
+                latestScreenIdSet.insert(screenId);
 
                 QString screenName = obj["name"].toString();
                 int screenVersion = obj["version"].toInt();
 
-                latestScreenNameSet.insert(screenName);
-                int index = m_screenListModel->findScreen(screenName);
+                int index = m_screenListModel->findScreen(screenId);
                 if (index != -1) {
                     const UIScreen& s = m_screenListModel->getScreen(index);
 
@@ -219,6 +230,10 @@ void ScreenManager::updateScreens(QByteArray reply)
                         LogManager::debug(QString("skip stale screen %1: %2 > %3").arg(screenId).arg(s.version()).arg(screenVersion));
                         continue;
                     }
+                }
+
+                if (screenId == localScreenId) {
+                    emit localHostNameChanged(screenName);
                 }
 
                 UIScreen screen(screenName);
@@ -236,32 +251,35 @@ void ScreenManager::updateScreens(QByteArray reply)
                 latestScreenList.push_back(screen);
             }
 
-            if (!m_screenNameSet.contains(m_localHostname) &&
-                !latestScreenNameSet.contains(m_localHostname) &&
+            if (!m_screenIdSet.contains(localScreenId) &&
+                !latestScreenIdSet.contains(localScreenId) &&
                 m_appConfig->profileId() != -1) {
-                latestScreenNameSet.insert(m_localHostname);
+                latestScreenIdSet.insert(localScreenId);
                 updateLocalHost = true;
             }
 
             // remove unsub screen
-            m_screenNameSet.subtract(latestScreenNameSet);
-            for (const QString& name : m_screenNameSet) {
-                removeScreen(name);
+            m_screenIdSet.subtract(latestScreenIdSet);
+            for (const int id : m_screenIdSet) {
+                removeScreenById(id);
 
-                if (name == m_localHostname) {
+                if (id == localScreenId) {
                     emit localhostUnsubscribed();
                 }
             }
 
-            m_screenNameSet = latestScreenNameSet;
+            m_screenIdSet = latestScreenIdSet;
 
             m_screenListModel->update(latestScreenList);
         }
     }
 
+    // remove screen with ID -1, this screen was added
+    // before receiving any screen info or first snapshot
+    removeScreenById(-1);
+
     if (updateLocalHost) {
-        removeScreen(m_localHostname);
-        UIScreen screen(m_localHostname);
+        UIScreen screen(Hostname::local());
         screen.setId(m_appConfig->screenId());
         m_arrangementStrategy->addScreen(m_screenListModel, screen);
 
@@ -320,8 +338,29 @@ void ScreenManager::setConfigHint(const QString& text)
     configHintChanged();
 }
 
+bool ScreenManager::removeScreenByName(QString name, bool notify)
+{
+    int index = m_screenListModel->findScreen(name);
+
+    return removeScreenByIndex(index, notify);
+}
+
 void ScreenManager::restartServices()
 {
     LogManager::debug("Resart services request");
     m_serviceProxy->restartService();
+}
+
+bool ScreenManager::isLocalMachine(int index)
+{
+    int findIndex = -1;
+
+    if (m_appConfig->screenId() == -1)  {
+        findIndex = m_screenListModel->findScreen(Hostname::local());
+    }
+    else {
+        findIndex = m_screenListModel->findScreen(m_appConfig->screenId());
+    }
+
+    return index == findIndex;
 }
