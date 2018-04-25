@@ -247,8 +247,7 @@ Router::start (uint32_t const id, std::string name) {
             if (ec) {
                 routerLog ()->error ("Incoming connection {} from {} failed. Unable to complete TLS "
                                      "handshake: {} (ec = {})",  connection->id (),
-                                     connection->remote_endpoint(),
-                                     ec.message(), ec);
+                                     connection->remote_ip(), ec.message(), ec);
                 continue;
             }
 
