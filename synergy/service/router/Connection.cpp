@@ -61,25 +61,25 @@ Connection::start () {
                 auto ec = reader_.error ();
                 if (ec == asio::error::operation_aborted) {
                     routerLog()->error ("Message processing on connection {}, connected to {}, "
-                                        "interrupted. Terminating", this->id (),
-                                       this->remote_endpoint());
+                                        "interrupted. Terminating", this->id (), 
+                                        this->remote_ip());
                     on_disconnect (self);
                     break;
                 } else if (!enabled_) {
                     routerLog()->debug ("Connection {}, connected to {}, disabled",
-                                        this->id (), this->remote_endpoint());
+                                        this->id (), this->remote_ip());
                     break;
                 } else  if (ec) {
                     routerLog()->error ("Message processing on connection {}, connected "
                                         "to {}, failed: {} (ec = {})", this->id (),
-                                        this->remote_endpoint(), ec.message (), ec.value());
+                                        this->remote_ip(), ec.message (), ec.value());
                     on_disconnect (self);
                     break;
                 }
             }
 
-            routerLog()->debug("Connection {}, connected to {},  terminated receive loop",
-                                this->id (), this->remote_endpoint());
+            routerLog()->debug("Connection {}, connected to {}, receive loop terminated",
+                                this->id (), this->remote_ip());
     });
 
     on_connected (this->shared_from_this ());
