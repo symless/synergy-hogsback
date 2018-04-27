@@ -23,7 +23,8 @@
     url = https://github.com/skystrife/cpptoml.git
 [submodule "third_party/autobahn-cpp"]
     path = third_party/autobahn-cpp
-    url = https://github.com/crossbario/autobahn-cpp.git
+    url = https://github.com/symless/autobahn-cpp.git
+    branch = synergy
 [submodule "third_party/msgpack-c"]
     path = third_party/msgpack-c
     url = https://github.com/msgpack/msgpack-c.git
