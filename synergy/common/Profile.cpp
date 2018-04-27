@@ -38,8 +38,3 @@ std::string Profile::name() const
 {
     return m_name;
 }
-
-void Profile::touch()
-{
-    m_version++;
-}
