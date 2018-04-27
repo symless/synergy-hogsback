@@ -34,8 +34,16 @@ using tcp_keep_alive_interval =
 #endif
 
 inline bool
-set_tcp_keep_alive_options (boost::asio::ip::tcp::socket& socket, int const idle,
-                            int const interval, int const count) {
+set_tcp_keep_alive_options (boost::asio::ip::tcp::socket& socket,
+                            int const idle,
+                            int const interval,
+                            int const count) {
+    boost::system::error_code ec;
+    bool success = true;
+
+    socket.set_option (boost::asio::ip::tcp::socket::keep_alive (true), ec);
+    success &= !ec;
+
 #ifdef _WIN32
     /* https://msdn.microsoft.com/en-us/library/windows/desktop/dd877220(v=vs.85).aspx
      */
@@ -51,7 +59,7 @@ set_tcp_keep_alive_options (boost::asio::ip::tcp::socket& socket, int const idle
     options.keepaliveinterval = 100 * interval * count;
 
     DWORD bytes = 0;
-    return (0 == WSAIoctl (socket.native_handle (),
+    success &= (0 == WSAIoctl (socket.native_handle (),
                            SIO_KEEPALIVE_VALS,
                            &options,
                            sizeof (options),
@@ -60,13 +68,8 @@ set_tcp_keep_alive_options (boost::asio::ip::tcp::socket& socket, int const idle
                            &bytes,
                            NULL,
                            NULL));
+    return success;
 #elif defined(__APPLE__) || defined(__linux__)
-    boost::system::error_code ec;
-    bool success = true;
-
-    socket.set_option (boost::asio::ip::tcp::socket::keep_alive (true), ec);
-    success &= !ec;
-
     socket.set_option (tcp_keep_alive_idle (idle), ec);
     success &= !ec;
 
