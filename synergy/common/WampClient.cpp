@@ -78,8 +78,9 @@ WampClient::connect (std::string const& ip, int const port) {
     auto endpoint = boost::asio::ip::tcp::endpoint
                     (boost::asio::ip::address::from_string(ip), port);
 
-    auto transport = std::make_shared<autobahn::wamp_tcp_transport>
+    m_transport = std::make_shared<autobahn::wamp_tcp_transport>
                         (ioService(), endpoint, kDebugWampClient);
+
 
     m_session = std::make_shared<autobahn::wamp_session> (ioService(),
                                                           kDebugWampClient);
