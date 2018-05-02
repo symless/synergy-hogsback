@@ -35,6 +35,7 @@ WampServer::start (std::string const& ip, int const port) {
         boost::system::error_code ec;
         set_tcp_keep_alive_options (transport->socket (), 5, 1, 5);
         set_socket_to_close_on_exec (transport->socket (), ec);
+        m_transport = std::move(transport);
 
         m_session->start().then(executor(), [&](boost::future<void> started) {
             started.get();
