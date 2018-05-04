@@ -436,7 +436,7 @@ CloudClient::uploadLogFile(QString source, QString target)
         "Synergy Version: %5\r\n"
         "System Name: %6\r\n"
         "\r\n").arg(appConfig->userId())
-               .arg(appConfig->profileId()
+               .arg(appConfig->profileId())
                .arg(appConfig->screenId())
                .arg(QSysInfo::prettyProductName())
                .arg(SYNERGY_VERSION_STRING)
