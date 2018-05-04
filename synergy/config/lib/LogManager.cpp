@@ -216,7 +216,7 @@ void LogManager::dismissDialog()
 void LogManager::acceptGDPR()
 {
     s_gdpr_accept = true;
-    dialogChanged();
+    uploadLogFile();
 }
 
 void LogManager::setQmlContext(QQmlContext* value)
