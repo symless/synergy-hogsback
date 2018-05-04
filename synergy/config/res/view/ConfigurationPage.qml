@@ -319,6 +319,17 @@ Rectangle {
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom
                 anchors.margins: dp(5)
+
+                onLinkActivated: {
+                    // should only happen with the GDPR message for now, so don't dismiss
+                    Qt.openUrlExternally(link)
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    acceptedButtons: Qt.NoButton
+                }
             }
 
             // log upload url
@@ -345,6 +356,27 @@ Rectangle {
                 }
             }
 
+            //  gdpr accept link
+            Text {
+                id: gdprSendLink
+                text: "Send"
+                font.underline: true
+                font.pixelSize: logUploadText.font.pixelSize
+                color: logUploadText.color
+                anchors.top: parent.top
+                anchors.left: logUploadUrl.right
+                anchors.margins: logUploadText.anchors.margins
+                visible: applicationWindow.logManager.gdprAccepted == false
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.LeftButton
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        applicationWindow.logManager.acceptGDPR()
+                    }
+                }
+            }
             //  log upload dismiss link
             Text {
                 id: logUploadLink
@@ -353,7 +385,7 @@ Rectangle {
                 font.pixelSize: logUploadText.font.pixelSize
                 color: logUploadText.color
                 anchors.top: parent.top
-                anchors.left: logUploadUrl.right
+                anchors.left: applicationWindow.logManager.gdprAccepted == false ? gdprSendLink.right : logUploadUrl.right
                 anchors.margins: logUploadText.anchors.margins
 
                 MouseArea {

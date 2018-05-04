@@ -1,5 +1,5 @@
 #include "LogManager.h"
-
+#include "VersionManager.h"
 #include "CloudClient.h"
 #include "DirectoryManager.h"
 #include "AppConfig.h"
@@ -17,6 +17,8 @@ CloudClient* LogManager::s_cloudClient = NULL;
 QStringList LogManager::s_logLines;
 const int LogManager::s_maximumLogLines = 100;
 bool LogManager::s_uploading = false;
+bool LogManager::s_gdpr_accept = false;
+
 const int LogManager::s_maximumUploadLogLines = 1000;
 
 const char* kCombinedLogFile = "synergy-combined.log";
@@ -44,7 +46,7 @@ LogManager::~LogManager()
 
 void LogManager::uploadLogFile()
 {
-    if (!s_uploading) {
+    if (!s_uploading && s_gdpr_accept) {
 
         m_dialogText = "Uploading log...";
         m_dialogUrl = "";
@@ -58,6 +60,16 @@ void LogManager::uploadLogFile()
         upload(logFilename());
 
         s_uploading = false;
+    }
+    else if (!s_gdpr_accept)
+    {
+        VersionManager* versionManager = qobject_cast<VersionManager*>(VersionManager::instance());
+
+
+        m_dialogText = QString("By clicking send, you are accepting our <a href='https://symless.com/privacy-policy?source=s2-app&version=%1'>privacy policy</a>.").arg(versionManager->buildVersion());
+        m_dialogUrl = "";
+        m_dialogVisible = true;
+        dialogChanged();
     }
 }
 
@@ -164,6 +176,11 @@ bool LogManager::dialogVisible() const
     return m_dialogVisible;
 }
 
+bool LogManager::gdprAccepted() const
+{
+    return s_gdpr_accept;
+}
+
 QString LogManager::dialogUrl() const
 {
     return m_dialogUrl;
@@ -194,6 +211,12 @@ void LogManager::dismissDialog()
 {
     m_dialogVisible = false;
     dialogChanged();
+}
+
+void LogManager::acceptGDPR()
+{
+    s_gdpr_accept = true;
+    uploadLogFile();
 }
 
 void LogManager::setQmlContext(QQmlContext* value)
