@@ -366,7 +366,7 @@ Rectangle {
                 anchors.top: parent.top
                 anchors.left: logUploadUrl.right
                 anchors.margins: logUploadText.anchors.margins
-                visible: applicationWindow.logManager.gdprAccept === false
+                visible: applicationWindow.logManager.gdprAccepted == false
 
                 MouseArea {
                     anchors.fill: parent
@@ -385,7 +385,7 @@ Rectangle {
                 font.pixelSize: logUploadText.font.pixelSize
                 color: logUploadText.color
                 anchors.top: parent.top
-                anchors.left: gdprSendLink.right
+                anchors.left: applicationWindow.logManager.gdprAccepted == false ? gdprSendLink.right : logUploadUrl.right
                 anchors.margins: logUploadText.anchors.margins
 
                 MouseArea {
