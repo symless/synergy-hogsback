@@ -430,11 +430,13 @@ CloudClient::uploadLogFile(QString source, QString target)
 
     QString header = QString::fromUtf8(
         "Symless User ID: %1\r\n"
-        "Screen ID: %2\r\n"
-        "Operating System: %3\r\n"
-        "Synergy Version: %4\r\n"
-        "System Name: %5\r\n"
+        "Profile ID: %2\r\n"
+        "Screen ID: %3\r\n"
+        "Operating System: %4\r\n"
+        "Synergy Version: %5\r\n"
+        "System Name: %6\r\n"
         "\r\n").arg(appConfig->userId())
+               .arg(appConfig->profileId())
                .arg(appConfig->screenId())
                .arg(QSysInfo::prettyProductName())
                .arg(SYNERGY_VERSION_STRING)
