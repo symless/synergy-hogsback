@@ -12,6 +12,7 @@
 #include <boost/algorithm/string/join.hpp>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
+#include <synergy/service/ServiceLogs.h>
 
 template <typename NextLayer>
 class ProxyClient {
@@ -161,7 +162,7 @@ ProxyClient<NextLayer>::async_connect
             // continue. Ideally we'd want to do this in setProxy() but then
             // we'd somehow need to block any connect() call until the result
             // was in.
-            using query_type = decltype(m_resolver)::query;
+            using query_type = typename decltype(m_resolver)::query;
 
             serviceLog()->warn("Resolving proxy host name '{}'...", m_host);
             m_resolver.async_resolve (query_type(m_host, std::to_string(m_port),
