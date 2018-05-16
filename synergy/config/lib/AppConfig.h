@@ -24,8 +24,6 @@ public:
 
 	bool dragAndDrop() const;
 	DebugLevel debugLevel();
-	QString localIp() const;
-    void setLocalIp(const QString& localIp);
     void setUserToken(const QString& token);
     void setUserId(int id);
     int profileId() const;
@@ -39,7 +37,6 @@ protected:
 private:
     QSettings m_settings;
 	DebugLevel m_debugLevel;
-    QString m_localIp;
     QString m_userToken;
     int m_userId;
     int m_profileId;

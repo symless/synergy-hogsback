@@ -24,9 +24,11 @@ public:
     Q_PROPERTY(QString dialogUrl READ dialogUrl NOTIFY dialogChanged)
     Q_PROPERTY(QString dialogText READ dialogText NOTIFY dialogChanged)
     Q_PROPERTY(bool dialogVisible READ dialogVisible NOTIFY dialogChanged)
+    Q_PROPERTY(bool gdprAccepted READ gdprAccepted NOTIFY dialogChanged)
 
     Q_INVOKABLE void uploadLogFile();
     Q_INVOKABLE static void setCloudClient(CloudClient* value);
+    Q_INVOKABLE void acceptGDPR();
     Q_INVOKABLE void dismissDialog();
 
     static void raw(const QString& text);
@@ -39,6 +41,7 @@ public:
     QString dialogText() const;
     QString dialogUrl() const;
     bool dialogVisible() const;
+    bool gdprAccepted() const;
     void setDialogUrl(const QString &dirty);
 
 signals:
@@ -62,6 +65,7 @@ private:
     static CloudClient* s_cloudClient;
     static const int s_maximumLogLines;
     static bool s_uploading;
+    static bool s_gdpr_accept;
     static const int s_maximumUploadLogLines;
     QString m_dialogText = "";
     QString m_dialogUrl = "";

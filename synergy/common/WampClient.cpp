@@ -1,4 +1,5 @@
 #include <synergy/common/WampClient.h>
+#include <synergy/common/SocketOptions.hpp>
 
 static bool const kDebugWampClient = false;
 static boost::posix_time::seconds const kRPCKeepAliveInterval (3);
@@ -76,8 +77,10 @@ WampClient::connect (std::string const& ip, int const port) {
 
     auto endpoint = boost::asio::ip::tcp::endpoint
                     (boost::asio::ip::address::from_string(ip), port);
+
     m_transport = std::make_shared<autobahn::wamp_tcp_transport>
-        (ioService(), endpoint, kDebugWampClient);
+                        (ioService(), endpoint, kDebugWampClient);
+
 
     m_session = std::make_shared<autobahn::wamp_session> (ioService(),
                                                           kDebugWampClient);
@@ -100,6 +103,13 @@ WampClient::connect() {
             disconnected(false);
             return;
         }
+
+        auto transport = std::static_pointer_cast<autobahn::wamp_tcp_transport>
+                            (m_transport);
+        boost::system::error_code ec;
+        set_tcp_keep_alive_options (transport->socket (), 5, 1, 5);
+        set_socket_to_close_on_exec (transport->socket (), ec);
+
         m_session->start().then(m_executor, [&](boost::future<void> started) {
             try {
                 started.get();

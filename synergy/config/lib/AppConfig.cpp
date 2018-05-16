@@ -57,15 +57,7 @@ DebugLevel AppConfig::debugLevel()
 	return m_debugLevel;
 }
 
-QString AppConfig::localIp() const
-{
-	return m_localIp;
-}
 
-void AppConfig::setLocalIp(const QString& localIp)
-{
-    m_localIp = localIp;
-}
 
 QString AppConfig::userToken()
 {

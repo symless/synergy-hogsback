@@ -428,17 +428,33 @@ CloudClient::uploadLogFile(QString source, QString target)
                       QVariant("form-data; name=\"log\"; filename=\"" +
                                withoutPath + "\""));
 
+
+    QString ipAddresses("");
+    QList<QHostAddress> list = QNetworkInterface::allAddresses();
+    for(int nIter=0; nIter<list.count(); nIter++)
+
+    {
+        if(!list[nIter].isLoopback())
+            if (list[nIter].protocol() == QAbstractSocket::IPv4Protocol )
+                ipAddresses.append(list[nIter].toString()+", ");
+
+    }
+
     QString header = QString::fromUtf8(
         "Symless User ID: %1\r\n"
-        "Screen ID: %2\r\n"
-        "Operating System: %3\r\n"
-        "Synergy Version: %4\r\n"
-        "System Name: %5\r\n"
+        "Profile ID: %2\r\n"
+        "Screen ID: %3\r\n"
+        "Operating System: %4\r\n"
+        "Synergy Version: %5\r\n"
+        "System Name: %6\r\n"
+        "IP Addresses: %7\r\n"
         "\r\n").arg(appConfig->userId())
+               .arg(appConfig->profileId())
                .arg(appConfig->screenId())
                .arg(QSysInfo::prettyProductName())
                .arg(SYNERGY_VERSION_STRING)
-               .arg(Hostname::local());
+               .arg(Hostname::local())
+               .arg(ipAddresses);
 
     // NOTE: The log can grow while we're reading the file here, which is why
     //       we cannot use setBodyDevice() instead of reading the file in to
