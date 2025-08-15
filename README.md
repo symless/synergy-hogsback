@@ -1,6 +1,6 @@
 # Synergy Hogsback (Synergy 2)
 
-_Automatic config layer and main repository for Synergy._
+_Automatic cloud-based config layer._
 
 This project is no longer in development.
 
