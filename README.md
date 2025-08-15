@@ -1,8 +1,10 @@
-# Synergy
+# Synergy Hogsback (Synergy 2)
 
-Automatic config layer and main repository for Synergy
+_Automatic config layer and main repository for Synergy._
 
-Not to be confused with [Synergy Core](https://github.com/symless/synergy-core)
+This project is no longer in development.
+
+Previously proprietary, Synergy 2 is released as open source under the MIT license.
 
 ## First clone
 
